@@ -50,7 +50,7 @@ class _MyAppState extends State<MyApp> {
         builder: (context, child) => const MaterialApp(
           debugShowCheckedModeBanner: false,
           onGenerateRoute: RouteGenerator.getRoute,
-          initialRoute: Routes.mainRoute,
+          initialRoute: Routes.boardingRoute,
         ),
         designSize: const Size(430, 810),
       ),
