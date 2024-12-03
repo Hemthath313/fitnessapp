@@ -6,6 +6,7 @@ import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:provider/provider.dart';
 
@@ -51,11 +52,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                       Align(
                         alignment: Alignment.topCenter,
                         child: NewExerciseButton(
-                          onTap: () {
-                            Navigator.of(context).pushNamed(
-                              Routes.addNewExerciseRoute,
-                            );
-                          },
+                          onTap: () => context.push(Routes.addNewExerciseRoute),
                         ),
                       ),
                       Expanded(

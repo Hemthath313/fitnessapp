@@ -3,6 +3,7 @@ import 'package:fitness_app/presentation/settings/widgets/delete_account_app_bar
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
@@ -43,7 +44,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
               .then((value) {
             setState(() {
               settingsProvider.signOut(context: context);
-              Navigator.of(context).pushReplacementNamed(Routes.loginRoute);
+              context.push(Routes.loginRoute);
             });
           });
         } catch (e) {
