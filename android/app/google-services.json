@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "661343486324",
+    "project_id": "tracking-ed1ba",
+    "storage_bucket": "tracking-ed1ba.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:661343486324:android:4477da69366fa6e1666c21",
+        "android_client_info": {
+          "package_name": "com.example.fitness_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjqC1H5QV4DrRYnP6buubn4NPhXqTHikQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
