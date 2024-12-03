@@ -6,11 +6,11 @@ import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:fitness_app/utils/widgets/lime_green_rounded_button.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../home/providers/home_provider.dart';
 import '../providers/auth_provider.dart';
-
 
 class AddDataPage extends StatefulWidget {
   const AddDataPage({super.key});
@@ -140,10 +140,7 @@ class _AddDataPageState extends State<AddDataPage> {
               ),
               LimeGreenRoundedButtonWidget(
                 onTap: () {
-                  addUserData().then(
-                    (value) => Navigator.of(context)
-                        .pushReplacementNamed(Routes.mainRoute),
-                  );
+                  addUserData().then((value) => context.go(Routes.mainRoute));
                 },
                 title: StringsManager.procede,
               )

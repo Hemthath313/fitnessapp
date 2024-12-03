@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
+import 'package:go_router/go_router.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -40,22 +41,19 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             SettingsPageButton(
               deviceWidth: deviceWidth,
-              onTap: () =>
-                  Navigator.of(context).pushNamed(Routes.changeEmailRoute),
+              onTap: () => context.push(Routes.changeEmailRoute),
               iconData: Icons.email_outlined,
               title: StringsManager.changeEmail,
             ),
             SettingsPageButton(
               deviceWidth: deviceWidth,
-              onTap: () =>
-                  Navigator.of(context).pushNamed(Routes.changePasswordRoute),
+              onTap: () => context.push(Routes.changePasswordRoute),
               iconData: Icons.lock_open_sharp,
               title: StringsManager.changePassword,
             ),
             SettingsPageButton(
               deviceWidth: deviceWidth,
-              onTap: () =>
-                  Navigator.of(context).pushNamed(Routes.deleteAccRoute),
+              onTap: () => context.push(Routes.deleteAccRoute),
               iconData: Icons.delete_outlined,
               title: StringsManager.deleteAcc,
             ),

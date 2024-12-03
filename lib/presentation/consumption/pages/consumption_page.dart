@@ -5,9 +5,9 @@ import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:provider/provider.dart';
-
 
 class ConsumptionPage extends StatefulWidget {
   const ConsumptionPage({super.key});
@@ -80,15 +80,13 @@ class _ConsumptionPageState extends State<ConsumptionPage> {
                     child: Align(
                       alignment: Alignment.bottomRight,
                       child: FloatingActionButton(
-                        backgroundColor: ColorManager.limerGreen2,
-                        child: const Icon(
-                          Icons.water_drop_outlined,
-                          color: ColorManager.darkGrey,
-                          size: SizeManager.s28,
-                        ),
-                        onPressed: () => Navigator.of(context)
-                            .pushNamed(Routes.addWaterRoute),
-                      ),
+                          backgroundColor: ColorManager.limerGreen2,
+                          child: const Icon(
+                            Icons.water_drop_outlined,
+                            color: ColorManager.darkGrey,
+                            size: SizeManager.s28,
+                          ),
+                          onPressed: () => context.push(Routes.addWaterRoute)),
                     ),
                   )
                 ],

@@ -14,7 +14,9 @@ import 'package:fitness_app/presentation/settings/pages/change_password_page.dar
 import 'package:fitness_app/presentation/settings/pages/delete_account_page.dart';
 import 'package:fitness_app/presentation/workouts/pages/new_exercise_page.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
+import 'package:fitness_app/utils/widgets/page_transition.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class Routes {
   static const String boardingRoute = '/';
@@ -34,56 +36,93 @@ class Routes {
   static const String changeMeasurementsRoute = '/changeMeasurements';
 }
 
-class RouteGenerator {
-  static Route<dynamic> getRoute(RouteSettings routeSettings) {
-    switch (routeSettings.name) {
-      case Routes.boardingRoute:
-        return MaterialPageRoute(builder: (_) => const BoardingPage());
-      case Routes.mainRoute:
-        return MaterialPageRoute(builder: (_) => const MainPage());
-      case Routes.loginRoute:
-        return MaterialPageRoute(builder: (_) => const LoginPage());
-      case Routes.authRoute:
-        return MaterialPageRoute(builder: (_) => const AuthPage());
-      case Routes.notificationsRoute:
-        return MaterialPageRoute(builder: (_) => const NotificationsPage());
-      case Routes.forgotPasswordRoute:
-        return MaterialPageRoute(builder: (_) => const ForgotPasswordPage());
-      case Routes.changePasswordRoute:
-        return MaterialPageRoute(builder: (_) => const ChangePasswordPage());
-      case Routes.changeEmailRoute:
-        return MaterialPageRoute(builder: (_) => const ChangeEmailPage());
-      case Routes.deleteAccRoute:
-        return MaterialPageRoute(builder: (_) => const DeleteAccountPage());
-      case Routes.newMealRoute:
-        return MaterialPageRoute(builder: (_) => const NewMealPage());
-      case Routes.addDataRoute:
-        return MaterialPageRoute(builder: (_) => const AddDataPage());
-      case Routes.addWaterRoute:
-        return MaterialPageRoute(builder: (_) => const DrinkPage());
-      case Routes.addNewExerciseRoute:
-        return MaterialPageRoute(builder: (_) => const NewExercisePage());
-      case Routes.changeWeightRoute:
-        return MaterialPageRoute(builder: (_) => const ChangeWeightPage());
-
-      case Routes.changeMeasurementsRoute:
-        return MaterialPageRoute(
-            builder: (_) => const ChangeMeasurementsPage());
-      default:
-        return undefinedRoute();
-    }
-  }
-
-  static Route<dynamic> undefinedRoute() {
-    return MaterialPageRoute(
-      builder: (_) => Scaffold(
-        appBar: AppBar(
-          title: const Text(StringsManager.noRouteFound),
-        ),
-        body: const Center(
-          child: Text(StringsManager.noRouteFound),
-        ),
+final GoRouter router = GoRouter(
+  initialLocation: Routes.boardingRoute,
+  routes: [
+    GoRoute(
+        path: Routes.boardingRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, BoardingPage())),
+    GoRoute(
+        path: Routes.mainRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, MainPage())),
+    GoRoute(
+        path: Routes.loginRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, LoginPage())),
+    GoRoute(
+        path: Routes.authRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, AuthPage())),
+    GoRoute(
+        path: Routes.notificationsRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, NotificationsPage())),
+    GoRoute(
+        path: Routes.forgotPasswordRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, ForgotPasswordPage())),
+    GoRoute(
+        path: Routes.changePasswordRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, ChangePasswordPage())),
+    GoRoute(
+        path: Routes.changeEmailRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, ChangeEmailPage())),
+    GoRoute(
+        path: Routes.deleteAccRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, DeleteAccountPage())),
+    GoRoute(
+        path: Routes.newMealRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, NewMealPage())),
+    GoRoute(
+        path: Routes.addDataRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, AddDataPage())),
+    GoRoute(
+        path: Routes.addWaterRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, DrinkPage())),
+    GoRoute(
+        path: Routes.addNewExerciseRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, NewExercisePage())),
+    GoRoute(
+        path: Routes.changeWeightRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, ChangeWeightPage())),
+    GoRoute(
+        path: Routes.changeMeasurementsRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, ChangeMeasurementsPage())),
+  ],
+  errorBuilder: (context, state) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(StringsManager.noRouteFound),
+      ),
+      body: const Center(
+        child: Text(StringsManager.noRouteFound),
       ),
     );
-  }
-}
+  },
+);
