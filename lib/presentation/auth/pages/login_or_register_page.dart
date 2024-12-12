@@ -10,6 +10,7 @@ import 'package:fitness_app/utils/widgets/lime_green_rounded_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 enum AuthMode { signUp, signIn }
@@ -133,8 +134,7 @@ class _LoginPageState extends State<LoginPage>
                           alignment: Alignment.centerRight,
                           child: GestureDetector(
                             onTap: () {
-                              Navigator.of(context)
-                                  .pushNamed(Routes.forgotPasswordRoute);
+                              context.push(Routes.forgotPasswordRoute);
                             },
                             child: Text(
                               StringsManager.forgotPassword,

@@ -6,6 +6,7 @@ import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 class ConsumptionPageAppBarWidget extends StatelessWidget {
   const ConsumptionPageAppBarWidget({
@@ -37,8 +38,7 @@ class ConsumptionPageAppBarWidget extends StatelessWidget {
             ),
             child: IconButton(
               splashColor: ColorManager.grey3,
-              onPressed: () =>
-                  Navigator.of(context).pushNamed(Routes.newMealRoute),
+              onPressed: () => context.push(Routes.newMealRoute),
               icon: const Icon(
                 Icons.add,
                 size: SizeManager.s26,

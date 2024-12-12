@@ -1,12 +1,11 @@
 import 'package:fitness_app/presentation/consumption/widgets/percent_value_of_meal.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
+import 'package:swipeable_tile/swipeable_tile.dart';
 
 class MealWidget extends StatelessWidget {
   const MealWidget({
@@ -40,19 +39,37 @@ class MealWidget extends StatelessWidget {
         left: PaddingManager.p1,
         right: PaddingManager.p1,
       ),
-      child: Slidable(
-        endActionPane: ActionPane(
-          motion: const StretchMotion(),
-          children: [
-            SlidableAction(
-              onPressed: onPressed,
-              icon: Icons.delete,
-              label: StringsManager.delete,
-              foregroundColor: ColorManager.limerGreen2,
-              backgroundColor: ColorManager.darkGrey,
-            ),
-          ],
-        ),
+      child: SwipeableTile(
+        key: Key(id), // Unique key for the SwipeableTile
+        color: ColorManager.black87,
+        swipeThreshold: 0.2,
+        direction: SwipeDirection.endToStart, // Swipe left to delete
+        onSwiped: (direction) {
+          if (direction == SwipeDirection.endToStart && onPressed != null) {
+            onPressed!(context);
+          }
+        },
+        backgroundBuilder: (context, direction, progress) {
+          if (direction == SwipeDirection.endToStart) {
+            return Container(
+              color: ColorManager.darkGrey,
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.symmetric(horizontal: PaddingManager.p16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    StringsManager.delete,
+                    style: TextStyle(color: ColorManager.limerGreen2),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(Icons.delete, color: ColorManager.limerGreen2),
+                ],
+              ),
+            );
+          }
+          return const SizedBox.shrink();
+        },
         child: Container(
           width: deviceWidth,
           height: SizeManager.s150.h,

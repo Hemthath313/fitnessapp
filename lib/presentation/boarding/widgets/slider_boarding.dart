@@ -3,8 +3,8 @@ import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:slide_to_act/slide_to_act.dart';
-
 
 class SliderBoardingWidget extends StatelessWidget {
   const SliderBoardingWidget({
@@ -21,7 +21,7 @@ class SliderBoardingWidget extends StatelessWidget {
         sliderButtonIcon: const Icon(Icons.double_arrow_sharp),
         text: StringsManager.swipeToPrc,
         onSubmit: () {
-          Navigator.of(context).pushReplacementNamed(Routes.authRoute);
+          context.go(Routes.authRoute);
           return null;
         },
       ),

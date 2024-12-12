@@ -6,6 +6,7 @@ import 'package:fitness_app/presentation/profile/widgets/weight_line_chart.dart'
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_app/utils/managers/asset_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
@@ -88,9 +89,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     EditTextButton(
-                      onTap: () => Navigator.of(context)
-                          .pushNamed(Routes.changeMeasurementsRoute),
-                    ),
+                        onTap: () =>
+                            context.push(Routes.changeMeasurementsRoute)),
                     Stack(
                       children: [
                         SizedBox(
@@ -329,9 +329,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ],
                     ),
                     EditTextButton(
-                      onTap: () => Navigator.of(context)
-                          .pushNamed(Routes.changeWeightRoute),
-                    ),
+                        onTap: () => context.push(Routes.changeWeightRoute)),
                     const WeightDataTextRowWidget(),
                     const WeightLineChart(),
                   ],

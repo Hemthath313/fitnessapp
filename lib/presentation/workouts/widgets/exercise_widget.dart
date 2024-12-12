@@ -4,7 +4,7 @@ import 'package:fitness_app/utils/managers/style_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:swipeable_tile/swipeable_tile.dart';
 
 class ExerciseWidget extends StatelessWidget {
   const ExerciseWidget({
@@ -27,37 +27,65 @@ class ExerciseWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final deviceWidth = MediaQuery.of(context).size.width;
+
     return Padding(
       padding: const EdgeInsets.only(
         top: PaddingManager.p8,
         left: PaddingManager.p1,
         right: PaddingManager.p1,
       ),
-      child: Slidable(
-        startActionPane: ActionPane(
-          motion: const StretchMotion(),
-          children: [
-            SlidableAction(
-              onPressed: onFinished,
-              icon: Icons.done_all_sharp,
-              label: StringsManager.finished,
-              foregroundColor: ColorManager.darkGrey,
-              backgroundColor: ColorManager.limerGreen2,
-            ),
-          ],
-        ),
-        endActionPane: ActionPane(
-          motion: const StretchMotion(),
-          children: [
-            SlidableAction(
-              onPressed: onDeleted,
-              icon: Icons.delete,
-              label: StringsManager.delete,
-              foregroundColor: ColorManager.limerGreen2,
-              backgroundColor: ColorManager.darkGrey,
-            ),
-          ],
-        ),
+      child: SwipeableTile(
+        key: Key(id), // Unique key for the SwipeableTile
+        color: ColorManager.black87,
+        swipeThreshold: 0.2,
+        direction: SwipeDirection.horizontal,
+        onSwiped: (direction) {
+          if (direction == SwipeDirection.startToEnd && onFinished != null) {
+            onFinished!(context);
+          } else if (direction == SwipeDirection.endToStart &&
+              onDeleted != null) {
+            onDeleted!(context);
+          }
+        },
+        backgroundBuilder: (context, direction, progress) {
+          if (direction == SwipeDirection.startToEnd) {
+            return Container(
+              color: ColorManager.limerGreen2,
+              alignment: Alignment.centerLeft,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: PaddingManager.p16),
+              child: Row(
+                children: [
+                  Icon(Icons.done_all_sharp, color: ColorManager.darkGrey),
+                  const SizedBox(width: 8),
+                  Text(
+                    StringsManager.finished,
+                    style: TextStyle(color: ColorManager.darkGrey),
+                  ),
+                ],
+              ),
+            );
+          } else if (direction == SwipeDirection.endToStart) {
+            return Container(
+              color: ColorManager.darkGrey,
+              alignment: Alignment.centerRight,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: PaddingManager.p16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    StringsManager.delete,
+                    style: TextStyle(color: ColorManager.limerGreen2),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(Icons.delete, color: ColorManager.limerGreen2),
+                ],
+              ),
+            );
+          }
+          return const SizedBox.shrink();
+        },
         child: Container(
           width: deviceWidth,
           height: SizeManager.s100.h,
