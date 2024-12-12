@@ -4,7 +4,6 @@ import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/widgets/neu_dark_container_widget.dart';
 import 'package:flutter/material.dart';
 
-
 class TextFieldWidget extends StatelessWidget {
   const TextFieldWidget({
     super.key,
@@ -32,14 +31,14 @@ class TextFieldWidget extends StatelessWidget {
           controller: controller,
           obscureText: obscureText,
           textAlign: TextAlign.start,
-          style: const TextStyle(color: ColorManager.limeGreen),
+          style: const TextStyle(color: ColorManager.white),
           autocorrect: false,
           keyboardType: keyboardType,
-          cursorColor: ColorManager.limeGreen,
+          cursorColor: ColorManager.white,
           decoration: InputDecoration(
             labelText: labelHint,
             labelStyle: const TextStyle(
-              color: ColorManager.limeGreen,
+              color: ColorManager.white,
               fontSize: FontSize.s14,
               letterSpacing: SizeManager.s1_5,
               fontWeight: FontWightManager.semiBold,
