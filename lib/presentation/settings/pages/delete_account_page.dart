@@ -168,7 +168,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
               ),
               LimeGreenRoundedButtonWidget(
                 onTap: popUp,
-                title: StringsManager.procede,
+                title: StringsManager.next,
               )
             ],
           ),

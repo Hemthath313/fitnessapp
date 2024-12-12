@@ -142,7 +142,7 @@ class _AddDataPageState extends State<AddDataPage> {
                 onTap: () {
                   addUserData().then((value) => context.go(Routes.mainRoute));
                 },
-                title: StringsManager.procede,
+                title: StringsManager.next,
               )
             ],
           ),

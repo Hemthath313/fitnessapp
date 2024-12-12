@@ -9,7 +9,7 @@ class ColorManager {
   static const Color yellow = Color.fromARGB(255, 255, 162, 0);
   static const Color white2 = Color.fromARGB(255, 207, 203, 203);
   static const Color lighGrey = Color.fromARGB(255, 116, 115, 115);
-  static const Color limeGreen = Color.fromARGB(255, 175, 231, 78);
+  static const Color limeGreen = Color.fromARGB(255, 235, 80, 14);
   static const Color darkGrey = Color.fromARGB(255, 21, 21, 21);
   static const Color grey = Color.fromARGB(255, 99, 98, 98);
   static Color grey3 = HexColor.fromHex('#242A2E');

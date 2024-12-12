@@ -115,7 +115,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               ),
               LimeGreenRoundedButtonWidget(
                 onTap: changePassword,
-                title: StringsManager.procede,
+                title: StringsManager.next,
               )
             ],
           ),
