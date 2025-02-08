@@ -3,6 +3,7 @@ import 'package:fitness_app/presentation/auth/pages/auth_page.dart';
 import 'package:fitness_app/presentation/auth/pages/forgot_password_page.dart';
 import 'package:fitness_app/presentation/auth/pages/login_or_register_page.dart';
 import 'package:fitness_app/presentation/boarding/pages/boarding_page.dart';
+import 'package:fitness_app/presentation/body_parts/pages/body_parts.dart';
 import 'package:fitness_app/presentation/consumption/pages/drink_page.dart';
 import 'package:fitness_app/presentation/consumption/pages/new_meal_page.dart';
 import 'package:fitness_app/presentation/main/pages/main_page.dart';
@@ -23,6 +24,7 @@ class Routes {
   static const String mainRoute = '/main';
   static const String loginRoute = '/login';
   static const String authRoute = '/auth';
+  static const String bodypartsPage = '/bodypartsPage';
   static const String notificationsRoute = '/notifications';
   static const String forgotPasswordRoute = '/forgotPassword';
   static const String changePasswordRoute = '/changePassword';
@@ -59,6 +61,11 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, AuthPage())),
+    GoRoute(
+        path: Routes.bodypartsPage,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, BodyPartsScreen())),
     GoRoute(
         path: Routes.notificationsRoute,
         pageBuilder: (context, state) =>

@@ -2,8 +2,9 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:fitness_app/presentation/home/widgets/carousel_home_box.dart';
 import 'package:fitness_app/utils/managers/asset_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
+import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
-
+import 'package:go_router/go_router.dart';
 
 class CarouselSliderHomeWidget extends StatelessWidget {
   const CarouselSliderHomeWidget({
@@ -19,7 +20,7 @@ class CarouselSliderHomeWidget extends StatelessWidget {
           deviceWidth: deviceWidth,
           image: ImageManager.carousel1WP,
           onTap: () {
-            //TODO
+            context.push(Routes.bodypartsPage);
           },
           title: StringsManager.strengh,
         ),
