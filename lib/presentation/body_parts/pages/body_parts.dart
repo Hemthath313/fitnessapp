@@ -1,14 +1,16 @@
+import 'package:fitness_app/utils/managers/asset_manager.dart';
+import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 
 class BodyPartsScreen extends StatelessWidget {
   final Map<String, String> bodyPartImages = {
-    'Chest': 'assets/images/chest.png',
-    'Biceps': 'assets/images/biceps.png',
-    'Triceps': 'assets/images/triceps.png',
-    'Shoulders': 'assets/images/shoulders.png',
-    'Legs': 'assets/images/legs.png',
-    'Back': 'assets/images/back.png',
-    'Abs': 'assets/images/abs.png',
+    'Chest': ImageManager.chestWorkout,
+    'Biceps': ImageManager.bicepsWorkout,
+    'Triceps': ImageManager.tricepsWorkout,
+    'Shoulders': ImageManager.shoulderWorkout,
+    'Legs': ImageManager.legWorkout,
+    'Back': ImageManager.backWorkout,
+    'Abs': ImageManager.absWorkout,
   };
 
   BodyPartsScreen({super.key});
@@ -16,8 +18,10 @@ class BodyPartsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ColorManager.black,
       appBar: AppBar(
-        title: Text('Select a Body Part'),
+        backgroundColor: ColorManager.black,
+        title: Text('Select a Body Part',style: TextStyle(color: ColorManager.white),),
         centerTitle: true,
       ),
       body: GridView.builder(
