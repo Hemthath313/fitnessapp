@@ -97,7 +97,7 @@ class _LoginPageState extends State<LoginPage>
     }
 
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.black,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(

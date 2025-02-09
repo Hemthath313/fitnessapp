@@ -166,6 +166,7 @@ class _BoardingPageState extends State<BoardingPage> {
   }
 
   @override
+
   void dispose() {
     _pageController.dispose();
     _timer.cancel();
