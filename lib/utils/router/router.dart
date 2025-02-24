@@ -37,7 +37,7 @@ class Routes {
   static const String changePasswordRoute = '/changePassword';
   static const String changeEmailRoute = '/changeEmail';
   static const String deleteAccRoute = '/deleteAcc';
-  static const String newMealRoute = 'newMeal';
+  static const String newMealRoute = '/newMeal';
   static const String addDataRoute = '/addData';
   static const String addWaterRoute = '/addWater';
   static const String addNewExerciseRoute = '/addExercise';
