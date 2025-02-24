@@ -1,5 +1,6 @@
-import 'dart:developer'; // For logging
+import 'dart:developer';
 import 'package:fitness_app/services/rapid_api_services.dart';
+import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 
 class LatExercisesPage extends StatefulWidget {
@@ -22,15 +23,15 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
 
   Future<void> fetchExercises() async {
     try {
-      log('Fetching chest exercises from API...'); // Log before network call
+      log('Fetching lats exercises from API...');
       final data = await _apiService.getTargetWorkoutData('lats', {});
-      log('API response: $data'); // Log API response
+      log('API response: $data');
       setState(() {
         exercises = data;
         isLoading = false;
       });
     } catch (e) {
-      log('Error fetching exercises: $e'); // Log error
+      log('Error fetching exercises: $e');
       setState(() {
         isLoading = false;
       });
@@ -43,28 +44,49 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ColorManager.black,
       appBar: AppBar(
-        title: Text('Lats Exercises'),
+        backgroundColor: ColorManager.black,
+        title: Text('Lats Exercises', style: TextStyle(color: Colors.white)),
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : exercises.isEmpty
-              ? Center(child: Text('No exercises found.'))
+              ? Center(
+                  child: Text('No exercises found.',
+                      style: TextStyle(color: Colors.white)))
               : ListView.builder(
                   itemCount: exercises.length,
                   itemBuilder: (context, index) {
                     final exercise = exercises[index];
                     return Card(
-                      margin: EdgeInsets.all(8.0),
+                      shadowColor: ColorManager.limeGreenOp,
+                      color: ColorManager.black54,
+                      margin: EdgeInsets.all(12.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      elevation: 4,
                       child: ListTile(
-                        leading: Image.network(
-                          exercise['gifUrl'],
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,
+                        contentPadding: EdgeInsets.all(10),
+                        leading: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(
+                            exercise['gifUrl'],
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                        title: Text(exercise['name']),
-                        subtitle: Text(exercise['equipment']),
+                        title: Text(
+                          exercise['name'],
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        subtitle: Text(
+                          'Equipment: ${exercise['equipment']}',
+                          style: TextStyle(fontSize: 12, color: Colors.white70),
+                        ),
                         onTap: () => showExerciseDetails(context, exercise),
                       ),
                     );
@@ -74,29 +96,66 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
   }
 
   void showExerciseDetails(BuildContext context, dynamic exercise) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(exercise['name']),
-        content: Column(
+      backgroundColor: Colors.white,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Target: ${exercise['target']}'),
+            Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(
+                  exercise['gifUrl'],
+                  height: 250,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            Text(
+              exercise['name'],
+              style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87),
+            ),
             SizedBox(height: 10),
-            Text('Equipment: ${exercise['equipment']}'),
+            Text('Target: ${exercise['target']}',
+                style: TextStyle(fontSize: 16, color: Colors.black87)),
+            SizedBox(height: 5),
+            Text('Equipment: ${exercise['equipment']}',
+                style: TextStyle(fontSize: 16, color: Colors.black87)),
             SizedBox(height: 10),
-            Text('Instructions:'),
+            Text(
+              'Instructions:',
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87),
+            ),
             for (String step in exercise['instructions'])
-              Text('- $step', style: TextStyle(fontSize: 14)),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                child: Text('- $step',
+                    style: TextStyle(fontSize: 14, color: Colors.black87)),
+              ),
+            SizedBox(height: 20),
+            Center(
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Close'),
+              ),
+            ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Close'),
-          ),
-        ],
       ),
     );
   }
