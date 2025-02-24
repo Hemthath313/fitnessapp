@@ -27,7 +27,7 @@ class BodyPartsScreen extends StatelessWidget {
     'Triceps': () => TricepsExercisesPage(),
     'Shoulders': () => ShoulderExercisesPage(),
     'Legs': () => LegExercisesPage(),
-    'Lats': () => LatExercisesPage(),
+    'Back': () => LatExercisesPage(),
     'Abs': () => AbsExercisesPage(),
   };
 
