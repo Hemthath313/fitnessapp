@@ -113,9 +113,9 @@ class _LoginPageState extends State<LoginPage>
                   child: SizedBox(
                     width: SizeManager.s250.w,
                     height: SizeManager.s250.h,
-                    child: Image.asset(
-                      ImageManager.logo,
-                    ),
+                    // child: Image.asset(
+                    //   ImageManager.logo,
+                    // ),
                   ),
                 ),
                 LoginOrRegisterView(

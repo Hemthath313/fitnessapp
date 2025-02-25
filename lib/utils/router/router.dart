@@ -20,6 +20,7 @@ import 'package:fitness_app/presentation/profile/pages/change_weight_page.dart';
 import 'package:fitness_app/presentation/settings/pages/change_email_page.dart';
 import 'package:fitness_app/presentation/settings/pages/change_password_page.dart';
 import 'package:fitness_app/presentation/settings/pages/delete_account_page.dart';
+import 'package:fitness_app/presentation/splash_screen/splashscreen.dart';
 import 'package:fitness_app/presentation/workouts/pages/new_exercise_page.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/widgets/page_transition.dart';
@@ -27,7 +28,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class Routes {
-  static const String boardingRoute = '/';
+  static const String splashScreen = '/';
+  static const String boardingRoute = '/boardingRoute';
   static const String mainRoute = '/main';
   static const String loginRoute = '/login';
   static const String authRoute = '/auth';
@@ -53,13 +55,18 @@ class Routes {
 }
 
 final GoRouter router = GoRouter(
-  initialLocation: Routes.boardingRoute,
+  initialLocation: Routes.splashScreen,
   routes: [
     GoRoute(
         path: Routes.boardingRoute,
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, BoardingPage())),
+    GoRoute(
+        path: Routes.splashScreen,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, SplashScreen())),
     GoRoute(
         path: Routes.mainRoute,
         pageBuilder: (context, state) =>
