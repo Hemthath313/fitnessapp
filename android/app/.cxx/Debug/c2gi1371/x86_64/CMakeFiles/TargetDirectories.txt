@@ -1,2 +1,0 @@
-/Users/hemthath/Documents/Learnings/fitness_app/fitnessapp/android/app/.cxx/Debug/c2gi1371/x86_64/CMakeFiles/edit_cache.dir
-/Users/hemthath/Documents/Learnings/fitness_app/fitnessapp/android/app/.cxx/Debug/c2gi1371/x86_64/CMakeFiles/rebuild_cache.dir

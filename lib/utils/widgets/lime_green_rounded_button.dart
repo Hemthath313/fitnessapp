@@ -29,7 +29,7 @@ class LimeGreenRoundedButtonWidget extends StatelessWidget {
           decoration: BoxDecoration(
             color: ColorManager.orange,
             borderRadius: BorderRadius.circular(
-              RadiusManager.r40,
+              RadiusManager.r15,
             ),
           ),
           child: Center(
