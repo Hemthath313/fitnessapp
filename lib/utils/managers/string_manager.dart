@@ -5,6 +5,8 @@ class StringsManager {
       'Control your calorie intake and workout\nschedule from the comfort of your phone.';
   static const String getStarted = 'Get Started';
   static const String key = 'key';
+  static const String diet = 'Diet';
+  static const String cardio = 'Cardio workout';
   static const String emailHint = 'Email';
   static const String passwordHint = 'Password';
   static const String signIn = 'Sign In';
