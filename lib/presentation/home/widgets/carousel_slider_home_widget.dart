@@ -38,24 +38,25 @@ class CarouselSliderHomeWidget extends StatelessWidget {
           onTap: () {
             //TODO
           },
-          title: StringsManager.power,
+          title: StringsManager.diet,
         ),
         CarouselHomeBox(
           deviceWidth: deviceWidth,
           image: ImageManager.carousel4WP,
           onTap: () {
+            context.push(Routes.cardioRoute);
             //TODO
           },
-          title: StringsManager.meditation,
+          title: StringsManager.cardio,
         ),
-        CarouselHomeBox(
-          deviceWidth: deviceWidth,
-          image: ImageManager.carousel5WP,
-          onTap: () {
-            //TODO
-          },
-          title: StringsManager.confidence,
-        ),
+        // CarouselHomeBox(
+        //   deviceWidth: deviceWidth,
+        //   image: ImageManager.carousel5WP,
+        //   onTap: () {
+        //     //TODO
+        //   },
+        //   title: StringsManager.confidence,
+        // ),
       ],
       options: CarouselOptions(
         autoPlay: true,

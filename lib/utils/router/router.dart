@@ -11,6 +11,7 @@ import 'package:fitness_app/presentation/body_parts/pages/lats.dart';
 import 'package:fitness_app/presentation/body_parts/pages/legs.dart';
 import 'package:fitness_app/presentation/body_parts/pages/shoulder.dart';
 import 'package:fitness_app/presentation/body_parts/pages/triceps.dart';
+import 'package:fitness_app/presentation/cardio_workouts/cardio.dart';
 import 'package:fitness_app/presentation/consumption/pages/drink_page.dart';
 import 'package:fitness_app/presentation/consumption/pages/new_meal_page.dart';
 import 'package:fitness_app/presentation/main/pages/main_page.dart';
@@ -33,6 +34,7 @@ class Routes {
   static const String mainRoute = '/main';
   static const String loginRoute = '/login';
   static const String authRoute = '/auth';
+  static const String cardioRoute = '/cardio';
   static const String bodypartsPage = '/bodypartsPage';
   static const String notificationsRoute = '/notifications';
   static const String forgotPasswordRoute = '/forgotPassword';
@@ -82,6 +84,11 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, AuthPage())),
+    GoRoute(
+        path: Routes.cardioRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, CardioExercisesPage())),
     GoRoute(
         path: Routes.bodypartsPage,
         pageBuilder: (context, state) =>
