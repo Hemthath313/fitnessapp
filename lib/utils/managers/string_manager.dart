@@ -67,7 +67,7 @@ class StringsManager {
   static const String todaysAct = 'Today\'s Activity';
   static const String explore = 'Explore';
   static const String strengh = 'STRENGH';
-  static const String yoga = 'YOGA';
+  static const String workoutRecovery = 'Post Workout Recovery';
   static const String power = 'POWER';
   static const String confidence = 'CONFIDENCE';
   static const String meditation = 'MEDITATION';

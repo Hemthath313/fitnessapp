@@ -28,6 +28,12 @@ class ImageManager {
   static const shoulderWorkout = '$imagePath/shoulder_workout.jpg';
   static const tricepsWorkout = '$imagePath/triceps_workout-unsplash.jpg';
   static const bicepsWorkout = '$imagePath/biceps_workout.jpg';
+  static const dietAndNutrition = '$imagePath/diet.jpeg';
+  static const cardioWorkout = '$imagePath/cardio.jpeg';
+  static const bulkingDiet = '$imagePath/bulking.jpeg';
+  static const cuttingDiet = '$imagePath/cutting.jpeg';
+  static const maintainDiet = '$imagePath/maintain.jpeg';
+  static const veganDiet = '$imagePath/vegan.jpeg';
   // static const cardioWorkout='$imagePath/cardio_workout.jpg';
   // static const yogaWorkout='$imagePath/yoga_workout.jpg';
 }
