@@ -1,8 +1,10 @@
-import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter/material.dart';
 
-Widget buildDietCard(String title, String imagePath) {
-    return Container(
+Widget buildDietCard(
+    BuildContext context, String title, String imagePath, VoidCallback onTap) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
@@ -36,7 +38,7 @@ Widget buildDietCard(String title, String imagePath) {
             child: Text(
               title,
               style: const TextStyle(
-                fontSize: SizeManager.s26,
+                fontSize: 26, // Removed SizeManager.s26 for direct value
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
@@ -44,6 +46,6 @@ Widget buildDietCard(String title, String imagePath) {
           ),
         ],
       ),
-    );
-  }
-
+    ),
+  );
+}

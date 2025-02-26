@@ -1,7 +1,9 @@
 import 'package:fitness_app/presentation/diet_nutrition/diet_card.dart';
 import 'package:fitness_app/utils/managers/asset_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
+import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class DietMain extends StatelessWidget {
   const DietMain({super.key});
@@ -22,13 +24,28 @@ class DietMain extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            buildDietCard('Bulking Diet', ImageManager.bulkingDiet),
+            buildDietCard(
+              context,
+              'Bulking Diet',
+              ImageManager.bulkingDiet,
+              () {
+                context.push(Routes.addDataRoute);
+              },
+            ),
             const SizedBox(height: 16),
-            buildDietCard('Cutting Diet', ImageManager.cuttingDiet),
+            buildDietCard(context, 'Cutting Diet', ImageManager.cuttingDiet,
+                () {
+              context.push(Routes.cardioRoute);
+            }),
             const SizedBox(height: 16),
-            buildDietCard('Maintain Diet', ImageManager.maintainDiet),
+            buildDietCard(context, 'Maintain Diet', ImageManager.maintainDiet,
+                () {
+              context.push(Routes.bodypartsPage);
+            }),
             const SizedBox(height: 16),
-            buildDietCard('Vegan Diet', ImageManager.veganDiet),
+            buildDietCard(context, 'Vegan Diet', ImageManager.veganDiet, () {
+              context.push(Routes.cardioRoute);
+            }),
           ],
         ),
       ),
