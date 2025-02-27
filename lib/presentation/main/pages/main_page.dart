@@ -1,4 +1,5 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:fitness_app/presentation/chat_screen/chat_screen.dart';
 import 'package:fitness_app/presentation/consumption/pages/consumption_page.dart';
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
 import 'package:fitness_app/presentation/home/pages/home_page.dart';
@@ -9,7 +10,6 @@ import 'package:fitness_app/presentation/main/widgets/appbar_settings.dart';
 import 'package:fitness_app/presentation/main/widgets/appbar_workouts.dart';
 import 'package:fitness_app/presentation/profile/pages/profile_page.dart';
 import 'package:fitness_app/presentation/settings/pages/settings_page.dart';
-import 'package:fitness_app/presentation/workouts/pages/workouts_page.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
@@ -37,7 +37,7 @@ class _MainPageState extends State<MainPage> {
   List<Widget> pages = const [
     HomePage(),
     ConsumptionPage(),
-    WorkoutPage(),
+    ChatScreen(),
     SettingsPage(),
     ProfilePage(),
   ];
@@ -48,7 +48,7 @@ class _MainPageState extends State<MainPage> {
     } else if (isConsumptionPage) {
       return const ConsumptionPageAppBarWidget();
     } else if (isWorkoutsPage) {
-      return const WorkoutsPageAppBarWidget();
+      return const ChatPageAppBarWidget();
     } else if (isSettingsPage) {
       return const SettingsPageAppBarWidget();
     } else if (isProfilePage) {

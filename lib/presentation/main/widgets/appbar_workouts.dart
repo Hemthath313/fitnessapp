@@ -4,8 +4,8 @@ import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
 
-class WorkoutsPageAppBarWidget extends StatelessWidget {
-  const WorkoutsPageAppBarWidget({
+class ChatPageAppBarWidget extends StatelessWidget {
+  const ChatPageAppBarWidget({
     super.key,
   });
 
@@ -17,7 +17,7 @@ class WorkoutsPageAppBarWidget extends StatelessWidget {
       automaticallyImplyLeading: false,
       elevation: SizeManager.s0,
       title: Text(
-        StringsManager.workoutsABtitle,
+        StringsManager.askYourDoubt,
         style: StyleManager.appbarTitleTextStyle,
       ),
     ).animate().fadeIn(
