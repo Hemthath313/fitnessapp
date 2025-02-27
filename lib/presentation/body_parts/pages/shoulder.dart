@@ -101,7 +101,7 @@ class _ShoulderExercisesPageState extends State<ShoulderExercisesPage> {
   void showExerciseDetails(BuildContext context, dynamic exercise) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -128,33 +128,38 @@ class _ShoulderExercisesPageState extends State<ShoulderExercisesPage> {
               style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87),
+                  color: ColorManager.white),
             ),
             SizedBox(height: 10),
             Text('Target: ${exercise['target']}',
-                style: TextStyle(fontSize: 16, color: Colors.black87)),
+                style: TextStyle(fontSize: 16, color: ColorManager.white)),
             SizedBox(height: 5),
             Text('Equipment: ${exercise['equipment']}',
-                style: TextStyle(fontSize: 16, color: Colors.black87)),
+                style: TextStyle(fontSize: 16, color: ColorManager.white)),
             SizedBox(height: 10),
             Text(
               'Instructions:',
               style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87),
+                  color: ColorManager.white),
             ),
             for (String step in exercise['instructions'])
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4.0),
                 child: Text('- $step',
-                    style: TextStyle(fontSize: 14, color: Colors.black87)),
+                    style: TextStyle(fontSize: 14, color: ColorManager.white)),
               ),
             SizedBox(height: 20),
             Center(
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: ColorManager.limerGreen2),
                 onPressed: () => Navigator.pop(context),
-                child: Text('Close'),
+                child: Text(
+                  'Close',
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
             ),
           ],

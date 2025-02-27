@@ -76,29 +76,71 @@ class _BicepsExercisesPageState extends State<BicepsExercisesPage> {
   }
 
   void showExerciseDetails(BuildContext context, dynamic exercise) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(exercise['name']),
-        content: Column(
+      backgroundColor: Colors.black,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Target: ${exercise['target']}'),
+            Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(
+                  exercise['gifUrl'],
+                  height: 250,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            Text(
+              exercise['name'],
+              style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: ColorManager.white),
+            ),
             SizedBox(height: 10),
-            Text('Equipment: ${exercise['equipment']}'),
+            Text('Target: ${exercise['target']}',
+                style: TextStyle(fontSize: 16, color: ColorManager.white)),
+            SizedBox(height: 5),
+            Text('Equipment: ${exercise['equipment']}',
+                style: TextStyle(fontSize: 16, color: ColorManager.white)),
             SizedBox(height: 10),
-            Text('Instructions:'),
+            Text(
+              'Instructions:',
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: ColorManager.white),
+            ),
             for (String step in exercise['instructions'])
-              Text('- $step', style: TextStyle(fontSize: 14)),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                child: Text('- $step',
+                    style: TextStyle(fontSize: 14, color: ColorManager.white)),
+              ),
+            SizedBox(height: 20),
+            Center(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: ColorManager.limerGreen2),
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'Close',
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+            ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Close'),
-          ),
-        ],
       ),
     );
   }
