@@ -1,8 +1,10 @@
 import 'dart:convert';
-import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 class BulkingDietScreen extends StatefulWidget {
   const BulkingDietScreen({super.key});
@@ -26,6 +28,18 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
     loadMealPlan();
   }
 
+  /// 🔹 Get current date in YYYY-MM-DD format
+  String getTodayDate() {
+    return DateFormat('yyyy-MM-dd').format(DateTime.now());
+  }
+
+  /// 🔹 Get current user ID from FirebaseAuth
+  String getUserId() {
+    return FirebaseAuth.instance.currentUser?.uid ??
+        'testUser'; // Replace with actual user handling
+  }
+
+  /// 🔹 Load meal plan from JSON and check Firestore for saved progress
   Future<void> loadMealPlan() async {
     final jsonString =
         await rootBundle.loadString('assets/json/bulkingdiet.json');
@@ -34,17 +48,17 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
     setState(() {
       mealLibrary = data['mealLibrary'];
       meals = (data['meals'] as List)
-          .map((meal) => {
-                ...meal as Map<String, dynamic>,
-                'isCompleted': false,
-              })
+          .map(
+              (meal) => {...meal as Map<String, dynamic>, 'isCompleted': false})
           .toList();
-
       dailySummary = data['dailySummary'];
       _resetRemainingMacros();
     });
+
+    await _loadSavedMealsFromFirestore(); // Load previously saved meals
   }
 
+  /// 🔹 Reset remaining macros based on the daily summary
   void _resetRemainingMacros() {
     remainingCalories = dailySummary['calories'] ?? 0;
     remainingProtein = dailySummary['protein'] ?? 0;
@@ -52,17 +66,61 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
     remainingFats = dailySummary['fats'] ?? 0;
   }
 
+  /// 🔹 Load completed meals from Firestore
+  Future<void> _loadSavedMealsFromFirestore() async {
+    String userId = getUserId();
+    String todayDate = getTodayDate();
+
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('mealRecords')
+        .doc(todayDate)
+        .get();
+
+    if (doc.exists) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+      // 🔹 Check if the last saved date is different from today
+      if (data['lastUpdated'] != todayDate) {
+        print("🔄 New day detected! Resetting meal records...");
+        _resetRemainingMacros(); // Reset macros
+        _saveToFirestore([]); // Clear completed meals in Firestore
+        return;
+      }
+
+      setState(() {
+        remainingCalories =
+            data['remainingCalories'] ?? dailySummary['calories'];
+        remainingProtein = data['remainingProtein'] ?? dailySummary['protein'];
+        remainingCarbs = data['remainingCarbs'] ?? dailySummary['carbs'];
+        remainingFats = data['remainingFats'] ?? dailySummary['fats'];
+
+        List<String> completedMeals =
+            List<String>.from(data['completedMeals'] ?? []);
+        for (var meal in meals) {
+          if (completedMeals.contains(meal['name'])) {
+            meal['isCompleted'] = true;
+          }
+        }
+      });
+    }
+  }
+
+  /// 🔹 Update remaining macros and save progress to Firestore
   void _updateRemainingMacros() {
     int consumedCalories = 0,
         consumedProtein = 0,
         consumedCarbs = 0,
         consumedFats = 0;
+    List<String> completedMeals = [];
 
     for (var meal in meals.where((m) => m['isCompleted'])) {
       consumedCalories += (meal['calories'] as num).toInt();
       consumedProtein += (meal['protein'] as num).toInt();
       consumedCarbs += (meal['carbs'] as num).toInt();
       consumedFats += (meal['fats'] as num).toInt();
+      completedMeals.add(meal['name']);
     }
 
     setState(() {
@@ -75,6 +133,32 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
       remainingFats =
           (dailySummary['fats'] - consumedFats).clamp(0, dailySummary['fats']);
     });
+
+    _saveToFirestore(completedMeals);
+  }
+
+  /// 🔹 Save completed meals and remaining macros to Firestore
+  void _saveToFirestore(List<String> completedMeals) async {
+    String userId = getUserId();
+    String todayDate = getTodayDate();
+
+    DocumentReference mealRecordRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('mealRecords')
+        .doc(todayDate);
+
+    await mealRecordRef.set({
+      'completedMeals': completedMeals,
+      'remainingCalories': remainingCalories,
+      'remainingProtein': remainingProtein,
+      'remainingCarbs': remainingCarbs,
+      'remainingFats': remainingFats,
+      'timestamp': FieldValue.serverTimestamp(),
+      'lastUpdated': todayDate, // 🔹 Save the last updated date
+    }, SetOptions(merge: true));
+
+    print("Meal record saved for $todayDate");
   }
 
   Widget _buildSummaryCard() {
@@ -98,7 +182,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
   }
 
   Widget _progressBar(String label, int total, int remaining, Color color) {
-    double progress = (total - remaining) / total;
+    double progress = total > 0 ? (total - remaining) / total : 0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -128,7 +212,6 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
           value: meal['isCompleted'],
           onChanged: (value) => _toggleMeal(index, value ?? false),
         ),
-        onTap: () => _showMealDetails(index),
       ),
     );
   }
@@ -136,82 +219,6 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
   void _toggleMeal(int index, bool isCompleted) {
     setState(() {
       meals[index]['isCompleted'] = isCompleted;
-    });
-    _updateRemainingMacros();
-  }
-
-  void _showMealDetails(int index) {
-    final meal = meals[index];
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(meal['name'],
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 20)),
-              const Divider(),
-              Text('Foods:',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              ...meal['foods'].map<Widget>((food) => Text('- $food')).toList(),
-              const Divider(),
-              Text(
-                  'Macros: ${meal['calories']} kcal | ${meal['protein']}g P | ${meal['carbs']}g C | ${meal['fats']}g F'),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () => _openMealLibrary(index),
-                    icon: const Icon(Icons.swap_horiz),
-                    label: const Text('Swap Meal'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void _openMealLibrary(int mealIndex) {
-    Navigator.pop(context); // Close bottom sheet
-
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return ListView.builder(
-          itemCount: mealLibrary.length,
-          itemBuilder: (context, libIndex) {
-            final meal = mealLibrary[libIndex];
-            return ListTile(
-              title: Text(meal['name']),
-              subtitle: Text(
-                  '${meal['calories']} kcal | ${meal['protein']}g Protein'),
-              onTap: () => _swapMeal(mealIndex, meal),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _swapMeal(int mealIndex, Map<String, dynamic> newMeal) {
-    setState(() {
-      meals[mealIndex] = {...newMeal, 'isCompleted': false};
-    });
-    _updateRemainingMacros();
-    Navigator.pop(context); // Close meal library sheet
-  }
-
-  void _markAllMealsComplete() {
-    setState(() {
-      for (var meal in meals) {
-        meal['isCompleted'] = true;
-      }
     });
     _updateRemainingMacros();
   }
@@ -236,11 +243,6 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
                 ),
               ),
             ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _markAllMealsComplete,
-        icon: const Icon(Icons.check_circle),
-        label: const Text('Complete All Meals'),
-      ),
     );
   }
 }
