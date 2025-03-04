@@ -48,9 +48,12 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
     setState(() {
       mealLibrary = data['mealLibrary'];
       meals = (data['meals'] as List)
-          .map(
-              (meal) => {...meal as Map<String, dynamic>, 'isCompleted': false})
+          .map((meal) => {
+                ...meal as Map<String, dynamic>,
+                'isCompleted': false,
+              })
           .toList();
+
       dailySummary = data['dailySummary'];
       _resetRemainingMacros();
     });
@@ -182,7 +185,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
   }
 
   Widget _progressBar(String label, int total, int remaining, Color color) {
-    double progress = total > 0 ? (total - remaining) / total : 0;
+    double progress = (total - remaining) / total;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -212,6 +215,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
           value: meal['isCompleted'],
           onChanged: (value) => _toggleMeal(index, value ?? false),
         ),
+        onTap: () => _showMealDetails(index),
       ),
     );
   }
@@ -219,6 +223,82 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
   void _toggleMeal(int index, bool isCompleted) {
     setState(() {
       meals[index]['isCompleted'] = isCompleted;
+    });
+    _updateRemainingMacros();
+  }
+
+  void _showMealDetails(int index) {
+    final meal = meals[index];
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(meal['name'],
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 20)),
+              const Divider(),
+              Text('Foods:',
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              ...meal['foods'].map<Widget>((food) => Text('- $food')).toList(),
+              const Divider(),
+              Text(
+                  'Macros: ${meal['calories']} kcal | ${meal['protein']}g P | ${meal['carbs']}g C | ${meal['fats']}g F'),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () => _openMealLibrary(index),
+                    icon: const Icon(Icons.swap_horiz),
+                    label: const Text('Swap Meal'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _openMealLibrary(int mealIndex) {
+    Navigator.pop(context); // Close bottom sheet
+
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return ListView.builder(
+          itemCount: mealLibrary.length,
+          itemBuilder: (context, libIndex) {
+            final meal = mealLibrary[libIndex];
+            return ListTile(
+              title: Text(meal['name']),
+              subtitle: Text(
+                  '${meal['calories']} kcal | ${meal['protein']}g Protein'),
+              onTap: () => _swapMeal(mealIndex, meal),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _swapMeal(int mealIndex, Map<String, dynamic> newMeal) {
+    setState(() {
+      meals[mealIndex] = {...newMeal, 'isCompleted': false};
+    });
+    _updateRemainingMacros();
+    Navigator.pop(context); // Close meal library sheet
+  }
+
+  void _markAllMealsComplete() {
+    setState(() {
+      for (var meal in meals) {
+        meal['isCompleted'] = true;
+      }
     });
     _updateRemainingMacros();
   }
@@ -243,6 +323,11 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
                 ),
               ),
             ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _markAllMealsComplete,
+        icon: const Icon(Icons.check_circle),
+        label: const Text('Complete All Meals'),
+      ),
     );
   }
 }
