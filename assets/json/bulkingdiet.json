@@ -1,0 +1,269 @@
+{
+    "dailySummary": {
+        "calories": 2800,
+        "protein": 120,
+        "carbs": 390,
+        "fats": 85
+    },
+    "meals": [
+        {
+            "name": "Breakfast",
+            "image": "https://example.com/breakfast.jpg",
+            "foods": [
+                "Oats Milkshake (Oats - 50g, Banana - 1, Dates - 4, Milk - 300ml)",
+                "Whole Wheat Bread - 2 slices",
+                "Peanut Butter - 2 tbsp"
+            ],
+            "calories": 700,
+            "protein": 25,
+            "carbs": 100,
+            "fats": 20,
+            "isCompleted": false
+        },
+        {
+            "name": "Mid-Morning Snack",
+            "image": "https://example.com/snack.jpg",
+            "foods": [
+                "Sweet Potato - 150g",
+                "Apple - 1 medium"
+            ],
+            "calories": 300,
+            "protein": 5,
+            "carbs": 70,
+            "fats": 0,
+            "isCompleted": false
+        },
+        {
+            "name": "Lunch",
+            "image": "https://example.com/lunch.jpg",
+            "foods": [
+                "Paneer - 150g",
+                "Rice - 200g",
+                "Mix Vegetables (Spinach, Carrot, Beans) - 200g",
+                "Ghee - 1 tsp"
+            ],
+            "calories": 800,
+            "protein": 40,
+            "carbs": 100,
+            "fats": 25,
+            "isCompleted": false
+        },
+        {
+            "name": "Evening Snack",
+            "image": "https://example.com/evening_snack.jpg",
+            "foods": [
+                "Chickpeas (Boiled) - 100g",
+                "Cucumber - 1 medium",
+                "Peanut Butter - 1 tbsp",
+                "Whole Wheat Bread - 1 slice"
+            ],
+            "calories": 400,
+            "protein": 20,
+            "carbs": 50,
+            "fats": 10,
+            "isCompleted": false
+        },
+        {
+            "name": "Dinner",
+            "image": "https://example.com/dinner.jpg",
+            "foods": [
+                "Roti (Whole Wheat) - 2",
+                "Mix Vegetable Curry - 200g",
+                "Sweet Potato - 100g",
+                "Paneer - 100g"
+            ],
+            "calories": 600,
+            "protein": 25,
+            "carbs": 70,
+            "fats": 15,
+            "isCompleted": false
+        },
+        {
+            "name": "Night Snack",
+            "image": "https://example.com/night_snack.jpg",
+            "foods": [
+                "Warm Milk - 250ml",
+                "Walnuts - 10 pcs"
+            ],
+            "calories": 200,
+            "protein": 5,
+            "carbs": 10,
+            "fats": 15,
+            "isCompleted": false
+        }
+    ],
+    "mealLibrary": [
+        {
+            "name": "Grilled Chicken Salad",
+            "calories": 600,
+            "protein": 50,
+            "carbs": 45,
+            "fats": 15,
+            "foods": [
+                "Grilled Chicken - 150g",
+                "Lettuce - 100g",
+                "Tomatoes - 50g",
+                "Olive Oil - 1 tbsp",
+                "Cucumber - 100g"
+            ]
+        },
+        {
+            "name": "Tuna Sandwich",
+            "calories": 550,
+            "protein": 40,
+            "carbs": 60,
+            "fats": 10,
+            "foods": [
+                "Whole Wheat Bread - 2 slices",
+                "Tuna - 150g",
+                "Mayo - 1 tbsp",
+                "Lettuce - 50g"
+            ]
+        },
+        {
+            "name": "Greek Yogurt with Berries",
+            "calories": 300,
+            "protein": 20,
+            "carbs": 35,
+            "fats": 5,
+            "foods": [
+                "Greek Yogurt - 200g",
+                "Blueberries - 50g",
+                "Strawberries - 50g",
+                "Chia Seeds - 1 tbsp"
+            ]
+        },
+        {
+            "name": "Avocado Toast with Egg",
+            "calories": 400,
+            "protein": 22,
+            "carbs": 40,
+            "fats": 18,
+            "foods": [
+                "Whole Grain Bread - 2 slices",
+                "Avocado - 100g",
+                "Egg - 2",
+                "Pepper - 1 tsp",
+                "Lemon - 1 tsp"
+            ]
+        },
+        {
+            "name": "Fruit Salad",
+            "calories": 250,
+            "protein": 5,
+            "carbs": 55,
+            "fats": 2,
+            "foods": [
+                "Apple - 1 medium",
+                "Banana - 1 medium",
+                "Oranges - 1 medium",
+                "Berries - 50g",
+                "Honey - 1 tsp"
+            ]
+        },
+        {
+            "name": "Quinoa and Chickpea Bowl",
+            "calories": 500,
+            "protein": 25,
+            "carbs": 65,
+            "fats": 10,
+            "foods": [
+                "Quinoa - 150g",
+                "Chickpeas - 100g",
+                "Spinach - 100g",
+                "Tomatoes - 50g",
+                "Olive Oil - 1 tbsp"
+            ]
+        },
+        {
+            "name": "Oats with Peanut Butter & Banana",
+            "calories": 450,
+            "protein": 20,
+            "carbs": 60,
+            "fats": 12,
+            "foods": [
+                "Oats - 50g",
+                "Milk - 300ml",
+                "Banana - 1",
+                "Peanut Butter - 2 tbsp"
+            ]
+        },
+        {
+            "name": "Grilled Salmon with Veggies",
+            "calories": 600,
+            "protein": 50,
+            "carbs": 30,
+            "fats": 25,
+            "foods": [
+                "Salmon - 150g",
+                "Broccoli - 100g",
+                "Carrots - 100g",
+                "Olive Oil - 1 tbsp"
+            ]
+        },
+        {
+            "name": "Cottage Cheese with Pineapple",
+            "calories": 350,
+            "protein": 30,
+            "carbs": 40,
+            "fats": 5,
+            "foods": [
+                "Cottage Cheese - 150g",
+                "Pineapple - 100g",
+                "Chia Seeds - 1 tbsp"
+            ]
+        },
+        {
+            "name": "Chicken and Brown Rice Bowl",
+            "calories": 550,
+            "protein": 45,
+            "carbs": 60,
+            "fats": 10,
+            "foods": [
+                "Grilled Chicken - 150g",
+                "Brown Rice - 200g",
+                "Green Beans - 100g"
+            ]
+        },
+        {
+            "name": "Hummus and Veggie Wrap",
+            "calories": 400,
+            "protein": 18,
+            "carbs": 55,
+            "fats": 12,
+            "foods": [
+                "Whole Wheat Wrap - 1",
+                "Hummus - 3 tbsp",
+                "Cucumber - 50g",
+                "Carrots - 50g",
+                "Bell Peppers - 50g"
+            ]
+        },
+        {
+            "name": "Protein Smoothie",
+            "calories": 350,
+            "protein": 35,
+            "carbs": 40,
+            "fats": 5,
+            "foods": [
+                "Protein Powder - 1 scoop",
+                "Banana - 1",
+                "Peanut Butter - 1 tbsp",
+                "Almond Milk - 300ml"
+            ]
+        },
+        {
+            "name": "Spinach and Cheese Omelette",
+            "calories": 450,
+            "protein": 35,
+            "carbs": 20,
+            "fats": 28,
+            "foods": [
+                "Eggs - 3",
+                "Spinach - 100g",
+                "Cheese - 50g",
+                "Olive Oil - 1 tbsp"
+            ]
+        }
+    ]
+}

@@ -1,4 +1,5 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:fitness_app/presentation/chat_screen/chat_screen.dart';
 import 'package:fitness_app/presentation/consumption/pages/consumption_page.dart';
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
 import 'package:fitness_app/presentation/home/pages/home_page.dart';
@@ -9,7 +10,6 @@ import 'package:fitness_app/presentation/main/widgets/appbar_settings.dart';
 import 'package:fitness_app/presentation/main/widgets/appbar_workouts.dart';
 import 'package:fitness_app/presentation/profile/pages/profile_page.dart';
 import 'package:fitness_app/presentation/settings/pages/settings_page.dart';
-import 'package:fitness_app/presentation/workouts/pages/workouts_page.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
@@ -17,7 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -37,7 +36,7 @@ class _MainPageState extends State<MainPage> {
   List<Widget> pages = const [
     HomePage(),
     ConsumptionPage(),
-    WorkoutPage(),
+    ChatScreen(),
     SettingsPage(),
     ProfilePage(),
   ];
@@ -48,7 +47,7 @@ class _MainPageState extends State<MainPage> {
     } else if (isConsumptionPage) {
       return const ConsumptionPageAppBarWidget();
     } else if (isWorkoutsPage) {
-      return const WorkoutsPageAppBarWidget();
+      return const ChatPageAppBarWidget();
     } else if (isSettingsPage) {
       return const SettingsPageAppBarWidget();
     } else if (isProfilePage) {
@@ -77,26 +76,28 @@ class _MainPageState extends State<MainPage> {
       final workouts = workoutsProvider.workouts;
       final meals = consumptionProvider.meals;
       final water = consumptionProvider.water;
+      bool isNewDay(DateTime now, DateTime lastDate) {
+        return now.year > lastDate.year ||
+            now.month > lastDate.month ||
+            now.day > lastDate.day;
+      }
+
       if (meals.isNotEmpty) {
         final lastMealDateTime = meals.last.dateTime;
-        final now = DateTime.now();
-        if (now.year > lastMealDateTime.year ||
-            now.month > lastMealDateTime.month ||
-            now.day > lastMealDateTime.day) {
-          await consumptionProvider.clearMealsIfDayChanges(lastMealDateTime);
+        if (isNewDay(DateTime.now(), lastMealDateTime)) {
+          await consumptionProvider.clearMealsIfNeeded();
           await consumptionProvider.fetchAndSetMeals();
         }
       }
+
       if (water.isNotEmpty) {
         final lastWaterDateTime = water.last.dateTime;
-        final now = DateTime.now();
-        if (now.year > lastWaterDateTime.year ||
-            now.month > lastWaterDateTime.month ||
-            now.day > lastWaterDateTime.day) {
-          await consumptionProvider.clearWaterIfDayChanges(lastWaterDateTime);
+        if (isNewDay(DateTime.now(), lastWaterDateTime)) {
+          await consumptionProvider.clearWaterIfNeeded();
           await consumptionProvider.fetchAndSetWater();
         }
       }
+
       if (workouts.isNotEmpty) {
         final lastWorkoutDateTime = workouts.last.dateTime;
         final now = DateTime.now();

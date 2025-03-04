@@ -67,7 +67,7 @@ class StringsManager {
   static const String todaysAct = 'Today\'s Activity';
   static const String explore = 'Explore';
   static const String strengh = 'STRENGH';
-  static const String yoga = 'YOGA';
+  static const String workoutRecovery = 'Post Workout Recovery';
   static const String power = 'POWER';
   static const String confidence = 'CONFIDENCE';
   static const String meditation = 'MEDITATION';
@@ -132,7 +132,7 @@ class StringsManager {
   static const String exercisesDoneTxt = 'Great Job! 🎉 You\'re on 🔥';
   static const String startYourExercises = 'It\'s a new day! Time to move! 💪';
   static const String error = 'Ups something went wrong';
-  //MEASUREMENTS DATA
+  static const String askYourDoubt = 'Ask Your Doubt to Ai';
   static const String chest = 'Chest';
   static const String shoulders = 'Shoulders';
   static const String thigh = 'Thighs';
