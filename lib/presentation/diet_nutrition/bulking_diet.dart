@@ -84,11 +84,10 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
     if (doc.exists) {
       Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-      // 🔹 Check if the last saved date is different from today
       if (data['lastUpdated'] != todayDate) {
         print("🔄 New day detected! Resetting meal records...");
-        _resetRemainingMacros(); // Reset macros
-        _saveToFirestore([]); // Clear completed meals in Firestore
+        _resetRemainingMacros();
+        _saveToFirestore([]);
         return;
       }
 
@@ -98,6 +97,11 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
         remainingProtein = data['remainingProtein'] ?? dailySummary['protein'];
         remainingCarbs = data['remainingCarbs'] ?? dailySummary['carbs'];
         remainingFats = data['remainingFats'] ?? dailySummary['fats'];
+
+        // 🔹 Load swapped meals if available
+        if (data.containsKey('swappedMeals')) {
+          meals = List<Map<String, dynamic>>.from(data['swappedMeals']);
+        }
 
         List<String> completedMeals =
             List<String>.from(data['completedMeals'] ?? []);
@@ -151,17 +155,30 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
         .collection('mealRecords')
         .doc(todayDate);
 
+    // 🔹 Store all meals, including swapped ones
+    List<Map<String, dynamic>> storedMeals = meals.map((meal) {
+      return {
+        'name': meal['name'],
+        'calories': meal['calories'],
+        'protein': meal['protein'],
+        'carbs': meal['carbs'],
+        'fats': meal['fats'],
+        'isCompleted': meal['isCompleted']
+      };
+    }).toList();
+
     await mealRecordRef.set({
       'completedMeals': completedMeals,
       'remainingCalories': remainingCalories,
       'remainingProtein': remainingProtein,
       'remainingCarbs': remainingCarbs,
       'remainingFats': remainingFats,
+      'swappedMeals': storedMeals, // 🔹 Save swapped meals
       'timestamp': FieldValue.serverTimestamp(),
-      'lastUpdated': todayDate, // 🔹 Save the last updated date
+      'lastUpdated': todayDate,
     }, SetOptions(merge: true));
 
-    print("Meal record saved for $todayDate");
+    print("Meal record saved for $todayDate with swapped meals.");
   }
 
   Widget _buildSummaryCard() {
