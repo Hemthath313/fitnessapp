@@ -14,6 +14,7 @@ import 'package:fitness_app/presentation/body_parts/pages/triceps.dart';
 import 'package:fitness_app/presentation/cardio_workouts/cardio.dart';
 import 'package:fitness_app/presentation/consumption/pages/drink_page.dart';
 import 'package:fitness_app/presentation/consumption/pages/new_meal_page.dart';
+import 'package:fitness_app/presentation/diet_nutrition/bulking_diet.dart';
 import 'package:fitness_app/presentation/diet_nutrition/diet_main.dart';
 import 'package:fitness_app/presentation/main/pages/main_page.dart';
 import 'package:fitness_app/presentation/notifications/pages/notifications_page.dart';
@@ -56,6 +57,7 @@ class Routes {
   static const String absRoute = '/absExercises';
   static const String backRoute = '/backRoutes';
   static const String dietRoute = '/diet';
+  static const String bulkingDietRoute = '/bulkingDietRoute';
 }
 
 final GoRouter router = GoRouter(
@@ -136,6 +138,11 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, DietMain())),
+    GoRoute(
+        path: Routes.bulkingDietRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, BulkingDietScreen())),
     GoRoute(
         path: Routes.notificationsRoute,
         pageBuilder: (context, state) =>

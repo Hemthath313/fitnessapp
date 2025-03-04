@@ -39,5 +39,5 @@ class ImageManager {
 }
 
 class AnimationManager {
-  static const water = '$animationPath/water.json';
+  static const water = '$animationPath/water_animation.json';
 }

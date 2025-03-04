@@ -29,7 +29,7 @@ class DietMain extends StatelessWidget {
               'Bulking Diet',
               ImageManager.bulkingDiet,
               () {
-                context.push(Routes.addDataRoute);
+                context.push(Routes.bulkingDietRoute);
               },
             ),
             const SizedBox(height: 16),

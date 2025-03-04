@@ -18,7 +18,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
@@ -77,26 +76,28 @@ class _MainPageState extends State<MainPage> {
       final workouts = workoutsProvider.workouts;
       final meals = consumptionProvider.meals;
       final water = consumptionProvider.water;
+      bool isNewDay(DateTime now, DateTime lastDate) {
+        return now.year > lastDate.year ||
+            now.month > lastDate.month ||
+            now.day > lastDate.day;
+      }
+
       if (meals.isNotEmpty) {
         final lastMealDateTime = meals.last.dateTime;
-        final now = DateTime.now();
-        if (now.year > lastMealDateTime.year ||
-            now.month > lastMealDateTime.month ||
-            now.day > lastMealDateTime.day) {
-          await consumptionProvider.clearMealsIfDayChanges(lastMealDateTime);
+        if (isNewDay(DateTime.now(), lastMealDateTime)) {
+          await consumptionProvider.clearMealsIfNeeded();
           await consumptionProvider.fetchAndSetMeals();
         }
       }
+
       if (water.isNotEmpty) {
         final lastWaterDateTime = water.last.dateTime;
-        final now = DateTime.now();
-        if (now.year > lastWaterDateTime.year ||
-            now.month > lastWaterDateTime.month ||
-            now.day > lastWaterDateTime.day) {
-          await consumptionProvider.clearWaterIfDayChanges(lastWaterDateTime);
+        if (isNewDay(DateTime.now(), lastWaterDateTime)) {
+          await consumptionProvider.clearWaterIfNeeded();
           await consumptionProvider.fetchAndSetWater();
         }
       }
+
       if (workouts.isNotEmpty) {
         final lastWorkoutDateTime = workouts.last.dateTime;
         final now = DateTime.now();
