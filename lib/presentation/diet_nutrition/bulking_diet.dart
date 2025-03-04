@@ -58,7 +58,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
       _resetRemainingMacros();
     });
 
-    await _loadSavedMealsFromFirestore(); // Load previously saved meals
+    await _loadSavedMealsFromFirestore();
   }
 
   /// 🔹 Reset remaining macros based on the daily summary
@@ -163,6 +163,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
         'protein': meal['protein'],
         'carbs': meal['carbs'],
         'fats': meal['fats'],
+        'foods': meal['foods'] ?? [],
         'isCompleted': meal['isCompleted']
       };
     }).toList();
@@ -183,6 +184,9 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
 
   Widget _buildSummaryCard() {
     return Card(
+      color: Colors.grey[800],
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -206,7 +210,10 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('$label: ${total - remaining}/$total'),
+        Text(
+          '$label: ${total - remaining}/$total',
+          style: TextStyle(color: ColorManager.white),
+        ),
         LinearProgressIndicator(
             value: progress, color: color, backgroundColor: Colors.grey[300]),
         const SizedBox(height: 8),
@@ -215,22 +222,52 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
   }
 
   Widget _buildMealList() {
-    return ListView.builder(
-      itemCount: meals.length,
-      itemBuilder: (context, index) => _mealCard(meals[index], index),
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 500),
+      child: ListView.builder(
+        key: ValueKey(meals.length),
+        itemCount: meals.length,
+        itemBuilder: (context, index) => mealCard(meals[index], index),
+      ),
     );
   }
 
-  Widget _mealCard(Map<String, dynamic> meal, int index) {
-    return Card(
+  Widget mealCard(Map<String, dynamic> meal, int index) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      decoration: BoxDecoration(
+        color: meal['isCompleted']
+            ? Colors.green.withOpacity(0.2)
+            : Colors.grey[900],
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 6,
+            offset: const Offset(2, 2),
+          )
+        ],
+      ),
       child: ListTile(
-        title: Text(meal['name'],
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle:
-            Text('${meal['calories']} kcal | ${meal['protein']}g Protein'),
-        trailing: Checkbox(
+        leading: Icon(
+          meal['isCompleted'] ? Icons.check_circle : Icons.fastfood,
+          color: meal['isCompleted'] ? Colors.green : Colors.orangeAccent,
+        ),
+        title: Text(
+          meal['name'],
+          style:
+              const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        subtitle: Text(
+          '${meal['calories']} kcal | ${meal['protein']}g Protein',
+          style: const TextStyle(color: Colors.white70),
+        ),
+        trailing: Switch(
           value: meal['isCompleted'],
-          onChanged: (value) => _toggleMeal(index, value ?? false),
+          onChanged: (value) => _toggleMeal(index, value),
+          activeColor: Colors.green,
         ),
         onTap: () => _showMealDetails(index),
       ),
@@ -249,6 +286,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
     showModalBottomSheet(
       context: context,
       builder: (context) {
+        final foods = meal['foods'] ?? []; // Ensure foods is not null
         return Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -260,7 +298,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
               const Divider(),
               Text('Foods:',
                   style: const TextStyle(fontWeight: FontWeight.bold)),
-              ...meal['foods'].map<Widget>((food) => Text('- $food')).toList(),
+              ...foods.map<Widget>((food) => Text('- $food')).toList(),
               const Divider(),
               Text(
                   'Macros: ${meal['calories']} kcal | ${meal['protein']}g P | ${meal['carbs']}g C | ${meal['fats']}g F'),
@@ -305,10 +343,14 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
 
   void _swapMeal(int mealIndex, Map<String, dynamic> newMeal) {
     setState(() {
-      meals[mealIndex] = {...newMeal, 'isCompleted': false};
+      meals[mealIndex] = {
+        ...newMeal,
+        'isCompleted': false,
+        'foods': newMeal['foods'] ?? [], // ✅ Ensure foods are included
+      };
     });
     _updateRemainingMacros();
-    Navigator.pop(context); // Close meal library sheet
+    Navigator.pop(context);
   }
 
   void _markAllMealsComplete() {
@@ -324,7 +366,12 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorManager.black,
-      appBar: AppBar(title: const Text('Bulking Diet Plan')),
+      appBar: AppBar(
+          backgroundColor: ColorManager.black,
+          title: const Text(
+            'Bulking Diet Plan',
+            style: TextStyle(color: ColorManager.white),
+          )),
       body: meals.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
