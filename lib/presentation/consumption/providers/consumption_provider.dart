@@ -231,6 +231,9 @@ class ConsumptionProvider with ChangeNotifier {
     if (lastClearedDate == null ||
         isLastDateTimeDifferent(now, lastClearedDate)) {
       await clearAllWater(); // Clear all water entries
+      waterADay = 0.0; // Reset the daily water counter
+      await setLastClearedDate(now); // Update the last cleared date
+      notifyListeners();
     }
   }
 
