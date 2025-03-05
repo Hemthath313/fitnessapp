@@ -60,7 +60,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
           .toList();
 
       dailySummary = data['dailySummary'];
-      // _resetRemainingMacros(); 
+      _resetRemainingMacros();
     });
 
     await _loadSavedMealsFromFirestore();
