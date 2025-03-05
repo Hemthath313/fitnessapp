@@ -1,10 +1,15 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness_app/presentation/diet_nutrition/meals/meal_card.dart';
+import 'package:fitness_app/presentation/diet_nutrition/meals/meal_details.dart';
+import 'package:fitness_app/presentation/diet_nutrition/summary_card.dart';
+import 'package:fitness_app/presentation/home/providers/home_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class BulkingDietScreen extends StatefulWidget {
   const BulkingDietScreen({super.key});
@@ -55,7 +60,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
           .toList();
 
       dailySummary = data['dailySummary'];
-      _resetRemainingMacros();
+      // _resetRemainingMacros(); 
     });
 
     await _loadSavedMealsFromFirestore();
@@ -184,22 +189,31 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
   }
 
   Widget _buildSummaryCard() {
+    final homeProvider = Provider.of<HomeProvider>(context);
+    final userData = homeProvider.userData;
+
+    double storedBMR = userData['bmr'] ?? 0.0;
+    double storedBMI = userData['bmi'] ?? 0.0;
+
+// Use storedBMI or storedBMR directly to calculate
+    int dailyCalories =
+        (storedBMR > 0) ? storedBMR.toInt() : (storedBMI * 30).toInt();
+    double weight = userData['weight'] ?? 60.0; // fallback weight if not stored
+    int protein = (weight * 2.0).toInt(); // 2g per kg
+    int carbs = (weight * 4.0).toInt(); // 4g per kg
+    int fats = (weight * 1.0).toInt(); // 1g per kg
+
+// Example Macro Calculation
     return Card(
-      color: Colors.grey[800],
+      color: ColorManager.black54,
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _progressBar('Calories', dailySummary['calories'],
-                remainingCalories, Colors.orange),
-            _progressBar('Protein', dailySummary['protein'], remainingProtein,
-                Colors.green),
             _progressBar(
-                'Carbs', dailySummary['carbs'], remainingCarbs, Colors.blue),
-            _progressBar(
-                'Fats', dailySummary['fats'], remainingFats, Colors.red),
+                'Calories', dailyCalories, remainingCalories, Colors.orange),
           ],
         ),
       ),
@@ -227,67 +241,118 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
       duration: const Duration(milliseconds: 500),
       child: ListView.builder(
         key: ValueKey(meals.length),
-        itemCount: meals.length,
-        itemBuilder: (context, index) => mealCard(meals[index], index),
+        itemCount: meals.length + 1, // +1 for custom meal button
+        itemBuilder: (context, index) {
+          if (index == meals.length) {
+            return _buildAddCustomMealButton();
+          }
+          return MealCard(
+            meal: meals[index],
+            index: index,
+            onToggleMeal: (value) => _toggleMeal(index, value),
+            onTap: () => _showMealDetails(index),
+          );
+        },
       ),
     );
   }
 
-  Widget mealCard(Map<String, dynamic> meal, int index) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      decoration: BoxDecoration(
-        color: meal['isCompleted']
-            ? Colors.green.withOpacity(0.2)
-            : Colors.grey[900],
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 6,
-            offset: const Offset(2, 2),
-          )
-        ],
-      ),
-      child: ListTile(
-        leading: Icon(
-          meal['isCompleted'] ? Icons.check_circle : Icons.fastfood,
-          color: meal['isCompleted'] ? Colors.green : Colors.orangeAccent,
+  Widget _buildAddCustomMealButton() {
+    return GestureDetector(
+      onTap: _showAddCustomMealDialog,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: ColorManager.black54,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white24),
         ),
-        title: Text(
-          meal['name'],
-          style:
-              const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${meal['calories']} kcal | ${meal['protein']}g Protein',
-              style: const TextStyle(color: Colors.white70),
+        child: const Center(
+          child: Text(
+            '+ Add Custom Meal',
+            style: TextStyle(
+              color: Colors.orangeAccent,
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Tap to view meal details',
-                  style: TextStyle(fontSize: 12, color: Colors.white54),
-                ),
-                const Icon(Icons.chevron_right, color: Colors.white54, size: 18)
-              ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAddCustomMealDialog() {
+    final nameController = TextEditingController();
+    final caloriesController = TextEditingController();
+    final proteinController = TextEditingController();
+    final carbsController = TextEditingController();
+    final fatsController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Add Custom Meal'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildTextField('Meal Name', nameController),
+              _buildTextField('Calories', caloriesController, isNumber: true),
+              _buildTextField('Protein (g)', proteinController, isNumber: true),
+              _buildTextField('Carbs (g)', carbsController, isNumber: true),
+              _buildTextField('Fats (g)', fatsController, isNumber: true),
+            ],
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel')),
+            TextButton(
+              onPressed: () {
+                _addCustomMeal(
+                  nameController.text,
+                  int.tryParse(caloriesController.text) ?? 0,
+                  int.tryParse(proteinController.text) ?? 0,
+                  int.tryParse(carbsController.text) ?? 0,
+                  int.tryParse(fatsController.text) ?? 0,
+                );
+                Navigator.pop(context);
+              },
+              child: const Text('Add'),
             ),
           ],
-        ),
-        trailing: Switch(
-          value: meal['isCompleted'],
-          onChanged: (value) => _toggleMeal(index, value),
-          activeColor: Colors.green,
-        ),
-        onTap: () => _showMealDetails(index),
-      ),
+        );
+      },
+    );
+  }
+
+  void _addCustomMeal(
+      String name, int calories, int protein, int carbs, int fats) {
+    final newMeal = {
+      'name': name,
+      'calories': calories,
+      'protein': protein,
+      'carbs': carbs,
+      'fats': fats,
+      'foods': [], // optional if needed
+      'isCompleted': false,
+      'image':
+          'assets/images/custom_meal.png' // You can use a placeholder image for custom meals
+    };
+
+    setState(() {
+      meals.add(newMeal);
+    });
+
+    _updateRemainingMacros(); // Save to Firestore immediately
+  }
+
+  Widget _buildTextField(String label, TextEditingController controller,
+      {bool isNumber = false}) {
+    return TextField(
+      controller: controller,
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+      decoration: InputDecoration(labelText: label),
     );
   }
 
@@ -300,47 +365,13 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
 
   void _showMealDetails(int index) {
     final meal = meals[index];
-    print('Meal Image Path for $index: ${meal['image']}');
-    print('Showing meal details for $index');
-    print('Meal: $meal');
     showModalBottomSheet(
       context: context,
+      backgroundColor: ColorManager.darkGrey,
       builder: (context) {
-        final foods = meal['foods'] ?? [];
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset(
-                meal['image'] ?? 'assets/images/milk.jpeg', // Fallback
-                height: 120,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-              const SizedBox(height: 8),
-              Text(meal['name'],
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 20)),
-              const Divider(),
-              Text('Foods:',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              ...foods.map<Widget>((food) => Text('- $food')).toList(),
-              const Divider(),
-              Text(
-                  'Macros: ${meal['calories']} kcal | ${meal['protein']}g P | ${meal['carbs']}g C | ${meal['fats']}g F'),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () => _openMealLibrary(index),
-                    icon: const Icon(Icons.swap_horiz),
-                    label: const Text('Swap Meal'),
-                  ),
-                ],
-              ),
-            ],
-          ),
+        return MealDetailsSheet(
+          meal: meal,
+          onSwapMeal: () => _openMealLibrary(index),
         );
       },
     );
@@ -392,7 +423,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorManager.black,
+      backgroundColor: ColorManager.darkGrey,
       appBar: AppBar(
           backgroundColor: ColorManager.black,
           title: const Text(
@@ -415,9 +446,14 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
               ),
             ),
       floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: ColorManager.limerGreen2,
         onPressed: _markAllMealsComplete,
-        icon: const Icon(Icons.check_circle),
-        label: const Text('Complete All Meals'),
+        // icon: const Icon(Icons.check_circle),
+        label: const Text(
+          'Complete All Meals',
+          style:
+              TextStyle(color: ColorManager.black, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
