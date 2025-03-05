@@ -159,6 +159,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
     List<Map<String, dynamic>> storedMeals = meals.map((meal) {
       return {
         'name': meal['name'],
+        'image': meal['image'], // ✅ Add this line
         'calories': meal['calories'],
         'protein': meal['protein'],
         'carbs': meal['carbs'],
@@ -260,9 +261,25 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
           style:
               const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        subtitle: Text(
-          '${meal['calories']} kcal | ${meal['protein']}g Protein',
-          style: const TextStyle(color: Colors.white70),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${meal['calories']} kcal | ${meal['protein']}g Protein',
+              style: const TextStyle(color: Colors.white70),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Tap to view meal details',
+                  style: TextStyle(fontSize: 12, color: Colors.white54),
+                ),
+                const Icon(Icons.chevron_right, color: Colors.white54, size: 18)
+              ],
+            ),
+          ],
         ),
         trailing: Switch(
           value: meal['isCompleted'],
@@ -283,15 +300,25 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
 
   void _showMealDetails(int index) {
     final meal = meals[index];
+    print('Meal Image Path for $index: ${meal['image']}');
+    print('Showing meal details for $index');
+    print('Meal: $meal');
     showModalBottomSheet(
       context: context,
       builder: (context) {
-        final foods = meal['foods'] ?? []; // Ensure foods is not null
+        final foods = meal['foods'] ?? [];
         return Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Image.asset(
+                meal['image'] ?? 'assets/images/milk.jpeg', // Fallback
+                height: 120,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+              const SizedBox(height: 8),
               Text(meal['name'],
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 20)),

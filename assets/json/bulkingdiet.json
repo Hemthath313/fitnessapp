@@ -8,7 +8,7 @@
     "meals": [
         {
             "name": "Breakfast",
-            "image": "https://example.com/breakfast.jpg",
+            "image": "assets/images/breakfast.jpeg",
             "foods": [
                 "Oats Milkshake (Oats - 50g, Banana - 1, Dates - 4, Milk - 300ml)",
                 "Whole Wheat Bread - 2 slices",
@@ -22,7 +22,7 @@
         },
         {
             "name": "Mid-Morning Snack",
-            "image": "https://example.com/snack.jpg",
+            "image": "assets/images/mid_snack.jpeg",
             "foods": [
                 "Sweet Potato - 150g",
                 "Apple - 1 medium"
@@ -35,7 +35,7 @@
         },
         {
             "name": "Lunch",
-            "image": "https://example.com/lunch.jpg",
+            "image": "assets/images/lunch.jpeg",
             "foods": [
                 "Paneer - 150g",
                 "Rice - 200g",
@@ -50,7 +50,7 @@
         },
         {
             "name": "Evening Snack",
-            "image": "https://example.com/evening_snack.jpg",
+            "image": "assets/images/eve_snack.jpeg",
             "foods": [
                 "Chickpeas (Boiled) - 100g",
                 "Cucumber - 1 medium",
@@ -65,7 +65,7 @@
         },
         {
             "name": "Dinner",
-            "image": "https://example.com/dinner.jpg",
+            "image": "assets/images/night_dinner.jpeg",
             "foods": [
                 "Roti (Whole Wheat) - 2",
                 "Mix Vegetable Curry - 200g",
@@ -80,10 +80,10 @@
         },
         {
             "name": "Night Snack",
-            "image": "https://example.com/night_snack.jpg",
+            "image": "assets/images/milk.jpeg",
             "foods": [
                 "Warm Milk - 250ml",
-                "Walnuts - 10 pcs"
+                "nuts - 10 pcs"
             ],
             "calories": 200,
             "protein": 5,
@@ -95,6 +95,7 @@
     "mealLibrary": [
         {
             "name": "Grilled Chicken Salad",
+            "image": "assets/images/chicken_salad.jpeg",
             "calories": 600,
             "protein": 50,
             "carbs": 45,
@@ -109,6 +110,7 @@
         },
         {
             "name": "Tuna Sandwich",
+            "image": "assets/images/sandwich.jpeg",
             "calories": 550,
             "protein": 40,
             "carbs": 60,
@@ -122,6 +124,7 @@
         },
         {
             "name": "Greek Yogurt with Berries",
+            "image": "assets/images/yogurt.jpeg",
             "calories": 300,
             "protein": 20,
             "carbs": 35,
@@ -135,6 +138,7 @@
         },
         {
             "name": "Avocado Toast with Egg",
+            "image": "assets/images/avocado.jpeg",
             "calories": 400,
             "protein": 22,
             "carbs": 40,
@@ -149,6 +153,7 @@
         },
         {
             "name": "Fruit Salad",
+            "image": "assets/images/fruit_salad.jpeg",
             "calories": 250,
             "protein": 5,
             "carbs": 55,
@@ -163,6 +168,7 @@
         },
         {
             "name": "Quinoa and Chickpea Bowl",
+            "image": "assets/images/quinoa.jpeg",
             "calories": 500,
             "protein": 25,
             "carbs": 65,
@@ -177,6 +183,7 @@
         },
         {
             "name": "Oats with Peanut Butter & Banana",
+            "image": "assets/images/oats.jpeg",
             "calories": 450,
             "protein": 20,
             "carbs": 60,
@@ -190,6 +197,7 @@
         },
         {
             "name": "Grilled Salmon with Veggies",
+            "image": "assets/images/chicken_salad.jpeg",
             "calories": 600,
             "protein": 50,
             "carbs": 30,
@@ -203,6 +211,7 @@
         },
         {
             "name": "Cottage Cheese with Pineapple",
+            "image": "assets/images/cottage_cheese.jpeg",
             "calories": 350,
             "protein": 30,
             "carbs": 40,
@@ -215,6 +224,7 @@
         },
         {
             "name": "Chicken and Brown Rice Bowl",
+            "image": "assets/images/chicken_salad.jpeg",
             "calories": 550,
             "protein": 45,
             "carbs": 60,
@@ -227,6 +237,7 @@
         },
         {
             "name": "Hummus and Veggie Wrap",
+            "image": "assets/images/hummus_wrap.jpeg",
             "calories": 400,
             "protein": 18,
             "carbs": 55,
@@ -241,6 +252,7 @@
         },
         {
             "name": "Protein Smoothie",
+            "image": "assets/images/oats.jpeg",
             "calories": 350,
             "protein": 35,
             "carbs": 40,
@@ -254,6 +266,7 @@
         },
         {
             "name": "Spinach and Cheese Omelette",
+            "image": "assets/images/chicken_salad.jpeg",
             "calories": 450,
             "protein": 35,
             "carbs": 20,
