@@ -52,4 +52,5 @@ class ConsumptionPageAppBarWidget extends StatelessWidget {
           duration: 500.ms,
         );
   }
+  //hello
 }

@@ -21,8 +21,23 @@ class ImageManager {
   static const weightIc = '$imagePath/weight_ic.png';
   static const exerciseLogo = '$imagePath/exercise_logo.png';
   static const weight = '$imagePath/weight.png';
+  static const absWorkout = '$imagePath/abs_workout.jpg';
+  static const backWorkout = '$imagePath/back_workout.jpg';
+  static const chestWorkout = '$imagePath/chest_workout.jpg';
+  static const legWorkout = '$imagePath/leg_workout.jpg';
+  static const shoulderWorkout = '$imagePath/shoulder_workout.jpg';
+  static const tricepsWorkout = '$imagePath/triceps_workout-unsplash.jpg';
+  static const bicepsWorkout = '$imagePath/biceps_workout.jpg';
+  static const dietAndNutrition = '$imagePath/diet.jpeg';
+  static const cardioWorkout = '$imagePath/cardio.jpeg';
+  static const bulkingDiet = '$imagePath/bulking.jpeg';
+  static const cuttingDiet = '$imagePath/cutting.jpeg';
+  static const maintainDiet = '$imagePath/maintain.jpeg';
+  static const veganDiet = '$imagePath/vegan.jpeg';
+  // static const cardioWorkout='$imagePath/cardio_workout.jpg';
+  // static const yogaWorkout='$imagePath/yoga_workout.jpg';
 }
 
 class AnimationManager {
-  static const water = '$animationPath/water.json';
+  static const water = '$animationPath/water_animation.json';
 }

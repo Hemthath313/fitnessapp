@@ -124,12 +124,12 @@ class AddDataWidgets extends StatelessWidget {
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton2(
-              // dropdownDecoration: BoxDecoration(
-              //   color: ColorManager.darkGrey,
-              //   borderRadius: BorderRadius.circular(
-              //     RadiusManager.r15.r,
-              //   ),
-              // ),
+              dropdownStyleData: DropdownStyleData(
+                decoration: BoxDecoration(
+                  color: ColorManager.darkGrey,
+                  borderRadius: BorderRadius.circular(RadiusManager.r15.r),
+                ),
+              ),
               onChanged: onChangedGender,
               value: valueGender,
               // iconSize: SizeManager.s0,
@@ -176,12 +176,12 @@ class AddDataWidgets extends StatelessWidget {
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton2(
-              // dropdownDecoration: BoxDecoration(
-              //   color: ColorManager.darkGrey,
-              //   borderRadius: BorderRadius.circular(
-              //     RadiusManager.r15.r,
-              //   ),
-              // ),
+              dropdownStyleData: DropdownStyleData(
+                decoration: BoxDecoration(
+                  color: ColorManager.darkGrey,
+                  borderRadius: BorderRadius.circular(RadiusManager.r15.r),
+                ),
+              ),
               onChanged: onChangedActivity,
               value: valueActivity,
               // iconSize: SizeManager.s0,
@@ -249,12 +249,12 @@ class AddDataWidgets extends StatelessWidget {
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton2(
-              // dropdownDecoration: BoxDecoration(
-              //   color: ColorManager.darkGrey,
-              //   borderRadius: BorderRadius.circular(
-              //     RadiusManager.r15.r,
-              //   ),
-              // ),
+              dropdownStyleData: DropdownStyleData(
+                decoration: BoxDecoration(
+                  color: ColorManager.darkGrey,
+                  borderRadius: BorderRadius.circular(RadiusManager.r15.r),
+                ),
+              ),
               onChanged: onChangedGoal,
               value: valueGoal,
               // iconSize: SizeManager.s0,

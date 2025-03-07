@@ -54,20 +54,58 @@ class CarouselHomeBox extends StatelessWidget {
                 borderRadius: BorderRadius.circular(
                   RadiusManager.r15.r,
                 ),
-                child: Image.asset(
-                  image,
-                  fit: BoxFit.cover,
+                child: Stack(
+                  children: [
+                    Image.asset(
+                      image,
+                      fit: BoxFit.cover,
+                      width: deviceWidth,
+                      height: SizeManager.s250.h,
+                    ),
+                    // Gradient Overlay
+                    Container(
+                      width: deviceWidth,
+                      height: SizeManager.s250.h,
+                      decoration: BoxDecoration(
+                        borderRadius:
+                            BorderRadius.circular(RadiusManager.r15.r),
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.black.withOpacity(0.6),
+                            Colors.transparent,
+                          ],
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                        ),
+                      ),
+                    ),
+                    // Centered Text with Padding
+                    Positioned(
+                      bottom: 20.h, // Adjust positioning
+                      left: 20.w,
+                      right: 20.w,
+                      child: Text(
+                        title,
+                        textAlign: TextAlign.center,
+                        style: StyleManager.homePageCarouselTitle.copyWith(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              blurRadius: 5.0,
+                              color: Colors.black.withOpacity(0.7),
+                              offset: Offset(2, 2),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
-          Align(
-            alignment: Alignment.center,
-            child: Text(
-              title,
-              style: StyleManager.homePageCarouselTitle,
-            ),
-          )
         ],
       ),
     );

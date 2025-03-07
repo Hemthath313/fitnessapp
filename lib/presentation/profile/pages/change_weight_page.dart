@@ -117,7 +117,7 @@ class _ChangeWeightPageState extends State<ChangeWeightPage> {
               ),
               LimeGreenRoundedButtonWidget(
                 onTap: changeWeight,
-                title: StringsManager.procede,
+                title: StringsManager.next,
               )
             ],
           ),

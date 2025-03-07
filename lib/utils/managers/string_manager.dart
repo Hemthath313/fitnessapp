@@ -5,6 +5,8 @@ class StringsManager {
       'Control your calorie intake and workout\nschedule from the comfort of your phone.';
   static const String getStarted = 'Get Started';
   static const String key = 'key';
+  static const String diet = 'Diet';
+  static const String cardio = 'Cardio workout';
   static const String emailHint = 'Email';
   static const String passwordHint = 'Password';
   static const String signIn = 'Sign In';
@@ -38,7 +40,7 @@ class StringsManager {
   static const String genderHint = 'Gender';
   static const String genderManHint = 'MAN';
   static const String genderWomanHint = 'WOMAN';
-  static const String fitnessioABtitle = 'FITNESS.IO';
+  static const String fitnessioABtitle = 'Gym Buddy';
   static const String accountSpacer = 'Account';
   static const String generalSpacer = 'General';
   static const String inviteFriend = 'Invite Friends';
@@ -54,7 +56,7 @@ class StringsManager {
   static const String oldEmailHint = 'Old Email';
   static const String newEmailHint = 'New Email';
   static const String deleteAccABtitle = 'DELETE ACCOUNT';
-  static const String procede = 'PROCEDE';
+  static const String next = 'Continue';
   static const String uSure = 'Are your sure?';
   static const String no = 'NO';
   static const String yes = 'YES';
@@ -65,7 +67,7 @@ class StringsManager {
   static const String todaysAct = 'Today\'s Activity';
   static const String explore = 'Explore';
   static const String strengh = 'STRENGH';
-  static const String yoga = 'YOGA';
+  static const String workoutRecovery = 'Post Workout Recovery';
   static const String power = 'POWER';
   static const String confidence = 'CONFIDENCE';
   static const String meditation = 'MEDITATION';
@@ -130,7 +132,7 @@ class StringsManager {
   static const String exercisesDoneTxt = 'Great Job! 🎉 You\'re on 🔥';
   static const String startYourExercises = 'It\'s a new day! Time to move! 💪';
   static const String error = 'Ups something went wrong';
-  //MEASUREMENTS DATA
+  static const String askYourDoubt = 'Ask Your Doubt to Ai';
   static const String chest = 'Chest';
   static const String shoulders = 'Shoulders';
   static const String thigh = 'Thighs';

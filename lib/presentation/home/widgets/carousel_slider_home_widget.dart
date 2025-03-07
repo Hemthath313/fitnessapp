@@ -2,8 +2,9 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:fitness_app/presentation/home/widgets/carousel_home_box.dart';
 import 'package:fitness_app/utils/managers/asset_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
+import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
-
+import 'package:go_router/go_router.dart';
 
 class CarouselSliderHomeWidget extends StatelessWidget {
   const CarouselSliderHomeWidget({
@@ -19,7 +20,7 @@ class CarouselSliderHomeWidget extends StatelessWidget {
           deviceWidth: deviceWidth,
           image: ImageManager.carousel1WP,
           onTap: () {
-            //TODO
+            context.push(Routes.bodypartsPage);
           },
           title: StringsManager.strengh,
         ),
@@ -29,32 +30,33 @@ class CarouselSliderHomeWidget extends StatelessWidget {
           onTap: () {
             //TODO
           },
-          title: StringsManager.yoga,
+          title: StringsManager.workoutRecovery,
         ),
         CarouselHomeBox(
           deviceWidth: deviceWidth,
-          image: ImageManager.carousel3WP,
+          image: ImageManager.dietAndNutrition,
           onTap: () {
-            //TODO
+            context.push(Routes.dietRoute);
           },
-          title: StringsManager.power,
+          title: StringsManager.diet,
         ),
         CarouselHomeBox(
           deviceWidth: deviceWidth,
-          image: ImageManager.carousel4WP,
+          image: ImageManager.cardioWorkout,
           onTap: () {
+            context.push(Routes.cardioRoute);
             //TODO
           },
-          title: StringsManager.meditation,
+          title: StringsManager.cardio,
         ),
-        CarouselHomeBox(
-          deviceWidth: deviceWidth,
-          image: ImageManager.carousel5WP,
-          onTap: () {
-            //TODO
-          },
-          title: StringsManager.confidence,
-        ),
+        // CarouselHomeBox(
+        //   deviceWidth: deviceWidth,
+        //   image: ImageManager.carousel5WP,
+        //   onTap: () {
+        //     //TODO
+        //   },
+        //   title: StringsManager.confidence,
+        // ),
       ],
       options: CarouselOptions(
         autoPlay: true,

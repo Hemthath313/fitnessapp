@@ -27,9 +27,9 @@ class LimeGreenRoundedButtonWidget extends StatelessWidget {
           height: SizeManager.s60,
           width: SizeManager.s400,
           decoration: BoxDecoration(
-            color: ColorManager.limerGreen2,
+            color: ColorManager.orange,
             borderRadius: BorderRadius.circular(
-              RadiusManager.r40,
+              RadiusManager.r15,
             ),
           ),
           child: Center(
@@ -37,7 +37,7 @@ class LimeGreenRoundedButtonWidget extends StatelessWidget {
               title,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: ColorManager.darkGrey,
+                color: ColorManager.white,
                 fontSize: FontSize.s30,
                 fontWeight: FontWightManager.bold,
                 letterSpacing: SizeManager.s1_5,

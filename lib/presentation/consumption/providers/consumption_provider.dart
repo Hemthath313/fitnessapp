@@ -5,7 +5,6 @@ import 'package:fitness_app/model/meal_model.dart';
 import 'package:fitness_app/model/water_model.dart';
 import 'package:flutter/material.dart';
 
-
 class ConsumptionProvider with ChangeNotifier {
   final List<MealModel> _meals = [];
   final List<WaterModel> _water = [];
@@ -51,6 +50,11 @@ class ConsumptionProvider with ChangeNotifier {
       rethrow;
     }
   }
+  bool isNewDay(DateTime now, DateTime lastDate) {
+    return now.year > lastDate.year ||
+        now.month > lastDate.month ||
+        now.day > lastDate.day;
+  }
 
   Future fetchAndSetMeals() async {
     User? user = FirebaseAuth.instance.currentUser;
@@ -95,30 +99,31 @@ class ConsumptionProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> clearMealsIfDayChanges(DateTime lastDateTime) async {
+  Future<void> clearMealsIfNeeded() async {
+    final lastClearedDate = await getLastClearedDate();
     DateTime now = DateTime.now();
 
-    if (isLastDateTimeDifferent(now, lastDateTime)) {
-      try {
-        User? user = FirebaseAuth.instance.currentUser;
-
-        await FirebaseFirestore.instance
-            .collection('meals')
-            .doc(user!.uid)
-            .collection('mealData')
-            .get()
-            .then((querySnapshot) {
-          for (var doc in querySnapshot.docs) {
-            DateTime mealDateTime = (doc['dateTime'] as Timestamp).toDate();
-            if (isInputTimeDifferent(now, mealDateTime)) {
-              doc.reference.delete();
-            }
-          }
-        });
-      } catch (e) {
-        rethrow;
-      }
+    if (lastClearedDate == null ||
+        isLastDateTimeDifferent(now, lastClearedDate)) {
+      await clearAllMeals(); // clear all meals directly
+      await setLastClearedDate(now); // update Firestore after clear
     }
+  }
+
+  Future<void> clearAllMeals() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    final mealsCollection = FirebaseFirestore.instance
+        .collection('meals')
+        .doc(user!.uid)
+        .collection('mealData');
+
+    final meals = await mealsCollection.get();
+    for (var doc in meals.docs) {
+      await doc.reference.delete();
+    }
+    _meals.clear();
+    kCalaDay = 0;
+    notifyListeners();
   }
 
   bool isLastDateTimeDifferent(DateTime now, DateTime lastDateTime) {
@@ -153,6 +158,33 @@ class ConsumptionProvider with ChangeNotifier {
     } catch (e) {
       rethrow;
     }
+  }
+
+  Future<DateTime?> getLastClearedDate() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .collection('dailyReset')
+        .doc('resetTracker')
+        .get();
+
+    if (doc.exists && doc.data() != null) {
+      return (doc['lastClearedDate'] as Timestamp).toDate();
+    }
+    return null;
+  }
+
+  Future<void> setLastClearedDate(DateTime date) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .collection('dailyReset')
+        .doc('resetTracker')
+        .set({
+      'lastClearedDate': Timestamp.fromDate(date),
+    });
   }
 
   Future fetchAndSetWater() async {
@@ -192,30 +224,33 @@ class ConsumptionProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> clearWaterIfDayChanges(DateTime lastDateTime) async {
+  Future<void> clearWaterIfNeeded() async {
+    final lastClearedDate = await getLastClearedDate();
     DateTime now = DateTime.now();
 
-    if (isLastDateTimeDifferent(now, lastDateTime)) {
-      try {
-        User? user = FirebaseAuth.instance.currentUser;
-
-        await FirebaseFirestore.instance
-            .collection('meals')
-            .doc(user!.uid)
-            .collection('waterData')
-            .get()
-            .then((querySnapshot) {
-          for (var doc in querySnapshot.docs) {
-            DateTime waterDateTime = (doc['dateTime'] as Timestamp).toDate();
-            if (isInputTimeDifferent(now, waterDateTime)) {
-              doc.reference.delete();
-            }
-          }
-        });
-      } catch (e) {
-        rethrow;
-      }
+    if (lastClearedDate == null ||
+        isLastDateTimeDifferent(now, lastClearedDate)) {
+      await clearAllWater(); // Clear all water entries
+      waterADay = 0.0; // Reset the daily water counter
+      await setLastClearedDate(now); // Update the last cleared date
+      notifyListeners();
     }
+  }
+
+  Future<void> clearAllWater() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    final waterCollection = FirebaseFirestore.instance
+        .collection('meals')
+        .doc(user!.uid)
+        .collection('waterData');
+
+    final water = await waterCollection.get();
+    for (var doc in water.docs) {
+      await doc.reference.delete();
+    }
+    _water.clear();
+    waterADay = 0;
+    notifyListeners();
   }
 
   Future<void> deleteMeal(String mealID) async {

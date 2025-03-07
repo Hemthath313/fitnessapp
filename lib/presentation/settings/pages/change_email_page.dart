@@ -114,7 +114,7 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
               ),
               LimeGreenRoundedButtonWidget(
                 onTap: changeEmail,
-                title: StringsManager.procede,
+                title: StringsManager.next,
               )
             ],
           ),

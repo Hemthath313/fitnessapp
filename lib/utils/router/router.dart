@@ -3,8 +3,19 @@ import 'package:fitness_app/presentation/auth/pages/auth_page.dart';
 import 'package:fitness_app/presentation/auth/pages/forgot_password_page.dart';
 import 'package:fitness_app/presentation/auth/pages/login_or_register_page.dart';
 import 'package:fitness_app/presentation/boarding/pages/boarding_page.dart';
+import 'package:fitness_app/presentation/body_parts/pages/abs.dart';
+import 'package:fitness_app/presentation/body_parts/pages/biceps.dart';
+import 'package:fitness_app/presentation/body_parts/pages/body_parts.dart';
+import 'package:fitness_app/presentation/body_parts/pages/chest.dart';
+import 'package:fitness_app/presentation/body_parts/pages/lats.dart';
+import 'package:fitness_app/presentation/body_parts/pages/legs.dart';
+import 'package:fitness_app/presentation/body_parts/pages/shoulder.dart';
+import 'package:fitness_app/presentation/body_parts/pages/triceps.dart';
+import 'package:fitness_app/presentation/cardio_workouts/cardio.dart';
 import 'package:fitness_app/presentation/consumption/pages/drink_page.dart';
 import 'package:fitness_app/presentation/consumption/pages/new_meal_page.dart';
+import 'package:fitness_app/presentation/diet_nutrition/bulking_diet.dart';
+import 'package:fitness_app/presentation/diet_nutrition/diet_main.dart';
 import 'package:fitness_app/presentation/main/pages/main_page.dart';
 import 'package:fitness_app/presentation/notifications/pages/notifications_page.dart';
 import 'package:fitness_app/presentation/profile/pages/change_measurements_page.dart';
@@ -12,6 +23,7 @@ import 'package:fitness_app/presentation/profile/pages/change_weight_page.dart';
 import 'package:fitness_app/presentation/settings/pages/change_email_page.dart';
 import 'package:fitness_app/presentation/settings/pages/change_password_page.dart';
 import 'package:fitness_app/presentation/settings/pages/delete_account_page.dart';
+import 'package:fitness_app/presentation/splash_screen/splashscreen.dart';
 import 'package:fitness_app/presentation/workouts/pages/new_exercise_page.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/widgets/page_transition.dart';
@@ -19,31 +31,48 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class Routes {
-  static const String boardingRoute = '/';
+  static const String splashScreen = '/';
+  static const String boardingRoute = '/boardingRoute';
   static const String mainRoute = '/main';
   static const String loginRoute = '/login';
   static const String authRoute = '/auth';
+  static const String cardioRoute = '/cardio';
+  static const String bodypartsPage = '/bodypartsPage';
   static const String notificationsRoute = '/notifications';
   static const String forgotPasswordRoute = '/forgotPassword';
   static const String changePasswordRoute = '/changePassword';
   static const String changeEmailRoute = '/changeEmail';
   static const String deleteAccRoute = '/deleteAcc';
-  static const String newMealRoute = 'newMeal';
+  static const String newMealRoute = '/newMeal';
   static const String addDataRoute = '/addData';
   static const String addWaterRoute = '/addWater';
   static const String addNewExerciseRoute = '/addExercise';
   static const String changeWeightRoute = '/changeWeight';
   static const String changeMeasurementsRoute = '/changeMeasurements';
+  static const String chestExerciseRoute = '/chestExercises';
+  static const String bicepsRoute = '/bicepsExercises';
+  static const String tricepsRoute = '/tricepsExercises';
+  static const String shouldersRoute = '/shouldersExercises';
+  static const String legsRoute = '/legsExercises';
+  static const String absRoute = '/absExercises';
+  static const String backRoute = '/backRoutes';
+  static const String dietRoute = '/diet';
+  static const String bulkingDietRoute = '/bulkingDietRoute';
 }
 
 final GoRouter router = GoRouter(
-  initialLocation: Routes.boardingRoute,
+  initialLocation: Routes.splashScreen,
   routes: [
     GoRoute(
         path: Routes.boardingRoute,
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, BoardingPage())),
+    GoRoute(
+        path: Routes.splashScreen,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, SplashScreen())),
     GoRoute(
         path: Routes.mainRoute,
         pageBuilder: (context, state) =>
@@ -59,6 +88,61 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, AuthPage())),
+    GoRoute(
+        path: Routes.cardioRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, CardioExercisesPage())),
+    GoRoute(
+        path: Routes.bodypartsPage,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, BodyPartsScreen())),
+    GoRoute(
+        path: Routes.chestExerciseRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, ChestExercisesPage())),
+    GoRoute(
+        path: Routes.bicepsRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, BicepsExercisesPage())),
+    GoRoute(
+        path: Routes.tricepsRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, TricepsExercisesPage())),
+    GoRoute(
+        path: Routes.shouldersRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, ShoulderExercisesPage())),
+    GoRoute(
+        path: Routes.legsRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, LegExercisesPage())),
+    GoRoute(
+        path: Routes.absRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, AbsExercisesPage())),
+    GoRoute(
+        path: Routes.backRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, LatExercisesPage())),
+    GoRoute(
+        path: Routes.dietRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, DietMain())),
+    GoRoute(
+        path: Routes.bulkingDietRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, BulkingDietScreen())),
     GoRoute(
         path: Routes.notificationsRoute,
         pageBuilder: (context, state) =>

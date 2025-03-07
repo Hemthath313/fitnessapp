@@ -30,7 +30,8 @@ class PercentValueOfMeal extends StatelessWidget {
           child: RotatedBox(
             quarterTurns: 3,
             child: LinearPercentIndicator(
-              percent: (value / amount),
+              percent: (value / amount)
+                  .clamp(0.0, 1.0), // Prevents out-of-range values
               width: SizeManager.s60.w,
               backgroundColor: ColorManager.grey3,
               progressColor: ColorManager.limerGreen2,
