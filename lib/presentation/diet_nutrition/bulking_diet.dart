@@ -60,6 +60,15 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
           .toList();
 
       dailySummary = data['dailySummary'];
+      final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+      final userData = homeProvider.userData;
+
+      double storedBMR = userData['bmr'] ?? 0.0;
+      double storedBMI = userData['bmi'] ?? 0.0;
+      int dailyCalories =
+          (storedBMR > 0) ? storedBMR.toInt() : (storedBMI * 30).toInt();
+
+      dailySummary['calories'] = dailyCalories; // 💥 Replac
       _resetRemainingMacros();
     });
 
