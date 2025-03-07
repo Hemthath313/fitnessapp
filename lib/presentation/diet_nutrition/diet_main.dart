@@ -1,15 +1,20 @@
 import 'package:fitness_app/presentation/diet_nutrition/diet_card.dart';
+import 'package:fitness_app/presentation/home/providers/home_provider.dart';
 import 'package:fitness_app/utils/managers/asset_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class DietMain extends StatelessWidget {
   const DietMain({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final goal =
+        Provider.of<HomeProvider>(context).userData['goal']?.toUpperCase();
+
     return Scaffold(
       backgroundColor: ColorManager.black,
       appBar: AppBar(
@@ -24,28 +29,40 @@ class DietMain extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            buildDietCard(
-              context,
-              'Bulking Diet',
-              ImageManager.bulkingDiet,
-              () {
-                context.push(Routes.bulkingDietRoute);
-              },
-            ),
-            const SizedBox(height: 16),
-            buildDietCard(context, 'Cutting Diet', ImageManager.cuttingDiet,
+            if (goal == 'GAIN')
+              buildDietCard(
+                context,
+                'Bulking Diet',
+                ImageManager.bulkingDiet,
                 () {
-              context.push(Routes.cardioRoute);
-            }),
-            const SizedBox(height: 16),
-            buildDietCard(context, 'Maintain Diet', ImageManager.maintainDiet,
+                  context.push(Routes.bulkingDietRoute);
+                },
+              ),
+            if (goal == 'LOSE')
+              buildDietCard(
+                context,
+                'Cutting Diet',
+                ImageManager.cuttingDiet,
                 () {
-              context.push(Routes.bodypartsPage);
-            }),
-            const SizedBox(height: 16),
-            buildDietCard(context, 'Vegan Diet', ImageManager.veganDiet, () {
-              context.push(Routes.cardioRoute);
-            }),
+                  context.push(
+                      Routes.cardioRoute); // Make sure this is correct route
+                },
+              ),
+            if (goal == 'MAINTAIN')
+              buildDietCard(
+                context,
+                'Maintain Diet',
+                ImageManager.maintainDiet,
+                () {
+                  context.push(
+                      Routes.bodypartsPage); // Make sure this is correct route
+                },
+              ),
+            if (goal == null || goal.isEmpty)
+              const Text(
+                'Please set your goal to view diet plans',
+                style: TextStyle(color: Colors.white),
+              ),
           ],
         ),
       ),

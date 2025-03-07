@@ -7,11 +7,11 @@ import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
-
 class AuthProvider with ChangeNotifier {
   User? _user;
   bool? _isNewUser;
   bool? _hasAgeParameter;
+  bool isDataCompleted = false; 
   AuthProvider() {
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       _user = user;
@@ -34,6 +34,10 @@ class AuthProvider with ChangeNotifier {
         notifyListeners();
       }
     });
+  }
+  void completeUserData() {
+    isDataCompleted = true;
+    notifyListeners();
   }
 
   void callAuth() {

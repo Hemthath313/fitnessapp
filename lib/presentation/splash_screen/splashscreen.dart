@@ -60,11 +60,15 @@ class _SplashScreenState extends State<SplashScreen>
 
   void navigate() {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    // Check if user is logged in and has age data
+
     if (authProvider.user != null) {
-      context.go(Routes.mainRoute);
+      if (authProvider.isDataCompleted) {
+        context.go(Routes.mainRoute);
+      } else {
+        context.go(Routes.addDataRoute);
+      }
     } else {
-      context.push(Routes.boardingRoute);
+      context.go(Routes.boardingRoute);
     }
   }
 
