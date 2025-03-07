@@ -11,7 +11,7 @@ class AuthProvider with ChangeNotifier {
   User? _user;
   bool? _isNewUser;
   bool? _hasAgeParameter;
-  bool isDataCompleted = false; 
+  bool isDataCompleted = false;
   AuthProvider() {
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       _user = user;
@@ -148,33 +148,30 @@ class AuthProvider with ChangeNotifier {
     required BuildContext context,
   }) async {
     showDialog(
-        context: context,
-        builder: (_) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(50),
-              child: SpinKitSpinningLines(color: ColorManager.limerGreen2),
-            ),
-          );
-        });
+      context: context,
+      builder: (_) {
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(50),
+            child: SpinKitSpinningLines(color: ColorManager.limerGreen2),
+          ),
+        );
+      },
+    );
 
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-
-      // ignore: use_build_context_synchronously
-      Navigator.pop(context);
-
+      Navigator.pop(context); // Close loading dialog
       notifyListeners();
-    } on FirebaseAuthException catch (_) {
-      Future.delayed(const Duration(seconds: 2)).then(
-        (value) {
-          Navigator.pop(context);
-          notifyListeners();
-        },
-      );
+    } on FirebaseAuthException catch (e) {
+      Navigator.pop(context); // Close loading dialog
+      rethrow; // <--- Forward the error back to LoginPage
+    } catch (e) {
+      Navigator.pop(context);
+      rethrow; // Handle any unexpected error
     }
   }
 
@@ -199,19 +196,18 @@ class AuthProvider with ChangeNotifier {
         email: email,
         password: password,
       );
-      // ignore: use_build_context_synchronously
+
       Navigator.pop(context);
+
       await FirebaseFirestore.instance
           .collection('users')
           .doc(credential.user!.uid)
           .set({});
 
       notifyListeners();
-    } on FirebaseAuthException catch (_) {
-      Future.delayed(const Duration(seconds: 2)).then((value) {
-        Navigator.pop(context);
-        notifyListeners();
-      });
+    } on FirebaseAuthException catch (e) {
+      Navigator.pop(context); // Close the dialog immediately
+      rethrow; // Pass error to LoginPage
     }
   }
 

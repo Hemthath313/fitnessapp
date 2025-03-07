@@ -6,6 +6,7 @@ import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/widgets/small_text_field_widget.dart';
 import 'package:fitness_app/utils/widgets/text_field_underlined.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // ignore: must_be_immutable
@@ -74,6 +75,9 @@ class AddDataWidgets extends StatelessWidget {
           bottom: PaddingManager.p12,
         ),
         child: TextFieldWidgetUnderLined(
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+          ],
           controller: ageController,
           labelHint: StringsManager.ageHint,
           obscureText: false,
@@ -91,12 +95,18 @@ class AddDataWidgets extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             SmallTextFieldWidget(
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+              ],
               controller: heightController,
               labelHint: StringsManager.heightHint,
               obscureText: false,
               keyboardType: TextInputType.number,
             ),
             SmallTextFieldWidget(
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+              ],
               controller: weightController,
               labelHint: StringsManager.weightHint,
               obscureText: false,
