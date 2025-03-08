@@ -6,12 +6,15 @@ import 'package:fitness_app/utils/managers/style_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthProvider with ChangeNotifier {
   User? _user;
   bool? _isNewUser;
   bool? _hasAgeParameter;
   bool isDataCompleted = false;
+  bool isLoading = true;
+
   AuthProvider() {
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       _user = user;
@@ -39,7 +42,6 @@ class AuthProvider with ChangeNotifier {
     isDataCompleted = true;
     notifyListeners();
   }
-
   void callAuth() {
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       _user = user;
@@ -256,5 +258,22 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       rethrow;
     }
+  }
+
+  Future<void> signInWithGoogle(BuildContext context) async {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    if (googleUser == null) {
+      return;
+    }
+
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    await FirebaseAuth.instance.signInWithCredential(credential);
   }
 }

@@ -11,6 +11,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:sign_in_button/sign_in_button.dart';
 
 enum AuthMode { signUp, signIn }
 
@@ -208,6 +209,16 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: PaddingManager.p8),
+                  child: SignInButton(
+                    clipBehavior: Clip.hardEdge,
+                    Buttons.google,
+                    onPressed: () {
+                      authProvider.signInWithGoogle(context);
+                    },
                   ),
                 ),
               ],

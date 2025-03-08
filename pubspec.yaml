@@ -69,6 +69,10 @@ dependencies:
   flutter_launcher_icons: ^0.14.3
   flutter_gemini: ^3.0.0
   intl: ^0.20.2
+  google_sign_in: ^6.2.2
+  sign_in_button: ^3.2.0
+
+
 
 
 
@@ -106,6 +110,7 @@ flutter:
   assets:
     - assets/images/
     - assets/json/bulkingdiet.json
+    - assets/json/cuttingdiet.json
     - assets/json/water_animation.json
     - lib/.env
 
