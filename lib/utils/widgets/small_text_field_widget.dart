@@ -2,6 +2,7 @@ import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/font_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SmallTextFieldWidget extends StatelessWidget {
@@ -11,12 +12,14 @@ class SmallTextFieldWidget extends StatelessWidget {
     required this.labelHint,
     required this.obscureText,
     required this.keyboardType,
+    this.inputFormatters,
   });
 
   final TextEditingController controller;
   final bool obscureText;
   final String labelHint;
   final TextInputType keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +38,7 @@ class SmallTextFieldWidget extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(PaddingManager.p8),
         child: TextField(
+          inputFormatters: inputFormatters,
           controller: controller,
           obscureText: obscureText,
           textAlign: TextAlign.start,

@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/model/meal_model.dart';
 import 'package:fitness_app/model/water_model.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ConsumptionProvider with ChangeNotifier {
   final List<MealModel> _meals = [];
@@ -18,6 +19,8 @@ class ConsumptionProvider with ChangeNotifier {
   List<WaterModel> get water {
     return [..._water];
   }
+
+  get consumedCalories => null;
 
   Future<void> addNewMeal({
     required String title,
@@ -50,6 +53,7 @@ class ConsumptionProvider with ChangeNotifier {
       rethrow;
     }
   }
+
   bool isNewDay(DateTime now, DateTime lastDate) {
     return now.year > lastDate.year ||
         now.month > lastDate.month ||
@@ -251,6 +255,24 @@ class ConsumptionProvider with ChangeNotifier {
     _water.clear();
     waterADay = 0;
     notifyListeners();
+  }
+
+  Future<void> fetchConsumedCalories() async {
+    String userId = FirebaseAuth.instance.currentUser?.uid ?? 'testUser';
+    String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('mealRecords')
+        .doc(todayDate)
+        .get();
+
+    if (doc.exists) {
+      final data = doc.data() as Map<String, dynamic>;
+      notifyListeners(); // Update UI
+      return data['consumedCalories'] ?? 0;
+    }
   }
 
   Future<void> deleteMeal(String mealID) async {

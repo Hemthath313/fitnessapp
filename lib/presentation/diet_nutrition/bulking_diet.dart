@@ -173,7 +173,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
     List<Map<String, dynamic>> storedMeals = meals.map((meal) {
       return {
         'name': meal['name'],
-        'image': meal['image'], // ✅ Add this line
+        'image': meal['image'],
         'calories': meal['calories'],
         'protein': meal['protein'],
         'carbs': meal['carbs'],
@@ -186,6 +186,8 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
     await mealRecordRef.set({
       'completedMeals': completedMeals,
       'remainingCalories': remainingCalories,
+      'consumedCalories':
+          dailySummary['calories'] - remainingCalories, // ✅ Add this
       'remainingProtein': remainingProtein,
       'remainingCarbs': remainingCarbs,
       'remainingFats': remainingFats,

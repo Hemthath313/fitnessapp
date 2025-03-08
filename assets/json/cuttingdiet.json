@@ -1,0 +1,162 @@
+{
+    "dailySummary": {
+        "calories": 2000,
+        "protein": 160,
+        "carbs": 200,
+        "fats": 55
+    },
+    "meals": [
+        {
+            "name": "Breakfast",
+            "image": "assets/images/breakfast.jpeg",
+            "foods": [
+                "Scrambled Eggs (Eggs - 3, Spinach - 50g, Olive Oil - 1 tsp)",
+                "Whole Wheat Toast - 1 slice"
+            ],
+            "calories": 400,
+            "protein": 30,
+            "carbs": 30,
+            "fats": 18,
+            "isCompleted": false
+        },
+        {
+            "name": "Mid-Morning Snack",
+            "image": "assets/images/mid_snack.jpeg",
+            "foods": [
+                "Boiled Egg - 1",
+                "Orange - 1 medium"
+            ],
+            "calories": 200,
+            "protein": 15,
+            "carbs": 25,
+            "fats": 5,
+            "isCompleted": false
+        },
+        {
+            "name": "Lunch",
+            "image": "assets/images/lunch.jpeg",
+            "foods": [
+                "Grilled Chicken - 120g",
+                "Brown Rice - 100g",
+                "Steamed Broccoli - 150g",
+                "Olive Oil - 1 tsp"
+            ],
+            "calories": 500,
+            "protein": 45,
+            "carbs": 50,
+            "fats": 10,
+            "isCompleted": false
+        },
+        {
+            "name": "Evening Snack",
+            "image": "assets/images/eve_snack.jpeg",
+            "foods": [
+                "Greek Yogurt - 150g",
+                "Almonds - 10 pcs"
+            ],
+            "calories": 300,
+            "protein": 30,
+            "carbs": 20,
+            "fats": 15,
+            "isCompleted": false
+        },
+        {
+            "name": "Dinner",
+            "image": "assets/images/night_dinner.jpeg",
+            "foods": [
+                "Grilled Fish (Indian Masala) - 150g",
+                "Quinoa - 100g",
+                "Steamed Zucchini - 150g"
+            ],
+            "calories": 400,
+            "protein": 40,
+            "carbs": 30,
+            "fats": 10,
+            "isCompleted": false
+        },
+        {
+            "name": "Night Snack",
+            "image": "assets/images/milk.jpeg",
+            "foods": [
+                "Cottage Cheese - 100g",
+                "Walnuts - 5 pcs"
+            ],
+            "calories": 200,
+            "protein": 15,
+            "carbs": 15,
+            "fats": 10,
+            "isCompleted": false
+        }
+    ],
+    "mealLibrary": [
+        {
+            "name": "Paneer Bhurji",
+            "image": "assets/images/paneer_bhurji.jpeg",
+            "calories": 350,
+            "protein": 30,
+            "carbs": 20,
+            "fats": 18,
+            "foods": [
+                "Paneer - 100g",
+                "Onion - 50g",
+                "Tomatoes - 50g",
+                "Spices - as per taste"
+            ]
+        },
+        {
+            "name": "Masala Grilled Fish",
+            "image": "assets/images/fish_masala.jpeg",
+            "calories": 400,
+            "protein": 40,
+            "carbs": 30,
+            "fats": 12,
+            "foods": [
+                "Fish - 150g",
+                "Indian Masala Spices",
+                "Olive Oil - 1 tsp"
+            ]
+        },
+        {
+            "name": "Chana Salad",
+            "image": "assets/images/chana_salad.jpeg",
+            "calories": 300,
+            "protein": 25,
+            "carbs": 40,
+            "fats": 5,
+            "foods": [
+                "Boiled Chickpeas - 100g",
+                "Onions - 50g",
+                "Tomatoes - 50g",
+                "Lemon - 1 tsp"
+            ]
+        },
+        {
+            "name": "Sprout Salad",
+            "image": "assets/images/sprout_salad.jpeg",
+            "calories": 250,
+            "protein": 20,
+            "carbs": 30,
+            "fats": 5,
+            "foods": [
+                "Mixed Sprouts - 100g",
+                "Onions - 50g",
+                "Cucumber - 50g",
+                "Lemon - 1 tsp"
+            ]
+        },
+        {
+            "name": "Tandoori Chicken",
+            "image": "assets/images/tandoori_chicken.jpeg",
+            "calories": 450,
+            "protein": 50,
+            "carbs": 20,
+            "fats": 15,
+            "foods": [
+                "Chicken - 150g",
+                "Tandoori Masala",
+                "Yogurt - 50g"
+            ]
+        }
+    ]
+}
+

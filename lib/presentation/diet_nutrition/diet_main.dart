@@ -44,8 +44,8 @@ class DietMain extends StatelessWidget {
                 'Cutting Diet',
                 ImageManager.cuttingDiet,
                 () {
-                  context.push(
-                      Routes.cardioRoute); // Make sure this is correct route
+                  context.push(Routes
+                      .cuttingDietRoute); // Make sure this is correct route
                 },
               ),
             if (goal == 'MAINTAIN')
