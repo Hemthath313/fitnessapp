@@ -11,6 +11,7 @@ class ConsumptionProvider with ChangeNotifier {
   final List<WaterModel> _water = [];
   double kCalaDay = 0.0;
   double waterADay = 0.0;
+  int consumedCalories = 0;
 
   List<MealModel> get meals {
     return [..._meals];
@@ -19,8 +20,6 @@ class ConsumptionProvider with ChangeNotifier {
   List<WaterModel> get water {
     return [..._water];
   }
-
-  get consumedCalories => null;
 
   Future<void> addNewMeal({
     required String title,
@@ -88,7 +87,7 @@ class ConsumptionProvider with ChangeNotifier {
       loadedMeals.sort((a, b) => b.dateTime.compareTo(a.dateTime));
       _meals.clear();
       _meals.addAll(loadedMeals);
-      await getkCal();
+      await getConsumedCalories();
       notifyListeners();
     } catch (e) {
       rethrow;
@@ -288,5 +287,32 @@ class ConsumptionProvider with ChangeNotifier {
     } catch (e) {
       rethrow;
     }
+  }
+
+  String getTodayDate() {
+    return DateFormat('yyyy-MM-dd').format(DateTime.now());
+  }
+
+  Future<void> getConsumedCalories() async {
+    print("getConsumedCalories");
+    User? user = FirebaseAuth.instance.currentUser;
+    String todayDate = getTodayDate();
+
+    DocumentReference mealRecordRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .collection('mealRecords')
+        .doc(todayDate);
+
+    DocumentSnapshot snapshot = await mealRecordRef.get();
+
+    if (snapshot.exists) {
+      consumedCalories = snapshot['consumedCalories'] ?? 0;
+      print('Consumed Calories123: ${consumedCalories}');
+    } else {
+      consumedCalories = 0;
+    }
+
+    notifyListeners(); 
   }
 }

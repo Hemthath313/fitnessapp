@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
 import 'package:fitness_app/presentation/diet_nutrition/meals/meal_card.dart';
 import 'package:fitness_app/presentation/diet_nutrition/meals/meal_details.dart';
 import 'package:fitness_app/presentation/diet_nutrition/summary_card.dart';
@@ -195,6 +196,8 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
       'timestamp': FieldValue.serverTimestamp(),
       'lastUpdated': todayDate,
     }, SetOptions(merge: true));
+    print("consumedcalories: ${dailySummary['calories'] - remainingCalories}");
+    print('remaingProtein: $remainingProtein');
 
     print("Meal record saved for $todayDate with swapped meals.");
   }
@@ -368,6 +371,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
   }
 
   void _toggleMeal(int index, bool isCompleted) {
+    print("TOGGLE");
     setState(() {
       meals[index]['isCompleted'] = isCompleted;
     });

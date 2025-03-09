@@ -184,6 +184,7 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
 
     await mealRecordRef.set({
       'completedMeals': completedMeals,
+      'consumedCalories': dailySummary['calories'] - remainingCalories,
       'remainingCalories': remainingCalories,
       'remainingProtein': remainingProtein,
       'remainingCarbs': remainingCarbs,
@@ -192,6 +193,8 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
       'timestamp': FieldValue.serverTimestamp(),
       'lastUpdated': todayDate,
     }, SetOptions(merge: true));
+    print("consumedcalories: ${dailySummary['calories'] - remainingCalories}");
+    print('remaingProtein: $remainingProtein');
 
     print("Meal record saved for $todayDate with swapped meals.");
   }

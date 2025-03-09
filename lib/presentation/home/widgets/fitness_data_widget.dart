@@ -288,8 +288,8 @@ class FitnessDataWidget extends StatelessWidget {
                                           CrossAxisAlignment.end,
                                       children: [
                                         Text(
-                                          // consumptionProvider.consumedCalories
-                                             ,
+                                          consumptionProvider.consumedCalories
+                                              .toStringAsFixed(0),
                                           style:
                                               StyleManager.homePageS20BoldWhite,
                                         ),
