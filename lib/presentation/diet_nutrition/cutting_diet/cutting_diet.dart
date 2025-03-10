@@ -184,6 +184,7 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
 
     await mealRecordRef.set({
       'completedMeals': completedMeals,
+      'consumedCalories': dailySummary['calories'] - remainingCalories,
       'remainingCalories': remainingCalories,
       'remainingProtein': remainingProtein,
       'remainingCarbs': remainingCarbs,
@@ -192,6 +193,8 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
       'timestamp': FieldValue.serverTimestamp(),
       'lastUpdated': todayDate,
     }, SetOptions(merge: true));
+    print("consumedcalories: ${dailySummary['calories'] - remainingCalories}");
+    print('remaingProtein: $remainingProtein');
 
     print("Meal record saved for $todayDate with swapped meals.");
   }
@@ -390,15 +393,31 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
 
     showModalBottomSheet(
       context: context,
+      backgroundColor: ColorManager.darkGrey, // Consistent dark theme
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       builder: (context) {
         return ListView.builder(
           itemCount: mealLibrary.length,
           itemBuilder: (context, libIndex) {
             final meal = mealLibrary[libIndex];
             return ListTile(
-              title: Text(meal['name']),
+              tileColor: ColorManager.black54, // Matches cards and buttons
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              title: Text(
+                meal['name'],
+                style: const TextStyle(
+                  color: ColorManager.white, // Consistent text color
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               subtitle: Text(
-                  '${meal['calories']} kcal | ${meal['protein']}g Protein'),
+                '${meal['calories']} kcal | ${meal['protein']}g Protein',
+                style: const TextStyle(color: Colors.orangeAccent),
+              ),
               onTap: () => _swapMeal(mealIndex, meal),
             );
           },

@@ -61,18 +61,17 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> navigate() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-    // Refresh data status to ensure correct navigation logic
+    // Ensure user data is loaded before proceeding
+    await authProvider.loadUserData();
+
     final user = authProvider.user;
     final hasAgeParameter = authProvider.hasAgeParameter;
 
     if (user != null && hasAgeParameter == true) {
-      // Registered user with completed data
       if (mounted) context.go(Routes.mainRoute);
     } else if (user != null && hasAgeParameter == false) {
-      // User exists but data isn't completed
       if (mounted) context.go(Routes.addDataRoute);
     } else {
-      // User not logged in
       if (mounted) context.go(Routes.boardingRoute);
     }
   }

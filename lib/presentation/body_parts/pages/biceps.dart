@@ -42,31 +42,54 @@ class _BicepsExercisesPageState extends State<BicepsExercisesPage> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorManager.black,
+      backgroundColor: ColorManager.darkGrey,
       appBar: AppBar(
-        title: Text('Biceps Exercises'),
+        backgroundColor: ColorManager.darkGrey,
+        title: Text(
+          'Biceps Exercises',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : exercises.isEmpty
-              ? Center(child: Text('No exercises found.'))
+              ? Center(
+                  child: Text('No exercises found.',
+                      style: TextStyle(color: Colors.white)))
               : ListView.builder(
                   itemCount: exercises.length,
                   itemBuilder: (context, index) {
                     final exercise = exercises[index];
                     return Card(
-                      margin: EdgeInsets.all(8.0),
+                      color: ColorManager.black54,
+                      margin: EdgeInsets.all(12.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      elevation: 4,
                       child: ListTile(
-                        leading: Image.network(
-                          exercise['gifUrl'],
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,
+                        contentPadding: EdgeInsets.all(10),
+                        leading: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(
+                            exercise['gifUrl'],
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                        title: Text(exercise['name']),
-                        subtitle: Text(exercise['equipment']),
+                        title: Text(
+                          exercise['name'],
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        subtitle: Text(
+                          'Equipment: ${exercise['equipment']}',
+                          style: TextStyle(fontSize: 12, color: Colors.white70),
+                        ),
                         onTap: () => showExerciseDetails(context, exercise),
                       ),
                     );

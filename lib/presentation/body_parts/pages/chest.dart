@@ -44,7 +44,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorManager.black,
+      backgroundColor: ColorManager.darkGrey,
       appBar: AppBar(
         backgroundColor: ColorManager.black,
         title: Text(
@@ -63,7 +63,6 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
                   itemBuilder: (context, index) {
                     final exercise = exercises[index];
                     return Card(
-                      shadowColor: ColorManager.limeGreenOp,
                       color: ColorManager.black54,
                       margin: EdgeInsets.all(12.0),
                       shape: RoundedRectangleBorder(

@@ -42,6 +42,7 @@ class AuthProvider with ChangeNotifier {
     isDataCompleted = true;
     notifyListeners();
   }
+
   void callAuth() {
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       _user = user;
@@ -275,5 +276,30 @@ class AuthProvider with ChangeNotifier {
     );
 
     await FirebaseAuth.instance.signInWithCredential(credential);
+  }
+
+  Future<void> loadUserData() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser != null) {
+      _user = currentUser;
+
+      final docSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_user!.uid)
+          .get();
+
+      _hasAgeParameter =
+          docSnapshot.exists && docSnapshot.data()!.containsKey('age');
+      _isNewUser =
+          _user!.metadata.creationTime == _user!.metadata.lastSignInTime &&
+              !_hasAgeParameter!;
+    } else {
+      _user = null;
+      _hasAgeParameter = null;
+      _isNewUser = null;
+    }
+
+    notifyListeners();
   }
 }

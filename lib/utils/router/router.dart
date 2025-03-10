@@ -17,6 +17,7 @@ import 'package:fitness_app/presentation/consumption/pages/new_meal_page.dart';
 import 'package:fitness_app/presentation/diet_nutrition/bulking_diet.dart';
 import 'package:fitness_app/presentation/diet_nutrition/cutting_diet/cutting_diet.dart';
 import 'package:fitness_app/presentation/diet_nutrition/diet_main.dart';
+import 'package:fitness_app/presentation/diet_nutrition/maintain_diet/maintain_diet.dart';
 import 'package:fitness_app/presentation/main/pages/main_page.dart';
 import 'package:fitness_app/presentation/notifications/pages/notifications_page.dart';
 import 'package:fitness_app/presentation/profile/pages/change_measurements_page.dart';
@@ -60,6 +61,7 @@ class Routes {
   static const String dietRoute = '/diet';
   static const String bulkingDietRoute = '/bulkingDietRoute';
   static const String cuttingDietRoute = '/cuttingDietRoute';
+  static const String maintainDietRoute = '/maintainDietRoute';
 }
 
 final GoRouter router = GoRouter(
@@ -150,6 +152,11 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, CuttingDietScreen())),
+    GoRoute(
+        path: Routes.maintainDietRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, MaintainDietScreen())),
     GoRoute(
         path: Routes.notificationsRoute,
         pageBuilder: (context, state) =>

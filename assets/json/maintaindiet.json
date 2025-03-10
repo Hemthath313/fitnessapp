@@ -1,0 +1,162 @@
+{
+    "dailySummary": {
+        "calories": 2000,
+        "protein": 85,
+        "carbs": 180,
+        "fats": 75
+    },
+    "meals": [
+        {
+            "name": "Breakfast",
+            "image": "assets/images/breakfast.jpeg",
+            "foods": [
+                "Scrambled Eggs (Eggs - 2, Spinach - 50g, Olive Oil - 1 tsp)",
+                "Whole Wheat Toast - 1 slice"
+            ],
+            "calories": 350,
+            "protein": 15,
+            "carbs": 25,
+            "fats": 15,
+            "isCompleted": false
+        },
+        {
+            "name": "Mid-Morning Snack",
+            "image": "assets/images/mid_snack.jpeg",
+            "foods": [
+                "Boiled Egg - 1",
+                "Orange - 1 medium"
+            ],
+            "calories": 200,
+            "protein": 10,
+            "carbs": 20,
+            "fats": 5,
+            "isCompleted": false
+        },
+        {
+            "name": "Lunch",
+            "image": "assets/images/lunch.jpeg",
+            "foods": [
+                "Grilled Chicken - 100g",
+                "Brown Rice - 80g",
+                "Steamed Broccoli - 150g",
+                "Olive Oil - 1 tsp"
+            ],
+            "calories": 450,
+            "protein": 25,
+            "carbs": 35,
+            "fats": 12,
+            "isCompleted": false
+        },
+        {
+            "name": "Evening Snack",
+            "image": "assets/images/eve_snack.jpeg",
+            "foods": [
+                "Greek Yogurt - 100g",
+                "Almonds - 10 pcs"
+            ],
+            "calories": 250,
+            "protein": 15,
+            "carbs": 20,
+            "fats": 12,
+            "isCompleted": false
+        },
+        {
+            "name": "Dinner",
+            "image": "assets/images/night_dinner.jpeg",
+            "foods": [
+                "Grilled Fish (Indian Masala) - 100g",
+                "Quinoa - 80g",
+                "Steamed Zucchini - 150g"
+            ],
+            "calories": 400,
+            "protein": 20,
+            "carbs": 30,
+            "fats": 15,
+            "isCompleted": false
+        },
+        {
+            "name": "Night Snack",
+            "image": "assets/images/milk.jpeg",
+            "foods": [
+                "Cottage Cheese - 100g",
+                "Walnuts - 5 pcs"
+            ],
+            "calories": 200,
+            "protein": 10,
+            "carbs": 10,
+            "fats": 10,
+            "isCompleted": false
+        }
+    ],
+    "mealLibrary": [
+        {
+            "name": "Paneer Bhurji",
+            "image": "assets/images/paneer_bhurji.jpeg",
+            "calories": 350,
+            "protein": 20,
+            "carbs": 20,
+            "fats": 18,
+            "foods": [
+                "Paneer - 100g",
+                "Onion - 50g",
+                "Tomatoes - 50g",
+                "Spices - as per taste"
+            ]
+        },
+        {
+            "name": "Masala Grilled Fish",
+            "image": "assets/images/fish_masala.jpeg",
+            "calories": 400,
+            "protein": 25,
+            "carbs": 30,
+            "fats": 15,
+            "foods": [
+                "Fish - 150g",
+                "Indian Masala Spices",
+                "Olive Oil - 1 tsp"
+            ]
+        },
+        {
+            "name": "Chana Salad",
+            "image": "assets/images/chana_salad.jpeg",
+            "calories": 300,
+            "protein": 20,
+            "carbs": 30,
+            "fats": 5,
+            "foods": [
+                "Boiled Chickpeas - 100g",
+                "Onions - 50g",
+                "Tomatoes - 50g",
+                "Lemon - 1 tsp"
+            ]
+        },
+        {
+            "name": "Avocado Toast",
+            "image": "assets/images/avocado_toast.jpeg",
+            "calories": 350,
+            "protein": 15,
+            "carbs": 30,
+            "fats": 20,
+            "foods": [
+                "Avocado - 1",
+                "Whole Wheat Bread - 2 slices",
+                "Olive Oil - 1 tsp",
+                "Chili Flakes - a pinch"
+            ]
+        },
+        {
+            "name": "Protein Smoothie",
+            "image": "assets/images/protein_smoothie.jpeg",
+            "calories": 300,
+            "protein": 20,
+            "carbs": 25,
+            "fats": 5,
+            "foods": [
+                "Whey Protein - 1/2 scoop",
+                "Banana - 1",
+                "Peanut Butter - 1 tbsp",
+                "Almond Milk - 200ml"
+            ]
+        }
+    ]
+}

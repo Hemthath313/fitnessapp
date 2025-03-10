@@ -34,6 +34,8 @@ class RapidApiService {
             '96f9f9b281msh5f7342cfec7494cp1d057bjsneb0702906f5c', // Your RapidAPI key
         'x-rapidapi-host': 'exercisedb.p.rapidapi.com', // RapidAPI host
       };
+      queryParams['limit'] = 20;
+
       final response = await _dio.get(
         '/exercises/target/$target',
         queryParameters: queryParams,

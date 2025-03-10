@@ -44,9 +44,9 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorManager.black,
+      backgroundColor: ColorManager.darkGrey,
       appBar: AppBar(
-        backgroundColor: ColorManager.black,
+        backgroundColor: ColorManager.darkGrey,
         title: Text('Lats Exercises', style: TextStyle(color: Colors.white)),
       ),
       body: isLoading
@@ -60,7 +60,6 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                   itemBuilder: (context, index) {
                     final exercise = exercises[index];
                     return Card(
-                      shadowColor: ColorManager.limeGreenOp,
                       color: ColorManager.black54,
                       margin: EdgeInsets.all(12.0),
                       shape: RoundedRectangleBorder(

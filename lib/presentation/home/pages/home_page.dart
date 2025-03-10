@@ -19,7 +19,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    Provider.of<ConsumptionProvider>(context, listen: false).fetchAndSetMeals();
+    // Provider.of<ConsumptionProvider>(context, listen: false).fetchAndSetMeals();
     Provider.of<ConsumptionProvider>(context, listen: false).fetchAndSetWater();
   }
 
@@ -35,7 +35,10 @@ class _HomePageState extends State<HomePage> {
             HomePageTextSpacerWidget(
               title: StringsManager.todaysAct,
             ),
-            FitnessDataWidget(),
+            Padding(
+              padding: EdgeInsets.only(right: 70),
+              child: FitnessDataWidget(),
+            ),
             HomePageTextSpacerWidget(
               title: StringsManager.explore,
             ),
