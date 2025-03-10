@@ -253,7 +253,7 @@ class FitnessDataWidget extends StatelessWidget {
                                 children: [
                                   Padding(
                                     padding: EdgeInsets.only(
-                                      left: PaddingManager.p12.w,
+                                      left: PaddingManager.p14.w,
                                       right: PaddingManager.p12.w,
                                     ),
                                     child: Row(

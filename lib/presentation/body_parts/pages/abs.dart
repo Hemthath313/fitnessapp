@@ -44,9 +44,9 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorManager.black,
+      backgroundColor: ColorManager.darkGrey,
       appBar: AppBar(
-        backgroundColor: ColorManager.black,
+        backgroundColor: ColorManager.darkGrey,
         title: Text(
           'Abs Exercises',
           style: TextStyle(color: Colors.white),
@@ -63,7 +63,6 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
                   itemBuilder: (context, index) {
                     final exercise = exercises[index];
                     return Card(
-                      shadowColor: ColorManager.limeGreenOp,
                       color: ColorManager.black54,
                       margin: EdgeInsets.all(12.0),
                       shape: RoundedRectangleBorder(

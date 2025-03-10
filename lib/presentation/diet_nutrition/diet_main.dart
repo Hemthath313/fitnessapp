@@ -55,7 +55,7 @@ class DietMain extends StatelessWidget {
                 ImageManager.maintainDiet,
                 () {
                   context.push(
-                      Routes.bodypartsPage); // Make sure this is correct route
+                      Routes.maintainDietRoute); // Make sure this is correct route
                 },
               ),
             if (goal == null || goal.isEmpty)
