@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -64,7 +65,9 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
+    MobileAds.instance.initialize();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      MobileAds.instance.initialize();
       final consumptionProvider =
           Provider.of<ConsumptionProvider>(context, listen: false);
       final workoutsProvider =

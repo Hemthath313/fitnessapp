@@ -1,3 +1,4 @@
+import 'package:fitness_app/presentation/banner_ads/banner_ad.dart';
 import 'package:fitness_app/presentation/home/widgets/carousel_slider_home_widget.dart';
 import 'package:fitness_app/presentation/home/widgets/fitness_data_widget.dart';
 import 'package:fitness_app/presentation/home/widgets/home_page_text_spacer_widget.dart';
@@ -30,19 +31,20 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: const [
-            TodaysMotivationWidget(),
-            HomePageTextSpacerWidget(
+          children: [
+            BannerAdWidget(),
+            const TodaysMotivationWidget(),
+            const HomePageTextSpacerWidget(
               title: StringsManager.todaysAct,
             ),
-            Padding(
+            const Padding(
               padding: EdgeInsets.only(right: 70),
               child: FitnessDataWidget(),
             ),
-            HomePageTextSpacerWidget(
+            const HomePageTextSpacerWidget(
               title: StringsManager.explore,
             ),
-            CarouselSliderHomeWidget()
+            const CarouselSliderHomeWidget()
           ],
         ),
       ),
