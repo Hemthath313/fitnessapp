@@ -306,22 +306,53 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Add Custom Meal'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildTextField('Meal Name', nameController),
-              _buildTextField('Calories', caloriesController, isNumber: true),
-              _buildTextField('Protein (g)', proteinController, isNumber: true),
-              _buildTextField('Carbs (g)', carbsController, isNumber: true),
-              _buildTextField('Fats (g)', fatsController, isNumber: true),
-            ],
+          backgroundColor: ColorManager.darkGrey,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            'Add Custom Meal',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: ColorManager.orange,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildTextField('Meal Name', nameController),
+                _buildTextField('Calories', caloriesController, isNumber: true),
+                _buildTextField('Protein (g)', proteinController,
+                    isNumber: true),
+                _buildTextField('Carbs (g)', carbsController, isNumber: true),
+                _buildTextField('Fats (g)', fatsController, isNumber: true),
+              ]
+                  .map((widget) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: widget,
+                      ))
+                  .toList(),
+            ),
           ),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel')),
-            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: ColorManager.white,
+              ),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorManager.orange,
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               onPressed: () {
                 _addCustomMeal(
                   nameController.text,

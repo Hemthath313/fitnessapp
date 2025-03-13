@@ -5,6 +5,7 @@ import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
+import 'package:fitness_app/utils/widgets/custom_google_button.dart';
 import 'package:fitness_app/utils/widgets/lime_green_rounded_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -204,7 +205,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ? StringsManager.signUp
                                 : StringsManager.signIn,
                             style:
-                                StyleManager.loginPageSubButtonSmallTextStyle,
+                                TextStyle(color: Colors.orangeAccent,fontWeight: FontWeight.w500),
                           ),
                         ),
                       ),
@@ -213,13 +214,10 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: PaddingManager.p8),
-                  child: SignInButton(
-                    clipBehavior: Clip.hardEdge,
-                    Buttons.google,
-                    onPressed: () {
-                      authProvider.signInWithGoogle(context);
-                    },
-                  ),
+                  child: CustomGoogleSignInButton(onTap: () async {
+                    await authProvider.signInWithGoogle(context);
+                  }),
+                
                 ),
               ],
             ).animate().fadeIn(duration: 500.ms),
