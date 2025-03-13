@@ -18,7 +18,7 @@ class CarouselSliderHomeWidget extends StatelessWidget {
       items: [
         CarouselHomeBox(
           deviceWidth: deviceWidth,
-          image: ImageManager.carousel1WP,
+          image: ImageManager.strengthWorkout,
           onTap: () {
             context.push(Routes.bodypartsPage);
           },
@@ -26,7 +26,7 @@ class CarouselSliderHomeWidget extends StatelessWidget {
         ),
         CarouselHomeBox(
           deviceWidth: deviceWidth,
-          image: ImageManager.carousel2WP,
+          image: ImageManager.postWorkout,
           onTap: () {
             //TODO
           },

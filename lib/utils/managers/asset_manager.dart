@@ -30,6 +30,8 @@ class ImageManager {
   static const bicepsWorkout = '$imagePath/biceps_workout.jpg';
   static const dietAndNutrition = '$imagePath/diet.jpeg';
   static const cardioWorkout = '$imagePath/cardio.jpeg';
+  static const strengthWorkout = '$imagePath/strength.jpeg';
+  static const postWorkout = '$imagePath/post_workout.jpeg';
   static const bulkingDiet = '$imagePath/bulking.jpeg';
   static const cuttingDiet = '$imagePath/cutting.jpeg';
   static const maintainDiet = '$imagePath/maintain.jpeg';
