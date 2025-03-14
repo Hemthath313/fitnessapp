@@ -38,6 +38,7 @@ class BodyPartsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: ColorManager.black,
       appBar: AppBar(
+        iconTheme: IconThemeData(color:ColorManager.white),
         backgroundColor: ColorManager.black,
         title: Text(
           'Select a Body Part',
