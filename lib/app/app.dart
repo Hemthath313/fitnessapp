@@ -47,6 +47,7 @@ class _MyAppState extends State<MyApp> {
       ],
       child: ScreenUtilInit(
         builder: (context, child) => MaterialApp.router(
+          theme: ThemeData(),
           debugShowCheckedModeBanner: false,
           routerConfig: router, // Pass the GoRouter instance here
         ),

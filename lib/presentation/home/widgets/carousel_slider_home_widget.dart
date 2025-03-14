@@ -18,37 +18,37 @@ class CarouselSliderHomeWidget extends StatelessWidget {
       items: [
         CarouselHomeBox(
           deviceWidth: deviceWidth,
-          image: ImageManager.carousel1WP,
+          image: ImageManager.strengthWorkout,
           onTap: () {
-            context.push(Routes.bodypartsPage);
+            context.push(Routes.absRoute);
           },
           title: StringsManager.strengh,
         ),
-        CarouselHomeBox(
-          deviceWidth: deviceWidth,
-          image: ImageManager.carousel2WP,
-          onTap: () {
-            //TODO
-          },
-          title: StringsManager.workoutRecovery,
-        ),
-        CarouselHomeBox(
-          deviceWidth: deviceWidth,
-          image: ImageManager.dietAndNutrition,
-          onTap: () {
-            context.push(Routes.dietRoute);
-          },
-          title: StringsManager.diet,
-        ),
-        CarouselHomeBox(
-          deviceWidth: deviceWidth,
-          image: ImageManager.cardioWorkout,
-          onTap: () {
-            context.push(Routes.cardioRoute);
-            //TODO
-          },
-          title: StringsManager.cardio,
-        ),
+        // CarouselHomeBox(
+        //   deviceWidth: deviceWidth,
+        //   image: ImageManager.postWorkout,
+        //   onTap: () {
+        //     //TODO
+        //   },
+        //   title: StringsManager.workoutRecovery,
+        // ),
+        // CarouselHomeBox(
+        //   deviceWidth: deviceWidth,
+        //   image: ImageManager.dietAndNutrition,
+        //   onTap: () {
+        //     context.push(Routes.dietRoute);
+        //   },
+        //   title: StringsManager.diet,
+        // ),
+        // CarouselHomeBox(
+        //   deviceWidth: deviceWidth,
+        //   image: ImageManager.cardioWorkout,
+        //   onTap: () {
+        //     context.push(Routes.cardioRoute);
+        //     //TODO
+        //   },
+        //   title: StringsManager.cardio,
+        // ),
         // CarouselHomeBox(
         //   deviceWidth: deviceWidth,
         //   image: ImageManager.carousel5WP,

@@ -2,6 +2,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:fitness_app/presentation/chat_screen/chat_screen.dart';
 import 'package:fitness_app/presentation/consumption/pages/consumption_page.dart';
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
+import 'package:fitness_app/presentation/explore/explore_page.dart';
 import 'package:fitness_app/presentation/home/pages/home_page.dart';
 import 'package:fitness_app/presentation/main/widgets/appbar_consumption.dart';
 import 'package:fitness_app/presentation/main/widgets/appbar_home.dart';
@@ -36,7 +37,7 @@ class _MainPageState extends State<MainPage> {
 
   List<Widget> pages = const [
     HomePage(),
-    ConsumptionPage(),
+    ExploreWidget(),
     ChatScreen(),
     SettingsPage(),
     ProfilePage(),
@@ -123,7 +124,7 @@ class _MainPageState extends State<MainPage> {
         size: SizeManager.s28,
       ),
       Icon(
-        Icons.fastfood_outlined,
+        Icons.explore,
         color:
             isConsumptionPage ? ColorManager.limerGreen2 : ColorManager.grey2,
         size: SizeManager.s28,

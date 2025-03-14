@@ -1,6 +1,9 @@
 import 'dart:developer';
+import 'package:fitness_app/presentation/challenges/daily_challenge.dart';
 import 'package:fitness_app/services/rapid_api_services.dart';
+import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../utils/managers/color_manager.dart';
 
 class AbsExercisesPage extends StatefulWidget {
@@ -12,8 +15,9 @@ class AbsExercisesPage extends StatefulWidget {
 
 class _AbsExercisesPageState extends State<AbsExercisesPage> {
   final RapidApiService _apiService = RapidApiService();
-  List<dynamic> exercises = [];
+  List<List<dynamic>> groupedExercises = [];
   bool isLoading = true;
+  int completedDays = 0;
 
   @override
   void initState() {
@@ -23,11 +27,15 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
 
   Future<void> fetchExercises() async {
     try {
-      log('Fetching abs exercises from API...');
+      log('Fetching 30-day six-pack challenge exercises from API...');
       final data = await _apiService.getTargetWorkoutData('abs', {});
       log('API response: $data');
+
       setState(() {
-        exercises = data;
+        groupedExercises = List.generate(
+            30,
+            (index) =>
+                data.skip(index * 3).take(3).toList()); // 3 exercises per day
         isLoading = false;
       });
     } catch (e) {
@@ -41,129 +49,57 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
     }
   }
 
+  void completeDay(int day) {
+    setState(() => completedDays = day);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Day $day complete! Well done!')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorManager.darkGrey,
       appBar: AppBar(
         backgroundColor: ColorManager.darkGrey,
-        title: Text(
-          'Abs Exercises',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: Text('30-Day Six-Pack Challenge',
+            style: TextStyle(color: Colors.white)),
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
-          : exercises.isEmpty
-              ? Center(
-                  child: Text('No exercises found.',
-                      style: TextStyle(color: Colors.white)))
-              : ListView.builder(
-                  itemCount: exercises.length,
-                  itemBuilder: (context, index) {
-                    final exercise = exercises[index];
-                    return Card(
-                      color: ColorManager.black54,
-                      margin: EdgeInsets.all(12.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      elevation: 4,
-                      child: ListTile(
-                        contentPadding: EdgeInsets.all(10),
-                        leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.network(
-                            exercise['gifUrl'],
-                            width: 80,
-                            height: 80,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        title: Text(
-                          exercise['name'],
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, color: Colors.white),
-                        ),
-                        subtitle: Text(
-                          'Equipment: ${exercise['equipment']}',
-                          style: TextStyle(fontSize: 12, color: Colors.white70),
-                        ),
-                        onTap: () => showExerciseDetails(context, exercise),
-                      ),
-                    );
-                  },
-                ),
-    );
-  }
+          : ListView.builder(
+              itemCount: groupedExercises.length,
+              itemBuilder: (context, index) {
+                final day = index + 1;
+                final isUnlocked = day <= completedDays + 1;
 
-  void showExerciseDetails(BuildContext context, dynamic exercise) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.black,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  exercise['gifUrl'],
-                  height: 250,
-                  fit: BoxFit.cover,
-                ),
-              ),
+                return Card(
+                  color: isUnlocked ? ColorManager.black54 : Colors.grey[800],
+                  margin: EdgeInsets.all(12.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  elevation: 4,
+                  child: ListTile(
+                    contentPadding: EdgeInsets.all(10),
+                    title: Text(
+                        'Day $day: ${groupedExercises[index].length} Exercises',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: isUnlocked ? Colors.white : Colors.white38)),
+                    enabled: isUnlocked,
+                    onTap: isUnlocked
+                        ? () => context.push(
+                              '${Routes.dailyExerciseRoute}?day=$day',
+                              extra: groupedExercises[index],
+                            )
+                        : null,
+                  ),
+                );
+              },
             ),
-            SizedBox(height: 20),
-            Text(
-              exercise['name'],
-              style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: ColorManager.white),
-            ),
-            SizedBox(height: 10),
-            Text('Target: ${exercise['target']}',
-                style: TextStyle(fontSize: 16, color: ColorManager.white)),
-            SizedBox(height: 5),
-            Text('Equipment: ${exercise['equipment']}',
-                style: TextStyle(fontSize: 16, color: ColorManager.white)),
-            SizedBox(height: 10),
-            Text(
-              'Instructions:',
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: ColorManager.white),
-            ),
-            for (String step in exercise['instructions'])
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: Text('- $step',
-                    style: TextStyle(fontSize: 14, color: ColorManager.white)),
-              ),
-            SizedBox(height: 20),
-            Center(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorManager.limerGreen2),
-                onPressed: () => Navigator.pop(context),
-                child: Text(
-                  'Close',
-                  style: TextStyle(color: Colors.black),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
+
+// New Page to Show 3-4 Exercises for Each Day

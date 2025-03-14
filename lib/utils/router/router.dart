@@ -12,6 +12,8 @@ import 'package:fitness_app/presentation/body_parts/pages/legs.dart';
 import 'package:fitness_app/presentation/body_parts/pages/shoulder.dart';
 import 'package:fitness_app/presentation/body_parts/pages/triceps.dart';
 import 'package:fitness_app/presentation/cardio_workouts/cardio.dart';
+import 'package:fitness_app/presentation/challenges/30_days_sixpack.dart';
+import 'package:fitness_app/presentation/challenges/daily_challenge.dart';
 import 'package:fitness_app/presentation/consumption/pages/drink_page.dart';
 import 'package:fitness_app/presentation/consumption/pages/new_meal_page.dart';
 import 'package:fitness_app/presentation/diet_nutrition/bulking_diet.dart';
@@ -62,6 +64,8 @@ class Routes {
   static const String bulkingDietRoute = '/bulkingDietRoute';
   static const String cuttingDietRoute = '/cuttingDietRoute';
   static const String maintainDietRoute = '/maintainDietRoute';
+  static const String sixPackChallenge = '/sixPackChallenge';
+  static const String dailyExerciseRoute = '/dailyExerciseRoute';
 }
 
 final GoRouter router = GoRouter(
@@ -98,6 +102,21 @@ final GoRouter router = GoRouter(
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, CardioExercisesPage())),
     GoRoute(
+      path: Routes.dailyExerciseRoute,
+      pageBuilder: (context, state) {
+        final day = int.tryParse(state.uri.queryParameters['day'] ?? '1') ?? 1;
+        final exercises = state.extra as List<dynamic>? ?? [];
+        return PageTransitions.buildPageWithSlideTransition(
+          state.pageKey,
+          DailyExercisePage(
+            exercises: exercises,
+            day: day,
+            onComplete: () {},
+          ),
+        );
+      },
+    ),
+    GoRoute(
         path: Routes.bodypartsPage,
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
@@ -132,6 +151,14 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, AbsExercisesPage())),
+    GoRoute(
+        path: Routes.sixPackChallenge,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey,
+                SixPackChallengeScreen(
+                  dayNumber: 2,
+                ))),
     GoRoute(
         path: Routes.backRoute,
         pageBuilder: (context, state) =>
