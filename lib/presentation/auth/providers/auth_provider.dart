@@ -4,8 +4,10 @@ import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
+import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthProvider with ChangeNotifier {
@@ -178,7 +180,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> register({
+  Future<void> registerAndVerifyEmail({
     required String email,
     required String password,
     required BuildContext context,
@@ -194,23 +196,23 @@ class AuthProvider with ChangeNotifier {
     );
 
     try {
+      print("registerAndVerifyEmail");
       UserCredential credential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+      print('credential: $credential');
 
+      User? user = credential.user;
+      await user?.sendEmailVerification();
       Navigator.pop(context);
 
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(credential.user!.uid)
-          .set({});
-
-      notifyListeners();
+      notifyListeners(); // Important: Only notify here; no data storage yet.
+      context.push(Routes.emailVerify); // Navigate to email verification page
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context); // Close the dialog immediately
-      rethrow; // Pass error to LoginPage
+      rethrow;
     }
   }
 
@@ -282,6 +284,7 @@ class AuthProvider with ChangeNotifier {
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser != null) {
+      await currentUser.reload();
       _user = currentUser;
 
       final docSnapshot = await FirebaseFirestore.instance

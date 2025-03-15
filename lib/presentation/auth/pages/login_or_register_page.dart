@@ -93,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _signUserUp(AuthProvider authProvider) async {
     try {
-      await authProvider.register(
+      await authProvider.registerAndVerifyEmail(
         email: _emailController.text,
         password: _passwordController.text,
         context: context,
@@ -204,8 +204,9 @@ class _LoginPageState extends State<LoginPage> {
                             isLoginView
                                 ? StringsManager.signUp
                                 : StringsManager.signIn,
-                            style:
-                                TextStyle(color: Colors.orangeAccent,fontWeight: FontWeight.w500),
+                            style: TextStyle(
+                                color: Colors.orangeAccent,
+                                fontWeight: FontWeight.w500),
                           ),
                         ),
                       ),
@@ -217,7 +218,6 @@ class _LoginPageState extends State<LoginPage> {
                   child: CustomGoogleSignInButton(onTap: () async {
                     await authProvider.signInWithGoogle(context);
                   }),
-                
                 ),
               ],
             ).animate().fadeIn(duration: 500.ms),
