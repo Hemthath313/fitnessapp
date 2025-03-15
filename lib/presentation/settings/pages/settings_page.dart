@@ -98,7 +98,7 @@ class _SettingsPageState extends State<SettingsPage> {
             SettingsPageButton(
               deviceWidth: deviceWidth,
               onTap: () {
-                context.push(Routes.premiumScreen);
+                // context.push(Routes.premiumScreen);
               },
               iconData: Icons.person_add_alt_1_outlined,
               title: StringsManager.inviteFriend,

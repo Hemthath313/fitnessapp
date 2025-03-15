@@ -20,7 +20,7 @@ import 'package:fitness_app/presentation/diet_nutrition/bulking_diet.dart';
 import 'package:fitness_app/presentation/diet_nutrition/cutting_diet/cutting_diet.dart';
 import 'package:fitness_app/presentation/diet_nutrition/diet_main.dart';
 import 'package:fitness_app/presentation/diet_nutrition/maintain_diet/maintain_diet.dart';
-import 'package:fitness_app/presentation/in_app_purchases/in_app_purchase';
+import 'package:fitness_app/presentation/email_verification/email_verify.dart';
 import 'package:fitness_app/presentation/main/pages/main_page.dart';
 import 'package:fitness_app/presentation/notifications/pages/notifications_page.dart';
 import 'package:fitness_app/presentation/profile/pages/change_measurements_page.dart';
@@ -67,7 +67,8 @@ class Routes {
   static const String maintainDietRoute = '/maintainDietRoute';
   static const String sixPackChallenge = '/sixPackChallenge';
   static const String dailyExerciseRoute = '/dailyExerciseRoute';
-  static const String premiumScreen = '/premiumScreen';
+  // static const String premiumScreen = '/premiumScreen';
+  static const String emailVerify = 'emailVerify';
 }
 
 final GoRouter router = GoRouter(
@@ -98,6 +99,11 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, AuthPage())),
+    GoRoute(
+        path: Routes.emailVerify,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, VerifyEmailScreen())),
     GoRoute(
         path: Routes.cardioRoute,
         pageBuilder: (context, state) =>
@@ -241,11 +247,11 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, ChangeMeasurementsPage())),
-    GoRoute(
-        path: Routes.premiumScreen,
-        pageBuilder: (context, state) =>
-            PageTransitions.buildPageWithSlideTransition(
-                state.pageKey, PremiumScreen())),
+    // GoRoute(
+    //     path: Routes.premiumScreen,
+    //     pageBuilder: (context, state) =>
+    //         PageTransitions.buildPageWithSlideTransition(
+    //             state.pageKey, PremiumScreen())),
   ],
   errorBuilder: (context, state) {
     return Scaffold(
