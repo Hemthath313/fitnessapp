@@ -159,14 +159,14 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, AbsExercisesPage())),
-    GoRoute(
-        path: Routes.sixPackChallenge,
-        pageBuilder: (context, state) =>
-            PageTransitions.buildPageWithSlideTransition(
-                state.pageKey,
-                SixPackChallengeScreen(
-                  dayNumber: 2,
-                ))),
+    // GoRoute(
+    //     path: Routes.sixPackChallenge,
+    //     pageBuilder: (context, state) =>
+    //         PageTransitions.buildPageWithSlideTransition(
+    //             state.pageKey,
+    //             SixPackChallengeScreen(
+    //               dayNumber: 2,
+    //             ))),
     GoRoute(
         path: Routes.backRoute,
         pageBuilder: (context, state) =>

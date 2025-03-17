@@ -66,10 +66,13 @@ class _SplashScreenState extends State<SplashScreen>
 
     final user = authProvider.user;
     final hasAgeParameter = authProvider.hasAgeParameter;
+    final emailIsVerified = user?.emailVerified ?? false;
 
     if (user != null && hasAgeParameter == true) {
       if (mounted) context.go(Routes.mainRoute);
-    } else if (user != null && hasAgeParameter == false) {
+    } else if (user != null &&
+        hasAgeParameter == false &&
+        emailIsVerified == true) {
       if (mounted) context.go(Routes.addDataRoute);
     } else {
       if (mounted) context.go(Routes.boardingRoute);
