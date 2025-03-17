@@ -1,5 +1,6 @@
 import 'dart:developer';
-import 'package:fitness_app/presentation/challenges/daily_challenge.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/services/rapid_api_services.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,30 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
   void initState() {
     super.initState();
     fetchExercises();
+  }
+
+  Future<void> fetchProgress() async {
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+
+    final snapshot =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
+
+    final progressData = snapshot.data()?['progress'] ?? {};
+    final sixPackProgress = progressData['sixPackChallenge'] ?? {};
+
+    final lastCompletedDay = sixPackProgress['lastCompletedDay'] ?? 0;
+    final completionDateStr = sixPackProgress['completionDate'] ?? '';
+
+    final completionDate =
+        DateTime.tryParse(completionDateStr)?.toLocal() ?? DateTime.now();
+    final today = DateTime.now();
+
+    // Unlock next day only if a new day has started AND the previous day was completed
+    final isNewDay = today.difference(completionDate).inDays >= 1;
+
+    setState(() {
+      completedDays = isNewDay ? lastCompletedDay : lastCompletedDay;
+    });
   }
 
   Future<void> fetchExercises() async {
@@ -49,8 +74,17 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
     }
   }
 
-  void completeDay(int day) {
-    setState(() => completedDays = day);
+  void completeDay(int day) async {
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+
+    await FirebaseFirestore.instance.collection('users').doc(userId).update({
+      'progress.sixPackChallenge.lastCompletedDay': day,
+      'progress.sixPackChallenge.completionDate':
+          DateTime.now().toIso8601String(),
+    });
+
+    fetchProgress();
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Day $day complete! Well done!')),
     );
@@ -89,10 +123,15 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
                             color: isUnlocked ? Colors.white : Colors.white38)),
                     enabled: isUnlocked,
                     onTap: isUnlocked
-                        ? () => context.push(
+                        ? () async {
+                            await context.push(
                               '${Routes.dailyExerciseRoute}?day=$day',
                               extra: groupedExercises[index],
-                            )
+                            );
+
+                            // Refresh progress when returning
+                            fetchProgress();
+                          }
                         : null,
                   ),
                 );
@@ -101,5 +140,3 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
     );
   }
 }
-
-// New Page to Show 3-4 Exercises for Each Day

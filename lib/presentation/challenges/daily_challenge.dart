@@ -1,5 +1,7 @@
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class DailyExercisePage extends StatelessWidget {
   final List<dynamic> exercises;
@@ -12,6 +14,54 @@ class DailyExercisePage extends StatelessWidget {
     required this.day,
     required this.onComplete,
   });
+
+  Future<Map<String, dynamic>> fetchProgress() async {
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+    print('Fetching progress for user ID: $userId');
+
+    final snapshot =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    print('Firestore Snapshot Data: ${snapshot.data()}');
+
+    final progressData = snapshot.data()?['progress'] ?? {};
+    print('Six Pack Challenge Progress Data: $progressData');
+
+    return progressData['sixPackChallenge'] ?? {};
+  }
+
+  bool isDayUnlocked(Map<String, dynamic> progressData, int day) {
+    final completionDateStr = progressData['completionDate'] ?? '';
+    final lastCompletedDay = progressData['lastCompletedDay'] ?? 0;
+
+    final completionDate =
+        DateTime.tryParse(completionDateStr)?.toLocal() ?? DateTime.now();
+    final today = DateTime.now();
+
+    // Compare only the date parts
+    final isNewDay = today.year > completionDate.year ||
+        today.month > completionDate.month ||
+        today.day > completionDate.day;
+
+    return isNewDay || day <= lastCompletedDay + 1;
+  }
+
+  String getDefaultSetsAndReps(String exerciseName, exercise) {
+    final lowerName = exerciseName.toLowerCase();
+
+    if (lowerName.contains('crunch') || lowerName.contains('sit-up')) {
+      return '4 sets of 20 reps';
+    } else if (lowerName.contains('plank')) {
+      return '3 sets of 1-minute hold';
+    } else if (lowerName.contains('leg raise') ||
+        lowerName.contains('bicycle')) {
+      return '4 sets of 15 reps';
+    } else if (lowerName.contains('mountain climber') ||
+        lowerName.contains('flutter kick')) {
+      return '4 sets of 30 seconds';
+    } else {
+      return '3 sets of 12 reps'; // Default for other abs exercises
+    }
+  }
 
   void showExerciseDetails(BuildContext context, dynamic exercise) {
     showModalBottomSheet(
@@ -53,18 +103,16 @@ class DailyExercisePage extends StatelessWidget {
                 style: TextStyle(fontSize: 16, color: ColorManager.white)),
             SizedBox(height: 10),
             Text(
-              'Instructions:',
+              'Sets & Reps:',
               style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: ColorManager.white),
             ),
-            for (String step in exercise['instructions'])
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: Text('- $step',
-                    style: TextStyle(fontSize: 14, color: ColorManager.white)),
-              ),
+            Text(
+              getDefaultSetsAndReps(exercise['name'], exercise['equipment']),
+              style: TextStyle(fontSize: 16, color: ColorManager.white),
+            ),
             SizedBox(height: 20),
             Center(
               child: ElevatedButton(
@@ -93,35 +141,64 @@ class DailyExercisePage extends StatelessWidget {
         title:
             Text('Day $day Exercises', style: TextStyle(color: Colors.white)),
       ),
-      body: ListView.builder(
-        itemCount: exercises.length,
-        itemBuilder: (context, index) {
-          final exercise = exercises[index];
-          return Card(
-            color: ColorManager.black54,
-            margin: EdgeInsets.all(12.0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            elevation: 4,
-            child: ListTile(
-              onTap: () => showExerciseDetails(context, exercise),
-              contentPadding: EdgeInsets.all(10),
-              leading: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  exercise['gifUrl'],
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
+      body: FutureBuilder(
+        future: fetchProgress(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Text('Error loading progress data.',
+                  style: TextStyle(color: Colors.white)),
+            );
+          }
+
+          final progressData = snapshot.data as Map<String, dynamic>? ?? {};
+
+          return ListView.builder(
+            itemCount: exercises.length,
+            itemBuilder: (context, index) {
+              final exercise = exercises[index];
+              final isUnlocked = isDayUnlocked(progressData, day);
+
+              return Card(
+                color: isUnlocked ? ColorManager.black54 : Colors.grey[800],
+                margin: EdgeInsets.all(12.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
                 ),
-              ),
-              title: Text('${exercise['name']}',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.white)),
-              subtitle: Text('Equipment: ${exercise['equipment']}',
-                  style: TextStyle(fontSize: 12, color: Colors.white70)),
-            ),
+                elevation: 4,
+                child: ListTile(
+                  onTap: isUnlocked
+                      ? () => showExerciseDetails(context, exercise)
+                      : null,
+                  contentPadding: EdgeInsets.all(10),
+                  leading: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      exercise['gifUrl'],
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  title: Text(
+                    '${exercise['name']}',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: isUnlocked ? Colors.white : Colors.white54),
+                  ),
+                  subtitle: Text(
+                    'Equipment: ${exercise['equipment']}',
+                    style: TextStyle(
+                        fontSize: 12,
+                        color: isUnlocked ? Colors.white70 : Colors.white38),
+                  ),
+                ),
+              );
+            },
           );
         },
       ),
@@ -130,7 +207,18 @@ class DailyExercisePage extends StatelessWidget {
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
               backgroundColor: ColorManager.limerGreen2),
-          onPressed: () {
+          onPressed: () async {
+            final userId = FirebaseAuth.instance.currentUser!.uid;
+            print('Marking Day $day as complete for user: $userId');
+
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(userId)
+                .update({
+              'progress.sixPackChallenge.lastCompletedDay': day,
+              'progress.sixPackChallenge.completionDate':
+                  DateTime.now().toIso8601String(),
+            });
             onComplete();
             Navigator.pop(context);
           },

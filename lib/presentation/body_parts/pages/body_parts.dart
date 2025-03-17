@@ -9,7 +9,14 @@ import 'package:fitness_app/utils/managers/asset_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 
-class BodyPartsScreen extends StatelessWidget {
+class BodyPartsScreen extends StatefulWidget {
+  const BodyPartsScreen({super.key});
+
+  @override
+  State<BodyPartsScreen> createState() => _BodyPartsScreenState();
+}
+
+class _BodyPartsScreenState extends State<BodyPartsScreen> {
   final Map<String, String> bodyPartImages = {
     'Chest': ImageManager.chestWorkout,
     'Biceps': ImageManager.bicepsWorkout,
@@ -20,7 +27,6 @@ class BodyPartsScreen extends StatelessWidget {
     'Abs': ImageManager.absWorkout,
   };
 
-  // Map body parts to their respective screens
   final Map<String, Widget Function()> bodyPartScreens = {
     'Chest': () => ChestExercisesPage(),
     'Biceps': () => BicepsExercisesPage(),
@@ -31,14 +37,33 @@ class BodyPartsScreen extends StatelessWidget {
     'Abs': () => AbsExercisesPage(),
   };
 
-  BodyPartsScreen({super.key});
+  List<bool> isVisible = [];
+
+  @override
+  void initState() {
+    super.initState();
+    isVisible = List.generate(bodyPartImages.length, (index) => false);
+    _triggerAnimations();
+  }
+
+  void _triggerAnimations() {
+    for (int i = 0; i < isVisible.length; i++) {
+      Future.delayed(Duration(milliseconds: i * 150), () {
+        if (mounted) {
+          setState(() {
+            isVisible[i] = true;
+          });
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorManager.black,
       appBar: AppBar(
-        iconTheme: IconThemeData(color:ColorManager.white),
+        iconTheme: IconThemeData(color: ColorManager.white),
         backgroundColor: ColorManager.black,
         title: Text(
           'Select a Body Part',
@@ -58,43 +83,57 @@ class BodyPartsScreen extends StatelessWidget {
           String bodyPart = bodyPartImages.keys.elementAt(index);
           String imagePath = bodyPartImages[bodyPart]!;
 
-          return GestureDetector(
-            onTap: () {
-              if (bodyPartScreens.containsKey(bodyPart)) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => bodyPartScreens[bodyPart]!(),
+          return AnimatedOpacity(
+            duration: const Duration(milliseconds: 400),
+            opacity: isVisible[index] ? 1.0 : 0.0,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 400),
+              transform: isVisible[index]
+                  ? Matrix4.identity()
+                  : Matrix4.diagonal3Values(0.8, 0.8, 1),
+              curve: Curves.easeOutBack,
+              child: GestureDetector(
+                onTap: () {
+                  if (bodyPartScreens.containsKey(bodyPart)) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => bodyPartScreens[bodyPart]!(),
+                      ),
+                    );
+                  }
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12.0),
+                    image: DecorationImage(
+                      image: AssetImage(imagePath),
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                );
-              }
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12.0),
-                image: DecorationImage(
-                  image: AssetImage(imagePath),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: Container(
-                alignment: Alignment.bottomCenter,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12.0),
-                  gradient: LinearGradient(
-                    colors: [Colors.black.withOpacity(0.8), Colors.transparent],
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    bodyPart,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
+                  child: Container(
+                    alignment: Alignment.bottomCenter,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12.0),
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.black.withOpacity(0.8),
+                          Colors.transparent
+                        ],
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        bodyPart,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ),
