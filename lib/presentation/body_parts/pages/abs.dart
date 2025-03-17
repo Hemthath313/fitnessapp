@@ -1,9 +1,11 @@
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/services/rapid_api_services.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import '../../../utils/managers/color_manager.dart';
 
@@ -50,27 +52,28 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
     });
   }
 
-  Future<void> fetchExercises() async {
+  void fetchExercises() async {
     try {
-      log('Fetching 30-day six-pack challenge exercises from API...');
-      final data = await _apiService.getTargetWorkoutData('abs', {});
-      log('API response: $data');
-
-      setState(() {
-        groupedExercises = List.generate(
-            30,
-            (index) =>
-                data.skip(index * 3).take(3).toList()); // 3 exercises per day
-        isLoading = false;
-      });
+      if (!(await Connectivity().checkConnectivity())
+          .contains(ConnectivityResult.none)) {
+        final data = await _apiService.getTargetWorkoutData('abs', {});
+        setState(() {
+          groupedExercises = List.generate(
+              30, (index) => data.skip(index * 3).take(3).toList());
+          isLoading = false;
+        });
+      } else {
+        Fluttertoast.showToast(
+          msg: "No internet connection. Please try again.",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+        );
+        setState(() => isLoading = false);
+      }
     } catch (e) {
-      log('Error fetching exercises: $e');
-      setState(() {
-        isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error fetching exercises: $e')),
-      );
+      setState(() => isLoading = false);
     }
   }
 

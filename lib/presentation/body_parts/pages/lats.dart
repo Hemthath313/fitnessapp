@@ -1,7 +1,10 @@
 import 'dart:developer';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dartz/dartz.dart' as ConnectivityResult;
 import 'package:fitness_app/services/rapid_api_services.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class LatExercisesPage extends StatefulWidget {
   const LatExercisesPage({super.key});
@@ -22,21 +25,41 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
   }
 
   Future<void> fetchExercises() async {
+    setState(() => isLoading = true);
+
     try {
+      final connectivityResult = await Connectivity().checkConnectivity();
+      if (connectivityResult == ConnectivityResult.none) {
+        log('No internet connection.');
+        Fluttertoast.showToast(
+          msg: "Please check your internet connection",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.TOP,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+        );
+        setState(() => isLoading = false);
+        return;
+      }
+
       log('Fetching lats exercises from API...');
       final data = await _apiService.getTargetWorkoutData('lats', {});
       log('API response: $data');
+
       setState(() {
         exercises = data;
         isLoading = false;
       });
     } catch (e) {
       log('Error fetching exercises: $e');
-      setState(() {
-        isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error fetching exercises: $e')),
+      setState(() => isLoading = false);
+
+      Fluttertoast.showToast(
+        msg: "Error fetching exercises. Please try again.",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
       );
     }
   }
