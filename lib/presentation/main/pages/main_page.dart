@@ -12,6 +12,7 @@ import 'package:fitness_app/presentation/main/widgets/appbar_workouts.dart';
 import 'package:fitness_app/presentation/profile/pages/profile_page.dart';
 import 'package:fitness_app/presentation/settings/pages/settings_page.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
+import 'package:fitness_app/services/connectivity_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter/material.dart';
@@ -68,6 +69,7 @@ class _MainPageState extends State<MainPage> {
     super.initState();
     MobileAds.instance.initialize();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      NetworkService.initialize();
       MobileAds.instance.initialize();
       final consumptionProvider =
           Provider.of<ConsumptionProvider>(context, listen: false);

@@ -1,7 +1,10 @@
 import 'dart:developer'; // For logging
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dartz/dartz.dart' as ConnectivityResult;
 import 'package:fitness_app/services/rapid_api_services.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class BicepsExercisesPage extends StatefulWidget {
   const BicepsExercisesPage({super.key});
@@ -22,21 +25,41 @@ class _BicepsExercisesPageState extends State<BicepsExercisesPage> {
   }
 
   Future<void> fetchExercises() async {
+    setState(() => isLoading = true);
+
     try {
-      log('Fetching chest exercises from API...'); // Log before network call
+      final connectivityResult = await Connectivity().checkConnectivity();
+      if (connectivityResult == ConnectivityResult.none) {
+        log('No internet connection.');
+        Fluttertoast.showToast(
+          msg: "Please check your internet connection",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.TOP,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+        );
+        setState(() => isLoading = false);
+        return;
+      }
+
+      log('Fetching biceps exercises from API...');
       final data = await _apiService.getTargetWorkoutData('biceps', {});
-      log('API response: $data'); // Log API response
+      log('API response: $data');
+
       setState(() {
         exercises = data;
         isLoading = false;
       });
     } catch (e) {
-      log('Error fetching exercises: $e'); // Log error
-      setState(() {
-        isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error fetching exercises: $e')),
+      log('Error fetching exercises: $e');
+      setState(() => isLoading = false);
+
+      Fluttertoast.showToast(
+        msg: "No internet connection. Please try again.",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
       );
     }
   }
