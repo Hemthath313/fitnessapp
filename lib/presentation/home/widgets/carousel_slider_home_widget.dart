@@ -24,14 +24,14 @@ class CarouselSliderHomeWidget extends StatelessWidget {
           },
           title: StringsManager.sixPackChallenge,
         ),
-        // CarouselHomeBox(
-        //   deviceWidth: deviceWidth,
-        //   image: ImageManager.postWorkout,
-        //   onTap: () {
-        //     //TODO
-        //   },
-        //   title: StringsManager.workoutRecovery,
-        // ),
+        CarouselHomeBox(
+          deviceWidth: deviceWidth,
+          image: ImageManager.postWorkout,
+          onTap: () {
+            context.push(Routes.workoutSplitsRoute);
+          },
+          title: StringsManager.workoutRecovery,
+        ),
         // CarouselHomeBox(
         //   deviceWidth: deviceWidth,
         //   image: ImageManager.dietAndNutrition,

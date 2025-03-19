@@ -487,6 +487,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
     return Scaffold(
       backgroundColor: ColorManager.darkGrey,
       appBar: AppBar(
+          iconTheme: const IconThemeData(color: ColorManager.white),
           backgroundColor: ColorManager.black,
           title: const Text(
             'Bulking Diet Plan',

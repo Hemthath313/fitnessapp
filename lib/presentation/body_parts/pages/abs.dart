@@ -26,6 +26,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
   void initState() {
     super.initState();
     fetchExercises();
+    fetchProgress();
   }
 
   Future<void> fetchProgress() async {
@@ -48,7 +49,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
     final isNewDay = today.difference(completionDate).inDays >= 1;
 
     setState(() {
-      completedDays = isNewDay ? lastCompletedDay : lastCompletedDay;
+      completedDays = isNewDay ? lastCompletedDay + 1 : lastCompletedDay;
     });
   }
 
@@ -77,27 +78,29 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
     }
   }
 
-  void completeDay(int day) async {
-    final userId = FirebaseAuth.instance.currentUser!.uid;
+  // void completeDay(int day) async {
+  //   print('Completing day $day...');
+  //   final userId = FirebaseAuth.instance.currentUser!.uid;
 
-    await FirebaseFirestore.instance.collection('users').doc(userId).update({
-      'progress.sixPackChallenge.lastCompletedDay': day,
-      'progress.sixPackChallenge.completionDate':
-          DateTime.now().toIso8601String(),
-    });
+  //   await FirebaseFirestore.instance.collection('users').doc(userId).update({
+  //     'progress.sixPackChallenge.lastCompletedDay': day,
+  //     'progress.sixPackChallenge.completionDate':
+  //         DateTime.now().toIso8601String(),
+  //   });
 
-    fetchProgress();
+  //   fetchProgress();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Day $day complete! Well done!')),
-    );
-  }
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(content: Text('Day $day complete! Well done!')),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorManager.darkGrey,
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: ColorManager.darkGrey,
         title: Text('30-Day Six-Pack Challenge',
             style: TextStyle(color: Colors.white)),
@@ -108,8 +111,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
               itemCount: groupedExercises.length,
               itemBuilder: (context, index) {
                 final day = index + 1;
-                final isUnlocked = day <= completedDays + 1;
-
+                final isUnlocked = day <= completedDays;
                 return Card(
                   color: isUnlocked ? ColorManager.black54 : Colors.grey[800],
                   margin: EdgeInsets.all(12.0),
