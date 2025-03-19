@@ -1,5 +1,6 @@
 import 'dart:developer';
-import 'package:connectivity_plus/connectivity_plus.dart' show Connectivity, ConnectivityResult;
+import 'package:connectivity_plus/connectivity_plus.dart'
+    show Connectivity, ConnectivityResult;
 import 'package:fitness_app/services/rapid_api_services.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
@@ -68,6 +69,7 @@ class _ShoulderExercisesPageState extends State<ShoulderExercisesPage> {
     return Scaffold(
       backgroundColor: ColorManager.darkGrey,
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: ColorManager.darkGrey,
         title: Text(
           'Shoulder Exercises',
@@ -103,14 +105,19 @@ class _ShoulderExercisesPageState extends State<ShoulderExercisesPage> {
                           ),
                         ),
                         title: Text(
-                          exercise['name'],
+                          exercise['name']
+                              .toString()
+                              .split(' ')
+                              .map((word) =>
+                                  word[0].toUpperCase() + word.substring(1))
+                              .join(' '),
                           style: TextStyle(
                               fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                         subtitle: Text(
-                          'Equipment: ${exercise['equipment']}',
-                          style: TextStyle(fontSize: 12, color: Colors.white70),
-                        ),
+                            'Equipment: ${exercise['equipment'].toString().split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ')}',
+                            style: TextStyle(
+                                fontSize: 16, color: ColorManager.white)),
                         onTap: () => showExerciseDetails(context, exercise),
                       ),
                     );
@@ -145,14 +152,19 @@ class _ShoulderExercisesPageState extends State<ShoulderExercisesPage> {
             ),
             SizedBox(height: 20),
             Text(
-              exercise['name'],
+              exercise['name']
+                  .toString()
+                  .split(' ')
+                  .map((word) => word[0].toUpperCase() + word.substring(1))
+                  .join(' '),
               style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: ColorManager.white),
             ),
             SizedBox(height: 10),
-            Text('Target: ${exercise['target']}',
+            Text(
+                'Target: ${exercise['target'].toString().split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ')}',
                 style: TextStyle(fontSize: 16, color: ColorManager.white)),
             SizedBox(height: 5),
             Text('Equipment: ${exercise['equipment']}',

@@ -65,11 +65,11 @@ class _BicepsExercisesPageState extends State<BicepsExercisesPage> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorManager.darkGrey,
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: ColorManager.darkGrey,
         title: Text(
           'Biceps Exercises',
@@ -105,7 +105,12 @@ class _BicepsExercisesPageState extends State<BicepsExercisesPage> {
                           ),
                         ),
                         title: Text(
-                          exercise['name'],
+                          exercise['name']
+                              .toString()
+                              .split(' ')
+                              .map((word) =>
+                                  word[0].toUpperCase() + word.substring(1))
+                              .join(' '),
                           style: TextStyle(
                               fontWeight: FontWeight.bold, color: Colors.white),
                         ),
@@ -147,17 +152,23 @@ class _BicepsExercisesPageState extends State<BicepsExercisesPage> {
             ),
             SizedBox(height: 20),
             Text(
-              exercise['name'],
+              exercise['name']
+                  .toString()
+                  .split(' ')
+                  .map((word) => word[0].toUpperCase() + word.substring(1))
+                  .join(' '),
               style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: ColorManager.white),
             ),
             SizedBox(height: 10),
-            Text('Target: ${exercise['target']}',
+            Text(
+                'Target: ${exercise['target'].toString().split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ')}',
                 style: TextStyle(fontSize: 16, color: ColorManager.white)),
             SizedBox(height: 5),
-            Text('Equipment: ${exercise['equipment']}',
+            Text(
+                'Equipment: ${exercise['equipment'].toString().split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ')}',
                 style: TextStyle(fontSize: 16, color: ColorManager.white)),
             SizedBox(height: 10),
             Text(

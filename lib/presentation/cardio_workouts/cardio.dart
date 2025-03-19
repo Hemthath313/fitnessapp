@@ -46,9 +46,10 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
     return Scaffold(
       backgroundColor: ColorManager.darkGrey,
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: ColorManager.darkGrey,
         title: Text(
-          'Triceps Exercises',
+          'Cardio Exercises',
           style: TextStyle(color: Colors.white),
         ),
       ),

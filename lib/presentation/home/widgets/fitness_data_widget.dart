@@ -71,7 +71,7 @@ class FitnessDataWidget extends StatelessWidget {
                   children: [
                     Container(
                       width: (deviceWidth / 3 - 16).w,
-                      height: SizeManager.s212.h,
+                      height: SizeManager.s200.h,
                       decoration: BoxDecoration(
                         color: ColorManager.black87,
                         borderRadius:
@@ -105,7 +105,12 @@ class FitnessDataWidget extends StatelessWidget {
                           Text(
                             'BMI ${bmi.toStringAsFixed(1)}',
                             textAlign: TextAlign.center,
-                            style: StyleManager.homePageS20BoldWhite,
+                            style: TextStyle(
+                              color: ColorManager.white,
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            // style: StyleManager.homePageS20BoldWhite,
                           ),
                           Padding(
                             padding: EdgeInsets.only(
@@ -129,8 +134,8 @@ class FitnessDataWidget extends StatelessWidget {
                             bottom: PaddingManager.p12.h,
                           ),
                           child: Container(
-                            height: SizeManager.s100.h,
-                            width: (deviceWidth * (2 / 3) - 20).w,
+                            height: 90,
+                            width: (deviceWidth * (2 / 3) - 10).w,
                             decoration: BoxDecoration(
                               color: ColorManager.limerGreen2,
                               borderRadius: BorderRadius.circular(
@@ -143,17 +148,29 @@ class FitnessDataWidget extends StatelessWidget {
                               children: [
                                 Text(
                                   StringsManager.kcalConsumption,
-                                  style: StyleManager.homePageS18BoldDarkGrey,
+                                  style: TextStyle(
+                                    color: ColorManager.darkGrey,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 Text(
                                   bmr.toStringAsFixed(0),
-                                  style: StyleManager.homePageS20BoldDarkGrey,
+                                  style: TextStyle(
+                                    color: ColorManager.darkGrey,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  // style: StyleManager.homePageS20BoldDarkGrey,
                                 ),
-                                Text(
-                                  StringsManager.kcalPerDay,
-                                  style:
-                                      StyleManager.homePageS16RegularDarkGrey,
-                                ),
+                                Text(StringsManager.kcalPerDay,
+                                    style: TextStyle(
+                                      color: ColorManager.darkGrey,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                    )
+                                    // StyleManager.homePageS16RegularDarkGrey,
+                                    ),
                               ],
                             ),
                           ),
@@ -190,8 +207,13 @@ class FitnessDataWidget extends StatelessWidget {
                                         children: [
                                           Text(
                                             StringsManager.water,
-                                            style: StyleManager
-                                                .homePageS17BoldWhite,
+                                            style: TextStyle(
+                                              color: ColorManager.white,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            // style: StyleManager
+                                            //     .homePageS17BoldWhite,
                                           ),
                                           Icon(
                                             Icons.water_drop_outlined,
@@ -228,8 +250,8 @@ class FitnessDataWidget extends StatelessWidget {
                                               StringsManager.liters,
                                               overflow: TextOverflow.clip,
                                               softWrap: true,
-                                              style: StyleManager
-                                                  .homePageS12RegularWhite2,
+                                              // style: StyleManager
+                                              //     .homePageS12RegularWhite2,
                                             ),
                                           ),
                                         ],
@@ -264,8 +286,12 @@ class FitnessDataWidget extends StatelessWidget {
                                       children: [
                                         Text(
                                           StringsManager.calories,
-                                          style:
-                                              StyleManager.homePageS17BoldWhite,
+                                          style:TextStyle(
+                                            color: ColorManager.white,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                          )
+                                          
                                         ),
                                         Icon(
                                           Icons.local_pizza_outlined,
