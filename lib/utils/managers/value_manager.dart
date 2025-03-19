@@ -89,6 +89,8 @@ class SizeManager {
   static const double s600 = 600.0;
   static const double s700 = 700.0;
   static const double s1100 = 1100.0;
+
+  static var s6;
 }
 
 class RadiusManager {

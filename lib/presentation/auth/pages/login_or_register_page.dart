@@ -131,22 +131,20 @@ class _LoginPageState extends State<LoginPage> {
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
-      backgroundColor: ColorManager.black,
+      backgroundColor: ColorManager.darkGrey,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.only(top: PaddingManager.p12),
+            padding: const EdgeInsets.only(top: PaddingManager.p8),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(bottom: PaddingManager.p8),
+                  padding: const EdgeInsets.only(bottom: PaddingManager.p4),
                   child: SizedBox(
-                    width: SizeManager.s250.w,
-                    height: SizeManager.s250.h,
-                    // Add your logo here if needed
-                    // child: Image.asset(ImageManager.logo),
+                    width: SizeManager.s200.w,
+                    height: SizeManager.s200.h,
                   ),
                 ),
                 LoginOrRegisterView(
@@ -155,24 +153,6 @@ class _LoginPageState extends State<LoginPage> {
                   isRegisterView: isRegisterView,
                   repeatPasswordController: _repeatPasswordController,
                 ),
-                if (isLoginView)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: PaddingManager.p28,
-                    ),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: GestureDetector(
-                        onTap: () {
-                          context.push(Routes.forgotPasswordRoute);
-                        },
-                        child: Text(
-                          StringsManager.forgotPassword,
-                          style: StyleManager.loginPageSubTextTextStyle,
-                        ),
-                      ),
-                    ),
-                  ),
                 Padding(
                   padding: const EdgeInsets.only(top: PaddingManager.p2),
                   child: LimeGreenRoundedButtonWidget(
@@ -184,8 +164,8 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: PaddingManager.p28,
-                    vertical: PaddingManager.p18,
+                    horizontal: PaddingManager.p16,
+                    vertical: PaddingManager.p12,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -197,7 +177,7 @@ class _LoginPageState extends State<LoginPage> {
                         style: StyleManager.loginPageSubTextTextStyle,
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(left: PaddingManager.p8),
+                        padding: const EdgeInsets.only(left: PaddingManager.p4),
                         child: GestureDetector(
                           onTap: _switchAuthMode,
                           child: Text(
@@ -214,7 +194,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(left: PaddingManager.p8),
+                  padding: const EdgeInsets.only(left: PaddingManager.p4),
                   child: CustomGoogleSignInButton(onTap: () async {
                     await authProvider.signInWithGoogle(context);
                   }),

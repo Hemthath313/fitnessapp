@@ -33,7 +33,6 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // BannerAdWidget(),
             const TodaysMotivationWidget(),
             const HomePageTextSpacerWidget(
               title: StringsManager.todaysAct,
@@ -42,7 +41,8 @@ class _HomePageState extends State<HomePage> {
             const HomePageTextSpacerWidget(
               title: StringsManager.explore,
             ),
-            const CarouselSliderHomeWidget()
+            const CarouselSliderHomeWidget(),
+            BannerAdWidget(),
           ],
         ),
       ),

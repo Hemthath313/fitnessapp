@@ -48,26 +48,28 @@ class TodaysMotivationWidget extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(
-        top: PaddingManager.p28,
-        left: PaddingManager.p12,
-        right: PaddingManager.p12,
+        top: 20,
+        left: 25,
+        right: 25,
       ),
       child: Container(
         width: deviceWidth,
         decoration: BoxDecoration(
           color: ColorManager.black87,
-          borderRadius: BorderRadius.circular(
-            RadiusManager.r40.r,
-          ),
+          borderRadius: BorderRadius.circular(24),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(PaddingManager.p20),
+          padding: const EdgeInsets.all(15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 "Motivation of the day",
-                style: StyleManager.homePageTodaysProgressTextSTyle,
+                style: TextStyle(
+                  color: ColorManager.white,
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: PaddingManager.p12),

@@ -89,17 +89,23 @@ class DailyExercisePage extends StatelessWidget {
             ),
             SizedBox(height: 20),
             Text(
-              exercise['name'],
+              exercise['name']
+                  .toString()
+                  .split(' ')
+                  .map((word) => word[0].toUpperCase() + word.substring(1))
+                  .join(' '),
               style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: ColorManager.white),
             ),
             SizedBox(height: 10),
-            Text('Target: ${exercise['target']}',
+            Text(
+                'Target: ${exercise['target'].toString().split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ')}',
                 style: TextStyle(fontSize: 16, color: ColorManager.white)),
             SizedBox(height: 5),
-            Text('Equipment: ${exercise['equipment']}',
+            Text(
+                'Equipment: ${exercise['equipment'].toString().split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ')}',
                 style: TextStyle(fontSize: 16, color: ColorManager.white)),
             SizedBox(height: 10),
             Text(
@@ -185,17 +191,20 @@ class DailyExercisePage extends StatelessWidget {
                     ),
                   ),
                   title: Text(
-                    '${exercise['name']}',
+                    '${exercise['name']}'
+                        .toString()
+                        .split(' ')
+                        .map(
+                            (word) => word[0].toUpperCase() + word.substring(1))
+                        .join(' '),
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: isUnlocked ? Colors.white : Colors.white54),
                   ),
                   subtitle: Text(
-                    'Equipment: ${exercise['equipment']}',
-                    style: TextStyle(
-                        fontSize: 12,
-                        color: isUnlocked ? Colors.white70 : Colors.white38),
-                  ),
+                      'Equipment: ${exercise['equipment'].toString().split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ')}',
+                      style:
+                          TextStyle(fontSize: 16, color: ColorManager.white)),
                 ),
               );
             },

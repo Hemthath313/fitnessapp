@@ -68,6 +68,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
     return Scaffold(
       backgroundColor: ColorManager.darkGrey,
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: ColorManager.black,
         title: Text(
           'Chest Exercises',
@@ -103,14 +104,19 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
                           ),
                         ),
                         title: Text(
-                          exercise['name'],
+                          exercise['name']
+                              .toString()
+                              .split(' ')
+                              .map((word) =>
+                                  word[0].toUpperCase() + word.substring(1))
+                              .join(' '),
                           style: TextStyle(
                               fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                         subtitle: Text(
-                          'Equipment: ${exercise['equipment']}',
-                          style: TextStyle(fontSize: 12, color: Colors.white70),
-                        ),
+                            'Equipment: ${exercise['equipment'].toString().split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ')}',
+                            style: TextStyle(
+                                fontSize: 16, color: ColorManager.white)),
                         onTap: () => showExerciseDetails(context, exercise),
                       ),
                     );
@@ -145,14 +151,19 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
             ),
             SizedBox(height: 20),
             Text(
-              exercise['name'],
+              exercise['name']
+                  .toString()
+                  .split(' ')
+                  .map((word) => word[0].toUpperCase() + word.substring(1))
+                  .join(' '),
               style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: ColorManager.white),
             ),
             SizedBox(height: 10),
-            Text('Target: ${exercise['target']}',
+            Text(
+                'Target: ${exercise['target'].toString().split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ')}',
                 style: TextStyle(fontSize: 16, color: ColorManager.white)),
             SizedBox(height: 5),
             Text('Equipment: ${exercise['equipment']}',
