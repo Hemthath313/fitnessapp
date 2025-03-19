@@ -1,3 +1,4 @@
+import 'package:fitness_app/data/workout_splits_data.dart';
 import 'package:fitness_app/presentation/auth/pages/add_data_page.dart';
 import 'package:fitness_app/presentation/auth/pages/auth_page.dart';
 import 'package:fitness_app/presentation/auth/pages/forgot_password_page.dart';
@@ -29,7 +30,13 @@ import 'package:fitness_app/presentation/settings/pages/change_email_page.dart';
 import 'package:fitness_app/presentation/settings/pages/change_password_page.dart';
 import 'package:fitness_app/presentation/settings/pages/delete_account_page.dart';
 import 'package:fitness_app/presentation/splash_screen/splashscreen.dart';
+import 'package:fitness_app/presentation/workout_splits/splits/bro_splits.dart';
+import 'package:fitness_app/presentation/workout_splits/splits/full_body_split.dart';
+import 'package:fitness_app/presentation/workout_splits/splits/ppl_splits.dart';
+import 'package:fitness_app/presentation/workout_splits/splits/upper_lower_splits.dart';
+import 'package:fitness_app/presentation/workout_splits/workout_splits.dart';
 import 'package:fitness_app/presentation/workouts/pages/new_exercise_page.dart';
+import 'package:fitness_app/presentation/workouts/pages/workouts_page.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/widgets/page_transition.dart';
 import 'package:flutter/material.dart';
@@ -68,7 +75,12 @@ class Routes {
   static const String sixPackChallenge = '/sixPackChallenge';
   static const String dailyExerciseRoute = '/dailyExerciseRoute';
   // static const String premiumScreen = '/premiumScreen';
+  static const String workoutSplitsRoute = '/workoutSplitsRoute';
   static const String emailVerify = 'emailVerify';
+  static const String broSplit = '/broSplit';
+  static const String pushPullLegsSplit = '/pushPullLegsSplit';
+  static const String fullBodySplit = '/fullBodySplit';
+  static const String upperLowerSplit = '/upperLowerSplit';
 }
 
 final GoRouter router = GoRouter(
@@ -159,6 +171,32 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, AbsExercisesPage())),
+    GoRoute(
+        path: Routes.workoutSplitsRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(state.pageKey,
+                WorkoutSplitListPage(workoutSplits: workoutSplits))),
+    GoRoute(
+        path: Routes.broSplit,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, BroSplitPage())),
+    GoRoute(
+        path: Routes.fullBodySplit,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, FullBodyPage())),
+    GoRoute(
+        path: Routes.pushPullLegsSplit,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, PPLPage())),
+    GoRoute(
+        path: Routes.upperLowerSplit,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, UpperLowerPage())),
+
     // GoRoute(
     //     path: Routes.sixPackChallenge,
     //     pageBuilder: (context, state) =>
