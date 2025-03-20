@@ -12,7 +12,7 @@ final List<WorkoutSplit> workoutSplits = [
     name: 'Push-Pull-Legs (PPL)',
     description:
         'Push (chest, shoulders, triceps), Pull (back, biceps), Legs. Great for growth!',
-    recommendedDays: 3,
+    recommendedDays: 6,
     route: Routes.pushPullLegsSplit,
   ),
   WorkoutSplit(

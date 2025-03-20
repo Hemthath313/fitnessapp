@@ -109,7 +109,7 @@ class BroSplitPage extends StatelessWidget {
             ElevatedButton(
               onPressed: () => _showExerciseDialog(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent,
+                backgroundColor: ColorManager.limerGreen2,
                 padding:
                     const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                 shape: RoundedRectangleBorder(
@@ -117,7 +117,7 @@ class BroSplitPage extends StatelessWidget {
                 ),
               ),
               child: const Text("View Exercises",
-                  style: TextStyle(color: Colors.white, fontSize: 16)),
+                  style: TextStyle(color: Colors.black, fontSize: 16)),
             ),
           ],
         ),

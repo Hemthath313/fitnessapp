@@ -20,6 +20,9 @@ class WorkoutSplitListPage extends StatelessWidget {
         context.push(Routes.pushPullLegsSplit);
         break;
       case 2:
+        context.push(Routes.upperLowerSplit);
+        break;
+      case 3:
         context.push(Routes.fullBodySplit);
         break;
       default:

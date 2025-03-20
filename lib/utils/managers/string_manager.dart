@@ -212,4 +212,7 @@ class StringsManager {
   static const String declineBenchPressBarBell = 'Decline Bench Press(Barbell)';
   static const String declineBenchPressDumBell = 'Decline Bench Press(Dumbell)';
   static const String declineBenchPressMachine = 'Decline Bench Press(Machine)';
+
+  //splits
+  static const String workoutsplit = 'Workout Splits';
 }

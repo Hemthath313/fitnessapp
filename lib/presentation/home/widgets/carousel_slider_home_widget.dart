@@ -26,11 +26,11 @@ class CarouselSliderHomeWidget extends StatelessWidget {
         ),
         CarouselHomeBox(
           deviceWidth: deviceWidth,
-          image: ImageManager.postWorkout,
+          image: ImageManager.dumbels,
           onTap: () {
             context.push(Routes.workoutSplitsRoute);
           },
-          title: StringsManager.workoutRecovery,
+          title: StringsManager.workoutsplit,
         ),
         // CarouselHomeBox(
         //   deviceWidth: deviceWidth,

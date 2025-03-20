@@ -36,6 +36,8 @@ class ImageManager {
   static const cuttingDiet = '$imagePath/cutting.jpeg';
   static const maintainDiet = '$imagePath/maintain.jpeg';
   static const veganDiet = '$imagePath/vegan.jpeg';
+  static const dumbels = '$imagePath/dumbels.jpeg';
+  static const yogaWorkout = '$imagePath/yoga_workout.jpg';
   // static const cardioWorkout='$imagePath/cardio_workout.jpg';
   // static const yogaWorkout='$imagePath/yoga_workout.jpg';
 }
