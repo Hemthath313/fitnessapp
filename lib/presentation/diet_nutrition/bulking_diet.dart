@@ -306,7 +306,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: ColorManager.darkGrey,
+          backgroundColor: ColorManager.black,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -315,7 +315,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: ColorManager.orange,
+              color: ColorManager.limerGreen2,
             ),
             textAlign: TextAlign.center,
           ),
@@ -347,7 +347,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: ColorManager.orange,
+                backgroundColor: ColorManager.limerGreen2,
                 foregroundColor: Colors.black,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -382,7 +382,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
       'foods': [], // optional if needed
       'isCompleted': false,
       'image':
-          'assets/images/custom_meal.png' // You can use a placeholder image for custom meals
+          'assets/images/chana_salad.jpeg' // You can use a placeholder image for custom meals
     };
 
     setState(() {
@@ -395,6 +395,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
   Widget _buildTextField(String label, TextEditingController controller,
       {bool isNumber = false}) {
     return TextField(
+      style: const TextStyle(color: ColorManager.white),
       controller: controller,
       keyboardType: isNumber ? TextInputType.number : TextInputType.text,
       decoration: InputDecoration(labelText: label),

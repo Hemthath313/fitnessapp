@@ -303,7 +303,7 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: ColorManager.darkGrey,
+          backgroundColor: ColorManager.black,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -312,7 +312,7 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: ColorManager.orange,
+              color: ColorManager.limerGreen2,
             ),
             textAlign: TextAlign.center,
           ),
@@ -344,7 +344,7 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: ColorManager.orange,
+                backgroundColor: ColorManager.limerGreen2,
                 foregroundColor: Colors.black,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -379,7 +379,7 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
       'foods': [], // optional if needed
       'isCompleted': false,
       'image':
-          'assets/images/custom_meal.png' // You can use a placeholder image for custom meals
+          'assets/images/chana_salad.jpeg' // You can use a placeholder image for custom meals
     };
 
     setState(() {
@@ -392,6 +392,7 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
   Widget _buildTextField(String label, TextEditingController controller,
       {bool isNumber = false}) {
     return TextField(
+      style: const TextStyle(color: ColorManager.white),
       controller: controller,
       keyboardType: isNumber ? TextInputType.number : TextInputType.text,
       decoration: InputDecoration(labelText: label),

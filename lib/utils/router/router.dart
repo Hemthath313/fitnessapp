@@ -24,6 +24,7 @@ import 'package:fitness_app/presentation/diet_nutrition/maintain_diet/maintain_d
 import 'package:fitness_app/presentation/email_verification/email_verify.dart';
 import 'package:fitness_app/presentation/main/pages/main_page.dart';
 import 'package:fitness_app/presentation/notifications/pages/notifications_page.dart';
+import 'package:fitness_app/presentation/post_workout/recovery.dart';
 import 'package:fitness_app/presentation/profile/pages/change_measurements_page.dart';
 import 'package:fitness_app/presentation/profile/pages/change_weight_page.dart';
 import 'package:fitness_app/presentation/settings/pages/change_email_page.dart';
@@ -81,6 +82,7 @@ class Routes {
   static const String pushPullLegsSplit = '/pushPullLegsSplit';
   static const String fullBodySplit = '/fullBodySplit';
   static const String upperLowerSplit = '/upperLowerSplit';
+  static const String recoveryRoute = '/recovery';
 }
 
 final GoRouter router = GoRouter(
@@ -111,6 +113,11 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, AuthPage())),
+    GoRoute(
+        path: Routes.recoveryRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, PostWorkoutRecoveryPage())),
     GoRoute(
         path: Routes.emailVerify,
         pageBuilder: (context, state) =>

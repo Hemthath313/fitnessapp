@@ -15,14 +15,14 @@ class MealDetailsSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final foods = meal['foods'] ?? [];
 
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Image.asset(
             meal['image'] ?? 'assets/images/milk.jpeg',
-            height: 120,
+            height: 150,
             width: double.infinity,
             fit: BoxFit.cover,
           ),
@@ -34,6 +34,7 @@ class MealDetailsSheet extends StatelessWidget {
               fontSize: 20,
               color: Colors.white,
             ),
+            textAlign: TextAlign.center,
           ),
           const Divider(color: Colors.white54),
           const Text(
@@ -69,9 +70,11 @@ class MealDetailsSheet extends StatelessWidget {
           Text(
             'Macros: ${meal['calories']} kcal | ${meal['protein']}g P | ${meal['carbs']}g C | ${meal['fats']}g F',
             style: const TextStyle(color: Colors.white),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          Row(
+          Wrap(
+            spacing: 10,
             children: [
               ElevatedButton.icon(
                 onPressed: onSwapMeal,
