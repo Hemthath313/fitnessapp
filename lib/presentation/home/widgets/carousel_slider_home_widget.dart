@@ -32,14 +32,14 @@ class CarouselSliderHomeWidget extends StatelessWidget {
           },
           title: StringsManager.workoutsplit,
         ),
-        // CarouselHomeBox(
-        //   deviceWidth: deviceWidth,
-        //   image: ImageManager.dietAndNutrition,
-        //   onTap: () {
-        //     context.push(Routes.dietRoute);
-        //   },
-        //   title: StringsManager.diet,
-        // ),
+        CarouselHomeBox(
+          deviceWidth: deviceWidth,
+          image: ImageManager.dietAndNutrition,
+          onTap: () {
+            context.push(Routes.dietRoute);
+          },
+          title: StringsManager.diet,
+        ),
         // CarouselHomeBox(
         //   deviceWidth: deviceWidth,
         //   image: ImageManager.cardioWorkout,

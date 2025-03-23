@@ -148,6 +148,7 @@ class StringsManager {
   static const String goal = 'Goal';
   static const String kg = 'kg';
   static const String sixPackChallenge = '30 day Six Pack Challenge';
+  static const String challenges = 'Challenges';
   //EXERCISES
   //A
   static const String aroundTheWorldHint = 'Around The World';

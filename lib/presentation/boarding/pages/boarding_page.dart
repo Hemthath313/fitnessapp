@@ -22,6 +22,26 @@ class _BoardingPageState extends State<BoardingPage> {
   final PageController _pageController = PageController(initialPage: 0);
   late Timer _timer;
 
+  List<String> imgList = [
+    ImageManager.splashBG1WP,
+    ImageManager.splashBG2WP,
+    ImageManager.splashBG3WP,
+    ImageManager.splashBG4WP,
+    ImageManager.splashBG5WP,
+    ImageManager.bicepsWorkout,
+    ImageManager.splashBG7WP,
+  ];
+
+  List<String> textList = [
+    "Welcome to Gym Buddy — Your Ultimate Fitness Companion!",
+    "Track your daily calories and personalized diet plans.",
+    "Achieve your fitness goals with personalized plans.",
+    "Stay motivated with monthly challenges and tips.",
+    "Access multiple workout splits tailored to your fitness goals!",
+    "Track your monthly weight progress with ease using intuitive charts!",
+    "Let's get started on your fitness journey today!",
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -36,16 +56,6 @@ class _BoardingPageState extends State<BoardingPage> {
     });
   }
 
-  List<String> imgList = [
-    ImageManager.splashBG1WP,
-    ImageManager.splashBG2WP,
-    ImageManager.splashBG3WP,
-    ImageManager.splashBG4WP,
-    ImageManager.splashBG5WP,
-    ImageManager.splashBG6WP,
-    ImageManager.splashBG7WP,
-  ];
-
   @override
   Widget build(BuildContext context) {
     for (var item in imgList) {
@@ -56,25 +66,20 @@ class _BoardingPageState extends State<BoardingPage> {
       backgroundColor: ColorManager.black,
       body: Stack(
         children: [
-          PageView(
+          PageView.builder(
             controller: _pageController,
-            children: imgList.map(
-              (item) {
-                return Center(
-                  child: Image.asset(
-                    item,
-                    fit: BoxFit.cover,
-                    height: height,
-                  ),
-                );
-              },
-            ).toList(),
+            itemCount: imgList.length,
+            itemBuilder: (context, index) => Center(
+              child: Image.asset(
+                imgList[index],
+                fit: BoxFit.cover,
+                height: height,
+              ),
+            ),
             onPageChanged: (value) {
               if (value == imgList.length - 1) {
                 Future.delayed(
-                  const Duration(
-                    seconds: DurationManager.s5,
-                  ),
+                  const Duration(seconds: DurationManager.s5),
                 ).then(
                   (value) => _pageController.animateToPage(
                     0,
@@ -89,18 +94,15 @@ class _BoardingPageState extends State<BoardingPage> {
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              height: SizeManager.s400.h,
+              height: SizeManager.s270.h,
               width: double.infinity,
               decoration: BoxDecoration(
-                  color: ColorManager.black87,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(
-                      RadiusManager.r15.r,
-                    ),
-                    topRight: Radius.circular(
-                      RadiusManager.r15.r,
-                    ),
-                  )),
+                color: ColorManager.black87,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(RadiusManager.r15.r),
+                  topRight: Radius.circular(RadiusManager.r15.r),
+                ),
+              ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -141,23 +143,22 @@ class _BoardingPageState extends State<BoardingPage> {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: PaddingManager.p28),
-                    child: Text(
-                      StringsManager.splashText1,
-                      style: StyleManager.splashText1TextStyle,
-                      textAlign: TextAlign.center,
+                    child: AnimatedBuilder(
+                      animation: _pageController,
+                      builder: (context, _) => Text(
+                        textList[_pageController.page?.round() ?? 0],
+                        style: TextStyle(
+                          color: ColorManager.white,
+                          fontSize: SizeManager.s24.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ).animate().fadeIn(duration: 500.ms),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: PaddingManager.p28),
-                    child: Text(
-                      StringsManager.splashText2,
-                      style: StyleManager.splashText2TextStyle,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  const SliderBoardingWidget()
+                  const SliderBoardingWidget(),
                 ],
-              ).animate().fadeIn(duration: 500.ms),
+              ),
             ),
           ),
         ],
@@ -166,7 +167,6 @@ class _BoardingPageState extends State<BoardingPage> {
   }
 
   @override
-
   void dispose() {
     _pageController.dispose();
     _timer.cancel();

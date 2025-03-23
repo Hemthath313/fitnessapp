@@ -45,8 +45,10 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
         DateTime.tryParse(completionDateStr)?.toLocal() ?? DateTime.now();
     final today = DateTime.now();
 
-    // Unlock next day only if a new day has started AND the previous day was completed
-    final isNewDay = today.difference(completionDate).inDays >= 1;
+    // Correct logic: Check if the calendar day has changed
+    final isNewDay = today.year > completionDate.year ||
+        today.month > completionDate.month ||
+        today.day > completionDate.day;
 
     setState(() {
       completedDays = isNewDay ? lastCompletedDay + 1 : lastCompletedDay;

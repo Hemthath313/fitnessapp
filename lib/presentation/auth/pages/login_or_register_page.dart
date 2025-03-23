@@ -185,7 +185,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ? StringsManager.signUp
                                 : StringsManager.signIn,
                             style: TextStyle(
-                                color: Colors.orangeAccent,
+                                color: ColorManager.limerGreen2,
                                 fontWeight: FontWeight.w500),
                           ),
                         ),
