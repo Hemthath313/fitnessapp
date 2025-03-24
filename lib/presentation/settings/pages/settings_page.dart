@@ -76,14 +76,6 @@ class _SettingsPageState extends State<SettingsPage> {
               onTap: () {
                 //TODO:
               },
-              iconData: Icons.nightlight_outlined,
-              title: StringsManager.theme,
-            ),
-            SettingsPageButton(
-              deviceWidth: deviceWidth,
-              onTap: () {
-                //TODO:
-              },
               iconData: Icons.help_outline,
               title: StringsManager.support,
             ),
@@ -94,14 +86,6 @@ class _SettingsPageState extends State<SettingsPage> {
               },
               iconData: Icons.library_books_outlined,
               title: StringsManager.termsOfService,
-            ),
-            SettingsPageButton(
-              deviceWidth: deviceWidth,
-              onTap: () {
-                // context.push(Routes.premiumScreen);
-              },
-              iconData: Icons.person_add_alt_1_outlined,
-              title: StringsManager.inviteFriend,
             ),
           ],
         ).animate().fadeIn(

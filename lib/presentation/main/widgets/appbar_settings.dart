@@ -1,7 +1,9 @@
 import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
 import 'package:fitness_app/presentation/settings/providers/settings_provider.dart';
+import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
@@ -54,7 +56,16 @@ class _SettingsPageAppBarWidgetState extends State<SettingsPageAppBarWidget> {
             ),
             child: IconButton(
               splashColor: ColorManager.grey3,
-              onPressed: () => signOut(settingsProvider, context),
+              onPressed: () async {
+                final currentContext =
+                    context; // Store context before the async gap
+                await signOut(settingsProvider, currentContext);
+
+                if (!currentContext.mounted) {
+                  return; // Prevent navigation if unmounted
+                }
+                currentContext.go(Routes.authRoute);
+              },
               icon: const Icon(
                 Icons.logout_sharp,
                 size: SizeManager.s26,

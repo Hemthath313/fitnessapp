@@ -21,31 +21,31 @@ class ConsumptionPageAppBarWidget extends StatelessWidget {
       automaticallyImplyLeading: false,
       elevation: SizeManager.s0,
       title: Text(
-        StringsManager.consumptionABtitle,
+        StringsManager.explore,
         style: StyleManager.appbarTitleTextStyle,
       ),
       actions: [
         Padding(
           padding: const EdgeInsets.only(right: PaddingManager.p12),
-          child: Container(
-            height: SizeManager.s40.h,
-            width: SizeManager.s40.w,
-            decoration: BoxDecoration(
-              color: ColorManager.grey3,
-              borderRadius: BorderRadius.circular(
-                RadiusManager.r40.r,
-              ),
-            ),
-            child: IconButton(
-              splashColor: ColorManager.grey3,
-              onPressed: () => context.push(Routes.newMealRoute),
-              icon: const Icon(
-                Icons.add,
-                size: SizeManager.s26,
-                color: ColorManager.white,
-              ),
-            ),
-          ),
+          // child: Container(
+          //   height: SizeManager.s40.h,
+          //   width: SizeManager.s40.w,
+          //   decoration: BoxDecoration(
+          //     color: ColorManager.grey3,
+          //     borderRadius: BorderRadius.circular(
+          //       RadiusManager.r40.r,
+          //     ),
+          //   ),
+          //   child: IconButton(
+          //     splashColor: ColorManager.grey3,
+          //     onPressed: () => context.push(Routes.newMealRoute),
+          //     icon: const Icon(
+          //       Icons.add,
+          //       size: SizeManager.s26,
+          //       color: ColorManager.white,
+          //     ),
+          //   ),
+          // ),
         ),
       ],
     ).animate().fadeIn(

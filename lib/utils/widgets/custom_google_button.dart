@@ -31,7 +31,7 @@ class CustomGoogleSignInButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const FaIcon(FontAwesomeIcons.google, color: Colors.orangeAccent),
+             FaIcon(FontAwesomeIcons.google, color: ColorManager.limerGreen2),
             SizedBox(width: 12.w),
             Text(
               'Sign in with Google',

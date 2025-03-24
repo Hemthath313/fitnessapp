@@ -39,10 +39,10 @@ class _HomePageState extends State<HomePage> {
             ),
             FitnessDataWidget(),
             const HomePageTextSpacerWidget(
-              title: StringsManager.explore,
+              title: StringsManager.challenges,
             ),
             const CarouselSliderHomeWidget(),
-            BannerAdWidget(),
+            // BannerAdWidget(),
           ],
         ),
       ),
