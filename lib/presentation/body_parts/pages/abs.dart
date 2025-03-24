@@ -55,14 +55,23 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
     });
   }
 
-  void fetchExercises() async {
+ void fetchExercises() async {
     try {
       if (!(await Connectivity().checkConnectivity())
           .contains(ConnectivityResult.none)) {
         final data = await _apiService.getTargetWorkoutData('abs', {});
+
+        // Ensure enough exercises to cover 30 days with 3 per day
+        final totalExercises = data.length;
+        List<List<dynamic>> filledExercises = [];
+
+        for (int i = 0; i < 30; i++) {
+          filledExercises
+              .add(data.skip((i * 3) % totalExercises).take(3).toList());
+        }
+
         setState(() {
-          groupedExercises = List.generate(
-              30, (index) => data.skip(index * 3).take(3).toList());
+          groupedExercises = filledExercises;
           isLoading = false;
         });
       } else {
@@ -79,6 +88,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
       setState(() => isLoading = false);
     }
   }
+
 
   // void completeDay(int day) async {
   //   print('Completing day $day...');

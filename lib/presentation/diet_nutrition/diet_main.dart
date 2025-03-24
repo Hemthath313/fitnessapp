@@ -203,10 +203,10 @@ class DietMain extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: ColorManager.black54,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          'Diet Plans',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
+        // title: const Text(
+        //   'Diet Plans',
+        //   style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        // ),
         centerTitle: true,
         elevation: 0,
       ),

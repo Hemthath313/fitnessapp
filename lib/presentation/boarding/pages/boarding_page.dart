@@ -26,7 +26,7 @@ class _BoardingPageState extends State<BoardingPage> {
     ImageManager.splashBG1WP,
     ImageManager.splashBG2WP,
     ImageManager.splashBG3WP,
-    ImageManager.splashBG4WP,
+    ImageManager.chestWorkout,
     ImageManager.splashBG5WP,
     ImageManager.bicepsWorkout,
     ImageManager.splashBG7WP,

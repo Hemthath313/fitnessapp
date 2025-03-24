@@ -35,7 +35,7 @@ class LimeGreenRoundedButtonWidget extends StatelessWidget {
               title,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: ColorManager.black54,
+                color: ColorManager.black,
                 fontSize: FontSize.s22,
                 fontWeight: FontWightManager.bold,
                 letterSpacing: SizeManager.s1_5,
