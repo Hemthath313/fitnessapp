@@ -17,17 +17,29 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      return web;
+      throw UnsupportedError(
+        'DefaultFirebaseOptions have not been configured for web - '
+        'you can reconfigure this by running the FlutterFire CLI again.',
+      );
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        return ios;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for ios - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.macOS:
-        return macos;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for macos - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.windows:
-        return windows;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for windows - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -40,51 +52,11 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBy6047xIuiM5eDAqFtLHXndNvU_rSdE2E',
-    appId: '1:661343486324:web:fb67af71253e2f66666c21',
-    messagingSenderId: '661343486324',
-    projectId: 'tracking-ed1ba',
-    authDomain: 'tracking-ed1ba.firebaseapp.com',
-    storageBucket: 'tracking-ed1ba.firebasestorage.app',
-    measurementId: 'G-NY2K94EC32',
-  );
-
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBjqC1H5QV4DrRYnP6buubn4NPhXqTHikQ',
-    appId: '1:661343486324:android:4477da69366fa6e1666c21',
+    appId: '1:661343486324:android:4999d1d064591987666c21',
     messagingSenderId: '661343486324',
     projectId: 'tracking-ed1ba',
     storageBucket: 'tracking-ed1ba.firebasestorage.app',
-  );
-
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAm8jSQl477kkWHm2V-ZsTeQhylmQsApRE',
-    appId: '1:661343486324:ios:6ed71517e08b841d666c21',
-    messagingSenderId: '661343486324',
-    projectId: 'tracking-ed1ba',
-    storageBucket: 'tracking-ed1ba.firebasestorage.app',
-    iosClientId: '661343486324-dfim5orb83mlnh4n1pe4spci7hcv8ab3.apps.googleusercontent.com',
-    iosBundleId: 'com.example.fitnessApp',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyAm8jSQl477kkWHm2V-ZsTeQhylmQsApRE',
-    appId: '1:661343486324:ios:6ed71517e08b841d666c21',
-    messagingSenderId: '661343486324',
-    projectId: 'tracking-ed1ba',
-    storageBucket: 'tracking-ed1ba.firebasestorage.app',
-    iosClientId: '661343486324-dfim5orb83mlnh4n1pe4spci7hcv8ab3.apps.googleusercontent.com',
-    iosBundleId: 'com.example.fitnessApp',
-  );
-
-  static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBy6047xIuiM5eDAqFtLHXndNvU_rSdE2E',
-    appId: '1:661343486324:web:6c9a3de08bb89ba9666c21',
-    messagingSenderId: '661343486324',
-    projectId: 'tracking-ed1ba',
-    authDomain: 'tracking-ed1ba.firebaseapp.com',
-    storageBucket: 'tracking-ed1ba.firebasestorage.app',
-    measurementId: 'G-L5H66VMZES',
   );
 }
