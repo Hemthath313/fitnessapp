@@ -3,6 +3,10 @@
         android:label=" Gym Buddy"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
+            <!-- AdMob App ID -->
+           <meta-data
+             android:name="com.google.android.gms.ads.APPLICATION_ID"
+             android:value="ca-app-pub-5975958510203735~8996828666"/> 
         <activity
             android:name=".MainActivity"
             android:exported="true"
