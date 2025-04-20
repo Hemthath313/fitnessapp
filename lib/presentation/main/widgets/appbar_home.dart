@@ -8,7 +8,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-
 class HomePageAppBarWidget extends StatelessWidget {
   const HomePageAppBarWidget({
     super.key,
@@ -64,7 +63,7 @@ class HomePageAppBarWidget extends StatelessWidget {
                     style: StyleManager.homeTitleNameTextStyle,
                   ),
                   Text(
-                    '${homeProvider.userData['first name']} ${homeProvider.userData['surname']}!',
+                    '${(homeProvider.userData['first name'] ?? 'Guest')} ${(homeProvider.userData['surname'] ?? '')}!',
                     style: StyleManager.homeTitleDataTextStyle,
                   )
                 ],
