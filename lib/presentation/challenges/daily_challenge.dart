@@ -228,8 +228,45 @@ class DailyExercisePage extends StatelessWidget {
               'progress.sixPackChallenge.completionDate':
                   DateTime.now().toIso8601String(),
             });
+
             onComplete();
-            Navigator.pop(context);
+
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                backgroundColor: ColorManager.darkGrey,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                title: Center(
+                  child: Text(
+                    '🎉 Congratulations!',
+                    style: TextStyle(
+                        color: ColorManager.limerGreen2,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
+                content: Text(
+                  'You have successfully completed Day $day!\n\nCome back tomorrow for Day ${day + 1}\'s exercises.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white),
+                ),
+                actions: [
+                  Center(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ColorManager.limerGreen2,
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop(); // close dialog
+                        Navigator.of(context).pop(); // go back
+                      },
+                      child: Text('Got it!',
+                          style: TextStyle(color: Colors.black)),
+                    ),
+                  ),
+                ],
+              ),
+            );
           },
           child: Text('Mark Day $day as Complete',
               style: TextStyle(color: Colors.black)),

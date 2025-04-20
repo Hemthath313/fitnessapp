@@ -265,9 +265,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> signInWithGoogle(BuildContext context) async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    if (googleUser == null) {
-      return;
-    }
+    if (googleUser == null) return;
 
     final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;
@@ -277,7 +275,21 @@ class AuthProvider with ChangeNotifier {
       idToken: googleAuth.idToken,
     );
 
-    await FirebaseAuth.instance.signInWithCredential(credential);
+    final userCredential =
+        await FirebaseAuth.instance.signInWithCredential(credential);
+    final user = userCredential.user;
+
+    // Create Firestore doc if it doesn't exist
+    final userDoc =
+        FirebaseFirestore.instance.collection('users').doc(user!.uid);
+    final docSnapshot = await userDoc.get();
+
+    if (!docSnapshot.exists) {
+      await userDoc.set({
+        'email': user.email,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    }
   }
 
   Future<void> loadUserData() async {

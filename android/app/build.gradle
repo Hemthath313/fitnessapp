@@ -2,6 +2,8 @@ plugins {
     id "com.android.application"
     // START: FlutterFire Configuration
     id 'com.google.gms.google-services'
+    // Add this for Crashlytics
+    id 'com.google.firebase.crashlytics' 
     // END: FlutterFire Configuration
     id "kotlin-android"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -63,8 +65,10 @@ flutter {
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-crashlytics") // Add this for Crashlytics
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.google.android.gms:play-services-auth:21.2.0'
- 
+
 }
 
+ 

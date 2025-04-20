@@ -51,11 +51,15 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
         today.day > completionDate.day;
 
     setState(() {
-      completedDays = isNewDay ? lastCompletedDay + 1 : lastCompletedDay;
+      if (lastCompletedDay == 0) {
+        completedDays = 1;
+      } else {
+        completedDays = isNewDay ? lastCompletedDay + 1 : lastCompletedDay;
+      }
     });
   }
 
- void fetchExercises() async {
+  void fetchExercises() async {
     try {
       if (!(await Connectivity().checkConnectivity())
           .contains(ConnectivityResult.none)) {
@@ -88,7 +92,6 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
       setState(() => isLoading = false);
     }
   }
-
 
   // void completeDay(int day) async {
   //   print('Completing day $day...');
@@ -134,10 +137,16 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
                   child: ListTile(
                     contentPadding: EdgeInsets.all(10),
                     title: Text(
-                        'Day $day: ${groupedExercises[index].length} Exercises',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: isUnlocked ? Colors.white : Colors.white38)),
+                      'Day $day: ${groupedExercises[index].length} Exercises',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: isUnlocked ? Colors.white : Colors.white38,
+                      ),
+                    ),
+                    trailing: Icon(
+                      isUnlocked ? Icons.lock_open : Icons.lock,
+                      color: isUnlocked ? Colors.white : Colors.white38,
+                    ),
                     enabled: isUnlocked,
                     onTap: isUnlocked
                         ? () async {
