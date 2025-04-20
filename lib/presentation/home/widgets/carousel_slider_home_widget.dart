@@ -7,61 +7,56 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class CarouselSliderHomeWidget extends StatelessWidget {
-  const CarouselSliderHomeWidget({
-    super.key,
-  });
+  const CarouselSliderHomeWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
     final deviceWidth = MediaQuery.of(context).size.width;
+
+    final List<_CarouselItem> carouselItems = [
+      _CarouselItem(
+        image: ImageManager.absWorkout,
+        title: StringsManager.sixPackChallenge,
+        route: Routes.absRoute,
+      ),
+      _CarouselItem(
+        image: ImageManager.dumbels,
+        title: StringsManager.workoutsplit,
+        route: Routes.workoutSplitsRoute,
+      ),
+      _CarouselItem(
+        image: ImageManager.shoulderWorkout,
+        title: StringsManager.exerciseOfWeek,
+        route: Routes.dietRoute,
+      ),
+    ];
+
     return CarouselSlider(
-      items: [
-        CarouselHomeBox(
+      items: carouselItems.map((item) {
+        return CarouselHomeBox(
           deviceWidth: deviceWidth,
-          image: ImageManager.absWorkout,
-          onTap: () {
-            context.push(Routes.absRoute);
-          },
-          title: StringsManager.sixPackChallenge,
-        ),
-        CarouselHomeBox(
-          deviceWidth: deviceWidth,
-          image: ImageManager.dumbels,
-          onTap: () {
-            context.push(Routes.workoutSplitsRoute);
-          },
-          title: StringsManager.workoutsplit,
-        ),
-        CarouselHomeBox(
-          deviceWidth: deviceWidth,
-          image: ImageManager.shoulderWorkout,
-          onTap: () {
-            context.push(Routes.dietRoute);
-          },
-          title: StringsManager.exerciseOfWeek,
-        ),
-        // CarouselHomeBox(
-        //   deviceWidth: deviceWidth,
-        //   image: ImageManager.cardioWorkout,
-        //   onTap: () {
-        //     context.push(Routes.cardioRoute);
-        //     //TODO
-        //   },
-        //   title: StringsManager.cardio,
-        // ),
-        // CarouselHomeBox(
-        //   deviceWidth: deviceWidth,
-        //   image: ImageManager.carousel5WP,
-        //   onTap: () {
-        //     //TODO
-        //   },
-        //   title: StringsManager.confidence,
-        // ),
-      ],
+          image: item.image,
+          title: item.title,
+          onTap: () => context.push(item.route),
+        );
+      }).toList(),
       options: CarouselOptions(
         autoPlay: true,
         enlargeCenterPage: true,
+        viewportFraction: deviceWidth < 400 ? 0.9 : 0.8,
       ),
     );
   }
+}
+
+class _CarouselItem {
+  final String image;
+  final String title;
+  final String route;
+
+  const _CarouselItem({
+    required this.image,
+    required this.title,
+    required this.route,
+  });
 }
