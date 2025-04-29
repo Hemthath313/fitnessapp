@@ -27,7 +27,7 @@ class CarouselSliderHomeWidget extends StatelessWidget {
       _CarouselItem(
         image: ImageManager.shoulderWorkout,
         title: StringsManager.exerciseOfWeek,
-        route: Routes.dietRoute,
+        route: Routes.comingSoon,
       ),
     ];
 

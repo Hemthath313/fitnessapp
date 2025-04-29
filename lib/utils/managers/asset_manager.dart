@@ -23,7 +23,7 @@ class ImageManager {
   static const weight = '$imagePath/weight.png';
   static const absWorkout = '$imagePath/abs_workout.webp';
   static const backWorkout = '$imagePath/back_workout.webp';
-  static const chestWorkout = '$imagePath/chest_workout.jpg';
+  static const chestWorkout = '$imagePath/chest_workout.webp';
   static const legWorkout = '$imagePath/leg_workout.webp';
   static const shoulderWorkout = '$imagePath/shoulder_workout.webp';
   static const tricepsWorkout = '$imagePath/triceps_workout-unsplash.webp';

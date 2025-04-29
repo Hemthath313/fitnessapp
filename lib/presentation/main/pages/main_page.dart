@@ -132,7 +132,7 @@ class _MainPageState extends State<MainPage> {
         size: SizeManager.s28,
       ),
       Icon(
-        Icons.list,
+        Icons.chat_bubble_outline_rounded,
         color: isWorkoutsPage ? ColorManager.limerGreen2 : ColorManager.grey2,
         size: SizeManager.s28,
       ),

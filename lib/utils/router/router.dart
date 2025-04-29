@@ -39,6 +39,7 @@ import 'package:fitness_app/presentation/workout_splits/workout_splits.dart';
 import 'package:fitness_app/presentation/workouts/pages/new_exercise_page.dart';
 import 'package:fitness_app/presentation/workouts/pages/workouts_page.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
+import 'package:fitness_app/utils/widgets/coming_soon.dart';
 import 'package:fitness_app/utils/widgets/page_transition.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -83,6 +84,7 @@ class Routes {
   static const String fullBodySplit = '/fullBodySplit';
   static const String upperLowerSplit = '/upperLowerSplit';
   static const String recoveryRoute = '/recovery';
+  static const String comingSoon = '/comingSoon';
 }
 
 final GoRouter router = GoRouter(
@@ -262,6 +264,12 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, DeleteAccountPage())),
+    GoRoute(
+        path: Routes.comingSoon,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, ComingSoon())),
+
     GoRoute(
         path: Routes.newMealRoute,
         pageBuilder: (context, state) =>
