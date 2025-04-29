@@ -8,11 +8,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart'; // For kDebugMode
 
 Future<void> main() async {
-  // Load environment variables
-  await dotenv.load(fileName: "lib/.env");
-
-  // Ensure Flutter framework is initialized
+  // FIRST: Ensure Flutter framework is initialized
   WidgetsFlutterBinding.ensureInitialized();
+
+  // THEN: Load environment variables
+  await dotenv.load(fileName: "lib/.env");
 
   // Initialize Firebase
   await Firebase.initializeApp();
