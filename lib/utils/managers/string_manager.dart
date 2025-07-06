@@ -15,7 +15,7 @@ class StringsManager {
   static const String dontHaveAcc = 'Not a Member?';
   static const String forgotPassword = 'Forgot password?';
   static const String repeatPasswordHint = 'Repeat Password';
-  static const String swipeToPrc = 'Let\'s Start';
+  static const String swipeToPrc = 'Swipe to continue';
   static const String myAcc = 'MY ACCOUNT';
   static const String enterEmailToResetPw =
       'Enter your Email\nto reset your Password';
