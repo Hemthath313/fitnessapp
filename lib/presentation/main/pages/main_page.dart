@@ -71,13 +71,17 @@ class _MainPageState extends State<MainPage> {
           Provider.of<ConsumptionProvider>(context, listen: false);
       final workoutsProvider =
           Provider.of<WorkoutProvider>(context, listen: false);
+      // FIRST: Check and clear water for new day BEFORE loading data
+      await consumptionProvider.clearWaterIfNeeded();
+
+      // THEN: Load fresh data after potential reset
       await consumptionProvider.fetchAndSetMeals();
       await consumptionProvider.fetchAndSetWater();
       await workoutsProvider.fetchAndSetWorkouts();
       await workoutsProvider.getProgressPercent();
+
       final workouts = workoutsProvider.workouts;
       final meals = consumptionProvider.meals;
-      final water = consumptionProvider.water;
       bool isNewDay(DateTime now, DateTime lastDate) {
         return now.year > lastDate.year ||
             now.month > lastDate.month ||
@@ -89,14 +93,6 @@ class _MainPageState extends State<MainPage> {
         if (isNewDay(DateTime.now(), lastMealDateTime)) {
           await consumptionProvider.clearMealsIfNeeded();
           await consumptionProvider.fetchAndSetMeals();
-        }
-      }
-
-      if (water.isNotEmpty) {
-        final lastWaterDateTime = water.last.dateTime;
-        if (isNewDay(DateTime.now(), lastWaterDateTime)) {
-          await consumptionProvider.clearWaterIfNeeded();
-          await consumptionProvider.fetchAndSetWater();
         }
       }
 

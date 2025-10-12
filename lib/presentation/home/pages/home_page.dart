@@ -21,7 +21,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     Provider.of<ConsumptionProvider>(context, listen: false)
         .getConsumedCalories();
-    Provider.of<ConsumptionProvider>(context, listen: false).fetchAndSetWater();
+    // Water data is loaded in MainPage after reset check
   }
 
   @override
