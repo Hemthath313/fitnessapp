@@ -9,6 +9,7 @@ class BannerAdWidget extends StatefulWidget {
 class _BannerAdWidgetState extends State<BannerAdWidget> {
   late BannerAd _bannerAd;
   bool _isAdLoaded = false;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -18,25 +19,61 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
       size: AdSize.banner,
       request: const AdRequest(),
       listener: BannerAdListener(
-        onAdLoaded: (_) => setState(() => _isAdLoaded = true),
-        onAdFailedToLoad: (ad, error) {
-          ad.dispose();
-          print('Failed to load a banner ad: $error');
+        onAdLoaded: (_) {
+          print('Banner ad loaded successfully');
+          setState(() {
+            _isAdLoaded = true;
+            _errorMessage = null;
+          });
         },
+        onAdFailedToLoad: (ad, error) {
+          print('Failed to load a banner ad: $error');
+          setState(() {
+            _errorMessage = error.message;
+          });
+          ad.dispose();
+        },
+        onAdOpened: (_) => print('Banner ad opened'),
+        onAdClosed: (_) => print('Banner ad closed'),
       ),
     )..load();
   }
 
   @override
   Widget build(BuildContext context) {
-    return _isAdLoaded
-        ? Container(
-            alignment: Alignment.center,
-            height: _bannerAd.size.height.toDouble(),
-            width: _bannerAd.size.width.toDouble(),
-            child: AdWidget(ad: _bannerAd),
-          )
-        : SizedBox.shrink();
+    if (_isAdLoaded) {
+      return Container(
+        alignment: Alignment.center,
+        height: _bannerAd.size.height.toDouble(),
+        width: _bannerAd.size.width.toDouble(),
+        child: AdWidget(ad: _bannerAd),
+      );
+    } else if (_errorMessage != null) {
+      // Show error message for debugging
+      return Container(
+        height: 50,
+        color: Colors.red.withOpacity(0.1),
+        child: Center(
+          child: Text(
+            'Ad Error: $_errorMessage',
+            style: TextStyle(color: Colors.red, fontSize: 12),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    } else {
+      // Show loading indicator
+      return Container(
+        height: 50,
+        color: Colors.grey.withOpacity(0.1),
+        child: Center(
+          child: Text(
+            'Loading Ad...',
+            style: TextStyle(color: Colors.grey, fontSize: 12),
+          ),
+        ),
+      );
+    }
   }
 
   @override

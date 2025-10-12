@@ -1,6 +1,5 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:fitness_app/presentation/chat_screen/chat_screen.dart';
-import 'package:fitness_app/presentation/consumption/pages/consumption_page.dart';
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
 import 'package:fitness_app/presentation/explore/explore_page.dart';
 import 'package:fitness_app/presentation/home/pages/home_page.dart';
@@ -19,7 +18,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -67,10 +65,8 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    MobileAds.instance.initialize();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       NetworkService.initialize();
-      MobileAds.instance.initialize();
       final consumptionProvider =
           Provider.of<ConsumptionProvider>(context, listen: false);
       final workoutsProvider =

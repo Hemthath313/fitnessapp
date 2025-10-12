@@ -4,7 +4,6 @@ import 'package:fitness_app/presentation/home/widgets/fitness_data_widget.dart';
 import 'package:fitness_app/presentation/home/widgets/home_page_text_spacer_widget.dart';
 import 'package:fitness_app/presentation/home/widgets/todays_progress_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
@@ -42,7 +41,7 @@ class _HomePageState extends State<HomePage> {
               title: StringsManager.challenges,
             ),
             const CarouselSliderHomeWidget(),
-            // BannerAdWidget(),
+            BannerAdWidget(),
           ],
         ),
       ),

@@ -6,6 +6,7 @@ import 'package:fitness_app/app/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart'; // For kDebugMode
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 Future<void> main() async {
   // FIRST: Ensure Flutter framework is initialized
@@ -16,6 +17,9 @@ Future<void> main() async {
 
   // Initialize Firebase
   await Firebase.initializeApp();
+
+  // Initialize Google Mobile Ads
+  await MobileAds.instance.initialize();
 
   // Set up Crashlytics (only in production)
   if (!kDebugMode) {
