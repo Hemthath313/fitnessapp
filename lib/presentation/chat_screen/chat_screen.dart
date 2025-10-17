@@ -1,3 +1,4 @@
+import 'package:fitness_app/presentation/banner_ads/banner_ad_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -142,6 +143,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 },
               ),
             ),
+            BannerAdWidget(pageName: 'chat'),
             _buildInputArea(),
           ],
         ),
