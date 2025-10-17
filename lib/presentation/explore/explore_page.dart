@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fitness_app/presentation/banner_ads/banner_ad_service.dart';
+import 'package:fitness_app/presentation/interstitial_ads/interstitial_ad_service.dart';
 import 'package:fitness_app/utils/managers/asset_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
@@ -26,7 +28,11 @@ class _ExploreWidgetState extends State<ExploreWidget>
         'image': ImageManager.strengthWorkout,
         'title': StringsManager.strengh,
         'description': 'Build strength and endurance with tailored workouts.',
-        'onTap': () => context.push(Routes.bodypartsPage),
+        'onTap': () async {
+          // Show interstitial ad when user taps strength workout
+          await InterstitialAdService.showStrengthWorkoutAd();
+          context.push(Routes.bodypartsPage);
+        },
       },
       {
         'image': ImageManager.postWorkout,
@@ -78,20 +84,27 @@ class _ExploreWidgetState extends State<ExploreWidget>
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(12.0),
-      itemCount: cards.length,
-      itemBuilder: (context, index) {
-        return RepaintBoundary(
-          child: ExploreCard(
-            animation: animations[index],
-            image: cards[index]['image'],
-            title: cards[index]['title'],
-            description: cards[index]['description'],
-            onTap: cards[index]['onTap'],
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(12.0),
+            itemCount: cards.length,
+            itemBuilder: (context, index) {
+              return RepaintBoundary(
+                child: ExploreCard(
+                  animation: animations[index],
+                  image: cards[index]['image'],
+                  title: cards[index]['title'],
+                  description: cards[index]['description'],
+                  onTap: cards[index]['onTap'],
+                ),
+              );
+            },
           ),
-        );
-      },
+        ),
+        BannerAdWidget(pageName: 'explore'),
+      ],
     );
   }
 }

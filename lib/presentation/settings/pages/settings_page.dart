@@ -1,3 +1,4 @@
+import 'package:fitness_app/presentation/banner_ads/banner_ad_service.dart';
 import 'package:fitness_app/presentation/settings/widgets/button_settings.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
@@ -20,77 +21,84 @@ class _SettingsPageState extends State<SettingsPage> {
     final deviceWidth = MediaQuery.of(context).size.width;
 
     return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: PaddingManager.p12,
-                  bottom: PaddingManager.p12,
-                  top: PaddingManager.p12,
-                ),
-                child: Text(
-                  StringsManager.accountSpacer,
-                  style: StyleManager.settingsPageSpacerTextStyle,
-                ),
-              ),
+      child: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        left: PaddingManager.p12,
+                        bottom: PaddingManager.p12,
+                        top: PaddingManager.p12,
+                      ),
+                      child: Text(
+                        StringsManager.accountSpacer,
+                        style: StyleManager.settingsPageSpacerTextStyle,
+                      ),
+                    ),
+                  ),
+                  SettingsPageButton(
+                    deviceWidth: deviceWidth,
+                    onTap: () => context.push(Routes.changeEmailRoute),
+                    iconData: Icons.email_outlined,
+                    title: StringsManager.changeEmail,
+                  ),
+                  SettingsPageButton(
+                    deviceWidth: deviceWidth,
+                    onTap: () => context.push(Routes.changePasswordRoute),
+                    iconData: Icons.lock_open_sharp,
+                    title: StringsManager.changePassword,
+                  ),
+                  SettingsPageButton(
+                    deviceWidth: deviceWidth,
+                    onTap: () => context.push(Routes.deleteAccRoute),
+                    iconData: Icons.delete_outlined,
+                    title: StringsManager.deleteAcc,
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        left: PaddingManager.p12,
+                        bottom: PaddingManager.p12,
+                        top: PaddingManager.p12,
+                      ),
+                      child: Text(
+                        StringsManager.generalSpacer,
+                        style: StyleManager.settingsPageSpacerTextStyle,
+                      ),
+                    ),
+                  ),
+                  SettingsPageButton(
+                    deviceWidth: deviceWidth,
+                    onTap: () {
+                      //TODO:
+                    },
+                    iconData: Icons.help_outline,
+                    title: StringsManager.support,
+                  ),
+                  SettingsPageButton(
+                    deviceWidth: deviceWidth,
+                    onTap: () {
+                      //TODO:
+                    },
+                    iconData: Icons.library_books_outlined,
+                    title: StringsManager.termsOfService,
+                  ),
+                ],
+              ).animate().fadeIn(
+                    duration: 500.ms,
+                  ),
             ),
-            SettingsPageButton(
-              deviceWidth: deviceWidth,
-              onTap: () => context.push(Routes.changeEmailRoute),
-              iconData: Icons.email_outlined,
-              title: StringsManager.changeEmail,
-            ),
-            SettingsPageButton(
-              deviceWidth: deviceWidth,
-              onTap: () => context.push(Routes.changePasswordRoute),
-              iconData: Icons.lock_open_sharp,
-              title: StringsManager.changePassword,
-            ),
-            SettingsPageButton(
-              deviceWidth: deviceWidth,
-              onTap: () => context.push(Routes.deleteAccRoute),
-              iconData: Icons.delete_outlined,
-              title: StringsManager.deleteAcc,
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: PaddingManager.p12,
-                  bottom: PaddingManager.p12,
-                  top: PaddingManager.p12,
-                ),
-                child: Text(
-                  StringsManager.generalSpacer,
-                  style: StyleManager.settingsPageSpacerTextStyle,
-                ),
-              ),
-            ),
-            SettingsPageButton(
-              deviceWidth: deviceWidth,
-              onTap: () {
-                //TODO:
-              },
-              iconData: Icons.help_outline,
-              title: StringsManager.support,
-            ),
-            SettingsPageButton(
-              deviceWidth: deviceWidth,
-              onTap: () {
-                //TODO:
-              },
-              iconData: Icons.library_books_outlined,
-              title: StringsManager.termsOfService,
-            ),
-          ],
-        ).animate().fadeIn(
-              duration: 500.ms,
-            ),
+          ),
+          BannerAdWidget(pageName: 'settings'),
+        ],
       ),
     );
   }

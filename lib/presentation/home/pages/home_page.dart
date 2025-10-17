@@ -1,4 +1,4 @@
-import 'package:fitness_app/presentation/banner_ads/banner_ad.dart';
+import 'package:fitness_app/presentation/banner_ads/banner_ad_service.dart';
 import 'package:fitness_app/presentation/home/widgets/carousel_slider_home_widget.dart';
 import 'package:fitness_app/presentation/home/widgets/fitness_data_widget.dart';
 import 'package:fitness_app/presentation/home/widgets/home_page_text_spacer_widget.dart';
@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
               title: StringsManager.challenges,
             ),
             const CarouselSliderHomeWidget(),
-            BannerAdWidget(),
+            BannerAdWidget(pageName: 'home'),
           ],
         ),
       ),
