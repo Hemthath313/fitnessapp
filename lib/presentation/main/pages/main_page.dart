@@ -14,6 +14,7 @@ import 'package:fitness_app/presentation/workouts/providers/workout_provider.dar
 import 'package:fitness_app/services/connectivity_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
+import 'package:fitness_app/utils/widgets/error_boundary.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -156,7 +157,10 @@ class _MainPageState extends State<MainPage> {
         index: _currentIndex,
         items: bottomNavItems,
       ),
-      body: pages[_currentIndex].animate().fadeIn(duration: 500.ms),
+      body: ErrorBoundary(
+        child: pages[_currentIndex].animate().fadeIn(duration: 500.ms),
+        fallbackMessage: 'Unable to load this page',
+      ),
     );
   }
 }

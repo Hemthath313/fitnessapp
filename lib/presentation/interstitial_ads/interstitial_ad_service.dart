@@ -1,4 +1,5 @@
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:fitness_app/utils/ad_config.dart';
 
 class InterstitialAdService {
   static InterstitialAd? _interstitialAd;
@@ -8,18 +9,10 @@ class InterstitialAdService {
   static bool _hasShownAdForSession =
       false; // Track if ad shown in current session
 
-  // Different ad units for different contexts
-  static const String _workoutAdUnitId =
-      'ca-app-pub-5975958510203735/1060509842'; // Workout completion
-  static const String _strengthAdUnitId =
-      'ca-app-pub-5975958510203735/1060509842'; // Strength workout access
-  static const String _generalAdUnitId =
-      'ca-app-pub-5975958510203735/1060509842'; // General use
-
   static Future<void> loadInterstitialAd({String? adUnitId}) async {
     if (_isAdLoaded) return;
 
-    final String unitId = adUnitId ?? _generalAdUnitId;
+    final String unitId = adUnitId ?? AdConfig.interstitialAdUnitId;
 
     try {
       await InterstitialAd.load(
@@ -107,13 +100,15 @@ class InterstitialAdService {
 
   // Specific method for strength workout access
   static Future<void> showStrengthWorkoutAd() async {
-    await loadInterstitialAd(adUnitId: _strengthAdUnitId);
+    await loadInterstitialAd(
+        adUnitId: AdConfig.getInterstitialAdUnitIdForContext('strength'));
     await showInterstitialAd(forceShow: true);
   }
 
   // Specific method for workout completion
   static Future<void> showWorkoutCompletionAd() async {
-    await loadInterstitialAd(adUnitId: _workoutAdUnitId);
+    await loadInterstitialAd(
+        adUnitId: AdConfig.getInterstitialAdUnitIdForContext('workout'));
     await showInterstitialAd();
   }
 

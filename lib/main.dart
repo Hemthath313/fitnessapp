@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:fitness_app/app/app.dart';
+import 'package:fitness_app/utils/ad_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart'; // For kDebugMode
@@ -12,14 +13,27 @@ Future<void> main() async {
   // FIRST: Ensure Flutter framework is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // THEN: Load environment variables
-  await dotenv.load(fileName: "lib/.env");
+  // THEN: Load environment variables (with error handling)
+  try {
+    await dotenv.load(fileName: "lib/.env");
+  } catch (e) {
+    // Handle missing .env file gracefully
+    if (kDebugMode) {
+      debugPrint(
+          'Warning: .env file not found. Some features may not work properly.');
+    }
+  }
 
   // Initialize Firebase
   await Firebase.initializeApp();
 
   // Initialize Google Mobile Ads
   await MobileAds.instance.initialize();
+
+  // Print ad configuration for debugging
+  // if (kDebugMode) {
+  //   AdConfig.printAdConfig();
+  // }
 
   // Set up Crashlytics (only in production)
   if (!kDebugMode) {

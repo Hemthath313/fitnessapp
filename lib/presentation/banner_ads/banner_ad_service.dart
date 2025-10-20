@@ -1,34 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:fitness_app/utils/ad_config.dart';
 
 class BannerAdService {
-  // Different banner ad units for different pages
-  static const String _homeAdUnitId =
-      'ca-app-pub-5975958510203735/2418977875'; // Home page
-  static const String _exploreAdUnitId =
-      'ca-app-pub-5975958510203735/1219614958'; // Explore page
-  static const String _chatAdUnitId =
-      'ca-app-pub-5975958510203735/3515923426'; // Chat page
-  static const String _settingsAdUnitId =
-      'ca-app-pub-5975958510203735/3515923426'; // Settings page
-  static const String _profileAdUnitId =
-      'ca-app-pub-5975958510203735/2418977875'; // Profile page
-
   static String getAdUnitIdForPage(String pageName) {
-    switch (pageName.toLowerCase()) {
-      case 'home':
-        return _homeAdUnitId;
-      case 'explore':
-        return _exploreAdUnitId;
-      case 'chat':
-        return _chatAdUnitId;
-      case 'settings':
-        return _settingsAdUnitId;
-      case 'profile':
-        return _profileAdUnitId;
-      default:
-        return _homeAdUnitId; // Default to home page ad unit
-    }
+    return AdConfig.getBannerAdUnitIdForPage(pageName);
   }
 }
 

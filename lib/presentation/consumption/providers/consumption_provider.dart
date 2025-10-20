@@ -62,10 +62,15 @@ class ConsumptionProvider with ChangeNotifier {
   Future fetchAndSetMeals() async {
     User? user = FirebaseAuth.instance.currentUser;
 
+    if (user == null) {
+      print('No user found for fetching meals');
+      return;
+    }
+
     try {
       final mealsSnapshot = await FirebaseFirestore.instance
           .collection('meals')
-          .doc(user!.uid)
+          .doc(user.uid)
           .collection('mealData')
           .get();
 
@@ -75,13 +80,15 @@ class ConsumptionProvider with ChangeNotifier {
         final mealData = doc.data();
         loadedMeals.add(MealModel(
           id: doc.id,
-          title: mealData['title'],
-          amount: mealData['amount'],
-          calories: mealData['calories'],
-          fats: mealData['fats'],
-          carbs: mealData['carbs'],
-          proteins: mealData['proteins'],
-          dateTime: (mealData['dateTime'] as Timestamp).toDate(),
+          title: mealData['title'] ?? '',
+          amount: (mealData['amount'] ?? 0).toDouble(),
+          calories: (mealData['calories'] ?? 0).toDouble(),
+          fats: (mealData['fats'] ?? 0).toDouble(),
+          carbs: (mealData['carbs'] ?? 0).toDouble(),
+          proteins: (mealData['proteins'] ?? 0).toDouble(),
+          dateTime: mealData['dateTime'] != null
+              ? (mealData['dateTime'] as Timestamp).toDate()
+              : DateTime.now(),
         ));
       }
       loadedMeals.sort((a, b) => b.dateTime.compareTo(a.dateTime));
@@ -90,7 +97,8 @@ class ConsumptionProvider with ChangeNotifier {
       await getConsumedCalories();
       notifyListeners();
     } catch (e) {
-      rethrow;
+      print('Error fetching meals: $e');
+      // Don't rethrow, just log the error
     }
   }
 
@@ -193,10 +201,15 @@ class ConsumptionProvider with ChangeNotifier {
   Future fetchAndSetWater() async {
     User? user = FirebaseAuth.instance.currentUser;
 
+    if (user == null) {
+      print('No user found for fetching water data');
+      return;
+    }
+
     try {
       final mealsSnapshot = await FirebaseFirestore.instance
           .collection('meals')
-          .doc(user!.uid)
+          .doc(user.uid)
           .collection('waterData')
           .get();
 
@@ -206,8 +219,10 @@ class ConsumptionProvider with ChangeNotifier {
         final mealData = doc.data();
         loadedWater.add(WaterModel(
           id: doc.id,
-          amount: mealData['amount'],
-          dateTime: (mealData['dateTime'] as Timestamp).toDate(),
+          amount: (mealData['amount'] ?? 0).toDouble(),
+          dateTime: mealData['dateTime'] != null
+              ? (mealData['dateTime'] as Timestamp).toDate()
+              : DateTime.now(),
         ));
       }
       _water.clear();
@@ -215,7 +230,8 @@ class ConsumptionProvider with ChangeNotifier {
       await getWater();
       notifyListeners();
     } catch (e) {
-      rethrow;
+      print('Error fetching water data: $e');
+      // Don't rethrow, just log the error
     }
   }
 
@@ -313,6 +329,6 @@ class ConsumptionProvider with ChangeNotifier {
       consumedCalories = 0;
     }
 
-    notifyListeners(); 
+    notifyListeners();
   }
 }

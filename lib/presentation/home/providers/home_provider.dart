@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class HomeProvider with ChangeNotifier {
   final Map<String, dynamic> _userData = {};
@@ -20,30 +18,42 @@ class HomeProvider with ChangeNotifier {
             .collection('users')
             .doc(user.uid)
             .get();
-        _userData['first name'] = userDataSnapshot.get('first name');
-        _userData['surname'] = userDataSnapshot.get('surname');
-        _userData['age'] = userDataSnapshot.get('age');
-        _userData['height'] = userDataSnapshot.get('height');
-        _userData['weight'] = userDataSnapshot.get('weight');
-        _userData['gender'] = userDataSnapshot.get('gender');
-        _userData['activity'] = userDataSnapshot.get('activity');
-        _userData['bmr'] = userDataSnapshot.get('bmr');
-        _userData['goal'] = userDataSnapshot.get('goal');
-        _userData['bmi'] = userDataSnapshot.get('bmi');
-        _userData['email'] = userDataSnapshot.get('email');
-        _userData['chest'] = userDataSnapshot.get('chest');
-        _userData['shoulders'] = userDataSnapshot.get('shoulders');
-        _userData['biceps'] = userDataSnapshot.get('biceps');
-        _userData['foreArm'] = userDataSnapshot.get('foreArm');
-        _userData['waist'] = userDataSnapshot.get('waist');
-        _userData['hips'] = userDataSnapshot.get('hips');
-        _userData['thigh'] = userDataSnapshot.get('thigh');
-        _userData['calf'] = userDataSnapshot.get('calf');
+
+        if (userDataSnapshot.exists && userDataSnapshot.data() != null) {
+          final data = userDataSnapshot.data() as Map<String, dynamic>;
+          _userData['first name'] = data['first name'] ?? '';
+          _userData['surname'] = data['surname'] ?? '';
+          _userData['age'] = data['age'] ?? 0;
+          _userData['height'] = (data['height'] ?? 0).toDouble();
+          _userData['weight'] = (data['weight'] ?? 0).toDouble();
+          _userData['gender'] = data['gender'] ?? '';
+          _userData['activity'] = data['activity'] ?? '';
+          _userData['bmr'] = (data['bmr'] ?? 0).toDouble();
+          _userData['goal'] = data['goal'] ?? '';
+          _userData['bmi'] = (data['bmi'] ?? 0).toDouble();
+          _userData['email'] = data['email'] ?? '';
+          _userData['chest'] = (data['chest'] ?? 0).toDouble();
+          _userData['shoulders'] = (data['shoulders'] ?? 0).toDouble();
+          _userData['biceps'] = (data['biceps'] ?? 0).toDouble();
+          _userData['foreArm'] = (data['foreArm'] ?? 0).toDouble();
+          _userData['waist'] = (data['waist'] ?? 0).toDouble();
+          _userData['hips'] = (data['hips'] ?? 0).toDouble();
+          _userData['thigh'] = (data['thigh'] ?? 0).toDouble();
+          _userData['calf'] = (data['calf'] ?? 0).toDouble();
+        } else {
+          // Return empty data if document doesn't exist
+          _userData.clear();
+        }
 
         notifyListeners();
+      } else {
+        // Return empty data if user is null
+        _userData.clear();
       }
     } catch (e) {
-      rethrow;
+      // Log error and return empty data instead of rethrowing
+      print('Error fetching user data: $e');
+      _userData.clear();
     }
     return _userData;
   }
