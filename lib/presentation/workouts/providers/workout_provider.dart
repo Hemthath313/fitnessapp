@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/model/workout_model.dart';
+import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class WorkoutProvider with ChangeNotifier {
   final List<WorkoutModel> _workouts = [];
@@ -262,10 +264,39 @@ class WorkoutProvider with ChangeNotifier {
         'dateTime': dateTime,
         'id': workoutID,
       });
+
+      // Update streak and statistics
+      // This needs to be called from the widget that has access to context
+
       notifyListeners();
     } catch (e) {
       notifyListeners();
       rethrow;
+    }
+  }
+
+  static Future<void> updateStatisticsAfterWorkout(BuildContext context) async {
+    try {
+      final statisticsProvider =
+          Provider.of<StatisticsProvider>(context, listen: false);
+      await statisticsProvider.updateStreak();
+
+      // Check for new achievements and show notification
+      final newAchievements = statisticsProvider.unlockedAchievements;
+
+      if (newAchievements.isNotEmpty) {
+        // Show achievement notification
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text('🎉 New Achievement Unlocked: ${newAchievements.last}!'),
+            backgroundColor: Colors.amber,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error updating statistics: $e');
     }
   }
 }

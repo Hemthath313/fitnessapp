@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user owns the document
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+      
+      // Daily reset tracker
+      match /dailyReset/{document=**} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
+      
+      // Meal records
+      match /mealRecords/{document=**} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
+    }
+    
+    // Workouts collection
+    match /workouts/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+      
+      match /workoutData/{document=**} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
+    }
+    
+    // All workouts collection
+    match /allWorkouts/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+      
+      match /allWorkoutsData/{document=**} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
+    }
+    
+    // Finished workouts collection
+    match /finishedWorkouts/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+      
+      match /finishedWorkoutsData/{document=**} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
+    }
+    
+    // Meals collection
+    match /meals/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+      
+      match /mealData/{document=**} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
+      
+      match /waterData/{document=**} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
+    }
+    
+    // Statistics collection (NEW)
+    match /statistics/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

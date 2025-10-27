@@ -220,10 +220,10 @@ class FitnessDataWidget extends StatelessWidget {
                             Padding(
                               padding: EdgeInsets.only(
                                 left: PaddingManager.p12.w,
-                                right: PaddingManager.p12.w,
+                                right: PaddingManager.p4.w,
                               ),
                               child: Container(
-                                width: (deviceWidth / 3 - 16).w,
+                                width: (deviceWidth / 3 - 20).w,
                                 height: SizeManager.s100.h,
                                 decoration: BoxDecoration(
                                   color: ColorManager.black87,
@@ -302,7 +302,7 @@ class FitnessDataWidget extends StatelessWidget {
                               ),
                             ),
                             Container(
-                              width: (deviceWidth / 3 - 16).w,
+                              width: (deviceWidth / 3 - 20).w,
                               height: SizeManager.s100.h,
                               decoration: BoxDecoration(
                                 color: ColorManager.black87,

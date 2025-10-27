@@ -98,7 +98,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                                   },
                                 );
                               },
-                              onFinished: (_) {
+                              onFinished: (_) async {
                                 setState(
                                   () {
                                     workoutsProvider.finishWorkout(
@@ -113,6 +113,9 @@ class _WorkoutPageState extends State<WorkoutPage> {
                                     );
                                   },
                                 );
+                                // Update statistics and show achievement notifications
+                                await WorkoutProvider
+                                    .updateStatisticsAfterWorkout(context);
                                 // Show interstitial ad after workout completion
                                 _showInterstitialAd();
                               },

@@ -47,6 +47,9 @@ class ConsumptionProvider with ChangeNotifier {
         'proteins': proteins,
         'dateTime': dateTime,
       });
+
+      // Immediately fetch and update meal data
+      await fetchAndSetMeals();
       notifyListeners();
     } catch (e) {
       rethrow;
@@ -165,6 +168,9 @@ class ConsumptionProvider with ChangeNotifier {
         'amount': amount,
         'dateTime': dateTime,
       });
+
+      // Immediately fetch and update water data
+      await fetchAndSetWater();
       notifyListeners();
     } catch (e) {
       rethrow;
@@ -188,9 +194,15 @@ class ConsumptionProvider with ChangeNotifier {
 
   Future<void> setLastClearedDate(DateTime date) async {
     User? user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      print('No user found for setting last cleared date');
+      return;
+    }
+
     await FirebaseFirestore.instance
         .collection('users')
-        .doc(user!.uid)
+        .doc(user.uid)
         .collection('dailyReset')
         .doc('resetTracker')
         .set({
@@ -258,9 +270,15 @@ class ConsumptionProvider with ChangeNotifier {
 
   Future<void> clearAllWater() async {
     User? user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      print('No user found for clearing water data');
+      return;
+    }
+
     final waterCollection = FirebaseFirestore.instance
         .collection('meals')
-        .doc(user!.uid)
+        .doc(user.uid)
         .collection('waterData');
 
     final water = await waterCollection.get();

@@ -101,7 +101,6 @@ class _NewExercisePageState extends State<NewExercisePage> {
                       // ),
                       onChanged: _onChangedExercise,
                       value: _valueExercise,
-                      // iconSize: SizeManager.s0,
                       hint: Text(
                         StringsManager.exerciseHint,
                         style: StyleManager.registerTextfieldTextStyle,

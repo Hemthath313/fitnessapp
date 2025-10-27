@@ -1,1 +1,24 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"tracking-ed1ba","appId":"1:661343486324:android:4999d1d064591987666c21","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"tracking-ed1ba","configurations":{"android":"1:661343486324:android:4999d1d064591987666c21"}}}}}}
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "tracking-ed1ba",
+          "appId": "1:661343486324:android:4999d1d064591987666c21",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "tracking-ed1ba",
+          "configurations": {
+            "android": "1:661343486324:android:4999d1d064591987666c21"
+          }
+        }
+      }
+    }
+  }
+}

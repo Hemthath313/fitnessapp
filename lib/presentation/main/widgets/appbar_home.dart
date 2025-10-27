@@ -1,4 +1,5 @@
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
+import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
@@ -16,35 +17,38 @@ class HomePageAppBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+    final statisticsProvider = Provider.of<StatisticsProvider>(context);
+
     return FutureBuilder<Map<String, dynamic>>(
         future: homeProvider.fetchUserData(),
         builder: (context, snapshot) {
           return AppBar(
             actions: [
+              // Streak indicator
               Padding(
-                padding: const EdgeInsets.only(right: PaddingManager.p12),
-                child: Container(
-                  height: SizeManager.s40.h,
-                  width: SizeManager.s40.w,
-                  decoration: BoxDecoration(
-                    color: ColorManager.grey3,
-                    borderRadius: BorderRadius.circular(
-                      RadiusManager.r40.r,
+                padding: const EdgeInsets.only(right: PaddingManager.p8),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.local_fire_department,
+                      color: statisticsProvider.currentStreak > 0
+                          ? Colors.orange
+                          : Colors.grey,
+                      size: SizeManager.s24,
                     ),
-                  ),
-                  child: IconButton(
-                    splashColor: ColorManager.grey3,
-                    onPressed: () {
-                      //TODO:::
-                    },
-                    icon: const Icon(
-                      Icons.notifications_none_sharp,
-                      size: SizeManager.s26,
-                      color: ColorManager.white,
+                    SizedBox(width: SizeManager.s4.w),
+                    Text(
+                      '${statisticsProvider.currentStreak}',
+                      style: TextStyle(
+                        color: ColorManager.white,
+                        fontSize: SizeManager.s16.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
+              SizedBox(width: SizeManager.s12.w),
             ],
             centerTitle: false,
             backgroundColor: Colors.transparent,

@@ -1,6 +1,7 @@
 import 'package:fitness_app/presentation/chat_screen/provider/chat_provider.dart';
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
+import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/presentation/profile/providers/profile_provider.dart';
 import 'package:fitness_app/presentation/settings/providers/settings_provider.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
@@ -47,6 +48,9 @@ class _MyAppState extends State<MyApp> {
         ),
         ChangeNotifierProvider.value(
           value: ChatProvider(),
+        ),
+        ChangeNotifierProvider.value(
+          value: StatisticsProvider(),
         ),
       ],
       child: ScreenUtilInit(

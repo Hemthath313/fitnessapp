@@ -1,15 +1,14 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:fitness_app/presentation/chat_screen/chat_screen.dart';
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
 import 'package:fitness_app/presentation/explore/explore_page.dart';
 import 'package:fitness_app/presentation/home/pages/home_page.dart';
 import 'package:fitness_app/presentation/main/widgets/appbar_consumption.dart';
 import 'package:fitness_app/presentation/main/widgets/appbar_home.dart';
-import 'package:fitness_app/presentation/main/widgets/appbar_profile.dart';
-import 'package:fitness_app/presentation/main/widgets/appbar_settings.dart';
-import 'package:fitness_app/presentation/main/widgets/appbar_workouts.dart';
-import 'package:fitness_app/presentation/profile/pages/profile_page.dart';
-import 'package:fitness_app/presentation/settings/pages/settings_page.dart';
+import 'package:fitness_app/presentation/main/widgets/appbar_custom_workouts.dart';
+import 'package:fitness_app/presentation/main/widgets/appbar_more.dart';
+import 'package:fitness_app/presentation/more/more_page.dart';
+import 'package:fitness_app/presentation/custom_workouts/custom_workouts_page.dart';
+import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/services/connectivity_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
@@ -38,29 +37,25 @@ class _MainPageState extends State<MainPage> {
   List<Widget> pages = const [
     HomePage(),
     ExploreWidget(),
-    ChatScreen(),
-    SettingsPage(),
-    ProfilePage(),
+    CustomWorkoutsPage(),
+    MorePage(),
   ];
 
   appBar() {
     if (isHomePage) {
       return const HomePageAppBarWidget();
-    } else if (isConsumptionPage) {
+    } else if (isExplorePage) {
       return const ConsumptionPageAppBarWidget();
-    } else if (isWorkoutsPage) {
-      return const ChatPageAppBarWidget();
-    } else if (isSettingsPage) {
-      return const SettingsPageAppBarWidget();
-    } else if (isProfilePage) {
-      return const ProfilePageAppBarWidget();
+    } else if (isCustomWorkoutsPage) {
+      return const CustomWorkoutsAppBarWidget();
+    } else if (isMorePage) {
+      return const MorePageAppBarWidget();
     }
   }
 
-  bool get isProfilePage => _currentIndex == 4;
-  bool get isSettingsPage => _currentIndex == 3;
-  bool get isWorkoutsPage => _currentIndex == 2;
-  bool get isConsumptionPage => _currentIndex == 1;
+  bool get isMorePage => _currentIndex == 3;
+  bool get isCustomWorkoutsPage => _currentIndex == 2;
+  bool get isExplorePage => _currentIndex == 1;
   bool get isHomePage => _currentIndex == 0;
 
   @override
@@ -72,6 +67,12 @@ class _MainPageState extends State<MainPage> {
           Provider.of<ConsumptionProvider>(context, listen: false);
       final workoutsProvider =
           Provider.of<WorkoutProvider>(context, listen: false);
+      final statisticsProvider =
+          Provider.of<StatisticsProvider>(context, listen: false);
+
+      // Load statistics
+      await statisticsProvider.loadStreakData();
+
       // FIRST: Check and clear water for new day BEFORE loading data
       await consumptionProvider.clearWaterIfNeeded();
 
@@ -114,29 +115,25 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     List<Widget> bottomNavItems = [
       Icon(
-        Icons.other_houses_outlined,
+        Icons.home_outlined,
         color: isHomePage ? ColorManager.limerGreen2 : ColorManager.grey2,
         size: SizeManager.s28,
       ),
       Icon(
-        Icons.explore,
-        color:
-            isConsumptionPage ? ColorManager.limerGreen2 : ColorManager.grey2,
+        Icons.restaurant,
+        color: isExplorePage ? ColorManager.limerGreen2 : ColorManager.grey2,
         size: SizeManager.s28,
       ),
       Icon(
-        Icons.chat_bubble_outline_rounded,
-        color: isWorkoutsPage ? ColorManager.limerGreen2 : ColorManager.grey2,
+        Icons.fitness_center,
+        color: isCustomWorkoutsPage
+            ? ColorManager.limerGreen2
+            : ColorManager.grey2,
         size: SizeManager.s28,
       ),
       Icon(
-        Icons.settings_outlined,
-        color: isSettingsPage ? ColorManager.limerGreen2 : ColorManager.grey2,
-        size: SizeManager.s28,
-      ),
-      Icon(
-        Icons.person_4_outlined,
-        color: isProfilePage ? ColorManager.limerGreen2 : ColorManager.grey2,
+        Icons.person_outline,
+        color: isMorePage ? ColorManager.limerGreen2 : ColorManager.grey2,
         size: SizeManager.s28,
       ),
     ];
@@ -145,7 +142,7 @@ class _MainPageState extends State<MainPage> {
       appBar: PreferredSize(
         preferredSize: Size(
           double.infinity,
-          isProfilePage ? SizeManager.s0 : SizeManager.s60.h,
+          SizeManager.s60.h,
         ),
         child: appBar(),
       ),
