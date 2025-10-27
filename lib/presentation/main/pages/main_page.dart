@@ -8,6 +8,7 @@ import 'package:fitness_app/presentation/main/widgets/appbar_custom_workouts.dar
 import 'package:fitness_app/presentation/main/widgets/appbar_more.dart';
 import 'package:fitness_app/presentation/more/more_page.dart';
 import 'package:fitness_app/presentation/custom_workouts/custom_workouts_page.dart';
+import 'package:fitness_app/presentation/chat_screen/chat_screen.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/services/connectivity_service.dart';
@@ -38,6 +39,7 @@ class _MainPageState extends State<MainPage> {
     HomePage(),
     ExploreWidget(),
     CustomWorkoutsPage(),
+    ChatScreen(),
     MorePage(),
   ];
 
@@ -48,12 +50,15 @@ class _MainPageState extends State<MainPage> {
       return const ConsumptionPageAppBarWidget();
     } else if (isCustomWorkoutsPage) {
       return const CustomWorkoutsAppBarWidget();
+    } else if (isChatPage) {
+      return null; // Chat screen has no app bar
     } else if (isMorePage) {
       return const MorePageAppBarWidget();
     }
   }
 
-  bool get isMorePage => _currentIndex == 3;
+  bool get isMorePage => _currentIndex == 4;
+  bool get isChatPage => _currentIndex == 3;
   bool get isCustomWorkoutsPage => _currentIndex == 2;
   bool get isExplorePage => _currentIndex == 1;
   bool get isHomePage => _currentIndex == 0;
@@ -132,6 +137,11 @@ class _MainPageState extends State<MainPage> {
         size: SizeManager.s28,
       ),
       Icon(
+        Icons.chat_bubble_outline,
+        color: isChatPage ? ColorManager.limerGreen2 : ColorManager.grey2,
+        size: SizeManager.s28,
+      ),
+      Icon(
         Icons.person_outline,
         color: isMorePage ? ColorManager.limerGreen2 : ColorManager.grey2,
         size: SizeManager.s28,
@@ -139,13 +149,15 @@ class _MainPageState extends State<MainPage> {
     ];
     return Scaffold(
       backgroundColor: ColorManager.darkGrey,
-      appBar: PreferredSize(
-        preferredSize: Size(
-          double.infinity,
-          SizeManager.s60.h,
-        ),
-        child: appBar(),
-      ),
+      appBar: appBar() != null
+          ? PreferredSize(
+              preferredSize: Size(
+                double.infinity,
+                SizeManager.s60.h,
+              ),
+              child: appBar()!,
+            )
+          : null,
       bottomNavigationBar: SafeArea(
         bottom: true,
         minimum: EdgeInsets.zero,
