@@ -1,3 +1,4 @@
+import 'package:fitness_app/presentation/banner_ads/banner_ad_service.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/presentation/workouts/widgets/workout_timer_widget.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
@@ -124,6 +125,9 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
               },
             ),
           ),
+
+          // Banner Ad at the bottom
+          BannerAdWidget(pageName: 'workout'),
         ],
       ),
     );

@@ -6,12 +6,14 @@ class AdConfig {
       'ca-app-pub-5975958510203735/1854291738'; // dashboard-banner-ad
   static const String chatBannerAdUnitId =
       'ca-app-pub-5975958510203735/7057489281'; // chat page banner-ad
-  static const String settingsBannerAdUnitId =
-      'ca-app-pub-5975958510203735/7110487847'; // settings-page-banner-ad
+  static const String exploreBannerAdUnitId =
+      'ca-app-pub-5975958510203735/7110487847'; // explore page banner-ad
+  static const String workoutBannerAdUnitId =
+      'ca-app-pub-5975958510203735/7217271380'; // workout page banner-ad
 
   // Interstitial Ad Unit ID - FIXED: Use proper interstitial ad unit ID
   static const String _interstitialAdUnitId =
-      'ca-app-pub-5975958510203735/7217271380'; // intersitial-ad (REPLACE WITH YOUR ACTUAL INTERSTITIAL AD UNIT ID)
+      'ca-app-pub-5975958510203735/6257548519'; // intersitial-ad (REPLACE WITH YOUR ACTUAL INTERSTITIAL AD UNIT ID)
 
   // Test Ad Unit IDs (for development)
   static const String testBannerAdUnitId =
@@ -36,8 +38,17 @@ class AdConfig {
         return homeBannerAdUnitId;
       case 'chat':
         return chatBannerAdUnitId;
+      case 'explore':
+      case 'consumption':
+      case 'nutrition':
+        return exploreBannerAdUnitId;
+      case 'workout':
+      case 'workouts':
+        return workoutBannerAdUnitId;
       case 'settings':
-        return settingsBannerAdUnitId;
+      case 'more':
+      case 'profile':
+        return chatBannerAdUnitId; // Use chat ad unit for settings/more/profile
       default:
         return homeBannerAdUnitId;
     }

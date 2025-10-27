@@ -72,16 +72,28 @@ class SettingsProvider with ChangeNotifier {
     }
   }
 
-  Future<void> deleteUser(
-      {required String email, required String password}) async {
+  Future<void> deleteUser({
+    required String email,
+    required String password,
+    bool isGoogleUser = false,
+  }) async {
     try {
       User? user = _auth.currentUser;
-      AuthCredential credential =
-          EmailAuthProvider.credential(email: email, password: password);
-      UserCredential result =
-          await user!.reauthenticateWithCredential(credential);
-      await DataBase(result.user!.uid).deleteUserData();
-      await result.user!.delete();
+
+      if (isGoogleUser) {
+        // For Google users, no reauthentication needed - just delete
+        await DataBase(user!.uid).deleteUserData();
+        await user.delete();
+      } else {
+        // For regular users, reauthenticate first
+        AuthCredential credential =
+            EmailAuthProvider.credential(email: email, password: password);
+        UserCredential result =
+            await user!.reauthenticateWithCredential(credential);
+        await DataBase(result.user!.uid).deleteUserData();
+        await result.user!.delete();
+      }
+
       notifyListeners();
     } catch (e) {
       rethrow;
