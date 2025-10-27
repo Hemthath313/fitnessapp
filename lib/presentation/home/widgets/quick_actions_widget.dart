@@ -1,3 +1,4 @@
+import 'package:fitness_app/presentation/interstitial_ads/interstitial_ad_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +52,8 @@ class QuickActionsWidget extends StatelessWidget {
                   icon: Icons.fitness_center,
                   label: 'Exercises',
                   color: ColorManager.limerGreen2,
-                  onTap: () {
+                  onTap: () async {
+                    await InterstitialAdService.showStrengthWorkoutAd();
                     context.push(Routes.bodypartsPage);
                   },
                 ),
