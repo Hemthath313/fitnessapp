@@ -32,6 +32,7 @@ class _ConsumptionPageState extends State<ConsumptionPage> {
   Widget build(BuildContext context) {
     return Consumer<ConsumptionProvider>(
       builder: (context, consumptionProvider, _) => SafeArea(
+        bottom: true,
         child: LiquidPullToRefresh(
           height: SizeManager.s250.h,
           color: ColorManager.darkGrey,

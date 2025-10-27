@@ -45,6 +45,7 @@ class _ProfilePageState extends State<ProfilePage> {
             final double calfData = homeProvider.userData['calf'];
             profileProvider.fetchAndSetFlSpots();
             return SafeArea(
+              bottom: true,
               child: Column(
                 children: [
                   Expanded(

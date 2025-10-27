@@ -84,27 +84,30 @@ class _ExploreWidgetState extends State<ExploreWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(12.0),
-            itemCount: cards.length,
-            itemBuilder: (context, index) {
-              return RepaintBoundary(
-                child: ExploreCard(
-                  animation: animations[index],
-                  image: cards[index]['image'],
-                  title: cards[index]['title'],
-                  description: cards[index]['description'],
-                  onTap: cards[index]['onTap'],
-                ),
-              );
-            },
+    return SafeArea(
+      bottom: true,
+      child: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(12.0),
+              itemCount: cards.length,
+              itemBuilder: (context, index) {
+                return RepaintBoundary(
+                  child: ExploreCard(
+                    animation: animations[index],
+                    image: cards[index]['image'],
+                    title: cards[index]['title'],
+                    description: cards[index]['description'],
+                    onTap: cards[index]['onTap'],
+                  ),
+                );
+              },
+            ),
           ),
-        ),
-        BannerAdWidget(pageName: 'explore'),
-      ],
+          BannerAdWidget(pageName: 'explore'),
+        ],
+      ),
     );
   }
 }

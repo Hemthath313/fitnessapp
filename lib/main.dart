@@ -31,9 +31,9 @@ Future<void> main() async {
   await MobileAds.instance.initialize();
 
   // Print ad configuration for debugging
-  // if (kDebugMode) {
-  //   AdConfig.printAdConfig();
-  // }
+  if (kDebugMode) {
+    AdConfig.printAdConfig();
+  }
 
   // Set up Crashlytics (only in production)
   if (!kDebugMode) {

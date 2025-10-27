@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-
 class NewMealPage extends StatefulWidget {
   const NewMealPage({super.key});
 
@@ -59,6 +58,7 @@ class _NewMealPageState extends State<NewMealPage> {
       ),
       backgroundColor: ColorManager.darkGrey,
       body: SafeArea(
+        bottom: true,
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

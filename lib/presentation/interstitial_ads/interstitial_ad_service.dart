@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:fitness_app/utils/ad_config.dart';
 
@@ -6,13 +7,23 @@ class InterstitialAdService {
   static bool _isAdLoaded = false;
   static int _adLoadAttempts = 0;
   static const int _maxLoadAttempts = 3;
-  static bool _hasShownAdForSession =
-      false; // Track if ad shown in current session
+  static Completer<void>? _loadCompleter;
 
   static Future<void> loadInterstitialAd({String? adUnitId}) async {
-    if (_isAdLoaded) return;
+    if (_isAdLoaded) {
+      print('Interstitial ad already loaded');
+      return;
+    }
 
     final String unitId = adUnitId ?? AdConfig.interstitialAdUnitId;
+
+    // If already loading, wait for it to complete
+    if (_loadCompleter != null && !_loadCompleter!.isCompleted) {
+      print('Interstitial ad already loading, waiting...');
+      return _loadCompleter!.future;
+    }
+
+    _loadCompleter = Completer<void>();
 
     try {
       await InterstitialAd.load(
@@ -53,6 +64,11 @@ class InterstitialAdService {
                 }
               },
             );
+
+            // Complete the completer when ad is loaded
+            if (!_loadCompleter!.isCompleted) {
+              _loadCompleter!.complete();
+            }
           },
           onAdFailedToLoad: (error) {
             print('Failed to load interstitial ad: $error');
@@ -66,49 +82,70 @@ class InterstitialAdService {
                 loadInterstitialAd(adUnitId: unitId);
               });
             }
+
+            // Complete the completer even on failure
+            if (_loadCompleter != null && !_loadCompleter!.isCompleted) {
+              _loadCompleter!.complete();
+            }
           },
         ),
       );
+
+      // Wait for the loading to complete (either success or failure)
+      await _loadCompleter!.future;
     } catch (e) {
       print('Error loading interstitial ad: $e');
       _isAdLoaded = false;
+      if (_loadCompleter != null && !_loadCompleter!.isCompleted) {
+        _loadCompleter!.complete();
+      }
     }
   }
 
   static Future<void> showInterstitialAd({bool forceShow = false}) async {
-    // If not forced and already shown in session, don't show again
-    if (!forceShow && _hasShownAdForSession) {
-      print('Ad already shown in this session, skipping');
+    // If ad is not loaded, try to load and wait for it
+    if (!_isAdLoaded) {
+      print('Interstitial ad not loaded, loading now...');
+      await loadInterstitialAd();
+    }
+
+    // Wait a bit for the ad to be ready (if it just finished loading)
+    if (!_isAdLoaded) {
+      print('Interstitial ad still not loaded after loading attempt');
       return;
     }
 
-    if (_isAdLoaded && _interstitialAd != null) {
+    if (_interstitialAd != null) {
       try {
         await _interstitialAd!.show();
-        _hasShownAdForSession = true; // Mark as shown for this session
+        print('Interstitial ad shown successfully');
       } catch (e) {
         print('Error showing interstitial ad: $e');
         _isAdLoaded = false;
         _interstitialAd = null;
       }
     } else {
-      print('Interstitial ad not loaded yet');
-      // Try to load and show
-      await loadInterstitialAd();
+      print('Interstitial ad is null');
     }
   }
 
   // Specific method for strength workout access
   static Future<void> showStrengthWorkoutAd() async {
+    print('Attempting to show strength workout ad...');
+    // Wait for ad to load
     await loadInterstitialAd(
         adUnitId: AdConfig.getInterstitialAdUnitIdForContext('strength'));
-    await showInterstitialAd(forceShow: true);
+    // Then show it
+    await showInterstitialAd();
   }
 
   // Specific method for workout completion
   static Future<void> showWorkoutCompletionAd() async {
+    print('Attempting to show workout completion ad...');
+    // Wait for ad to load
     await loadInterstitialAd(
         adUnitId: AdConfig.getInterstitialAdUnitIdForContext('workout'));
+    // Then show it
     await showInterstitialAd();
   }
 
@@ -122,6 +159,6 @@ class InterstitialAdService {
 
   // Reset session flag (call this when app restarts or user logs out)
   static void resetSession() {
-    _hasShownAdForSession = false;
+    // Session tracking removed - ads can show multiple times
   }
 }

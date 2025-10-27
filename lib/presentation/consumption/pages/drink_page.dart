@@ -12,7 +12,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
-
 class DrinkPage extends StatefulWidget {
   const DrinkPage({super.key});
 
@@ -92,6 +91,7 @@ class _DrinkPageState extends State<DrinkPage> {
       ),
       backgroundColor: ColorManager.darkGrey,
       body: SafeArea(
+        bottom: true,
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

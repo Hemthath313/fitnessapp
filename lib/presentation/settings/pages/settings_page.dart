@@ -21,6 +21,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final deviceWidth = MediaQuery.of(context).size.width;
 
     return SafeArea(
+      bottom: true,
       child: Column(
         children: [
           Expanded(

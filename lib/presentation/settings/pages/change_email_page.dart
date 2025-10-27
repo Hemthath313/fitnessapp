@@ -59,67 +59,68 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
         child: const ChangeEmailPageAppBar(),
       ),
       body: SafeArea(
+          bottom: true,
           child: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(PaddingManager.p28),
-                child: Text(
-                  StringsManager.changeEmailContent,
-                  textAlign: TextAlign.center,
-                  style: StyleManager.settingsOptionTiteTextStyle,
-                ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(PaddingManager.p28),
+                    child: Text(
+                      StringsManager.changeEmailContent,
+                      textAlign: TextAlign.center,
+                      style: StyleManager.settingsOptionTiteTextStyle,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: PaddingManager.p28,
+                      right: PaddingManager.p28,
+                      bottom: PaddingManager.p12,
+                    ),
+                    child: TextFieldWidgetUnderLined(
+                      controller: _oldEmailController,
+                      labelHint: StringsManager.oldEmailHint,
+                      obscureText: false,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: PaddingManager.p28,
+                      right: PaddingManager.p28,
+                      bottom: PaddingManager.p12,
+                    ),
+                    child: TextFieldWidgetUnderLined(
+                      controller: _newEmailController,
+                      labelHint: StringsManager.newEmailHint,
+                      obscureText: false,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: PaddingManager.p28,
+                      right: PaddingManager.p28,
+                      bottom: PaddingManager.p12,
+                    ),
+                    child: TextFieldWidgetUnderLined(
+                      controller: _passwordController,
+                      labelHint: StringsManager.passwordHint,
+                      obscureText: true,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                  ),
+                  LimeGreenRoundedButtonWidget(
+                    onTap: changeEmail,
+                    title: StringsManager.next,
+                  )
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: PaddingManager.p28,
-                  right: PaddingManager.p28,
-                  bottom: PaddingManager.p12,
-                ),
-                child: TextFieldWidgetUnderLined(
-                  controller: _oldEmailController,
-                  labelHint: StringsManager.oldEmailHint,
-                  obscureText: false,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: PaddingManager.p28,
-                  right: PaddingManager.p28,
-                  bottom: PaddingManager.p12,
-                ),
-                child: TextFieldWidgetUnderLined(
-                  controller: _newEmailController,
-                  labelHint: StringsManager.newEmailHint,
-                  obscureText: false,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: PaddingManager.p28,
-                  right: PaddingManager.p28,
-                  bottom: PaddingManager.p12,
-                ),
-                child: TextFieldWidgetUnderLined(
-                  controller: _passwordController,
-                  labelHint: StringsManager.passwordHint,
-                  obscureText: true,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-              ),
-              LimeGreenRoundedButtonWidget(
-                onTap: changeEmail,
-                title: StringsManager.next,
-              )
-            ],
-          ),
-        ),
-      )),
+            ),
+          )),
     ).animate().fadeIn(
           duration: 500.ms,
         );

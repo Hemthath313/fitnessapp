@@ -149,13 +149,17 @@ class _MainPageState extends State<MainPage> {
         ),
         child: appBar(),
       ),
-      bottomNavigationBar: CurvedNavigationBar(
-        color: ColorManager.black87,
-        buttonBackgroundColor: Colors.transparent,
-        backgroundColor: ColorManager.darkGrey,
-        onTap: ontap,
-        index: _currentIndex,
-        items: bottomNavItems,
+      bottomNavigationBar: SafeArea(
+        bottom: true,
+        minimum: EdgeInsets.zero,
+        child: CurvedNavigationBar(
+          color: ColorManager.black87,
+          buttonBackgroundColor: Colors.transparent,
+          backgroundColor: ColorManager.darkGrey,
+          onTap: ontap,
+          index: _currentIndex,
+          items: bottomNavItems,
+        ),
       ),
       body: ErrorBoundary(
         child: pages[_currentIndex].animate().fadeIn(duration: 500.ms),

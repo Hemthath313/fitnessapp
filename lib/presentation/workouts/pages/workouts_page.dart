@@ -52,6 +52,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
   Widget build(BuildContext context) {
     return Consumer<WorkoutProvider>(
       builder: (context, workoutsProvider, _) => SafeArea(
+        bottom: true,
         child: LiquidPullToRefresh(
           height: SizeManager.s250.h,
           color: ColorManager.darkGrey,

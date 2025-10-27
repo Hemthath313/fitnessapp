@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-
 class NewExercisePage extends StatefulWidget {
   const NewExercisePage({super.key});
 
@@ -59,6 +58,7 @@ class _NewExercisePageState extends State<NewExercisePage> {
       ),
       backgroundColor: ColorManager.darkGrey,
       body: SafeArea(
+        bottom: true,
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

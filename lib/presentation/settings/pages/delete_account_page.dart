@@ -126,54 +126,55 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
         child: const DeleteAccountPageAppBar(),
       ),
       body: SafeArea(
+          bottom: true,
           child: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(PaddingManager.p28),
-                child: Text(
-                  StringsManager.deleteAccContent,
-                  textAlign: TextAlign.center,
-                  style: StyleManager.settingsOptionTiteTextStyle,
-                ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(PaddingManager.p28),
+                    child: Text(
+                      StringsManager.deleteAccContent,
+                      textAlign: TextAlign.center,
+                      style: StyleManager.settingsOptionTiteTextStyle,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: PaddingManager.p28,
+                      right: PaddingManager.p28,
+                      bottom: PaddingManager.p12,
+                    ),
+                    child: TextFieldWidgetUnderLined(
+                      controller: _emailController,
+                      labelHint: StringsManager.emailHint,
+                      obscureText: false,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: PaddingManager.p28,
+                      right: PaddingManager.p28,
+                      bottom: PaddingManager.p12,
+                    ),
+                    child: TextFieldWidgetUnderLined(
+                      controller: _passwordController,
+                      labelHint: StringsManager.passwordHint,
+                      keyboardType: TextInputType.emailAddress,
+                      obscureText: true,
+                    ),
+                  ),
+                  LimeGreenRoundedButtonWidget(
+                    onTap: popUp,
+                    title: StringsManager.next,
+                  )
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: PaddingManager.p28,
-                  right: PaddingManager.p28,
-                  bottom: PaddingManager.p12,
-                ),
-                child: TextFieldWidgetUnderLined(
-                  controller: _emailController,
-                  labelHint: StringsManager.emailHint,
-                  obscureText: false,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: PaddingManager.p28,
-                  right: PaddingManager.p28,
-                  bottom: PaddingManager.p12,
-                ),
-                child: TextFieldWidgetUnderLined(
-                  controller: _passwordController,
-                  labelHint: StringsManager.passwordHint,
-                  keyboardType: TextInputType.emailAddress,
-                  obscureText: true,
-                ),
-              ),
-              LimeGreenRoundedButtonWidget(
-                onTap: popUp,
-                title: StringsManager.next,
-              )
-            ],
-          ),
-        ),
-      )),
+            ),
+          )),
     ).animate().fadeIn(
           duration: 500.ms,
         );

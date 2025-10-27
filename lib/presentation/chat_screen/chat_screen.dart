@@ -93,59 +93,62 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Center(
-        child: Column(
-          children: [
-            const SizedBox(height: kToolbarHeight + 10), // Space for app bar
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.all(16),
-                itemCount: _messages.length + (isThinking ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index == _messages.length && isThinking) {
-                    return _buildTypingIndicator();
-                  }
-                  final message = _messages[index];
-                  final isUser = message.isUser;
+      body: SafeArea(
+        bottom: true,
+        child: Center(
+          child: Column(
+            children: [
+              const SizedBox(height: kToolbarHeight + 10), // Space for app bar
+              Expanded(
+                child: ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _messages.length + (isThinking ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index == _messages.length && isThinking) {
+                      return _buildTypingIndicator();
+                    }
+                    final message = _messages[index];
+                    final isUser = message.isUser;
 
-                  return Align(
-                    alignment:
-                        isUser ? Alignment.centerRight : Alignment.centerLeft,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeOut,
-                      constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.7,
-                      ),
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: isUser
-                            ? ColorManager.limerGreen2
-                            : Colors.grey[800],
-                        borderRadius: BorderRadius.only(
-                          topLeft: const Radius.circular(16),
-                          topRight: const Radius.circular(16),
-                          bottomLeft: Radius.circular(isUser ? 16 : 0),
-                          bottomRight: Radius.circular(isUser ? 0 : 16),
+                    return Align(
+                      alignment:
+                          isUser ? Alignment.centerRight : Alignment.centerLeft,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOut,
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.7,
+                        ),
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isUser
+                              ? ColorManager.limerGreen2
+                              : Colors.grey[800],
+                          borderRadius: BorderRadius.only(
+                            topLeft: const Radius.circular(16),
+                            topRight: const Radius.circular(16),
+                            bottomLeft: Radius.circular(isUser ? 16 : 0),
+                            bottomRight: Radius.circular(isUser ? 0 : 16),
+                          ),
+                        ),
+                        child: Text(
+                          message.message,
+                          style: TextStyle(
+                            color: isUser ? Colors.black : Colors.white,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
-                      child: Text(
-                        message.message,
-                        style: TextStyle(
-                          color: isUser ? Colors.black : Colors.white,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
-            BannerAdWidget(pageName: 'chat'),
-            _buildInputArea(),
-          ],
+              BannerAdWidget(pageName: 'chat'),
+              _buildInputArea(),
+            ],
+          ),
         ),
       ),
     );

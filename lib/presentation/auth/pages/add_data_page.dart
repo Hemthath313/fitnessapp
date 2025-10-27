@@ -161,6 +161,7 @@ class _AddDataPageState extends State<AddDataPage> {
         elevation: SizeManager.s0,
       ),
       body: SafeArea(
+        bottom: true,
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

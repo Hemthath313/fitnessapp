@@ -13,7 +13,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-
 class ChangeWeightPage extends StatefulWidget {
   const ChangeWeightPage({super.key});
 
@@ -87,42 +86,43 @@ class _ChangeWeightPageState extends State<ChangeWeightPage> {
         child: const ChangeDataPagesAppBar(),
       ),
       body: SafeArea(
+          bottom: true,
           child: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(PaddingManager.p28),
-                child: Text(
-                  StringsManager.changeWeightText,
-                  textAlign: TextAlign.center,
-                  style: StyleManager.settingsOptionTiteTextStyle,
-                ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(PaddingManager.p28),
+                    child: Text(
+                      StringsManager.changeWeightText,
+                      textAlign: TextAlign.center,
+                      style: StyleManager.settingsOptionTiteTextStyle,
+                    ),
+                  ),
+                  SizedBox(
+                    child: Image.asset(
+                      ImageManager.weight,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(PaddingManager.p28),
+                    child: TextFieldWidgetUnderLined(
+                      controller: _weightController,
+                      labelHint: StringsManager.weightHint,
+                      obscureText: false,
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  LimeGreenRoundedButtonWidget(
+                    onTap: changeWeight,
+                    title: StringsManager.next,
+                  )
+                ],
               ),
-              SizedBox(
-                child: Image.asset(
-                  ImageManager.weight,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(PaddingManager.p28),
-                child: TextFieldWidgetUnderLined(
-                  controller: _weightController,
-                  labelHint: StringsManager.weightHint,
-                  obscureText: false,
-                  keyboardType: TextInputType.number,
-                ),
-              ),
-              LimeGreenRoundedButtonWidget(
-                onTap: changeWeight,
-                title: StringsManager.next,
-              )
-            ],
-          ),
-        ),
-      )),
+            ),
+          )),
     ).animate().fadeIn(
           duration: 500.ms,
         );
