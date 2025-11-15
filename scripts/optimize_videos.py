@@ -55,6 +55,18 @@ def optimize_video(input_path, output_path):
     except subprocess.CalledProcessError:
         return False
 
+def find_all_videos(videos_dir):
+    """Find all MP4 files recursively in videos directory and subdirectories"""
+    video_files = []
+    for root, dirs, files in os.walk(videos_dir):
+        # Skip optimized directory
+        if 'optimized' in root:
+            continue
+        for file in files:
+            if file.endswith('.mp4'):
+                video_files.append(Path(root) / file)
+    return video_files
+
 def main():
     print("🎬 Starting video optimization...\n")
     
@@ -72,27 +84,31 @@ def main():
     optimized_dir = videos_dir / "optimized"
     optimized_dir.mkdir(exist_ok=True)
     
-    # Find all MP4 files
-    video_files = list(videos_dir.glob("*.mp4"))
+    # Find all MP4 files recursively
+    video_files = find_all_videos(videos_dir)
     
     if not video_files:
         print("❌ No video files found in assets/videos/")
         sys.exit(1)
     
+    print(f"📹 Found {len(video_files)} video(s) to optimize\n")
+    
     total_original = 0
     total_optimized = 0
+    processed = 0
+    failed = 0
     
     # Process each video
     for video_file in video_files:
-        if video_file.name == "README.md":
-            continue
-            
-        print(f"📹 Optimizing: {video_file.name}")
+        print(f"📹 Optimizing: {video_file.relative_to(videos_dir)}")
         
         original_size = get_file_size(video_file)
         total_original += original_size
         
-        output_file = optimized_dir / video_file.name
+        # Preserve subdirectory structure in optimized folder
+        relative_path = video_file.relative_to(videos_dir)
+        output_file = optimized_dir / relative_path
+        output_file.parent.mkdir(parents=True, exist_ok=True)
         
         if optimize_video(video_file, output_file):
             new_size = get_file_size(output_file)
@@ -102,21 +118,28 @@ def main():
             print(f"✅ Optimized: {video_file.name}")
             print(f"   Original: {original_size:.2f} MB → Optimized: {new_size:.2f} MB")
             print(f"   Size reduction: {reduction:.1f}%\n")
+            processed += 1
         else:
             print(f"❌ Failed to optimize: {video_file.name}\n")
+            failed += 1
     
     # Summary
+    print("=" * 50)
     print("✨ Optimization complete!")
-    print(f"📊 Total size: {total_original:.2f} MB → {total_optimized:.2f} MB")
-    print(f"💾 Space saved: {total_original - total_optimized:.2f} MB ({(total_original - total_optimized)/total_original*100:.1f}%)")
+    print(f"📊 Processed: {processed} videos")
+    if failed > 0:
+        print(f"⚠️  Failed: {failed} videos")
+    print(f"📦 Total size: {total_original:.2f} MB → {total_optimized:.2f} MB")
+    if total_original > 0:
+        print(f"💾 Space saved: {total_original - total_optimized:.2f} MB ({(total_original - total_optimized)/total_original*100:.1f}%)")
     print(f"\n📁 Optimized videos are in: {optimized_dir}")
     print("\n💡 Next steps:")
-    print("   1. Review the optimized videos")
-    print("   2. If quality is good, replace originals:")
-    print(f"      mv {optimized_dir}/*.mp4 {videos_dir}/")
-    print("   3. Delete the optimized directory:")
+    print("   1. Review the optimized videos in the optimized folder")
+    print("   2. If quality is good, you can replace originals manually")
+    print("   3. Or use this command to replace all (BACKUP FIRST!):")
+    print("      find assets/videos/optimized -name '*.mp4' -exec sh -c 'mv \"$1\" \"assets/videos/$(echo $1 | sed \"s|assets/videos/optimized/||\")\"' _ {} \\;")
+    print("   4. Delete the optimized directory:")
     print(f"      rm -rf {optimized_dir}")
 
 if __name__ == "__main__":
     main()
-
