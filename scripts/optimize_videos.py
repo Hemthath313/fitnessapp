@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """
 Video Optimization Script for Fitness App
-Optimizes videos to reduce file size while maintaining quality.
+Optimizes videos in place to reduce file size while maintaining quality.
 Requires: ffmpeg
 """
 
 import os
 import subprocess
 import sys
+import tempfile
+import shutil
 from pathlib import Path
 
 def check_ffmpeg():
@@ -59,7 +61,7 @@ def find_all_videos(videos_dir):
     """Find all MP4 files recursively in videos directory and subdirectories"""
     video_files = []
     for root, dirs, files in os.walk(videos_dir):
-        # Skip optimized directory
+        # Skip optimized directory if it exists
         if 'optimized' in root:
             continue
         for file in files:
@@ -68,7 +70,7 @@ def find_all_videos(videos_dir):
     return video_files
 
 def main():
-    print("🎬 Starting video optimization...\n")
+    print("🎬 Starting video optimization (in-place)...\n")
     
     # Check ffmpeg
     if not check_ffmpeg():
@@ -81,8 +83,6 @@ def main():
     
     # Setup paths
     videos_dir = Path("assets/videos")
-    optimized_dir = videos_dir / "optimized"
-    optimized_dir.mkdir(exist_ok=True)
     
     # Find all MP4 files recursively
     video_files = find_all_videos(videos_dir)
@@ -105,21 +105,25 @@ def main():
         original_size = get_file_size(video_file)
         total_original += original_size
         
-        # Preserve subdirectory structure in optimized folder
-        relative_path = video_file.relative_to(videos_dir)
-        output_file = optimized_dir / relative_path
-        output_file.parent.mkdir(parents=True, exist_ok=True)
+        # Create temporary file for optimized video
+        temp_file = video_file.with_suffix('.tmp.mp4')
         
-        if optimize_video(video_file, output_file):
-            new_size = get_file_size(output_file)
+        if optimize_video(video_file, temp_file):
+            new_size = get_file_size(temp_file)
             total_optimized += new_size
             reduction = ((original_size - new_size) / original_size) * 100
+            
+            # Replace original with optimized version
+            shutil.move(str(temp_file), str(video_file))
             
             print(f"✅ Optimized: {video_file.name}")
             print(f"   Original: {original_size:.2f} MB → Optimized: {new_size:.2f} MB")
             print(f"   Size reduction: {reduction:.1f}%\n")
             processed += 1
         else:
+            # Clean up temp file if optimization failed
+            if temp_file.exists():
+                temp_file.unlink()
             print(f"❌ Failed to optimize: {video_file.name}\n")
             failed += 1
     
@@ -131,15 +135,10 @@ def main():
         print(f"⚠️  Failed: {failed} videos")
     print(f"📦 Total size: {total_original:.2f} MB → {total_optimized:.2f} MB")
     if total_original > 0:
-        print(f"💾 Space saved: {total_original - total_optimized:.2f} MB ({(total_original - total_optimized)/total_original*100:.1f}%)")
-    print(f"\n📁 Optimized videos are in: {optimized_dir}")
-    print("\n💡 Next steps:")
-    print("   1. Review the optimized videos in the optimized folder")
-    print("   2. If quality is good, you can replace originals manually")
-    print("   3. Or use this command to replace all (BACKUP FIRST!):")
-    print("      find assets/videos/optimized -name '*.mp4' -exec sh -c 'mv \"$1\" \"assets/videos/$(echo $1 | sed \"s|assets/videos/optimized/||\")\"' _ {} \\;")
-    print("   4. Delete the optimized directory:")
-    print(f"      rm -rf {optimized_dir}")
+        space_saved = total_original - total_optimized
+        percent_saved = (space_saved / total_original) * 100
+        print(f"💾 Space saved: {space_saved:.2f} MB ({percent_saved:.1f}%)")
+    print("\n✅ All videos have been optimized in place!")
 
 if __name__ == "__main__":
     main()
