@@ -123,6 +123,10 @@ flutter:
     - assets/videos/biceps/
     - assets/videos/cardio/
     - assets/videos/triceps/
+    - assets/videos/back/
+    - assets/videos/shoulder/
+    - assets/videos/legs/
+    - assets/videos/abs/
     # - assets/json/bulkingdiet.json
     # - assets/json/cuttingdiet.json
     # - assets/json/water_animation.json
