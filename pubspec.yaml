@@ -74,6 +74,7 @@ dependencies:
   firebase_crashlytics: ^4.3.5
   http: ^1.3.0
   shimmer: ^3.0.0
+  video_player: ^2.9.1
 
 
 
@@ -117,6 +118,8 @@ flutter:
   assets:
     - assets/images/
     - assets/json/
+    - assets/videos/
+    - assets/videos/chest/
     # - assets/json/bulkingdiet.json
     # - assets/json/cuttingdiet.json
     # - assets/json/water_animation.json

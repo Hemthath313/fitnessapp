@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:fitness_app/services/rapid_api_services.dart';
+import 'package:fitness_app/services/local_video_service.dart';
+import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../../utils/managers/color_manager.dart';
@@ -13,7 +14,7 @@ class LegExercisesPage extends StatefulWidget {
 }
 
 class _LegExercisesPageState extends State<LegExercisesPage> {
-  final RapidApiService _apiService = RapidApiService();
+  final LocalVideoService _videoService = LocalVideoService();
   List<dynamic> exercises = [];
   bool isLoading = true;
 
@@ -42,7 +43,7 @@ class _LegExercisesPageState extends State<LegExercisesPage> {
       }
 
       log('Fetching leg exercises from API...');
-      final data = await _apiService.getBodyPartsWorkoutData('upper legs', {});
+      final data = await _videoService.getBodyPartsWorkoutData('upper legs', {});
       log('API response: $data');
 
       setState(() {
@@ -94,14 +95,11 @@ class _LegExercisesPageState extends State<LegExercisesPage> {
                       elevation: 4,
                       child: ListTile(
                         contentPadding: EdgeInsets.all(10),
-                        leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.network(
-                            exercise['gifUrl'],
-                            width: 80,
-                            height: 80,
-                            fit: BoxFit.cover,
-                          ),
+                        leading: ExerciseVideoPlayer(
+                          videoPath: exercise['localVideoPath'],
+                          gifUrl: exercise['gifUrl'],
+                          width: 80,
+                          height: 80,
                         ),
                         title: Text(
                           exercise['name']
@@ -140,13 +138,11 @@ class _LegExercisesPageState extends State<LegExercisesPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  exercise['gifUrl'],
-                  height: 250,
-                  fit: BoxFit.cover,
-                ),
+              child: ExerciseVideoPlayer(
+                videoPath: exercise['localVideoPath'],
+                gifUrl: exercise['gifUrl'],
+                height: 250,
+                autoPlay: true, // Auto-play in detail view
               ),
             ),
             SizedBox(height: 20),

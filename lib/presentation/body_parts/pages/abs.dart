@@ -2,7 +2,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitness_app/services/rapid_api_services.dart';
+import 'package:fitness_app/services/local_video_service.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -17,7 +17,7 @@ class AbsExercisesPage extends StatefulWidget {
 }
 
 class _AbsExercisesPageState extends State<AbsExercisesPage> {
-  final RapidApiService _apiService = RapidApiService();
+  final LocalVideoService _videoService = LocalVideoService();
   List<List<dynamic>> groupedExercises = [];
   bool isLoading = true;
   int completedDays = 0;
@@ -63,7 +63,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
     try {
       if (!(await Connectivity().checkConnectivity())
           .contains(ConnectivityResult.none)) {
-        final data = await _apiService.getTargetWorkoutData('abs', {});
+        final data = await _videoService.getTargetWorkoutData('abs', {});
 
         // Ensure enough exercises to cover 30 days with 3 per day
         final totalExercises = data.length;

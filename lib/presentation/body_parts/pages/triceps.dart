@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:fitness_app/services/rapid_api_services.dart';
+import 'package:fitness_app/services/local_video_service.dart';
+import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../../utils/managers/color_manager.dart';
@@ -13,7 +14,7 @@ class TricepsExercisesPage extends StatefulWidget {
 }
 
 class _TricepsExercisesPageState extends State<TricepsExercisesPage> {
-  final RapidApiService _apiService = RapidApiService();
+  final LocalVideoService _videoService = LocalVideoService();
   List<dynamic> exercises = [];
   bool isLoading = true;
 
@@ -42,7 +43,7 @@ class _TricepsExercisesPageState extends State<TricepsExercisesPage> {
       }
 
       log('Fetching triceps exercises from API...');
-      final data = await _apiService.getTargetWorkoutData('triceps', {});
+      final data = await _videoService.getTargetWorkoutData('triceps', {});
       log('API response: $data');
 
       setState(() {
@@ -94,14 +95,11 @@ class _TricepsExercisesPageState extends State<TricepsExercisesPage> {
                       elevation: 4,
                       child: ListTile(
                         contentPadding: EdgeInsets.all(10),
-                        leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.network(
-                            exercise['gifUrl'],
-                            width: 80,
-                            height: 80,
-                            fit: BoxFit.cover,
-                          ),
+                        leading: ExerciseVideoPlayer(
+                          videoPath: exercise['localVideoPath'],
+                          gifUrl: exercise['gifUrl'],
+                          width: 80,
+                          height: 80,
                         ),
                         title: Text(
                           exercise['name']
@@ -140,13 +138,11 @@ class _TricepsExercisesPageState extends State<TricepsExercisesPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  exercise['gifUrl'],
-                  height: 250,
-                  fit: BoxFit.cover,
-                ),
+              child: ExerciseVideoPlayer(
+                videoPath: exercise['localVideoPath'],
+                gifUrl: exercise['gifUrl'],
+                height: 250,
+                autoPlay: true, // Auto-play in detail view
               ),
             ),
             SizedBox(height: 20),
