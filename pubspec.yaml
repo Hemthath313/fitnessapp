@@ -120,6 +120,7 @@ flutter:
     - assets/json/
     - assets/videos/
     - assets/videos/chest/
+    - assets/videos/biceps/
     # - assets/json/bulkingdiet.json
     # - assets/json/cuttingdiet.json
     # - assets/json/water_animation.json
