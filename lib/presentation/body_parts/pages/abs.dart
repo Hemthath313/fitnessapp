@@ -356,7 +356,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
                   Container(
                     padding: EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: ColorManager.black54,
+                      color: ColorManager.surface,
                       borderRadius: BorderRadius.circular(15),
                       border: Border.all(
                         color: ColorManager.limerGreen2.withOpacity(0.3),
@@ -407,7 +407,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: ColorManager.black54,
+        color: ColorManager.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -649,7 +649,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
                     Container(
                       padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: ColorManager.black54,
+                        color: ColorManager.surface,
                         borderRadius: BorderRadius.circular(15),
                       ),
                       child: Text(
@@ -720,7 +720,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
                         margin: EdgeInsets.only(bottom: 12),
                         padding: EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: ColorManager.black54,
+                          color: ColorManager.surface,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: ColorManager.limerGreen2.withOpacity(0.2),
@@ -804,7 +804,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: ColorManager.black54,
+        color: ColorManager.surface,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(
           color: ColorManager.limerGreen2.withOpacity(0.3),

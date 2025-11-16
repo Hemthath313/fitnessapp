@@ -308,7 +308,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
                   Container(
                     padding: EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: ColorManager.black54,
+                      color: ColorManager.surface,
                       borderRadius: BorderRadius.circular(15),
                       border: Border.all(
                         color: ColorManager.limerGreen2.withOpacity(0.3),
@@ -359,7 +359,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: ColorManager.black54,
+        color: ColorManager.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -601,7 +601,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
                     Container(
                       padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: ColorManager.black54,
+                        color: ColorManager.surface,
                         borderRadius: BorderRadius.circular(15),
                       ),
                       child: Text(
@@ -672,7 +672,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
                         margin: EdgeInsets.only(bottom: 12),
                         padding: EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: ColorManager.black54,
+                          color: ColorManager.surface,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: ColorManager.limerGreen2.withOpacity(0.2),
@@ -756,7 +756,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: ColorManager.black54,
+        color: ColorManager.surface,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(
           color: ColorManager.limerGreen2.withOpacity(0.3),

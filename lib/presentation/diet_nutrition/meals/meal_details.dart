@@ -55,7 +55,7 @@ class MealDetailsSheet extends StatelessWidget {
                   margin: const EdgeInsets.symmetric(vertical: 4),
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: ColorManager.black54,
+                    color: ColorManager.surface,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(

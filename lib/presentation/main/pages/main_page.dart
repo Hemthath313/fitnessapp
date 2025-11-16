@@ -121,34 +121,34 @@ class _MainPageState extends State<MainPage> {
     List<Widget> bottomNavItems = [
       Icon(
         Icons.home_outlined,
-        color: isHomePage ? ColorManager.limerGreen2 : ColorManager.grey2,
+        color: isHomePage ? ColorManager.primary : ColorManager.textTertiary,
         size: SizeManager.s28,
       ),
       Icon(
         Icons.restaurant,
-        color: isExplorePage ? ColorManager.limerGreen2 : ColorManager.grey2,
+        color: isExplorePage ? ColorManager.primary : ColorManager.textTertiary,
         size: SizeManager.s28,
       ),
       Icon(
         Icons.fitness_center,
         color: isCustomWorkoutsPage
-            ? ColorManager.limerGreen2
-            : ColorManager.grey2,
+            ? ColorManager.primary
+            : ColorManager.textTertiary,
         size: SizeManager.s28,
       ),
       Icon(
         Icons.chat_bubble_outline,
-        color: isChatPage ? ColorManager.limerGreen2 : ColorManager.grey2,
+        color: isChatPage ? ColorManager.primary : ColorManager.textTertiary,
         size: SizeManager.s28,
       ),
       Icon(
         Icons.person_outline,
-        color: isMorePage ? ColorManager.limerGreen2 : ColorManager.grey2,
+        color: isMorePage ? ColorManager.primary : ColorManager.textTertiary,
         size: SizeManager.s28,
       ),
     ];
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       appBar: appBar() != null
           ? PreferredSize(
               preferredSize: Size(
@@ -162,9 +162,9 @@ class _MainPageState extends State<MainPage> {
         bottom: true,
         minimum: EdgeInsets.zero,
         child: CurvedNavigationBar(
-          color: ColorManager.black87,
+          color: ColorManager.surface,
           buttonBackgroundColor: Colors.transparent,
-          backgroundColor: ColorManager.darkGrey,
+          backgroundColor: ColorManager.background,
           onTap: ontap,
           index: _currentIndex,
           items: bottomNavItems,

@@ -87,7 +87,7 @@ class _RecoverySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: ColorManager.black54,
+      color: ColorManager.surface,
       margin: const EdgeInsets.only(bottom: 16.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       elevation: 4,

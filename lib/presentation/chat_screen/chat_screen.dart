@@ -92,7 +92,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: ColorManager.background,
       body: SafeArea(
         bottom: true,
         child: Center(
@@ -124,8 +124,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: isUser
-                              ? ColorManager.limerGreen2
-                              : Colors.grey[800],
+                              ? ColorManager.primary
+                              : ColorManager.surface,
                           borderRadius: BorderRadius.only(
                             topLeft: const Radius.circular(16),
                             topRight: const Radius.circular(16),
@@ -136,7 +136,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: Text(
                           message.message,
                           style: TextStyle(
-                            color: isUser ? Colors.black : Colors.white,
+                            color: isUser ? Colors.black : ColorManager.textPrimary,
                             fontSize: 16,
                           ),
                         ),
@@ -162,29 +162,29 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: TextField(
               controller: _controller,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: ColorManager.textPrimary),
               decoration: InputDecoration(
                 hintText: 'Ask a fitness question...',
-                hintStyle: const TextStyle(color: Colors.white54),
+                hintStyle: const TextStyle(color: ColorManager.textTertiary),
                 filled: true,
-                fillColor: Colors.grey[850],
+                fillColor: ColorManager.surface,
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
-                  borderSide: const BorderSide(color: Colors.lime, width: 1),
+                  borderSide: const BorderSide(color: ColorManager.primary, width: 1),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
                   borderSide:
-                      const BorderSide(color: Colors.limeAccent, width: 2),
+                      const BorderSide(color: ColorManager.primary, width: 2),
                 ),
               ),
             ),
           ),
           const SizedBox(width: 8),
           IconButton(
-            icon: const Icon(Icons.send, color: Colors.lime),
+            icon: const Icon(Icons.send, color: ColorManager.primary),
             onPressed: _sendMessage,
           ),
         ],
@@ -199,12 +199,12 @@ class _ChatScreenState extends State<ChatScreen> {
         margin: const EdgeInsets.symmetric(vertical: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.grey[800],
+          color: ColorManager.surface,
           borderRadius: BorderRadius.circular(16),
         ),
         child: const Text(
           '...',
-          style: TextStyle(color: Colors.white, fontSize: 20),
+          style: TextStyle(color: ColorManager.textPrimary, fontSize: 20),
         ),
       ),
     );

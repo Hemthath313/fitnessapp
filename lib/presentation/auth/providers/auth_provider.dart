@@ -18,6 +18,10 @@ class AuthProvider with ChangeNotifier {
   bool isLoading = true;
 
   AuthProvider() {
+    // Load initial auth state immediately
+    _loadInitialAuthState();
+    
+    // Listen to auth state changes
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       _user = user;
       if (_user != null) {
@@ -31,14 +35,46 @@ class AuthProvider with ChangeNotifier {
           _isNewUser =
               _user!.metadata.creationTime == _user!.metadata.lastSignInTime &&
                   !_hasAgeParameter!;
+          isLoading = false;
           notifyListeners();
         });
       } else {
         _hasAgeParameter = null;
         _isNewUser = null;
+        isLoading = false;
         notifyListeners();
       }
     });
+  }
+
+  Future<void> _loadInitialAuthState() async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        await currentUser.reload();
+        _user = currentUser;
+
+        final docSnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(_user!.uid)
+            .get();
+
+        _hasAgeParameter =
+            docSnapshot.exists && docSnapshot.data()!.containsKey('age');
+        _isNewUser =
+            _user!.metadata.creationTime == _user!.metadata.lastSignInTime &&
+                !_hasAgeParameter!;
+      } else {
+        _user = null;
+        _hasAgeParameter = null;
+        _isNewUser = null;
+      }
+      isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      isLoading = false;
+      notifyListeners();
+    }
   }
   void completeUserData() {
     isDataCompleted = true;
@@ -293,6 +329,9 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> loadUserData() async {
+    isLoading = true;
+    notifyListeners();
+    
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser != null) {
@@ -315,6 +354,7 @@ class AuthProvider with ChangeNotifier {
       _isNewUser = null;
     }
 
+    isLoading = false;
     notifyListeners();
   }
 }

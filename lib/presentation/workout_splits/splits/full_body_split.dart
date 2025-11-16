@@ -78,7 +78,7 @@ class FullBodyPage extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final split = splits[index];
                   return Card(
-                    color: ColorManager.black54,
+                    color: ColorManager.surface,
                     elevation: 4,
                     margin: const EdgeInsets.symmetric(vertical: 8),
                     shape: RoundedRectangleBorder(
