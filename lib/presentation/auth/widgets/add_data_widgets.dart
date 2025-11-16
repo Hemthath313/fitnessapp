@@ -3,8 +3,7 @@ import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
-import 'package:fitness_app/utils/widgets/small_text_field_widget.dart';
-import 'package:fitness_app/utils/widgets/text_field_underlined.dart';
+import 'package:fitness_app/utils/widgets/text_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -43,12 +42,8 @@ class AddDataWidgets extends StatelessWidget {
   Widget build(BuildContext context) {
     List<Widget> addDataList = [
       Padding(
-        padding: const EdgeInsets.only(
-          left: PaddingManager.p28,
-          right: PaddingManager.p28,
-          bottom: PaddingManager.p12,
-        ),
-        child: TextFieldWidgetUnderLined(
+        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+        child: TextFieldWidget(
           controller: nameController,
           labelHint: StringsManager.nameHint,
           obscureText: false,
@@ -56,12 +51,8 @@ class AddDataWidgets extends StatelessWidget {
         ),
       ),
       Padding(
-        padding: const EdgeInsets.only(
-          left: PaddingManager.p28,
-          right: PaddingManager.p28,
-          bottom: PaddingManager.p12,
-        ),
-        child: TextFieldWidgetUnderLined(
+        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+        child: TextFieldWidget(
           controller: surnameController,
           labelHint: StringsManager.surnameHint,
           obscureText: false,
@@ -69,12 +60,8 @@ class AddDataWidgets extends StatelessWidget {
         ),
       ),
       Padding(
-        padding: const EdgeInsets.only(
-          left: PaddingManager.p28,
-          right: PaddingManager.p28,
-          bottom: PaddingManager.p12,
-        ),
-        child: TextFieldWidgetUnderLined(
+        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+        child: TextFieldWidget(
           inputFormatters: [
             FilteringTextInputFormatter.digitsOnly,
           ],
@@ -85,32 +72,37 @@ class AddDataWidgets extends StatelessWidget {
         ),
       ),
       Padding(
-        padding: const EdgeInsets.only(
-          left: PaddingManager.p28,
-          right: PaddingManager.p28,
-          bottom: PaddingManager.p12,
-          top: PaddingManager.p12,
-        ),
+        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            SmallTextFieldWidget(
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
-              controller: heightController,
-              labelHint: StringsManager.heightHint,
-              obscureText: false,
-              keyboardType: TextInputType.number,
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(right: 8.w),
+                child: TextFieldWidget(
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
+                  controller: heightController,
+                  labelHint: StringsManager.heightHint,
+                  obscureText: false,
+                  keyboardType: TextInputType.number,
+                ),
+              ),
             ),
-            SmallTextFieldWidget(
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
-              controller: weightController,
-              labelHint: StringsManager.weightHint,
-              obscureText: false,
-              keyboardType: TextInputType.number,
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(left: 8.w),
+                child: TextFieldWidget(
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
+                  controller: weightController,
+                  labelHint: StringsManager.weightHint,
+                  obscureText: false,
+                  keyboardType: TextInputType.number,
+                ),
+              ),
             ),
           ],
         ),

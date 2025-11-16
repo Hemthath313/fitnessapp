@@ -1,6 +1,7 @@
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/widgets/text_field_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class LoginOrRegisterView extends StatelessWidget {
   const LoginOrRegisterView({
@@ -20,7 +21,7 @@ class LoginOrRegisterView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         TextFieldWidget(
           controller: emailController,
@@ -28,20 +29,22 @@ class LoginOrRegisterView extends StatelessWidget {
           obscureText: false,
           keyboardType: TextInputType.emailAddress,
         ),
+        SizedBox(height: 20.h),
         TextFieldWidget(
           controller: passwordController,
           labelHint: StringsManager.passwordHint,
           obscureText: true,
-          keyboardType: TextInputType.emailAddress,
+          keyboardType: TextInputType.visiblePassword,
         ),
-        isRegisterView
-            ? TextFieldWidget(
-                controller: repeatPasswordController,
-                labelHint: StringsManager.repeatPasswordHint,
-                obscureText: true,
-                keyboardType: TextInputType.emailAddress,
-              )
-            : Container(),
+        if (isRegisterView) ...[
+          SizedBox(height: 20.h),
+          TextFieldWidget(
+            controller: repeatPasswordController,
+            labelHint: StringsManager.repeatPasswordHint,
+            obscureText: true,
+            keyboardType: TextInputType.visiblePassword,
+          ),
+        ],
       ],
     );
   }

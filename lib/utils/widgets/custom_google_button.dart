@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
-import 'package:fitness_app/utils/managers/style_manager.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class CustomGoogleSignInButton extends StatelessWidget {
@@ -11,32 +10,37 @@ class CustomGoogleSignInButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 50.h,
-        width: double.infinity,
-        margin: const EdgeInsets.symmetric(horizontal: 28),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30.r),
-          boxShadow: [
-            BoxShadow(
-              color: ColorManager.limeGreen.withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
+    return SizedBox(
+      height: 52.h,
+      width: double.infinity,
+      child: OutlinedButton(
+        onPressed: onTap,
+        style: OutlinedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black87,
+          side: BorderSide(
+            color: ColorManager.surfaceLight,
+            width: 1,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          elevation: 0,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-             FaIcon(FontAwesomeIcons.google, color: ColorManager.limerGreen2),
+            FaIcon(
+              FontAwesomeIcons.google,
+              color: ColorManager.primary,
+              size: 20.sp,
+            ),
             SizedBox(width: 12.w),
             Text(
               'Sign in with Google',
-              style: StyleManager.loginPageSubTextTextStyle.copyWith(
-                color: Colors.black,
+              style: TextStyle(
+                color: Colors.black87,
+                fontSize: 15.sp,
                 fontWeight: FontWeight.w600,
               ),
             ),

@@ -9,7 +9,7 @@ import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/widgets/lime_green_rounded_button.dart';
-import 'package:fitness_app/utils/widgets/text_field_underlined.dart';
+import 'package:fitness_app/utils/widgets/text_field_widget.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -206,12 +206,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                       ),
                     ),
                   Padding(
-                    padding: const EdgeInsets.only(
-                      left: PaddingManager.p28,
-                      right: PaddingManager.p28,
-                      bottom: PaddingManager.p12,
-                    ),
-                    child: TextFieldWidgetUnderLined(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+                    child: TextFieldWidget(
                       controller: _emailController,
                       labelHint: StringsManager.emailHint,
                       obscureText: false,
@@ -220,15 +216,11 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                   ),
                   if (!_isGoogleUser)
                     Padding(
-                      padding: const EdgeInsets.only(
-                        left: PaddingManager.p28,
-                        right: PaddingManager.p28,
-                        bottom: PaddingManager.p12,
-                      ),
-                      child: TextFieldWidgetUnderLined(
+                      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+                      child: TextFieldWidget(
                         controller: _passwordController,
                         labelHint: StringsManager.passwordHint,
-                        keyboardType: TextInputType.emailAddress,
+                        keyboardType: TextInputType.visiblePassword,
                         obscureText: true,
                       ),
                     ),

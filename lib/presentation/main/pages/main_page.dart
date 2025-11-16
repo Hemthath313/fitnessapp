@@ -170,9 +170,13 @@ class _MainPageState extends State<MainPage> {
           items: bottomNavItems,
         ),
       ),
-      body: ErrorBoundary(
-        child: pages[_currentIndex].animate().fadeIn(duration: 500.ms),
-        fallbackMessage: 'Unable to load this page',
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: ErrorBoundary(
+          child: pages[_currentIndex].animate().fadeIn(duration: 500.ms),
+          fallbackMessage: 'Unable to load this page',
+        ),
       ),
     );
   }

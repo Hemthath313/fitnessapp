@@ -6,7 +6,8 @@ import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/widgets/lime_green_rounded_button.dart';
-import 'package:fitness_app/utils/widgets/text_field_underlined.dart';
+import 'package:fitness_app/utils/widgets/text_field_widget.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lottie/lottie.dart';
@@ -162,17 +163,15 @@ class _DrinkPageState extends State<DrinkPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(
-                  left: PaddingManager.p28,
-                  right: PaddingManager.p28,
-                  top: PaddingManager.p12,
-                  bottom: PaddingManager.p12,
-                ),
-                child: TextFieldWidgetUnderLined(
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+                child: TextFieldWidget(
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                  ],
                   controller: _drinkController,
                   labelHint: StringsManager.waterHint,
                   obscureText: false,
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
                 ),
               ),
               LimeGreenRoundedButtonWidget(
