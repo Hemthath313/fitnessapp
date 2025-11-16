@@ -74,8 +74,8 @@ class HomeProvider with ChangeNotifier {
     const double high = 1.725;
     const double veryhigh = 1.9;
 
-    var isMan = gender == 'MAN';
-    var isWoman = gender == 'WOMAN';
+    var isMan = gender == 'Male';
+    var isWoman = gender == 'Female';
     if (isMan) {
       var manBmrEquation =
           88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);

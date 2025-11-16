@@ -106,7 +106,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 height: SizeManager.s600.h,
                                 width: deviceWidth,
                                 child: Image.asset(
-                                  homeProvider.userData['gender'] == 'MAN'
+                                  homeProvider.userData['gender'] == 'Male'
                                       ? ImageManager.man
                                       : ImageManager.woman,
                                 ),
