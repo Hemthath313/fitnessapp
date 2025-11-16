@@ -1,8 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/data/db.dart';
-import 'package:fitness_app/utils/managers/color_manager.dart';
+import 'package:fitness_app/utils/widgets/loading_overlay.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class SettingsProvider with ChangeNotifier {
   var currentUser = FirebaseAuth.instance.currentUser;
@@ -14,16 +13,7 @@ class SettingsProvider with ChangeNotifier {
     required String oldPassword,
     required String newPassword,
   }) async {
-    showDialog(
-        context: context,
-        builder: (_) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(50),
-              child: SpinKitSpinningLines(color: ColorManager.limerGreen2),
-            ),
-          );
-        });
+    LoadingOverlay.show(context, message: 'Changing password...');
 
     try {
       var credential =
@@ -32,10 +22,14 @@ class SettingsProvider with ChangeNotifier {
         currentUser!.updatePassword(newPassword);
       });
 
-      // ignore: use_build_context_synchronously
-      Navigator.pop(context);
+      if (context.mounted) {
+        LoadingOverlay.hide(context);
+      }
       notifyListeners();
     } catch (e) {
+      if (context.mounted) {
+        LoadingOverlay.hide(context);
+      }
       rethrow;
     }
   }
@@ -46,16 +40,7 @@ class SettingsProvider with ChangeNotifier {
     required String newEmail,
     required String password,
   }) async {
-    showDialog(
-        context: context,
-        builder: (_) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(50),
-              child: SpinKitSpinningLines(color: ColorManager.limerGreen2),
-            ),
-          );
-        });
+    LoadingOverlay.show(context, message: 'Changing email...');
 
     try {
       var credential =
@@ -64,10 +49,14 @@ class SettingsProvider with ChangeNotifier {
         currentUser!.updateEmail(newEmail);
       });
 
-      // ignore: use_build_context_synchronously
-      Navigator.pop(context);
+      if (context.mounted) {
+        LoadingOverlay.hide(context);
+      }
       notifyListeners();
     } catch (e) {
+      if (context.mounted) {
+        LoadingOverlay.hide(context);
+      }
       rethrow;
     }
   }
@@ -75,8 +64,11 @@ class SettingsProvider with ChangeNotifier {
   Future<void> deleteUser({
     required String email,
     required String password,
+    required BuildContext context,
     bool isGoogleUser = false,
   }) async {
+    LoadingOverlay.show(context, message: 'Deleting account...');
+
     try {
       User? user = _auth.currentUser;
 
@@ -94,8 +86,14 @@ class SettingsProvider with ChangeNotifier {
         await result.user!.delete();
       }
 
+      if (context.mounted) {
+        LoadingOverlay.hide(context);
+      }
       notifyListeners();
     } catch (e) {
+      if (context.mounted) {
+        LoadingOverlay.hide(context);
+      }
       rethrow;
     }
   }
@@ -103,32 +101,21 @@ class SettingsProvider with ChangeNotifier {
   Future<void> signOut({
     required BuildContext context,
   }) async {
-    showDialog(
-        context: context,
-        builder: (_) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(50),
-              child: SpinKitSpinningLines(color: ColorManager.limerGreen2),
-            ),
-          );
-        });
+    LoadingOverlay.show(context, message: 'Logging out...');
 
     try {
       await FirebaseAuth.instance.signOut();
 
-      // ignore: use_build_context_synchronously
-      Navigator.pop(context);
+      if (context.mounted) {
+        LoadingOverlay.hide(context);
+      }
 
       notifyListeners();
     } on FirebaseAuthException catch (_) {
-      Future.delayed(const Duration(seconds: 2)).then(
-        (value) {
-          Navigator.pop(context);
-
-          notifyListeners();
-        },
-      );
+      if (context.mounted) {
+        LoadingOverlay.hide(context);
+      }
+      notifyListeners();
     }
   }
 }

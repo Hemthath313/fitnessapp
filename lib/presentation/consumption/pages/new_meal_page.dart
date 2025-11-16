@@ -6,6 +6,7 @@ import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/widgets/lime_green_rounded_button.dart';
 import 'package:fitness_app/utils/widgets/text_field_widget.dart';
+import 'package:fitness_app/utils/widgets/loading_overlay.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -168,9 +169,10 @@ class _NewMealPageState extends State<NewMealPage> {
                 ),
               ),
               LimeGreenRoundedButtonWidget(
-                onTap: () {
+                onTap: () async {
+                  LoadingOverlay.show(context, message: 'Adding meal...');
                   try {
-                    consumptionProvider.addNewMeal(
+                    await consumptionProvider.addNewMeal(
                       title: _mealTitleController.text,
                       amount: double.parse(_mealAmountController.text),
                       calories: double.parse(_mealCalloriesController.text),
@@ -179,8 +181,14 @@ class _NewMealPageState extends State<NewMealPage> {
                       proteins: double.parse(_mealProteinsController.text),
                       dateTime: DateTime.now(),
                     );
-                    Navigator.of(context).pop();
+                    if (context.mounted) {
+                      LoadingOverlay.hide(context);
+                      Navigator.of(context).pop();
+                    }
                   } catch (e) {
+                    if (context.mounted) {
+                      LoadingOverlay.hide(context);
+                    }
                     rethrow;
                   }
                 },

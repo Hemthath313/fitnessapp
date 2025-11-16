@@ -25,6 +25,16 @@ class WorkoutProvider with ChangeNotifier {
     return [..._allWorkouts];
   }
 
+  void clearAllWorkouts() {
+    _workouts.clear();
+    _allWorkouts.clear();
+    _finishedWorkouts.clear();
+    progressPercent = null;
+    exercisesLeft = null;
+    shownPercent = null;
+    notifyListeners();
+  }
+
   Future<void> getProgressPercent() async {
     final int allWorkoutsNum = _allWorkouts.length;
     final int finishedWorkoutsNum = _finishedWorkouts.length;
@@ -73,10 +83,20 @@ class WorkoutProvider with ChangeNotifier {
   Future fetchAndSetWorkouts() async {
     User? user = FirebaseAuth.instance.currentUser;
 
+    // Check if user is authenticated
+    if (user == null) {
+      // Clear all workouts if user is not authenticated
+      _workouts.clear();
+      _allWorkouts.clear();
+      _finishedWorkouts.clear();
+      notifyListeners();
+      return;
+    }
+
     try {
       final workoutSnapshot = await FirebaseFirestore.instance
           .collection('workouts')
-          .doc(user!.uid)
+          .doc(user.uid)
           .collection('workoutData')
           .get();
       final allWorkoutSnapshot = await FirebaseFirestore.instance
@@ -141,7 +161,19 @@ class WorkoutProvider with ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      rethrow;
+      // Handle permission denied or other errors gracefully
+      print('Error fetching workouts: $e');
+      
+      // If it's a permission error, clear the data
+      if (e.toString().contains('PERMISSION_DENIED') || 
+          e.toString().contains('permission-denied')) {
+        _workouts.clear();
+        _allWorkouts.clear();
+        _finishedWorkouts.clear();
+        notifyListeners();
+      } else {
+        rethrow;
+      }
     }
   }
 

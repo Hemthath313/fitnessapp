@@ -3,6 +3,7 @@ import 'package:fitness_app/presentation/home/providers/home_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
+import 'package:fitness_app/utils/widgets/loading_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -300,7 +301,8 @@ class MorePage extends StatelessWidget {
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      barrierDismissible: true,
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: ColorManager.darkGrey,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(SizeManager.s16.r),
@@ -322,35 +324,99 @@ class MorePage extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text(
               'Cancel',
               style: TextStyle(color: ColorManager.white70),
             ),
           ),
-          ElevatedButton(
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              if (context.mounted) {
-                context.go(Routes.loginRoute);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(SizeManager.s8.r),
+          _LogoutButton(parentContext: context),
+        ],
+      ),
+    );
+  }
+}
+
+class _LogoutButton extends StatefulWidget {
+  final BuildContext parentContext;
+  
+  const _LogoutButton({required this.parentContext});
+  
+  @override
+  State<_LogoutButton> createState() => _LogoutButtonState();
+}
+
+class _LogoutButtonState extends State<_LogoutButton> {
+  bool _isLoading = false;
+
+  Future<void> _handleLogout() async {
+    if (_isLoading) return; // Prevent multiple clicks
+    
+    setState(() => _isLoading = true);
+    
+    // Close dialog first
+    Navigator.of(context).pop();
+    
+    // Wait a frame to ensure dialog is closed
+    await Future.delayed(const Duration(milliseconds: 50));
+    
+    if (!mounted) return;
+    
+    // Use parent context (from MorePage) for loading overlay and navigation
+    LoadingOverlay.show(widget.parentContext, message: 'Logging out...');
+    
+    try {
+      await FirebaseAuth.instance.signOut();
+      
+      if (widget.parentContext.mounted) {
+        LoadingOverlay.hide(widget.parentContext);
+        // Navigate using parent context
+        widget.parentContext.go(Routes.loginRoute);
+      }
+    } catch (e) {
+      if (widget.parentContext.mounted) {
+        LoadingOverlay.hide(widget.parentContext);
+        ScaffoldMessenger.of(widget.parentContext).showSnackBar(
+          SnackBar(
+            content: Text('Error logging out: ${e.toString()}'),
+            backgroundColor: ColorManager.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: _isLoading ? null : _handleLogout,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.red,
+        disabledBackgroundColor: Colors.red.withOpacity(0.6),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(SizeManager.s8.r),
+        ),
+      ),
+      child: _isLoading
+          ? SizedBox(
+              height: 16.h,
+              width: 16.w,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(ColorManager.white),
               ),
-            ),
-            child: Text(
+            )
+          : Text(
               'Logout',
               style: TextStyle(
                 color: ColorManager.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
-          ),
-        ],
-      ),
     );
   }
 }

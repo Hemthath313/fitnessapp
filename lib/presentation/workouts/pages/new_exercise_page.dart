@@ -9,6 +9,7 @@ import 'package:fitness_app/utils/managers/style_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/widgets/lime_green_rounded_button.dart';
 import 'package:fitness_app/utils/widgets/text_field_widget.dart';
+import 'package:fitness_app/utils/widgets/loading_overlay.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -148,17 +149,24 @@ class _NewExercisePageState extends State<NewExercisePage> {
                 ),
               ),
               LimeGreenRoundedButtonWidget(
-                onTap: () {
+                onTap: () async {
+                  LoadingOverlay.show(context, message: 'Adding workout...');
                   try {
-                    workoutProvider.addNewWorkout(
+                    await workoutProvider.addNewWorkout(
                       name: _valueExercise!,
                       repNumber: int.parse(_repNumberController.text),
                       setNumber: int.parse(_setNumberController.text),
                       dateTime: DateTime.now(),
                     );
-                    workoutProvider.getProgressPercent();
-                    Navigator.of(context).pop();
+                    await workoutProvider.getProgressPercent();
+                    if (context.mounted) {
+                      LoadingOverlay.hide(context);
+                      Navigator.of(context).pop();
+                    }
                   } catch (e) {
+                    if (context.mounted) {
+                      LoadingOverlay.hide(context);
+                    }
                     rethrow;
                   }
                 },

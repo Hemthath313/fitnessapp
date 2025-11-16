@@ -22,15 +22,31 @@ class SettingsPageAppBarWidget extends StatefulWidget {
 }
 
 class _SettingsPageAppBarWidgetState extends State<SettingsPageAppBarWidget> {
+  bool _isLoggingOut = false;
+
   @override
   Widget build(BuildContext context) {
     final settingsProvider =
         Provider.of<SettingsProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    Future<void> signOut(
-        SettingsProvider settingsProvider, BuildContext context) async {
-      await settingsProvider.signOut(context: context);
-      authProvider.callAuth();
+
+    Future<void> signOut() async {
+      if (_isLoggingOut) return; // Prevent multiple clicks
+      
+      setState(() => _isLoggingOut = true);
+      
+      try {
+        await settingsProvider.signOut(context: context);
+        authProvider.callAuth();
+
+        if (mounted) {
+          context.go(Routes.authRoute);
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoggingOut = false);
+        }
+      }
     }
 
     return AppBar(
@@ -56,21 +72,21 @@ class _SettingsPageAppBarWidgetState extends State<SettingsPageAppBarWidget> {
             ),
             child: IconButton(
               splashColor: ColorManager.grey3,
-              onPressed: () async {
-                final currentContext =
-                    context; // Store context before the async gap
-                await signOut(settingsProvider, currentContext);
-
-                if (!currentContext.mounted) {
-                  return; // Prevent navigation if unmounted
-                }
-                currentContext.go(Routes.authRoute);
-              },
-              icon: const Icon(
-                Icons.logout_sharp,
-                size: SizeManager.s26,
-                color: ColorManager.white,
-              ),
+              onPressed: _isLoggingOut ? null : signOut,
+              icon: _isLoggingOut
+                  ? SizedBox(
+                      width: 20.w,
+                      height: 20.h,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(ColorManager.white),
+                      ),
+                    )
+                  : const Icon(
+                      Icons.logout_sharp,
+                      size: SizeManager.s26,
+                      color: ColorManager.white,
+                    ),
             ),
           ),
         ),

@@ -64,6 +64,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
               .deleteUser(
             email: _emailController.text,
             password: _passwordController.text,
+            context: context,
             isGoogleUser: _isGoogleUser,
           )
               .then((value) {

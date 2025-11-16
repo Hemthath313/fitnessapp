@@ -8,6 +8,7 @@ import 'package:fitness_app/utils/managers/style_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/widgets/lime_green_rounded_button.dart';
 import 'package:fitness_app/utils/widgets/text_field_widget.dart';
+import 'package:fitness_app/utils/widgets/loading_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -38,6 +39,8 @@ class _ChangeWeightPageState extends State<ChangeWeightPage> {
   }
 
   Future<void> changeWeight() async {
+    LoadingOverlay.show(context, message: 'Updating weight...');
+    
     final profileProvider =
         Provider.of<ProfileProvider>(context, listen: false);
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
@@ -68,9 +71,17 @@ class _ChangeWeightPageState extends State<ChangeWeightPage> {
             (_) => homeProvider.fetchUserData(),
           )
           .then(
-            (_) => Navigator.of(context).pop(),
+            (_) {
+              if (context.mounted) {
+                LoadingOverlay.hide(context);
+                Navigator.of(context).pop();
+              }
+            },
           );
     } catch (e) {
+      if (context.mounted) {
+        LoadingOverlay.hide(context);
+      }
       rethrow;
     }
   }

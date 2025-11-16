@@ -1,4 +1,5 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
 import 'package:fitness_app/presentation/explore/explore_page.dart';
 import 'package:fitness_app/presentation/home/pages/home_page.dart';
@@ -67,6 +68,12 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Check if user is authenticated before loading data
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      if (authProvider.user == null) {
+        return; // Don't load data if user is not authenticated
+      }
+
       NetworkService.initialize();
       final consumptionProvider =
           Provider.of<ConsumptionProvider>(context, listen: false);
@@ -75,17 +82,22 @@ class _MainPageState extends State<MainPage> {
       final statisticsProvider =
           Provider.of<StatisticsProvider>(context, listen: false);
 
-      // Load statistics
-      await statisticsProvider.loadStreakData();
+      try {
+        // Load statistics
+        await statisticsProvider.loadStreakData();
 
-      // FIRST: Check and clear water for new day BEFORE loading data
-      await consumptionProvider.clearWaterIfNeeded();
+        // FIRST: Check and clear water for new day BEFORE loading data
+        await consumptionProvider.clearWaterIfNeeded();
 
-      // THEN: Load fresh data after potential reset
-      await consumptionProvider.fetchAndSetMeals();
-      await consumptionProvider.fetchAndSetWater();
-      await workoutsProvider.fetchAndSetWorkouts();
-      await workoutsProvider.getProgressPercent();
+        // THEN: Load fresh data after potential reset
+        await consumptionProvider.fetchAndSetMeals();
+        await consumptionProvider.fetchAndSetWater();
+        await workoutsProvider.fetchAndSetWorkouts();
+        await workoutsProvider.getProgressPercent();
+      } catch (e) {
+        // Handle errors gracefully - don't crash the app
+        print('Error loading initial data: $e');
+      }
 
       final workouts = workoutsProvider.workouts;
       final meals = consumptionProvider.meals;
