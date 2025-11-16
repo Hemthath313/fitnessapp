@@ -368,10 +368,36 @@ class _LogoutButtonState extends State<_LogoutButton> {
     try {
       await FirebaseAuth.instance.signOut();
       
+      // Wait for auth state to update
+      await Future.delayed(const Duration(milliseconds: 100));
+      
       if (widget.parentContext.mounted) {
+        // Hide loading overlay first
         LoadingOverlay.hide(widget.parentContext);
-        // Navigate using parent context
-        widget.parentContext.go(Routes.loginRoute);
+        
+        // Wait to ensure overlay is fully dismissed before navigation
+        await Future.delayed(const Duration(milliseconds: 200));
+        
+        // Double check to hide overlay
+        LoadingOverlay.hide(null);
+        
+        // Wait one more frame
+        await Future.delayed(const Duration(milliseconds: 100));
+        
+        // Now navigate to boarding route (router will handle redirect)
+        if (widget.parentContext.mounted) {
+          widget.parentContext.go(Routes.boardingRoute);
+          
+          // Ensure overlay is hidden after navigation
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            LoadingOverlay.hide(null);
+          });
+          
+          // Final check after delay
+          Future.delayed(const Duration(milliseconds: 500), () {
+            LoadingOverlay.hide(null);
+          });
+        }
       }
     } catch (e) {
       if (widget.parentContext.mounted) {

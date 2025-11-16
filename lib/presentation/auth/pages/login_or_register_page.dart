@@ -3,6 +3,7 @@ import 'package:fitness_app/presentation/auth/widgets/login_or_register_view.dar
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/widgets/custom_google_button.dart';
+import 'package:fitness_app/utils/widgets/loading_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -24,6 +25,16 @@ class _LoginPageState extends State<LoginPage> {
       TextEditingController();
 
   AuthMode _authMode = AuthMode.signIn;
+
+  @override
+  void initState() {
+    super.initState();
+    // Ensure any lingering overlays are dismissed when login page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      LoadingOverlay.hide(null);
+      LoadingOverlay.forceHide();
+    });
+  }
 
   @override
   void dispose() {

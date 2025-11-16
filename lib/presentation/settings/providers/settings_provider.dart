@@ -106,6 +106,9 @@ class SettingsProvider with ChangeNotifier {
     try {
       await FirebaseAuth.instance.signOut();
 
+      // Wait for auth state to update
+      await Future.delayed(const Duration(milliseconds: 100));
+
       if (context.mounted) {
         LoadingOverlay.hide(context);
       }

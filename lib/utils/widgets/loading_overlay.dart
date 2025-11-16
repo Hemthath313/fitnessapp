@@ -56,22 +56,28 @@ class LoadingOverlay {
     try {
       // Try to use the stored overlay context first
       if (_overlayContext != null && _overlayContext!.mounted) {
-        Navigator.of(_overlayContext!, rootNavigator: true).pop();
+        try {
+          Navigator.of(_overlayContext!, rootNavigator: true).pop();
+        } catch (_) {}
         _overlayContext = null;
         return;
       }
       
       // Fallback to provided context
       if (context != null && context.mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
+        try {
+          Navigator.of(context, rootNavigator: true).pop();
+        } catch (_) {}
         _overlayContext = null;
         return;
       }
       
-      // Last resort: try to find and close any dialog on root navigator
-      final navigatorKey = GlobalKey<NavigatorState>();
-      if (navigatorKey.currentContext != null) {
-        Navigator.of(navigatorKey.currentContext!, rootNavigator: true).pop();
+      // Try to pop any dialog on root navigator using any available context
+      // This is a last resort when context is null
+      if (context != null && context.mounted) {
+        try {
+          Navigator.of(context, rootNavigator: true).pop();
+        } catch (_) {}
       }
     } catch (e) {
       // If all else fails, try to pop until we find the dialog
@@ -81,8 +87,14 @@ class LoadingOverlay {
               .popUntil((route) => route.isFirst || route.settings.name == null);
         } catch (_) {}
       }
+    } finally {
       _overlayContext = null;
     }
+  }
+  
+  /// Force hide overlay - useful for cleanup after navigation
+  static void forceHide() {
+    _overlayContext = null;
   }
 }
 

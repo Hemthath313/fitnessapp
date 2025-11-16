@@ -1,6 +1,7 @@
 import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
 import 'package:fitness_app/presentation/settings/providers/settings_provider.dart';
 import 'package:fitness_app/utils/router/router.dart';
+import 'package:fitness_app/utils/widgets/loading_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
@@ -37,10 +38,36 @@ class _SettingsPageAppBarWidgetState extends State<SettingsPageAppBarWidget> {
       
       try {
         await settingsProvider.signOut(context: context);
+        
+        // Wait for auth state to update
+        await Future.delayed(const Duration(milliseconds: 100));
+        
+        // Ensure overlay is hidden before proceeding
+        LoadingOverlay.hide(context);
+        await Future.delayed(const Duration(milliseconds: 200));
+        
+        // Double check to hide overlay
+        LoadingOverlay.hide(null);
+        await Future.delayed(const Duration(milliseconds: 100));
+        
         authProvider.callAuth();
 
+        // Wait a bit more to ensure state is updated
+        await Future.delayed(const Duration(milliseconds: 100));
+
         if (mounted) {
-          context.go(Routes.authRoute);
+          // Navigate to boarding route (router will handle redirect)
+          context.go(Routes.boardingRoute);
+          
+          // Ensure overlay is hidden after navigation
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            LoadingOverlay.hide(null);
+          });
+          
+          // Final check after delay
+          Future.delayed(const Duration(milliseconds: 500), () {
+            LoadingOverlay.hide(null);
+          });
         }
       } finally {
         if (mounted) {
