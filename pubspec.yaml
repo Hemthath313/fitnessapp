@@ -98,6 +98,7 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
+  remove_alpha_ios: true  # Remove alpha channel for App Store compliance
   adaptive_icon_background: "#000000"  # Set to black
   adaptive_icon_foreground: "assets/images/launcher_icon.png"
   image_path: "assets/images/launcher_icon.png"
