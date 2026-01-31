@@ -198,10 +198,14 @@ class ProfileProvider with ChangeNotifier {
   }) async {
     try {
       User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      int timestamp = DateTime.now().millisecondsSinceEpoch;
+      int month = DateTime.now().month;
 
       await FirebaseFirestore.instance
           .collection('users')
-          .doc(user!.uid)
+          .doc(user.uid)
           .update({
         'activity': activity,
         'bmr': bmr,
@@ -215,9 +219,73 @@ class ProfileProvider with ChangeNotifier {
         'thigh': thigh,
         'calf': calf,
       });
+
+      // Save history for Pro features (Advanced Analytics)
+      final measurements = {
+        'chest': chest,
+        'shoulders': shoulders,
+        'biceps': biceps,
+        'foreArm': foreArm,
+        'waist': waist,
+        'hips': hips,
+        'thigh': thigh,
+        'calf': calf,
+      };
+
+      for (var entry in measurements.entries) {
+        final docSnapshot = await FirebaseFirestore.instance
+            .collection('measurementSpots')
+            .doc(user.uid)
+            .collection(entry.key)
+            .where('month', isEqualTo: month)
+            .get();
+
+        if (docSnapshot.docs.isNotEmpty) {
+          await docSnapshot.docs.first.reference.update({
+            'value': entry.value,
+            'timestamp': timestamp,
+          });
+        } else {
+          await FirebaseFirestore.instance
+              .collection('measurementSpots')
+              .doc(user.uid)
+              .collection(entry.key)
+              .add({
+            'value': entry.value,
+            'month': month,
+            'timestamp': timestamp,
+          });
+        }
+      }
+
       notifyListeners();
     } catch (e) {
       rethrow;
+    }
+  }
+
+  Future<List<FlSpot>> fetchMeasurementSpots(String type) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return [];
+
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('measurementSpots')
+          .doc(user.uid)
+          .collection(type)
+          .orderBy('month')
+          .get();
+
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        return FlSpot(
+          (data['month'] as int).toDouble(),
+          (data['value'] as num).toDouble(),
+        );
+      }).toList();
+    } catch (e) {
+      print('Error fetching measurement spots for $type: $e');
+      return [];
     }
   }
 }

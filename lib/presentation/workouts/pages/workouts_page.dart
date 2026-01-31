@@ -1,6 +1,7 @@
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/presentation/workouts/widgets/exercise_widget.dart';
 import 'package:fitness_app/presentation/workouts/widgets/new_exercise_button.dart';
+import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/interstitial_ads/interstitial_ad_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
@@ -42,9 +43,12 @@ class _WorkoutPageState extends State<WorkoutPage> {
 
   void _showInterstitialAd() {
     _workoutCount++;
-    // Show interstitial ad every 3 workouts
+    // Show interstitial ad every 3 workouts (skip for premium)
     if (_workoutCount % 3 == 0) {
-      InterstitialAdService.showWorkoutCompletionAd();
+      final sub = Provider.of<SubscriptionProvider>(context, listen: false);
+      if (!sub.isPremium) {
+        InterstitialAdService.showWorkoutCompletionAd();
+      }
     }
   }
 

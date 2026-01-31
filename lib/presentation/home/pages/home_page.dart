@@ -50,7 +50,7 @@ class _HomePageState extends State<HomePage> {
             ),
             const CarouselSliderHomeWidget(),
 
-            BannerAdWidget(pageName: 'home'),
+            PremiumAwareBannerAd(pageName: 'home'),
             SizedBox(height: SizeManager.s16.h),
           ],
         ),

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../presentation/auth/providers/auth_provider.dart';
-import '../presentation/chat_screen/provider/chat_provider.dart';
 import '../presentation/consumption/providers/consumption_provider.dart';
+import '../presentation/in_app_purchases/providers/subscription_provider.dart';
 import '../presentation/home/providers/home_provider.dart';
 import '../presentation/settings/providers/settings_provider.dart';
 import '../presentation/profile/providers/profile_provider.dart';
@@ -43,7 +43,7 @@ class _MyAppState extends State<MyApp> {
           value: ProfileProvider(),
         ),
         ChangeNotifierProvider.value(
-          value: ChatProvider(),
+          value: SubscriptionProvider(),
         ),
         ChangeNotifierProvider.value(
           value: StatisticsProvider(),
@@ -67,7 +67,7 @@ class _MyAppState extends State<MyApp> {
       useMaterial3: true,
       colorScheme: AppTheme.colorScheme,
       scaffoldBackgroundColor: ColorManager.background,
-      
+
       // AppBar Theme
       appBarTheme: AppBarTheme(
         backgroundColor: ColorManager.background,
@@ -81,7 +81,7 @@ class _MyAppState extends State<MyApp> {
           letterSpacing: 0.5,
         ),
       ),
-      
+
       // Card Theme
       cardTheme: CardThemeData(
         color: ColorManager.surface,
@@ -91,7 +91,7 @@ class _MyAppState extends State<MyApp> {
         ),
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
-      
+
       // Elevated Button Theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -109,7 +109,7 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
       ),
-      
+
       // Text Button Theme
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
@@ -120,7 +120,7 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
       ),
-      
+
       // Outlined Button Theme
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
@@ -136,7 +136,7 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
       ),
-      
+
       // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -163,9 +163,10 @@ class _MyAppState extends State<MyApp> {
         ),
         labelStyle: TextStyle(color: ColorManager.textSecondary),
         hintStyle: TextStyle(color: ColorManager.textTertiary),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
-      
+
       // Bottom Navigation Bar Theme
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: ColorManager.surface,
@@ -176,20 +177,20 @@ class _MyAppState extends State<MyApp> {
         type: BottomNavigationBarType.fixed,
         elevation: 8,
       ),
-      
+
       // Icon Theme
       iconTheme: const IconThemeData(
         color: ColorManager.textPrimary,
         size: 24,
       ),
-      
+
       // Divider Theme
       dividerTheme: DividerThemeData(
         color: ColorManager.textTertiary.withOpacity(0.2),
         thickness: 1,
         space: 1,
       ),
-      
+
       // Chip Theme
       chipTheme: ChipThemeData(
         backgroundColor: ColorManager.surface,
@@ -201,7 +202,7 @@ class _MyAppState extends State<MyApp> {
           borderRadius: BorderRadius.circular(8),
         ),
       ),
-      
+
       // Dialog Theme
       dialogTheme: DialogThemeData(
         backgroundColor: ColorManager.surface,
@@ -219,7 +220,7 @@ class _MyAppState extends State<MyApp> {
           fontSize: 16,
         ),
       ),
-      
+
       // Bottom Sheet Theme
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: ColorManager.surface,
@@ -228,7 +229,7 @@ class _MyAppState extends State<MyApp> {
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
       ),
-      
+
       // Snackbar Theme
       snackBarTheme: SnackBarThemeData(
         backgroundColor: ColorManager.surface,
@@ -238,13 +239,13 @@ class _MyAppState extends State<MyApp> {
         ),
         behavior: SnackBarBehavior.floating,
       ),
-      
+
       // Progress Indicator Theme
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: ColorManager.primary,
         linearTrackColor: ColorManager.surface,
       ),
-      
+
       // Floating Action Button Theme
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: ColorManager.primary,

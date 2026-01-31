@@ -1,5 +1,7 @@
+import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/interstitial_ads/interstitial_ad_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
+import 'package:provider/provider.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -53,7 +55,11 @@ class QuickActionsWidget extends StatelessWidget {
                   label: 'Exercises',
                   color: ColorManager.limerGreen2,
                   onTap: () async {
-                    await InterstitialAdService.showStrengthWorkoutAd();
+                    final sub = Provider.of<SubscriptionProvider>(context,
+                        listen: false);
+                    if (!sub.isPremium) {
+                      await InterstitialAdService.showStrengthWorkoutAd();
+                    }
                     context.push(Routes.bodypartsPage);
                   },
                 ),
@@ -65,7 +71,13 @@ class QuickActionsWidget extends StatelessWidget {
                   label: 'Diet Plans',
                   color: Colors.purple,
                   onTap: () {
-                    context.push(Routes.dietRoute);
+                    final sub = Provider.of<SubscriptionProvider>(context,
+                        listen: false);
+                    if (sub.isPremium) {
+                      context.push(Routes.dietRoute);
+                    } else {
+                      context.push(Routes.premiumScreen);
+                    }
                   },
                 ),
               ),

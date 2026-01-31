@@ -348,7 +348,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                     ),
                   ),
-                  BannerAdWidget(pageName: 'profile'),
+                  PremiumAwareBannerAd(pageName: 'profile'),
                 ],
               ),
             );

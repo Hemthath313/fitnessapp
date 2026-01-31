@@ -25,6 +25,11 @@ service cloud.firestore {
       match /mealRecords/{document=**} {
         allow read, write: if isAuthenticated() && isOwner(userId);
       }
+
+      // Workout logs
+      match /workout_logs/{document=**} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
     }
     
     // Workouts collection

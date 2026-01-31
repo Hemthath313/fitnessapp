@@ -5,6 +5,7 @@ import 'package:fitness_app/presentation/auth/pages/forgot_password_page.dart';
 import 'package:fitness_app/presentation/auth/pages/login_or_register_page.dart';
 import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
 import 'package:fitness_app/presentation/boarding/pages/boarding_page.dart';
+import 'package:fitness_app/presentation/in_app_purchases/premimum_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_app/presentation/body_parts/pages/abs.dart';
 import 'package:fitness_app/presentation/body_parts/pages/biceps.dart';
@@ -40,6 +41,8 @@ import 'package:fitness_app/presentation/workout_splits/splits/upper_lower_split
 import 'package:fitness_app/presentation/workout_splits/workout_splits.dart';
 import 'package:fitness_app/presentation/workouts/pages/new_exercise_page.dart';
 import 'package:fitness_app/presentation/workouts/pages/workouts_page.dart';
+import 'package:fitness_app/presentation/workout_logs/workout_log_screen.dart';
+import 'package:fitness_app/presentation/workout_logs/workout_history_screen.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/widgets/coming_soon.dart';
 import 'package:fitness_app/utils/widgets/page_transition.dart';
@@ -78,7 +81,7 @@ class Routes {
   static const String maintainDietRoute = '/maintainDietRoute';
   static const String sixPackChallenge = '/sixPackChallenge';
   static const String dailyExerciseRoute = '/dailyExerciseRoute';
-  // static const String premiumScreen = '/premiumScreen';
+  static const String premiumScreen = '/premiumScreen';
   static const String workoutSplitsRoute = '/workoutSplitsRoute';
   static const String emailVerify = 'emailVerify';
   static const String broSplit = '/broSplit';
@@ -87,6 +90,8 @@ class Routes {
   static const String upperLowerSplit = '/upperLowerSplit';
   static const String recoveryRoute = '/recovery';
   static const String comingSoon = '/comingSoon';
+  static const String workoutLogRoute = '/workoutLog';
+  static const String workoutHistoryRoute = '/workoutHistory';
 }
 
 final GoRouter router = GoRouter(
@@ -100,7 +105,7 @@ final GoRouter router = GoRouter(
     // Try to get AuthProvider - if not available yet, allow navigation
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      
+
       // Wait for initial auth state to load
       if (authProvider.isLoading) {
         return Routes.splashScreen;
@@ -112,16 +117,16 @@ final GoRouter router = GoRouter(
 
       // If user is logged in and has completed profile, redirect away from auth/login pages
       if (user != null && hasAgeParameter == true && emailIsVerified) {
-        if (state.uri.path == Routes.loginRoute || 
+        if (state.uri.path == Routes.loginRoute ||
             state.uri.path == Routes.authRoute ||
             state.uri.path == Routes.boardingRoute) {
           return Routes.mainRoute;
         }
       }
-      
+
       // If user is logged in but needs to add data
       if (user != null && hasAgeParameter == false && emailIsVerified) {
-        if (state.uri.path == Routes.loginRoute || 
+        if (state.uri.path == Routes.loginRoute ||
             state.uri.path == Routes.authRoute ||
             state.uri.path == Routes.boardingRoute) {
           return Routes.addDataRoute;
@@ -352,11 +357,21 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, ChangeMeasurementsPage())),
-    // GoRoute(
-    //     path: Routes.premiumScreen,
-    //     pageBuilder: (context, state) =>
-    //         PageTransitions.buildPageWithSlideTransition(
-    //             state.pageKey, PremiumScreen())),
+    GoRoute(
+        path: Routes.premiumScreen,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const PremiumScreen())),
+    GoRoute(
+        path: Routes.workoutLogRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const WorkoutLogScreen())),
+    GoRoute(
+        path: Routes.workoutHistoryRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const WorkoutHistoryScreen())),
   ],
   errorBuilder: (context, state) {
     return Scaffold(

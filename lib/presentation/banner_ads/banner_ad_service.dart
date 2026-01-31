@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:fitness_app/utils/ad_config.dart';
+import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
+import 'package:provider/provider.dart';
 
 class BannerAdService {
   static String getAdUnitIdForPage(String pageName) {
@@ -98,5 +100,22 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   void dispose() {
     _bannerAd.dispose();
     super.dispose();
+  }
+}
+
+/// Banner ad that hides for premium users (ad-free experience).
+class PremiumAwareBannerAd extends StatelessWidget {
+  final String? pageName;
+
+  const PremiumAwareBannerAd({super.key, this.pageName});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<SubscriptionProvider>(
+      builder: (context, subProvider, _) {
+        if (subProvider.isPremium) return const SizedBox.shrink();
+        return BannerAdWidget(pageName: pageName);
+      },
+    );
   }
 }

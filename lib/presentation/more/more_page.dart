@@ -85,6 +85,19 @@ class MorePage extends StatelessWidget {
             ),
             SizedBox(height: SizeManager.s24.h),
 
+            // Premium Section
+            _buildSectionTitle('Premium'),
+            SizedBox(height: SizeManager.s12.h),
+            _buildMenuCard(
+              context,
+              icon: Icons.workspace_premium,
+              title: 'Go Premium',
+              subtitle: 'Ad-free, workout splits, diet plans & more',
+              color: ColorManager.primary,
+              onTap: () => context.push(Routes.premiumScreen),
+            ),
+            SizedBox(height: SizeManager.s24.h),
+
             // Body & Measurements Section
             _buildSectionTitle('Body & Measurements'),
             SizedBox(height: SizeManager.s12.h),
@@ -339,9 +352,9 @@ class MorePage extends StatelessWidget {
 
 class _LogoutButton extends StatefulWidget {
   final BuildContext parentContext;
-  
+
   const _LogoutButton({required this.parentContext});
-  
+
   @override
   State<_LogoutButton> createState() => _LogoutButtonState();
 }
@@ -351,48 +364,48 @@ class _LogoutButtonState extends State<_LogoutButton> {
 
   Future<void> _handleLogout() async {
     if (_isLoading) return; // Prevent multiple clicks
-    
+
     setState(() => _isLoading = true);
-    
+
     // Close dialog first
     Navigator.of(context).pop();
-    
+
     // Wait a frame to ensure dialog is closed
     await Future.delayed(const Duration(milliseconds: 50));
-    
+
     if (!mounted) return;
-    
+
     // Use parent context (from MorePage) for loading overlay and navigation
     LoadingOverlay.show(widget.parentContext, message: 'Logging out...');
-    
+
     try {
       await FirebaseAuth.instance.signOut();
-      
+
       // Wait for auth state to update
       await Future.delayed(const Duration(milliseconds: 100));
-      
+
       if (widget.parentContext.mounted) {
         // Hide loading overlay first
         LoadingOverlay.hide(widget.parentContext);
-        
+
         // Wait to ensure overlay is fully dismissed before navigation
         await Future.delayed(const Duration(milliseconds: 200));
-        
+
         // Double check to hide overlay
         LoadingOverlay.hide(null);
-        
+
         // Wait one more frame
         await Future.delayed(const Duration(milliseconds: 100));
-        
+
         // Now navigate to boarding route (router will handle redirect)
         if (widget.parentContext.mounted) {
           widget.parentContext.go(Routes.boardingRoute);
-          
+
           // Ensure overlay is hidden after navigation
           WidgetsBinding.instance.addPostFrameCallback((_) {
             LoadingOverlay.hide(null);
           });
-          
+
           // Final check after delay
           Future.delayed(const Duration(milliseconds: 500), () {
             LoadingOverlay.hide(null);

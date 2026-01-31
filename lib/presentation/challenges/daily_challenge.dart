@@ -1,8 +1,14 @@
+import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
+import 'package:fitness_app/utils/managers/value_manager.dart';
+import 'package:fitness_app/utils/router/router.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class DailyExercisePage extends StatelessWidget {
   final List<dynamic> exercises;
@@ -146,68 +152,73 @@ class DailyExercisePage extends StatelessWidget {
         title:
             Text('Day $day Exercises', style: TextStyle(color: Colors.white)),
       ),
-      body: FutureBuilder(
-        future: fetchProgress(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
+      body: Stack(
+        children: [
+          FutureBuilder(
+            future: fetchProgress(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
 
-          if (snapshot.hasError) {
-            return Center(
-              child: Text('Error loading progress data.',
-                  style: TextStyle(color: Colors.white)),
-            );
-          }
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text('Error loading progress data.',
+                      style: TextStyle(color: Colors.white)),
+                );
+              }
 
-          final progressData = snapshot.data as Map<String, dynamic>? ?? {};
+              final progressData = snapshot.data as Map<String, dynamic>? ?? {};
 
-          return ListView.builder(
-            itemCount: exercises.length,
-            itemBuilder: (context, index) {
-              final exercise = exercises[index];
-              final isUnlocked = isDayUnlocked(progressData, day);
+              return ListView.builder(
+                itemCount: exercises.length,
+                itemBuilder: (context, index) {
+                  final exercise = exercises[index];
+                  final isUnlocked = isDayUnlocked(progressData, day);
 
-              return Card(
-                color: isUnlocked ? ColorManager.black54 : Colors.grey[800],
-                margin: EdgeInsets.all(12.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                elevation: 4,
-                child: ListTile(
-                  onTap: isUnlocked
-                      ? () => showExerciseDetails(context, exercise)
-                      : null,
-                  contentPadding: EdgeInsets.all(10),
-                  leading: ExerciseVideoPlayer(
-                    videoPath: exercise['localVideoPath'],
-                    gifUrl: exercise['gifUrl'],
-                    width: 80,
-                    height: 80,
-                  ),
-                  title: Text(
-                    '${exercise['name']}'
-                        .toString()
-                        .split(' ')
-                        .map(
-                            (word) => word[0].toUpperCase() + word.substring(1))
-                        .join(' '),
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isUnlocked ? Colors.white : Colors.white54),
-                  ),
-                  subtitle: Text(
-                      'Equipment: ${exercise['equipment'].toString().split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ')}',
-                      style:
-                          TextStyle(fontSize: 16, color: ColorManager.white)),
-                ),
+                  return Card(
+                    color: isUnlocked ? ColorManager.black54 : Colors.grey[800],
+                    margin: EdgeInsets.all(12.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    elevation: 4,
+                    child: ListTile(
+                      onTap: isUnlocked
+                          ? () => showExerciseDetails(context, exercise)
+                          : null,
+                      contentPadding: EdgeInsets.all(10),
+                      leading: ExerciseVideoPlayer(
+                        videoPath: exercise['localVideoPath'],
+                        gifUrl: exercise['gifUrl'],
+                        width: 80,
+                        height: 80,
+                      ),
+                      title: Text(
+                        '${exercise['name']}'
+                            .toString()
+                            .split(' ')
+                            .map(
+                                (word) => word[0].toUpperCase() + word.substring(1))
+                            .join(' '),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: isUnlocked ? Colors.white : Colors.white54),
+                      ),
+                      subtitle: Text(
+                          'Equipment: ${exercise['equipment'].toString().split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ')}',
+                          style:
+                              TextStyle(fontSize: 16, color: ColorManager.white)),
+                    ),
+                  );
+                },
               );
             },
-          );
-        },
+          ),
+          if (!_isAccessAllowed(context)) _buildPremiumLockOverlay(context),
+        ],
       ),
-      bottomNavigationBar: Padding(
+      bottomNavigationBar: !_isAccessAllowed(context) ? null : Padding(
         padding: const EdgeInsets.all(12.0),
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
@@ -266,6 +277,74 @@ class DailyExercisePage extends StatelessWidget {
           },
           child: Text('Mark Day $day as Complete',
               style: TextStyle(color: Colors.black)),
+        ),
+      ),
+    );
+  }
+
+  bool _isAccessAllowed(BuildContext context) {
+    final subProvider = Provider.of<SubscriptionProvider>(context, listen: false);
+    return subProvider.isPremium || day <= 3;
+  }
+
+  Widget _buildPremiumLockOverlay(BuildContext context) {
+    return Container(
+      color: ColorManager.background.withOpacity(0.8),
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.all(SizeManager.s24.w),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.all(SizeManager.s20.w),
+                decoration: BoxDecoration(
+                  color: ColorManager.primary.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.lock,
+                  size: 80.sp,
+                  color: ColorManager.primary,
+                ),
+              ),
+              SizedBox(height: SizeManager.s24.h),
+              Text(
+                'Premium Day',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 24.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(height: SizeManager.s12.h),
+              Text(
+                'Days 4 and beyond are reserved for Pro members. Upgrade now to continue your 30-day transformation!',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  color: ColorManager.textSecondary,
+                ),
+              ),
+              SizedBox(height: SizeManager.s32.h),
+              ElevatedButton(
+                onPressed: () => context.push(Routes.premiumScreen),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ColorManager.primary,
+                  foregroundColor: Colors.black,
+                  padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 15.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.r),
+                  ),
+                ),
+                child: Text(
+                  'Go Pro',
+                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

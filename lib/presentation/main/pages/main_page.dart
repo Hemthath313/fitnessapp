@@ -1,5 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
+import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
 import 'package:fitness_app/presentation/explore/explore_page.dart';
 import 'package:fitness_app/presentation/home/pages/home_page.dart';
@@ -9,7 +10,6 @@ import 'package:fitness_app/presentation/main/widgets/appbar_custom_workouts.dar
 import 'package:fitness_app/presentation/main/widgets/appbar_more.dart';
 import 'package:fitness_app/presentation/more/more_page.dart';
 import 'package:fitness_app/presentation/custom_workouts/custom_workouts_page.dart';
-import 'package:fitness_app/presentation/chat_screen/chat_screen.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/services/connectivity_service.dart';
@@ -40,7 +40,6 @@ class _MainPageState extends State<MainPage> {
     HomePage(),
     ExploreWidget(),
     CustomWorkoutsPage(),
-    ChatScreen(),
     MorePage(),
   ];
 
@@ -51,15 +50,12 @@ class _MainPageState extends State<MainPage> {
       return const ConsumptionPageAppBarWidget();
     } else if (isCustomWorkoutsPage) {
       return const CustomWorkoutsAppBarWidget();
-    } else if (isChatPage) {
-      return null; // Chat screen has no app bar
     } else if (isMorePage) {
       return const MorePageAppBarWidget();
     }
   }
 
-  bool get isMorePage => _currentIndex == 4;
-  bool get isChatPage => _currentIndex == 3;
+  bool get isMorePage => _currentIndex == 3;
   bool get isCustomWorkoutsPage => _currentIndex == 2;
   bool get isExplorePage => _currentIndex == 1;
   bool get isHomePage => _currentIndex == 0;
@@ -75,6 +71,7 @@ class _MainPageState extends State<MainPage> {
       }
 
       NetworkService.initialize();
+      Provider.of<SubscriptionProvider>(context, listen: false).refresh();
       final consumptionProvider =
           Provider.of<ConsumptionProvider>(context, listen: false);
       final workoutsProvider =
@@ -146,11 +143,6 @@ class _MainPageState extends State<MainPage> {
         color: isCustomWorkoutsPage
             ? ColorManager.primary
             : ColorManager.textTertiary,
-        size: SizeManager.s28,
-      ),
-      Icon(
-        Icons.chat_bubble_outline,
-        color: isChatPage ? ColorManager.primary : ColorManager.textTertiary,
         size: SizeManager.s28,
       ),
       Icon(
