@@ -62,130 +62,177 @@ class _DietMainState extends State<DietMain>
 
     switch (goal) {
       case 'GAIN':
-        goalDescription =
-            '💪 Bulking means consuming more calories than you burn to build muscle.';
+        goalDescription = 'Bulking Phase';
         tips = [
-          '🥩 Eat calorie-dense foods like nuts, avocados, and whole grains.',
-          '🏋️‍♂️ Increase protein intake to support muscle growth.',
-          '🛌 Prioritize recovery with proper rest.'
+          'High Protein: 2.0g per kg of body weight',
+          'Caloric Surplus: Eat more than you burn',
+          'Focus on compound movements in gym'
         ];
         goalIcon = Icons.fitness_center;
         break;
       case 'LOSE':
-        goalDescription =
-            '🔥 Cutting means maintaining a calorie deficit to reduce body fat.';
+        goalDescription = 'Cutting Phase';
         tips = [
-          '🥗 Focus on lean protein sources to preserve muscle.',
-          '🚴 Include cardio exercises for better fat burning.',
-          '📊 Track your calories to stay within your target.'
+          'Lean Protein: Preserve muscle while losing fat',
+          'Caloric Deficit: Strategic meal timing',
+          'Increased fiber intake for satiety'
         ];
         goalIcon = Icons.local_fire_department;
         break;
       case 'MAINTAIN':
-        goalDescription =
-            '⚖️ Maintaining means balancing your calorie intake with your energy expenditure.';
+        goalDescription = 'Maintenance Phase';
         tips = [
-          '🥦 Eat a variety of nutrient-rich foods.',
-          '🏃 Maintain a consistent workout routine.',
-          '💧 Stay hydrated to support overall health.'
+          'Balanced Macros: Fuel your performance',
+          'Energy Balance: Maintain current weight',
+          'Focus on dietary variety and micronutrients'
         ];
         goalIcon = Icons.balance;
         break;
       default:
-        goalDescription = '❗ Please set your goal to view tailored diet plans.';
-        tips = [];
+        goalDescription = 'Set Your Goal';
+        tips = ['Set your fitness goal in profile to see plans'];
         goalIcon = Icons.warning;
     }
 
     return Scaffold(
       backgroundColor: ColorManager.black,
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: ColorManager.black,
         title: const Text(
-          'Diet Plans',
+          'Nutrition Hub',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         elevation: 0,
       ),
-      body: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) => Opacity(
-          opacity: _fadeAnimation.value,
-          child: SlideTransition(
-            position: _slideAnimation,
-            child: Padding(
-              padding: const EdgeInsets.all(30),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(goalIcon, size: 50, color: Colors.orangeAccent),
-                  const SizedBox(height: 12),
-                  Text(
-                    goalDescription,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const Divider(
-                      color: Colors.orangeAccent, thickness: 1.5, height: 30),
-                  if (tips.isNotEmpty)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: tips
-                          .map(
-                            (tip) => Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 15.0),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.check_circle,
-                                      color: Colors.green, size: 20),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      tip,
-                                      style:
-                                          const TextStyle(color: Colors.white),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  const SizedBox(height: 20),
-                  if (goal == 'GAIN')
-                    buildDietCard(
-                      context,
-                      'Bulking Diet',
-                      ImageManager.bulkingDiet,
-                      () => context.push(Routes.bulkingDietRoute),
-                    ),
-                  if (goal == 'LOSE')
-                    buildDietCard(
-                      context,
-                      'Cutting Diet',
-                      ImageManager.cuttingDiet,
-                      () => context.push(Routes.cuttingDietRoute),
-                    ),
-                  if (goal == 'MAINTAIN')
-                    buildDietCard(
-                      context,
-                      'Maintain Diet',
-                      ImageManager.maintainDiet,
-                      () => context.push(Routes.maintainDietRoute),
-                    ),
-                ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildGoalBanner(goal, goalDescription, goalIcon),
+              SizedBox(height: 24),
+              Text(
+                'Plan Highlights',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
+              SizedBox(height: 12),
+              ...tips.map((tip) => _buildTipItem(tip)),
+              SizedBox(height: 32),
+              Text(
+                'Personalized Plans',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              SizedBox(height: 16),
+              if (goal == 'GAIN')
+                buildDietCard(
+                  context,
+                  'Open Bulking Plan',
+                  ImageManager.bulkingDiet,
+                  () => context.push(Routes.bulkingDietRoute),
+                )
+              else if (goal == 'LOSE')
+                buildDietCard(
+                  context,
+                  'Open Cutting Plan',
+                  ImageManager.cuttingDiet,
+                  () => context.push(Routes.cuttingDietRoute),
+                )
+              else if (goal == 'MAINTAIN')
+                buildDietCard(
+                  context,
+                  'Open Maintain Plan',
+                  ImageManager.maintainDiet,
+                  () => context.push(Routes.maintainDietRoute),
+                )
+              else
+                Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 40),
+                    child: Text(
+                      'Please set your goal in the Profile tab to unlock your nutrition plan.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
+                  ),
+                ),
+              SizedBox(height: 40),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildGoalBanner(String? goal, String title, IconData icon) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            ColorManager.primary.withOpacity(0.8),
+            ColorManager.primary.withOpacity(0.4),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 25,
+            backgroundColor: Colors.white24,
+            child: Icon(icon, color: Colors.white, size: 30),
+          ),
+          SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Current Sprint',
+                style: TextStyle(color: Colors.white70, fontSize: 12),
+              ),
+              Text(
+                title,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTipItem(String text) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Icon(Icons.bolt, color: ColorManager.primary, size: 16),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(color: Colors.white70, fontSize: 14),
+            ),
+          ),
+        ],
       ),
     );
   }

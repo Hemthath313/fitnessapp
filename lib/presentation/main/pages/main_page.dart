@@ -14,6 +14,8 @@ import 'package:fitness_app/presentation/home/providers/statistics_provider.dart
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/services/connectivity_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
+import 'package:fitness_app/presentation/journal/pages/journal_page.dart';
+import 'package:fitness_app/presentation/main/widgets/appbar_journal.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/widgets/error_boundary.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +41,7 @@ class _MainPageState extends State<MainPage> {
   List<Widget> pages = const [
     HomePage(),
     ExploreWidget(),
+    JournalPage(),
     CustomWorkoutsPage(),
     MorePage(),
   ];
@@ -48,6 +51,8 @@ class _MainPageState extends State<MainPage> {
       return const HomePageAppBarWidget();
     } else if (isExplorePage) {
       return const ConsumptionPageAppBarWidget();
+    } else if (isJournalPage) {
+      return const JournalAppBarWidget();
     } else if (isCustomWorkoutsPage) {
       return const CustomWorkoutsAppBarWidget();
     } else if (isMorePage) {
@@ -55,8 +60,9 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  bool get isMorePage => _currentIndex == 3;
-  bool get isCustomWorkoutsPage => _currentIndex == 2;
+  bool get isMorePage => _currentIndex == 4;
+  bool get isCustomWorkoutsPage => _currentIndex == 3;
+  bool get isJournalPage => _currentIndex == 2;
   bool get isExplorePage => _currentIndex == 1;
   bool get isHomePage => _currentIndex == 0;
 
@@ -134,12 +140,17 @@ class _MainPageState extends State<MainPage> {
         size: SizeManager.s28,
       ),
       Icon(
-        Icons.restaurant,
+        Icons.restaurant_menu_outlined,
         color: isExplorePage ? ColorManager.primary : ColorManager.textTertiary,
         size: SizeManager.s28,
       ),
       Icon(
-        Icons.fitness_center,
+        Icons.history_edu_outlined,
+        color: isJournalPage ? ColorManager.primary : ColorManager.textTertiary,
+        size: SizeManager.s28,
+      ),
+      Icon(
+        Icons.fitness_center_outlined,
         color: isCustomWorkoutsPage
             ? ColorManager.primary
             : ColorManager.textTertiary,

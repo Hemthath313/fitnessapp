@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:fitness_app/app/app.dart';
 import 'package:fitness_app/utils/ad_config.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart'; // For kDebugMode
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'firebase_options.dart';
 
 Future<void> main() async {
   // FIRST: Ensure Flutter framework is initialized
@@ -25,7 +27,14 @@ Future<void> main() async {
   }
 
   // Initialize Firebase
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Activate App Check
+  await FirebaseAppCheck.instance.activate(
+    androidProvider: kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
+  );
 
   // Initialize Google Mobile Ads
   await MobileAds.instance.initialize();

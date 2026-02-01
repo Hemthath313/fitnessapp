@@ -378,21 +378,21 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, const WorkoutHistoryScreen())),
-    GoRoute(
-        path: Routes.progressPhotosRoute,
-        pageBuilder: (context, state) =>
-            PageTransitions.buildPageWithSlideTransition(
-                state.pageKey, const ProgressPhotosScreen())),
-    GoRoute(
-        path: Routes.addProgressPhotoRoute,
-        pageBuilder: (context, state) =>
-            PageTransitions.buildPageWithSlideTransition(
-                state.pageKey, const AddProgressPhotoScreen())),
-    GoRoute(
-        path: Routes.photoComparisonRoute,
-        pageBuilder: (context, state) =>
-            PageTransitions.buildPageWithSlideTransition(
-                state.pageKey, const PhotoComparisonScreen())),
+    // GoRoute(
+    //     path: Routes.progressPhotosRoute,
+    //     pageBuilder: (context, state) =>
+    //         PageTransitions.buildPageWithSlideTransition(
+    //             state.pageKey, const ProgressPhotosScreen())),
+    // GoRoute(
+    //     path: Routes.addProgressPhotoRoute,
+    //     pageBuilder: (context, state) =>
+    //         PageTransitions.buildPageWithSlideTransition(
+    //             state.pageKey, const AddProgressPhotoScreen())),
+    // GoRoute(
+    //     path: Routes.photoComparisonRoute,
+    //     pageBuilder: (context, state) =>
+    //         PageTransitions.buildPageWithSlideTransition(
+    //             state.pageKey, const PhotoComparisonScreen())),
   ],
   errorBuilder: (context, state) {
     return Scaffold(

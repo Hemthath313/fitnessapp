@@ -47,16 +47,22 @@ class MealCard extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '${meal['calories']} kcal | ${meal['protein']}g Protein',
-              style: const TextStyle(color: Colors.white70),
+            Row(
+              children: [
+                Text(
+                  '${meal['calories']} kcal | ${meal['protein']}g Protein',
+                  style: const TextStyle(color: Colors.white70),
+                ),
+                const SizedBox(width: 8),
+                _buildMacroBadge(),
+              ],
             ),
             const SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: const [
                 Text(
-                  'Tap to view meal details',
+                  'Tap to see details & foods',
                   style: TextStyle(fontSize: 12, color: Colors.white54),
                 ),
                 Icon(Icons.chevron_right, color: Colors.white54, size: 18)
@@ -70,6 +76,35 @@ class MealCard extends StatelessWidget {
           activeColor: Colors.green,
         ),
         onTap: onTap,
+      ),
+    );
+  }
+
+  Widget _buildMacroBadge() {
+    final protein = (meal['protein'] as num).toDouble();
+    final calories = (meal['calories'] as num).toDouble();
+
+    // Simple logic: if protein is high relative to others
+    if (protein > 25) {
+      return _badge('High Protein', Colors.orange);
+    } else if (calories < 300) {
+      return _badge('Low Cal', Colors.blue);
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _badge(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color.withOpacity(0.5), width: 0.5),
+      ),
+      child: Text(
+        label,
+        style:
+            TextStyle(color: color, fontSize: 8, fontWeight: FontWeight.bold),
       ),
     );
   }

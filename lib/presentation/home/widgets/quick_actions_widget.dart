@@ -106,17 +106,17 @@ class QuickActionsWidget extends StatelessWidget {
                   },
                 ),
               ),
-              SizedBox(width: SizeManager.s12.w),
-              Expanded(
-                child: _QuickActionCard(
-                  icon: Icons.photo_camera,
-                  label: 'Progress Photos',
-                  color: Colors.pink,
-                  onTap: () {
-                    context.push(Routes.progressPhotosRoute);
-                  },
-                ),
-              ),
+              // SizedBox(width: SizeManager.s12.w),
+              // Expanded(
+              //   child: _QuickActionCard(
+              //     icon: Icons.photo_camera,
+              //     label: 'Progress Photos',
+              //     color: Colors.pink,
+              //     onTap: () {
+              //       context.push(Routes.progressPhotosRoute);
+              //     },
+              //   ),
+              // ),
             ],
           ),
         ],

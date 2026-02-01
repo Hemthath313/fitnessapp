@@ -20,85 +20,102 @@ class BannerAdWidget extends StatefulWidget {
 }
 
 class _BannerAdWidgetState extends State<BannerAdWidget> {
-  late BannerAd _bannerAd;
+  BannerAd? _bannerAd;
   bool _isAdLoaded = false;
   String? _errorMessage;
+  AdSize? _adSize;
 
   @override
-  void initState() {
-    super.initState();
-    final adUnitId =
-        BannerAdService.getAdUnitIdForPage(widget.pageName ?? 'home');
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_bannerAd == null) {
+      _loadAd();
+    }
+  }
+
+  Future<void> _loadAd() async {
+    if (!mounted) return;
+
+    try {
+      final adUnitId =
+          BannerAdService.getAdUnitIdForPage(widget.pageName ?? 'home');
+
+      double screenWidth = MediaQuery.of(context).size.width;
+
+      if (screenWidth <= 0) {
+        // Fallback to standard banner if width not available
+        _createBannerAd(adUnitId, AdSize.banner);
+        return;
+      }
+
+      final AnchoredAdaptiveBannerAdSize? size =
+          await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+              screenWidth.truncate());
+
+      _createBannerAd(adUnitId, size ?? AdSize.banner);
+    } catch (e) {
+      print('Error in _loadAd: $e');
+      final adUnitId = BannerAdService.getAdUnitIdForPage(widget.pageName ?? 'home');
+      _createBannerAd(adUnitId, AdSize.banner);
+    }
+  }
+
+  void _createBannerAd(String adUnitId, AdSize size) {
+    if (!mounted) return;
+    
+    setState(() {
+      _adSize = size;
+    });
 
     _bannerAd = BannerAd(
       adUnitId: adUnitId,
-      size: AdSize.banner,
+      size: size,
       request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (_) {
-          print(
-              'Banner ad loaded successfully for ${widget.pageName ?? 'home'}');
-          setState(() {
-            _isAdLoaded = true;
-            _errorMessage = null;
-          });
+          if (mounted) {
+            setState(() {
+              _isAdLoaded = true;
+              _errorMessage = null;
+            });
+          }
         },
         onAdFailedToLoad: (ad, error) {
-          print(
-              'Failed to load banner ad for ${widget.pageName ?? 'home'}: $error');
-          setState(() {
-            _errorMessage = error.message;
-          });
+          if (mounted) {
+            setState(() {
+              _errorMessage = error.message;
+            });
+          }
           ad.dispose();
         },
-        onAdOpened: (_) =>
-            print('Banner ad opened for ${widget.pageName ?? 'home'}'),
-        onAdClosed: (_) =>
-            print('Banner ad closed for ${widget.pageName ?? 'home'}'),
       ),
     )..load();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isAdLoaded) {
-      return Container(
-        alignment: Alignment.center,
-        height: _bannerAd.size.height.toDouble(),
-        width: _bannerAd.size.width.toDouble(),
-        child: AdWidget(ad: _bannerAd),
-      );
-    } else if (_errorMessage != null) {
-      // Show error message for debugging
-      return Container(
-        height: 50,
-        color: Colors.red.withOpacity(0.1),
-        child: Center(
-          child: Text(
-            'Ad Error: $_errorMessage',
-            style: TextStyle(color: Colors.red, fontSize: 12),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
-    } else {
-      // Show loading indicator
-      return Container(
-        height: 50,
-        color: Colors.grey.withOpacity(0.1),
-        child: Center(
-          child: Text(
-            'Loading Ad...',
-            style: TextStyle(color: Colors.grey, fontSize: 12),
-          ),
-        ),
-      );
-    }
+    final double displayHeight = _adSize?.height.toDouble() ?? 50.0;
+
+    return Container(
+      width: double.infinity,
+      height: displayHeight,
+      alignment: Alignment.center,
+      child: _isAdLoaded && _bannerAd != null
+          ? AdWidget(ad: _bannerAd!)
+          : _errorMessage != null
+              ? const SizedBox.shrink()
+              : Center(
+                  child: Text(
+                    'Loading Ad...',
+                    style: TextStyle(color: Colors.grey.withOpacity(0.5), fontSize: 10),
+                  ),
+                ),
+    );
   }
 
   @override
   void dispose() {
-    _bannerAd.dispose();
+    _bannerAd?.dispose();
     super.dispose();
   }
 }

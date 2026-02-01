@@ -29,7 +29,11 @@ class ProgressPhotoService {
       // Generate unique filename
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final fileName = '${_uid}_${timestamp}_$category.jpg';
+      
+      // Be explicit about the bucket to avoid 404s if default is misconfigured
       final storageRef = _storage.ref().child('progress_photos/$_uid/$fileName');
+      
+      print('Uploading to: ${storageRef.fullPath} in bucket: ${storageRef.bucket}');
 
       // Upload file
       final uploadTask = await storageRef.putFile(imageFile);

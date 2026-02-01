@@ -72,6 +72,8 @@ class MealDetailsSheet extends StatelessWidget {
             style: const TextStyle(color: Colors.white),
             textAlign: TextAlign.center,
           ),
+          const Divider(color: Colors.white54),
+          _buildSubstitutionGuide(),
           const SizedBox(height: 16),
           Wrap(
             spacing: 10,
@@ -80,7 +82,7 @@ class MealDetailsSheet extends StatelessWidget {
                 onPressed: onSwapMeal,
                 icon: const Icon(Icons.swap_horiz),
                 label: const Text(
-                  'Swap Meal',
+                  'Swap Full Meal',
                   style: TextStyle(color: ColorManager.black),
                 ),
                 style: ElevatedButton.styleFrom(
@@ -91,6 +93,50 @@ class MealDetailsSheet extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSubstitutionGuide() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Row(
+          children: [
+            Icon(Icons.lightbulb_outline, color: Colors.orangeAccent, size: 18),
+            SizedBox(width: 8),
+            Text(
+              'Substitutions:',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.orangeAccent,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        _subItem('Chicken', 'Turkey, Lean Beef, Tofu'),
+        _subItem('Rice/Oats', 'Quinoa, Sweet Potato, Brown Rice'),
+        _subItem('Milk/Shake', 'Greek Yogurt, Soy Milk, Casein'),
+        _subItem('Vegetables', 'Spinach, Broccoli, Asparagus'),
+      ],
+    );
+  }
+
+  Widget _subItem(String original, String replacements) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
+      child: RichText(
+        text: TextSpan(
+          style: const TextStyle(fontSize: 12, color: Colors.white70),
+          children: [
+            TextSpan(
+              text: '$original: ',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            TextSpan(text: replacements),
+          ],
+        ),
       ),
     );
   }

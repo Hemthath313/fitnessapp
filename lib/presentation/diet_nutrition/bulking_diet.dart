@@ -203,52 +203,14 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
   }
 
   Widget _buildSummaryCard() {
-    final homeProvider = Provider.of<HomeProvider>(context);
-    final userData = homeProvider.userData;
-
-    double storedBMR = userData['bmr'] ?? 0.0;
-    double storedBMI = userData['bmi'] ?? 0.0;
-
-// Use storedBMI or storedBMR directly to calculate
-    int dailyCalories =
-        (storedBMR > 0) ? storedBMR.toInt() : (storedBMI * 30).toInt();
-    double weight = userData['weight'] ?? 60.0; // fallback weight if not stored
-    int protein = (weight * 2.0).toInt(); // 2g per kg
-    int carbs = (weight * 4.0).toInt(); // 4g per kg
-    int fats = (weight * 1.0).toInt(); // 1g per kg
-
-// Example Macro Calculation
-    return Card(
-      color: ColorManager.surface,
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _progressBar(
-                'Calories', dailyCalories, remainingCalories, Colors.orange),
-          ],
-        ),
-      ),
+    return SummaryCard(
+      remainingCalories: remainingCalories,
+      remainingProtein: remainingProtein,
+      remainingCarbs: remainingCarbs,
+      remainingFats: remainingFats,
     );
   }
 
-  Widget _progressBar(String label, int total, int remaining, Color color) {
-    double progress = (total - remaining) / total;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '$label: ${total - remaining}/$total',
-          style: TextStyle(color: ColorManager.white),
-        ),
-        LinearProgressIndicator(
-            value: progress, color: color, backgroundColor: Colors.grey[300]),
-        const SizedBox(height: 8),
-      ],
-    );
-  }
 
   Widget _buildMealList() {
     return AnimatedSwitcher(
