@@ -43,7 +43,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
 
     final log = WorkoutLog(
       id: '',
-      exerciseName: _exerciseController.text,
+      exerciseName: _exerciseController.text.trim(),
       date: DateTime.now(),
       sets: _sets,
       notes: _notesController.text,

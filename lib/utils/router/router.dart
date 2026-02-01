@@ -46,6 +46,8 @@ import 'package:fitness_app/presentation/workout_logs/workout_history_screen.dar
 import 'package:fitness_app/presentation/progress_photos/progress_photos_screen.dart';
 import 'package:fitness_app/presentation/progress_photos/add_progress_photo_screen.dart';
 import 'package:fitness_app/presentation/progress_photos/photo_comparison_screen.dart';
+import 'package:fitness_app/presentation/ai_coach/ai_chat_screen.dart';
+import 'package:fitness_app/presentation/challenges/exercise_of_the_week.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/widgets/coming_soon.dart';
 import 'package:fitness_app/utils/widgets/page_transition.dart';
@@ -82,7 +84,7 @@ class Routes {
   static const String bulkingDietRoute = '/bulkingDietRoute';
   static const String cuttingDietRoute = '/cuttingDietRoute';
   static const String maintainDietRoute = '/maintainDietRoute';
-  static const String sixPackChallenge = '/sixPackChallenge';
+  static const String sixPackChallengeRoute = '/sixPackChallenge';
   static const String dailyExerciseRoute = '/dailyExerciseRoute';
   static const String premiumScreen = '/premiumScreen';
   static const String workoutSplitsRoute = '/workoutSplitsRoute';
@@ -98,6 +100,9 @@ class Routes {
   static const String progressPhotosRoute = '/progressPhotos';
   static const String addProgressPhotoRoute = '/addProgressPhoto';
   static const String photoComparisonRoute = '/photoComparison';
+  static const String plateauAnalysisRoute = '/plateauAnalysis';
+  static const String aiChatRoute = '/aiChat';
+  static const String exerciseOfTheWeekRoute = '/exerciseOfTheWeek';
 }
 
 final GoRouter router = GoRouter(
@@ -197,11 +202,9 @@ final GoRouter router = GoRouter(
       path: Routes.dailyExerciseRoute,
       pageBuilder: (context, state) {
         final day = int.tryParse(state.uri.queryParameters['day'] ?? '1') ?? 1;
-        final exercises = state.extra as List<dynamic>? ?? [];
         return PageTransitions.buildPageWithSlideTransition(
           state.pageKey,
           DailyExercisePage(
-            exercises: exercises,
             day: day,
             onComplete: () {},
           ),
@@ -269,14 +272,11 @@ final GoRouter router = GoRouter(
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, UpperLowerPage())),
 
-    // GoRoute(
-    //     path: Routes.sixPackChallenge,
-    //     pageBuilder: (context, state) =>
-    //         PageTransitions.buildPageWithSlideTransition(
-    //             state.pageKey,
-    //             SixPackChallengeScreen(
-    //               dayNumber: 2,
-    //             ))),
+    GoRoute(
+        path: Routes.sixPackChallengeRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const SixPackChallengeSelectionScreen())),
     GoRoute(
         path: Routes.backRoute,
         pageBuilder: (context, state) =>
@@ -393,6 +393,21 @@ final GoRouter router = GoRouter(
     //     pageBuilder: (context, state) =>
     //         PageTransitions.buildPageWithSlideTransition(
     //             state.pageKey, const PhotoComparisonScreen())),
+    // GoRoute(
+    //     path: Routes.plateauAnalysisRoute,
+    //     pageBuilder: (context, state) =>
+    //         PageTransitions.buildPageWithSlideTransition(
+    //             state.pageKey, const PlateauAnalysisScreen())),
+    GoRoute(
+        path: Routes.aiChatRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const AIChatScreen())),
+    GoRoute(
+        path: Routes.exerciseOfTheWeekRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const ExerciseOfTheWeekScreen())),
   ],
   errorBuilder: (context, state) {
     return Scaffold(

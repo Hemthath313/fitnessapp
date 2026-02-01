@@ -145,7 +145,7 @@ class _MainPageState extends State<MainPage> {
         size: SizeManager.s28,
       ),
       Icon(
-        Icons.history_edu_outlined,
+        Icons.auto_awesome_rounded,
         color: isJournalPage ? ColorManager.primary : ColorManager.textTertiary,
         size: SizeManager.s28,
       ),

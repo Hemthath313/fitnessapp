@@ -8,6 +8,7 @@ import 'package:fitness_app/utils/ad_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart'; // For kDebugMode
+import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'firebase_options.dart';
 
@@ -26,15 +27,28 @@ Future<void> main() async {
     }
   }
 
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // Initialize Gemini
+  if (dotenv.env['GEMINI_API_KEY'] != null) {
+    Gemini.init(apiKey: dotenv.env['GEMINI_API_KEY']!);
+  }
 
-  // Activate App Check
-  await FirebaseAppCheck.instance.activate(
-    androidProvider: kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
-  );
+  // Initialize Firebase
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
+    
+    // Activate App Check
+    await FirebaseAppCheck.instance.activate(
+      androidProvider:
+          kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
+    );
+  } catch (e) {
+    debugPrint('Firebase initialization error: $e');
+    // Continue anyway, as some features might work and we don't want to hang the app
+  }
 
   // Initialize Google Mobile Ads
   await MobileAds.instance.initialize();

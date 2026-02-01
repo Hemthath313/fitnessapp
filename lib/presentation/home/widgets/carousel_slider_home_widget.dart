@@ -18,8 +18,13 @@ class CarouselSliderHomeWidget extends StatelessWidget {
     final List<_CarouselItem> carouselItems = [
       _CarouselItem(
         image: ImageManager.absWorkout,
-        title: StringsManager.sixPackChallenge,
+        title: 'Abs Workout',
         route: Routes.absRoute,
+      ),
+      _CarouselItem(
+        image: ImageManager.absWorkout,
+        title: StringsManager.sixPackChallenge,
+        route: Routes.sixPackChallengeRoute,
       ),
       _CarouselItem(
         image: ImageManager.dumbels,
@@ -29,7 +34,7 @@ class CarouselSliderHomeWidget extends StatelessWidget {
       _CarouselItem(
         image: ImageManager.shoulderWorkout,
         title: StringsManager.exerciseOfWeek,
-        route: Routes.comingSoon,
+        route: Routes.exerciseOfTheWeekRoute,
       ),
     ];
 
