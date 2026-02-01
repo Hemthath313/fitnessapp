@@ -14,6 +14,8 @@ import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
+import 'package:fitness_app/presentation/profile/widgets/measurement_line_chart.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -342,6 +344,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                   context.push(Routes.changeWeightRoute)),
                           const WeightDataTextRowWidget(),
                           const WeightLineChart(),
+                          
+                          // Pro Features Section
+                          _buildProAnalyticsSection(context),
+                          
+                          SizedBox(height: 24.h),
                         ],
                       ).animate().fadeIn(
                             duration: 500.ms,
@@ -353,6 +360,118 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             );
           }),
+    );
+  }
+
+  Widget _buildProAnalyticsSection(BuildContext context) {
+    final subProvider = Provider.of<SubscriptionProvider>(context);
+    final isPremium = subProvider.isPremium;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: PaddingManager.p16, vertical: PaddingManager.p8),
+          child: Row(
+            children: [
+              Text(
+                'Advanced Analytics',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (!isPremium) ...[
+                SizedBox(width: 8.w),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: ColorManager.secondary,
+                    borderRadius: BorderRadius.circular(4.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: ColorManager.secondary.withOpacity(0.3),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    'PRO',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        Stack(
+          children: [
+            Column(
+              children: [
+                const MeasurementLineChart(
+                  title: 'Chest Progress',
+                  measurementType: 'chest',
+                ),
+                const MeasurementLineChart(
+                  title: 'Biceps Progress',
+                  measurementType: 'biceps',
+                ),
+              ],
+            ),
+            if (!isPremium)
+              Positioned.fill(
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: PaddingManager.p12),
+                  decoration: BoxDecoration(
+                    color: ColorManager.background.withOpacity(0.75),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.lock_outline, color: ColorManager.primary, size: 44.sp),
+                      SizedBox(height: 10.h),
+                      Text(
+                        'Unlock Advanced Metrics',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        'Track every muscle group individually',
+                        style: TextStyle(
+                          color: ColorManager.textSecondary,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+                      ElevatedButton(
+                        onPressed: () => context.push(Routes.premiumScreen),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ColorManager.primary,
+                          foregroundColor: Colors.black,
+                          padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.r)),
+                          elevation: 5,
+                        ),
+                        child: Text('Get Pro Access', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:flutter/services.dart';
 
 class IAPService {
   final InAppPurchase _iap = InAppPurchase.instance;
@@ -43,10 +44,22 @@ class IAPService {
 
   Future<void> buyProduct(ProductDetails product) async {
     final purchaseParam = PurchaseParam(productDetails: product);
-    if (product.id.contains('monthly') || product.id.contains('yearly')) {
-      await _iap.buyNonConsumable(purchaseParam: purchaseParam);
-    } else {
-      await _iap.buyConsumable(purchaseParam: purchaseParam);
+    try {
+      // Subscriptions + non-consumables use buyNonConsumable in this plugin.
+      if (product.id.contains('monthly') || product.id.contains('yearly')) {
+        await _iap.buyNonConsumable(purchaseParam: purchaseParam);
+      } else {
+        await _iap.buyConsumable(purchaseParam: purchaseParam);
+      }
+    } on PlatformException catch (e) {
+      // Android commonly throws item_already_owned for already-owned purchases.
+      // In that case, trigger a restore to re-attach entitlement to current Firebase uid.
+      final code = e.code.toLowerCase();
+      final msg = (e.message ?? '').toLowerCase();
+      if (code.contains('already') || msg.contains('already') && msg.contains('own')) {
+        await restorePurchases();
+      }
+      rethrow;
     }
   }
 

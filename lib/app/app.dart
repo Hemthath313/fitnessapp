@@ -11,6 +11,7 @@ import '../presentation/settings/providers/settings_provider.dart';
 import '../presentation/profile/providers/profile_provider.dart';
 import '../presentation/home/providers/statistics_provider.dart';
 import '../presentation/workouts/providers/workout_provider.dart';
+import '../presentation/progress_photos/providers/progress_photo_provider.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -47,6 +48,9 @@ class _MyAppState extends State<MyApp> {
         ),
         ChangeNotifierProvider.value(
           value: StatisticsProvider(),
+        ),
+        ChangeNotifierProvider.value(
+          value: ProgressPhotoProvider(),
         ),
       ],
       child: ScreenUtilInit(

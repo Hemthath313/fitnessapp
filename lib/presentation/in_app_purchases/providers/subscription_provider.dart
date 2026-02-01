@@ -16,6 +16,7 @@ class SubscriptionProvider with ChangeNotifier {
   final IAPService _iapService = IAPService();
   List<ProductDetails> _products = [];
   StreamSubscription<PurchaseDetails>? _purchaseSubscription;
+  bool _didAttemptAutoRestore = false;
 
   bool get isPremium => _isPremium;
   bool get isLoading => _isLoading;
@@ -32,6 +33,12 @@ class SubscriptionProvider with ChangeNotifier {
     _products = _iapService.products;
     
     _purchaseSubscription = _iapService.purchaseStream.listen(_handlePurchaseUpdate);
+
+    // Firebase-only production-friendly behavior:
+    // If user logs in with a *new* Firebase account but the Store account already owns
+    // the subscription, purchasing again will show "already owned".
+    // Auto-restore lets us re-attach the entitlement to the new uid by writing isPremium=true.
+    await autoRestoreIfNeeded();
     
     _isLoading = false;
     notifyListeners();
@@ -78,7 +85,16 @@ class SubscriptionProvider with ChangeNotifier {
   }
 
   Future<void> buyProduct(ProductDetails product) async {
-    await _iapService.buyProduct(product);
+    try {
+      await _iapService.buyProduct(product);
+    } catch (e) {
+      // If the store says the item is already owned, we should restore instead.
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('already') && msg.contains('own')) {
+        await restorePurchases();
+      }
+      rethrow;
+    }
   }
 
   Future<void> restorePurchases() async {
@@ -86,11 +102,35 @@ class SubscriptionProvider with ChangeNotifier {
     notifyListeners();
     try {
       await _iapService.restorePurchases();
+      // purchase stream handler will set premium if entitlement exists
+      await loadPremiumStatus();
     } catch (e) {
       _error = e.toString();
     }
     _isLoading = false;
     notifyListeners();
+  }
+
+  /// Automatically restore purchases once per app session when needed.
+  /// This is important for the case:
+  /// - user previously purchased with old app email (old Firebase uid)
+  /// - user logs in with new email (new Firebase uid)
+  /// - Store still owns subscription, so buying again says "already owned"
+  Future<void> autoRestoreIfNeeded() async {
+    if (_didAttemptAutoRestore) return;
+    _didAttemptAutoRestore = true;
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    if (_isPremium) return;
+
+    try {
+      await _iapService.restorePurchases();
+      // purchase stream will set premium if eligible
+    } catch (e) {
+      // swallow auto-restore errors (user can retry manually)
+      _error = e.toString();
+    }
   }
 
   /// Set premium status in Firestore (called after successful purchase)

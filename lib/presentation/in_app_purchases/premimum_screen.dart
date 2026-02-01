@@ -15,6 +15,17 @@ class PremiumScreen extends StatefulWidget {
 
 class _PremiumScreenState extends State<PremiumScreen> {
   @override
+  void initState() {
+    super.initState();
+    // Trigger a one-time auto-restore attempt when opening the paywall.
+    // This helps when the store already owns the subscription but user changed app login email.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final sub = Provider.of<SubscriptionProvider>(context, listen: false);
+      sub.autoRestoreIfNeeded();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final subProvider = Provider.of<SubscriptionProvider>(context);
 
@@ -91,6 +102,30 @@ class _PremiumScreenState extends State<PremiumScreen> {
                       ),
                     ),
                   ] else ...[
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: subProvider.isLoading
+                            ? null
+                            : () => subProvider.restorePurchases(),
+                        icon: const Icon(Icons.restore, color: ColorManager.textSecondary),
+                        label: const Text(
+                          'Restore',
+                          style: TextStyle(color: ColorManager.textSecondary),
+                        ),
+                      ),
+                    ),
+                    if (subProvider.error != null) ...[
+                      SizedBox(height: SizeManager.s8.h),
+                      Text(
+                        subProvider.error!,
+                        style: TextStyle(
+                          color: ColorManager.error,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                      SizedBox(height: SizeManager.s12.h),
+                    ],
                     ...subProvider.products.map((product) => _buildProductCard(product, subProvider)),
                   ],
                   SizedBox(height: SizeManager.s4.h),

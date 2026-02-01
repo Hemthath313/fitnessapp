@@ -43,6 +43,9 @@ import 'package:fitness_app/presentation/workouts/pages/new_exercise_page.dart';
 import 'package:fitness_app/presentation/workouts/pages/workouts_page.dart';
 import 'package:fitness_app/presentation/workout_logs/workout_log_screen.dart';
 import 'package:fitness_app/presentation/workout_logs/workout_history_screen.dart';
+import 'package:fitness_app/presentation/progress_photos/progress_photos_screen.dart';
+import 'package:fitness_app/presentation/progress_photos/add_progress_photo_screen.dart';
+import 'package:fitness_app/presentation/progress_photos/photo_comparison_screen.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/widgets/coming_soon.dart';
 import 'package:fitness_app/utils/widgets/page_transition.dart';
@@ -92,6 +95,9 @@ class Routes {
   static const String comingSoon = '/comingSoon';
   static const String workoutLogRoute = '/workoutLog';
   static const String workoutHistoryRoute = '/workoutHistory';
+  static const String progressPhotosRoute = '/progressPhotos';
+  static const String addProgressPhotoRoute = '/addProgressPhoto';
+  static const String photoComparisonRoute = '/photoComparison';
 }
 
 final GoRouter router = GoRouter(
@@ -372,6 +378,21 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, const WorkoutHistoryScreen())),
+    GoRoute(
+        path: Routes.progressPhotosRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const ProgressPhotosScreen())),
+    GoRoute(
+        path: Routes.addProgressPhotoRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const AddProgressPhotoScreen())),
+    GoRoute(
+        path: Routes.photoComparisonRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const PhotoComparisonScreen())),
   ],
   errorBuilder: (context, state) {
     return Scaffold(

@@ -44,6 +44,16 @@ class QuickActionsWidget extends StatelessWidget {
                 ),
               ),
               SizedBox(width: SizeManager.s12.w),
+              Expanded(
+                child: _QuickActionCard(
+                  icon: Icons.edit_calendar,
+                  label: 'Log Workout',
+                  color: Colors.orange,
+                  onTap: () {
+                    context.push(Routes.workoutLogRoute);
+                  },
+                ),
+              ),
             ],
           ),
           SizedBox(height: SizeManager.s12.h),
@@ -78,6 +88,32 @@ class QuickActionsWidget extends StatelessWidget {
                     } else {
                       context.push(Routes.premiumScreen);
                     }
+                  },
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: SizeManager.s12.h),
+          Row(
+            children: [
+              Expanded(
+                child: _QuickActionCard(
+                  icon: Icons.history,
+                  label: 'Workout History',
+                  color: Colors.teal,
+                  onTap: () {
+                    context.push(Routes.workoutHistoryRoute);
+                  },
+                ),
+              ),
+              SizedBox(width: SizeManager.s12.w),
+              Expanded(
+                child: _QuickActionCard(
+                  icon: Icons.photo_camera,
+                  label: 'Progress Photos',
+                  color: Colors.pink,
+                  onTap: () {
+                    context.push(Routes.progressPhotosRoute);
                   },
                 ),
               ),
