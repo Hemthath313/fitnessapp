@@ -6,6 +6,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 
 class SummaryCard extends StatelessWidget {
+  final int totalCalories;
+  final int totalProtein;
+  final int totalCarbs;
+  final int totalFats;
   final int remainingCalories;
   final int remainingProtein;
   final int remainingCarbs;
@@ -13,6 +17,10 @@ class SummaryCard extends StatelessWidget {
 
   const SummaryCard({
     Key? key,
+    required this.totalCalories,
+    required this.totalProtein,
+    required this.totalCarbs,
+    required this.totalFats,
     required this.remainingCalories,
     required this.remainingProtein,
     required this.remainingCarbs,
@@ -21,19 +29,7 @@ class SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final homeProvider = Provider.of<HomeProvider>(context);
-    final userData = homeProvider.userData;
-
-    double storedBMR = userData['bmr'] ?? 0.0;
-    double storedBMI = userData['bmi'] ?? 0.0;
-    double weight = userData['weight'] ?? 70.0;
-
-    int totalCalories = (storedBMR > 0) ? storedBMR.toInt() : (storedBMI * 30).toInt();
-    if (totalCalories == 0) totalCalories = 2000; // Default fallback
-
-    int totalProtein = (weight * 2.0).toInt();
-    int totalCarbs = (weight * 3.5).toInt();
-    int totalFats = (weight * 0.8).toInt();
+    // Logic moved to parent
 
     return Container(
       padding: EdgeInsets.all(SizeManager.s16.w),

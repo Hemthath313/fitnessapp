@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:fitness_app/presentation/in_app_purchases/premimum_screen.dart';
+import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
@@ -61,7 +63,14 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
     }
   }
 
+
   Future<void> _generateWorkout() async {
+    final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
+    if (!subscriptionProvider.isPremium) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const PremiumScreen()));
+      return;
+    }
+
     if (gemini == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Gemini API Key is missing!')),

@@ -64,11 +64,34 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
       final userData = homeProvider.userData;
 
       double storedBMR = userData['bmr'] ?? 0.0;
-      double storedBMI = userData['bmi'] ?? 0.0;
-      int dailyCalories =
-          (storedBMR > 0) ? storedBMR.toInt() : (storedBMI * 30).toInt();
+      double weight = userData['weight'] ?? 70.0;
 
-      dailySummary['calories'] = dailyCalories; // 💥 Replac
+      // 1. Calculate Maintenance (TDEE)
+      int maintenanceCalories = (storedBMR > 0) 
+          ? storedBMR.toInt() 
+          : (weight * 33).toInt();
+
+      // 2. Set Cutting Goal (Maintenance - 500 deficit)
+      int goalCalories = maintenanceCalories - 500;
+      if (goalCalories < 1200) goalCalories = 1200; // Safety floor
+
+      // 3. Set Macros for Cutting (High Protein to spare muscle)
+      // Protein: 2.2g per kg
+      int goalProtein = (weight * 2.2).toInt();
+      
+      // Fats: 0.8g per kg
+      int goalFats = (weight * 0.8).toInt();
+
+      // Carbs: Remainder
+      int consumedByPF = (goalProtein * 4) + (goalFats * 9);
+      int goalCarbs = ((goalCalories - consumedByPF) / 4).toInt();
+      if (goalCarbs < 0) goalCarbs = 50; // Safety
+
+      dailySummary['calories'] = goalCalories; 
+      dailySummary['protein'] = goalProtein;
+      dailySummary['carbs'] = goalCarbs;
+      dailySummary['fats'] = goalFats;
+
       _resetRemainingMacros();
     });
 
@@ -202,6 +225,10 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
 
   Widget _buildSummaryCard() {
     return SummaryCard(
+      totalCalories: dailySummary['calories'] ?? 2000,
+      totalProtein: dailySummary['protein'] ?? 150,
+      totalCarbs: dailySummary['carbs'] ?? 200,
+      totalFats: dailySummary['fats'] ?? 60,
       remainingCalories: remainingCalories,
       remainingProtein: remainingProtein,
       remainingCarbs: remainingCarbs,
@@ -213,6 +240,7 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 500),
       child: ListView.builder(
+        padding: const EdgeInsets.only(bottom: 80),
         key: ValueKey(meals.length),
         itemCount: meals.length + 1, // +1 for custom meal button
         itemBuilder: (context, index) {
@@ -372,14 +400,36 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
     final meal = meals[index];
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: ColorManager.darkGrey,
       builder: (context) {
-        return MealDetailsSheet(
-          meal: meal,
-          onSwapMeal: () => _openMealLibrary(index),
+        return Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: MealDetailsSheet(
+            meal: meal,
+            onSwapMeal: () => _openMealLibrary(index),
+            onAddFood: (foodName) => _addFoodToMeal(index, foodName),
+          ),
         );
       },
     );
+  }
+
+  void _addFoodToMeal(int mealIndex, String foodName) {
+    setState(() {
+      if (meals[mealIndex]['foods'] == null) {
+        meals[mealIndex]['foods'] = [];
+      }
+      meals[mealIndex]['foods'].add(foodName);
+    });
+    List<String> completed = [];
+    for (var m in meals.where((x) => x['isCompleted'])) {
+      completed.add(m['name']);
+    }
+    _saveToFirestore(completed);
+    
+    Navigator.pop(context); 
+    _showMealDetails(mealIndex); 
   }
 
   void _openMealLibrary(int mealIndex) {
@@ -388,7 +438,7 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: ColorManager.darkGrey, // Consistent dark theme
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
@@ -425,7 +475,7 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
       meals[mealIndex] = {
         ...newMeal,
         'isCompleted': false,
-        'foods': newMeal['foods'] ?? [], // ✅ Ensure foods are included
+        'foods': newMeal['foods'] != null ? List.from(newMeal['foods']) : [], 
       };
     });
     _updateRemainingMacros();

@@ -1,3 +1,5 @@
+import 'package:fitness_app/presentation/in_app_purchases/premimum_screen.dart';
+import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/diet_nutrition/diet_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -5,6 +7,7 @@ import 'package:fitness_app/utils/managers/asset_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fitness_app/presentation/diet_nutrition/widgets/weekly_progress_card.dart';
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
 
 class DietMain extends StatefulWidget {
@@ -51,14 +54,27 @@ class _DietMainState extends State<DietMain>
     super.dispose();
   }
 
+  void _handlePlanTap(VoidCallback navigationAction) {
+    final isPremium = Provider.of<SubscriptionProvider>(context, listen: false).isPremium;
+    if (isPremium) {
+      navigationAction();
+    } else {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const PremiumScreen()));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final goal =
         Provider.of<HomeProvider>(context).userData['goal']?.toUpperCase();
+    final isPremium = Provider.of<SubscriptionProvider>(context).isPremium;
 
     String goalDescription = '';
     List<String> tips = [];
     IconData goalIcon = Icons.info;
+    String? currentPlanImage;
+    VoidCallback? currentPlanAction;
+    String currentPlanTitle = '';
 
     switch (goal) {
       case 'GAIN':
@@ -69,6 +85,9 @@ class _DietMainState extends State<DietMain>
           'Focus on compound movements in gym'
         ];
         goalIcon = Icons.fitness_center;
+        currentPlanImage = ImageManager.bulkingDiet;
+        currentPlanTitle = 'Bulking Protocol';
+        currentPlanAction = () => context.push(Routes.bulkingDietRoute);
         break;
       case 'LOSE':
         goalDescription = 'Cutting Phase';
@@ -78,6 +97,9 @@ class _DietMainState extends State<DietMain>
           'Increased fiber intake for satiety'
         ];
         goalIcon = Icons.local_fire_department;
+        currentPlanImage = ImageManager.cuttingDiet;
+        currentPlanTitle = 'Shredding Protocol';
+        currentPlanAction = () => context.push(Routes.cuttingDietRoute);
         break;
       case 'MAINTAIN':
         goalDescription = 'Maintenance Phase';
@@ -87,6 +109,9 @@ class _DietMainState extends State<DietMain>
           'Focus on dietary variety and micronutrients'
         ];
         goalIcon = Icons.balance;
+        currentPlanImage = ImageManager.maintainDiet;
+        currentPlanTitle = 'Maintenance Protocol';
+        currentPlanAction = () => context.push(Routes.maintainDietRoute);
         break;
       default:
         goalDescription = 'Set Your Goal';
@@ -105,68 +130,134 @@ class _DietMainState extends State<DietMain>
         ),
         centerTitle: true,
         elevation: 0,
+        actions: [
+          if (!isPremium)
+            IconButton(
+              icon: const Icon(Icons.star, color: Colors.amber),
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PremiumScreen())),
+            )
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildGoalBanner(goal, goalDescription, goalIcon),
-              SizedBox(height: 24),
-              Text(
-                'Plan Highlights',
+              const SizedBox(height: 32),
+              
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Your Active Plan',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (!isPremium)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.amber),
+                      ),
+                      child: Row(
+                        children: const [
+                          Icon(Icons.lock, color: Colors.amber, size: 12),
+                          SizedBox(width: 4),
+                          Text('PREMIUM', style: TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              
+              if (currentPlanImage != null && currentPlanAction != null)
+                Stack(
+                  children: [
+                    Opacity(
+                      opacity: isPremium ? 1.0 : 0.6,
+                      child: buildDietCard(
+                        context,
+                        currentPlanTitle,
+                        currentPlanImage,
+                        () => _handlePlanTap(currentPlanAction!),
+                      ),
+                    ),
+                    if (!isPremium)
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.4),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black54,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.amber, width: 2),
+                                    ),
+                                    child: const Icon(Icons.lock, color: Colors.amber, size: 32),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    'Tap to Unlock',
+                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                )
+              else
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 40),
+                    child: Text(
+                      'Please set your goal in the Profile tab to unlock your nutrition plan.',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
+                  ),
+                ),
+
+              const SizedBox(height: 32),
+              const Text(
+                'Strategy Highlights',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 12),
-              ...tips.map((tip) => _buildTipItem(tip)),
-              SizedBox(height: 32),
-              Text(
-                'Personalized Plans',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  letterSpacing: 1.2,
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: ColorManager.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white10),
+                ),
+                child: Column(
+                  children: tips.map((tip) => _buildTipItem(tip)).toList(),
                 ),
               ),
-              SizedBox(height: 16),
-              if (goal == 'GAIN')
-                buildDietCard(
-                  context,
-                  'Open Bulking Plan',
-                  ImageManager.bulkingDiet,
-                  () => context.push(Routes.bulkingDietRoute),
-                )
-              else if (goal == 'LOSE')
-                buildDietCard(
-                  context,
-                  'Open Cutting Plan',
-                  ImageManager.cuttingDiet,
-                  () => context.push(Routes.cuttingDietRoute),
-                )
-              else if (goal == 'MAINTAIN')
-                buildDietCard(
-                  context,
-                  'Open Maintain Plan',
-                  ImageManager.maintainDiet,
-                  () => context.push(Routes.maintainDietRoute),
-                )
-              else
-                Center(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 40),
-                    child: Text(
-                      'Please set your goal in the Profile tab to unlock your nutrition plan.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
-                    ),
-                  ),
-                ),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -177,7 +268,7 @@ class _DietMainState extends State<DietMain>
   Widget _buildGoalBanner(String? goal, String title, IconData icon) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -196,17 +287,17 @@ class _DietMainState extends State<DietMain>
             backgroundColor: Colors.white24,
             child: Icon(icon, color: Colors.white, size: 30),
           ),
-          SizedBox(width: 16),
+          const SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Current Sprint',
                 style: TextStyle(color: Colors.white70, fontSize: 12),
               ),
               Text(
                 title,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -221,15 +312,16 @@ class _DietMainState extends State<DietMain>
 
   Widget _buildTipItem(String text) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.bolt, color: ColorManager.primary, size: 16),
-          SizedBox(width: 12),
+          const Icon(Icons.check_circle_outline, color: ColorManager.primary, size: 18),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               text,
-              style: TextStyle(color: Colors.white70, fontSize: 14),
+              style: const TextStyle(color: Colors.white70, fontSize: 14, height: 1.4),
             ),
           ),
         ],

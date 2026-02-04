@@ -1,5 +1,6 @@
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class MealCard extends StatelessWidget {
   final Map<String, dynamic> meal;
@@ -20,12 +21,12 @@ class MealCard extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
-      margin: const EdgeInsets.symmetric(vertical: 6),
+      margin: EdgeInsets.symmetric(vertical: 6.h),
       decoration: BoxDecoration(
         color: meal['isCompleted']
             ? Colors.green.withOpacity(0.2)
             : ColorManager.surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black26,
@@ -35,14 +36,15 @@ class MealCard extends StatelessWidget {
         ],
       ),
       child: ListTile(
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         leading: Icon(
           meal['isCompleted'] ? Icons.check_circle : Icons.fastfood,
           color: meal['isCompleted'] ? Colors.green : Colors.orangeAccent,
+          size: 28.sp,
         ),
         title: Text(
           meal['name'],
-          style:
-              const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16.sp),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,29 +53,32 @@ class MealCard extends StatelessWidget {
               children: [
                 Text(
                   '${meal['calories']} kcal | ${meal['protein']}g Protein',
-                  style: const TextStyle(color: Colors.white70),
+                  style: TextStyle(color: Colors.white70, fontSize: 12.sp),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8.w),
                 _buildMacroBadge(),
               ],
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
+              children: [
                 Text(
                   'Tap to see details & foods',
-                  style: TextStyle(fontSize: 12, color: Colors.white54),
+                  style: TextStyle(fontSize: 10.sp, color: Colors.white54),
                 ),
-                Icon(Icons.chevron_right, color: Colors.white54, size: 18)
+                Icon(Icons.chevron_right, color: Colors.white54, size: 16.sp)
               ],
             ),
           ],
         ),
-        trailing: Switch(
-          value: meal['isCompleted'],
-          onChanged: onToggleMeal,
-          activeColor: Colors.green,
+        trailing: Transform.scale(
+          scale: 0.8,
+          child: Switch(
+            value: meal['isCompleted'],
+            onChanged: onToggleMeal,
+            activeColor: Colors.green,
+          ),
         ),
         onTap: onTap,
       ),
@@ -95,16 +100,16 @@ class MealCard extends StatelessWidget {
 
   Widget _badge(String label, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
       decoration: BoxDecoration(
         color: color.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(4.r),
         border: Border.all(color: color.withOpacity(0.5), width: 0.5),
       ),
       child: Text(
         label,
         style:
-            TextStyle(color: color, fontSize: 8, fontWeight: FontWeight.bold),
+            TextStyle(color: color, fontSize: 8.sp, fontWeight: FontWeight.bold),
       ),
     );
   }

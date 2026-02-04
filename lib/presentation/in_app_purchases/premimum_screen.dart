@@ -175,33 +175,33 @@ class _PremiumScreenState extends State<PremiumScreen> {
       children: [
         _buildFeatureItem(
           Icons.auto_awesome, 
-          'Pro AI Coach', 
-          'Get 24/7 hyper-personalized fitness & nutrition guidance.',
+          'AI Workout Generator', 
+          'Build unlimited personalized weekly workout plans with AI.',
           Colors.purpleAccent,
         ),
         _buildFeatureItem(
-          Icons.all_inclusive, 
-          'Unlimited Everything', 
-          'Create infinite custom workouts and diet plans.',
+          Icons.restaurant_menu, 
+          'Advanced Diet & Macros', 
+          'Track calories, macros, and access premium nutritional plans.',
+          Colors.orangeAccent,
+        ),
+        _buildFeatureItem(
+          Icons.fitness_center, 
+          'Unlimited Custom Workouts', 
+          'Create and save infinite custom routines.',
           Colors.blueAccent,
         ),
         _buildFeatureItem(
           Icons.analytics, 
           'Elite Analytics', 
           'Deep dive into your progress with interactive charts.',
-          Colors.orangeAccent,
+          Colors.pinkAccent,
         ),
         _buildFeatureItem(
           Icons.ads_click, 
-          'Pure Experience', 
+          'Ad-Free Experience', 
           'Remove all ads and focus entirely on your training.',
           Colors.greenAccent,
-        ),
-        _buildFeatureItem(
-          Icons.picture_as_pdf, 
-          'Cloud Sync & Export', 
-          'Backup your data and export logs to PDF or CSV.',
-          Colors.tealAccent,
         ),
       ],
     );
