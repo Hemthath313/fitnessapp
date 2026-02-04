@@ -5,6 +5,7 @@ import 'package:fitness_app/presentation/auth/pages/forgot_password_page.dart';
 import 'package:fitness_app/presentation/auth/pages/login_or_register_page.dart';
 import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
 import 'package:fitness_app/presentation/boarding/pages/boarding_page.dart';
+import 'package:fitness_app/presentation/chat_screen/chat_screen.dart';
 import 'package:fitness_app/presentation/in_app_purchases/premimum_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_app/presentation/body_parts/pages/abs.dart';
@@ -48,6 +49,7 @@ import 'package:fitness_app/presentation/progress_photos/add_progress_photo_scre
 import 'package:fitness_app/presentation/progress_photos/photo_comparison_screen.dart';
 import 'package:fitness_app/presentation/ai_coach/ai_chat_screen.dart';
 import 'package:fitness_app/presentation/challenges/exercise_of_the_week.dart';
+import 'package:fitness_app/presentation/ai_coach/workout_generator_screen.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/widgets/coming_soon.dart';
 import 'package:fitness_app/utils/widgets/page_transition.dart';
@@ -103,6 +105,7 @@ class Routes {
   static const String plateauAnalysisRoute = '/plateauAnalysis';
   static const String aiChatRoute = '/aiChat';
   static const String exerciseOfTheWeekRoute = '/exerciseOfTheWeek';
+  static const String workoutGeneratorRoute = '/workoutGenerator';
 }
 
 final GoRouter router = GoRouter(
@@ -402,12 +405,17 @@ final GoRouter router = GoRouter(
         path: Routes.aiChatRoute,
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
-                state.pageKey, const AIChatScreen())),
+                state.pageKey, const ChatScreen())),
     GoRoute(
         path: Routes.exerciseOfTheWeekRoute,
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, const ExerciseOfTheWeekScreen())),
+    GoRoute(
+        path: Routes.workoutGeneratorRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const WorkoutGeneratorScreen())),
   ],
   errorBuilder: (context, state) {
     return Scaffold(

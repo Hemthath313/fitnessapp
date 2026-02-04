@@ -15,7 +15,7 @@ class JournalAppBarWidget extends StatelessWidget {
       title: Padding(
         padding: EdgeInsets.symmetric(horizontal: SizeManager.s8.w),
         child: Text(
-          'AI Transformation Hub',
+          'My AI Hub',
           style: TextStyle(
             color: ColorManager.white,
             fontSize: SizeManager.s20.sp,

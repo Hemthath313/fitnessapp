@@ -44,22 +44,28 @@ class _JournalPageState extends State<JournalPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'AI Transformation Hub',
+              'My AI Hub',
               style: TextStyle(
                 color: ColorManager.white,
-                fontSize: SizeManager.s2.sp,
+                fontSize: SizeManager.s24.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
             SizedBox(height: SizeManager.s4.h),
             Text(
-              'Your smarter way to fitness',
+              'Hyper-personalized fitness intelligence',
               style: TextStyle(
-                color: ColorManager.white70,
-                fontSize: SizeManager.s12.sp,
+                color: ColorManager.textSecondary,
+                fontSize: SizeManager.s14.sp,
               ),
             ),
             SizedBox(height: SizeManager.s24.h),
+
+            // Premium Upgrade Prompt (Only for free users)
+            if (!Provider.of<SubscriptionProvider>(context).isPremium)
+              _buildPremiumUpgradeCard(),
+
+            SizedBox(height: SizeManager.s20.h),
 
             // AI Daily Insight Card
             _buildAIInsightCard(),
@@ -112,6 +118,11 @@ class _JournalPageState extends State<JournalPage> {
               ],
             ),
             
+            SizedBox(height: SizeManager.s20.h),
+
+            // Nutrition Section
+            _buildNutritionAnalysisCard(),
+            
             SizedBox(height: SizeManager.s40.h),
             const PremiumAwareBannerAd(pageName: 'journal'),
             SizedBox(height: SizeManager.s16.h),
@@ -121,51 +132,218 @@ class _JournalPageState extends State<JournalPage> {
     );
   }
 
-  Widget _buildAIInsightCard() {
+  Widget _buildPremiumUpgradeCard() {
     return Container(
+      margin: EdgeInsets.only(top: SizeManager.s12.h),
       padding: EdgeInsets.all(SizeManager.s16.w),
       decoration: BoxDecoration(
-        color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(SizeManager.s20.r),
-        border: Border.all(
-          color: ColorManager.primary.withOpacity(0.1),
-          width: 1,
+        gradient: LinearGradient(
+          colors: [
+            ColorManager.secondary.withOpacity(0.8),
+            ColorManager.secondaryDark,
+          ],
         ),
+        borderRadius: BorderRadius.circular(SizeManager.s20.r),
+        boxShadow: [
+          BoxShadow(
+            color: ColorManager.secondary.withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          Container(
-            padding: EdgeInsets.all(SizeManager.s10.w),
-            decoration: BoxDecoration(
-              color: ColorManager.primary.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.tips_and_updates, color: ColorManager.primary, size: 24.sp),
-          ),
-          SizedBox(width: SizeManager.s16.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Daily AI Insight',
+                  'Upgrade to Pro!',
                   style: TextStyle(
-                    color: ColorManager.primary,
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: SizeManager.s14.sp,
+                    fontSize: SizeManager.s18.sp,
                   ),
                 ),
                 SizedBox(height: SizeManager.s4.h),
                 Text(
-                  'Muscle recovery is peak between 7-9 hours of sleep. Gemini says: Rest is your secret weapon!',
+                  'Ads-free, AI Coach, Pro Tools & More.',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.white.withOpacity(0.9),
                     fontSize: SizeManager.s12.sp,
                   ),
                 ),
               ],
             ),
           ),
+          ElevatedButton(
+            onPressed: () => context.push(Routes.premiumScreen),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: ColorManager.secondary,
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+            ),
+            child: Text(
+              'Get Pro',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAIInsightCard() {
+    return Container(
+      padding: EdgeInsets.all(SizeManager.s20.w),
+      decoration: BoxDecoration(
+        color: ColorManager.surface,
+        borderRadius: BorderRadius.circular(SizeManager.s20.r),
+        border: Border.all(
+          color: ColorManager.primary.withOpacity(0.2),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: ColorManager.primary.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  color: ColorManager.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Icon(Icons.psychology, color: ColorManager.primary, size: 22.sp),
+              ),
+              SizedBox(width: SizeManager.s12.w),
+              Text(
+                'AI Daily Insight',
+                style: TextStyle(
+                  color: ColorManager.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: SizeManager.s16.sp,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: SizeManager.s16.h),
+          Text(
+            'Muscle recovery is peak between 7-9 hours of sleep. Gemini says: Rest is your secret weapon! Tracking your consistency leads to 2x faster results.',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.9),
+              fontSize: SizeManager.s14.sp,
+              height: 1.4,
+            ),
+          ),
+          SizedBox(height: SizeManager.s12.h),
+          Row(
+            children: [
+              Icon(Icons.auto_awesome, color: Colors.amber, size: 14.sp),
+              SizedBox(width: 4.w),
+              Text(
+                'AI Analysis based on your activity',
+                style: TextStyle(
+                  color: ColorManager.textTertiary,
+                  fontSize: 10.sp,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNutritionAnalysisCard() {
+    final isPremium = Provider.of<SubscriptionProvider>(context).isPremium;
+
+    return Container(
+      padding: EdgeInsets.all(SizeManager.s20.w),
+      decoration: BoxDecoration(
+        color: ColorManager.surface,
+        borderRadius: BorderRadius.circular(SizeManager.s20.r),
+        border: Border.all(
+          color: Colors.orange.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.restaurant_menu, color: Colors.orange),
+              SizedBox(width: SizeManager.s8.w),
+              Text(
+                'Smart Nutrition Analysis',
+                style: TextStyle(
+                  color: ColorManager.white,
+                  fontSize: SizeManager.s18.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Spacer(),
+              if (!isPremium)
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: Colors.amber,
+                    borderRadius: BorderRadius.circular(4.r),
+                  ),
+                  child: Text(
+                    'PRO',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 8.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          SizedBox(height: SizeManager.s12.h),
+          Text(
+            isPremium
+                ? 'Your macro distribution is optimal for muscle gain. Try increasing protein by 10g in your morning meal.'
+                : 'Unlock intelligent meal analysis and macro tracking suggestions.',
+            style: TextStyle(
+              color: ColorManager.textSecondary,
+              fontSize: SizeManager.s12.sp,
+            ),
+          ),
+          if (!isPremium) ...[
+            SizedBox(height: SizeManager.s16.h),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () => context.push(Routes.premiumScreen),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: Colors.orange),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                ),
+                child: Text(
+                  'Analyze My Nutrition',
+                  style: TextStyle(color: Colors.orange),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

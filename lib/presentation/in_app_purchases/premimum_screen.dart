@@ -74,14 +74,21 @@ class _PremiumScreenState extends State<PremiumScreen> {
                   SizedBox(height: SizeManager.s24.h),
                   
                   // Feature List
-                  _buildFeatureItem(Icons.all_inclusive, 'Unlimited Custom Workouts'),
-                  _buildFeatureItem(Icons.psychology, 'Pro AI Fitness Assistant'),
-                  _buildFeatureItem(Icons.analytics, 'Advanced Progress Analytics'),
-                  _buildFeatureItem(Icons.picture_as_pdf, 'Export Logs to CSV/PDF'),
-                  _buildFeatureItem(Icons.ad_units, 'Ad-Free Experience'),
-                  _buildFeatureItem(Icons.emoji_events, 'Exclusive Pro Challenges'),
+                  _buildFeatureSection(),
                   
                   SizedBox(height: SizeManager.s32.h),
+                  
+                  Center(
+                    child: Text(
+                      'Choose Your Plan',
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: SizeManager.s16.h),
                   if (subProvider.isPremium) ...[
                     Container(
                       padding: EdgeInsets.all(SizeManager.s20.w),
@@ -128,10 +135,31 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     ],
                     ...subProvider.products.map((product) => _buildProductCard(product, subProvider)),
                   ],
-                  SizedBox(height: SizeManager.s4.h),
+                  SizedBox(height: SizeManager.s12.h),
+                  Center(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(20.r),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.security, color: ColorManager.primary, size: 14.sp),
+                          SizedBox(width: 6.w),
+                          Text(
+                            'Secure checkout with App Store/Play Store',
+                            style: TextStyle(fontSize: 10.sp, color: ColorManager.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: SizeManager.s24.h),
                   const Center(
                     child: Text(
-                      'By subscribing, you agree to our Terms and Privacy Policy.',
+                      'Cancel anytime. By subscribing, you agree to our\nTerms and Privacy Policy.',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 10, color: Colors.white38),
                     ),
@@ -142,26 +170,79 @@ class _PremiumScreenState extends State<PremiumScreen> {
     );
   }
 
-  Widget _buildFeatureItem(IconData icon, String title) {
+  Widget _buildFeatureSection() {
+    return Column(
+      children: [
+        _buildFeatureItem(
+          Icons.auto_awesome, 
+          'Pro AI Coach', 
+          'Get 24/7 hyper-personalized fitness & nutrition guidance.',
+          Colors.purpleAccent,
+        ),
+        _buildFeatureItem(
+          Icons.all_inclusive, 
+          'Unlimited Everything', 
+          'Create infinite custom workouts and diet plans.',
+          Colors.blueAccent,
+        ),
+        _buildFeatureItem(
+          Icons.analytics, 
+          'Elite Analytics', 
+          'Deep dive into your progress with interactive charts.',
+          Colors.orangeAccent,
+        ),
+        _buildFeatureItem(
+          Icons.ads_click, 
+          'Pure Experience', 
+          'Remove all ads and focus entirely on your training.',
+          Colors.greenAccent,
+        ),
+        _buildFeatureItem(
+          Icons.picture_as_pdf, 
+          'Cloud Sync & Export', 
+          'Backup your data and export logs to PDF or CSV.',
+          Colors.tealAccent,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeatureItem(IconData icon, String title, String subtitle, Color iconColor) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: SizeManager.s8.h),
+      padding: EdgeInsets.symmetric(vertical: SizeManager.s12.h),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: EdgeInsets.all(SizeManager.s8.w),
+            padding: EdgeInsets.all(SizeManager.s10.w),
             decoration: BoxDecoration(
-              color: ColorManager.primary.withOpacity(0.1),
-              shape: BoxShape.circle,
+              color: iconColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12.r),
             ),
-            child: Icon(icon, color: ColorManager.primary, size: 20.sp),
+            child: Icon(icon, color: iconColor, size: 22.sp),
           ),
           SizedBox(width: SizeManager.s16.w),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 15.sp,
-              color: ColorManager.textPrimary,
-              fontWeight: FontWeight.w500,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    color: ColorManager.textPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: ColorManager.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
