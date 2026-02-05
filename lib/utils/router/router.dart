@@ -47,6 +47,8 @@ import 'package:fitness_app/presentation/workout_logs/workout_history_screen.dar
 import 'package:fitness_app/presentation/progress_photos/progress_photos_screen.dart';
 import 'package:fitness_app/presentation/progress_photos/add_progress_photo_screen.dart';
 import 'package:fitness_app/presentation/progress_photos/photo_comparison_screen.dart';
+import 'package:fitness_app/presentation/profile/pages/monthly_comparison_page.dart';
+import 'package:fitness_app/presentation/diet_nutrition/pages/protein_chart_page.dart';
 import 'package:fitness_app/presentation/ai_coach/ai_chat_screen.dart';
 import 'package:fitness_app/presentation/challenges/exercise_of_the_week.dart';
 import 'package:fitness_app/presentation/ai_coach/workout_generator_screen.dart';
@@ -106,6 +108,8 @@ class Routes {
   static const String aiChatRoute = '/aiChat';
   static const String exerciseOfTheWeekRoute = '/exerciseOfTheWeek';
   static const String workoutGeneratorRoute = '/workoutGenerator';
+  static const String monthlyComparisonRoute = '/monthlyComparison';
+  static const String proteinChartRoute = '/proteinChart';
 }
 
 final GoRouter router = GoRouter(
@@ -416,6 +420,16 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, const WorkoutGeneratorScreen())),
+    GoRoute(
+        path: Routes.monthlyComparisonRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const MonthlyComparisonPage())),
+    GoRoute(
+        path: Routes.proteinChartRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const ProteinChartPage())),
   ],
   errorBuilder: (context, state) {
     return Scaffold(

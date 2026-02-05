@@ -102,6 +102,11 @@ class _ProfilePageState extends State<ProfilePage> {
                           EditTextButton(
                               onTap: () =>
                                   context.push(Routes.changeMeasurementsRoute)),
+                          SizedBox(height: 12.h),
+                          EditTextButton(
+                            text: "Monthly Comparison",
+                            onTap: () => context.push(Routes.monthlyComparisonRoute),
+                          ),
                           Stack(
                             children: [
                               SizedBox(

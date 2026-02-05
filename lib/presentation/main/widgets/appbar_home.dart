@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:fitness_app/utils/router/router.dart';
 
 class HomePageAppBarWidget extends StatelessWidget {
   const HomePageAppBarWidget({
@@ -46,6 +48,14 @@ class HomePageAppBarWidget extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+              ),
+              IconButton(
+                onPressed: () => context.push(Routes.premiumScreen),
+                icon: Icon(
+                  Icons.workspace_premium,
+                  color: Colors.amber, // Gold color for premium
+                  size: SizeManager.s28,
                 ),
               ),
               SizedBox(width: SizeManager.s12.w),

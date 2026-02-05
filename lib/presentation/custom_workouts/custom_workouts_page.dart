@@ -1,10 +1,13 @@
 import 'package:fitness_app/presentation/banner_ads/banner_ad_service.dart';
+import 'package:fitness_app/presentation/custom_workouts/day_workout_session_page.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/presentation/workouts/widgets/workout_timer_widget.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
+import 'package:fitness_app/data/exercise_data.dart';
+import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -78,159 +81,197 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      bottom: true,
-      child: Column(
-        children: [
-          // Header
-          Padding(
-            padding: EdgeInsets.all(SizeManager.s16.w),
-            child: Consumer<WorkoutProvider>(
-              builder: (context, provider, _) {
-                final hasWeeklyPlan = provider.allWorkouts.any((w) => w.name.startsWith('['));
-                
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                     Column(
-                       crossAxisAlignment: CrossAxisAlignment.start,
-                       children: [
-                         Text(
-                          hasWeeklyPlan ? 'Weekly Schedule' : 'My Workouts',
-                          style: TextStyle(
-                            color: ColorManager.white,
-                            fontSize: SizeManager.s24.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        if (hasWeeklyPlan)
-                          Text(
-                            'AI Generated Plan',
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.push(Routes.addNewExerciseRoute),
+        backgroundColor: ColorManager.primary,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+      body: SafeArea(
+        bottom: true,
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: EdgeInsets.all(SizeManager.s16.w),
+              child: Consumer<WorkoutProvider>(
+                builder: (context, provider, _) {
+                  final hasWeeklyPlan = provider.allWorkouts.any((w) => w.name.startsWith('['));
+                  
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                       Column(
+                         crossAxisAlignment: CrossAxisAlignment.start,
+                         children: [
+                           Text(
+                            hasWeeklyPlan ? 'Weekly Schedule' : 'My Workouts',
                             style: TextStyle(
-                              color: ColorManager.gradientStart,
-                              fontSize: 12.sp,
+                              color: ColorManager.white,
+                              fontSize: SizeManager.s24.sp,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                       ],
-                     ),
-                    if (hasWeeklyPlan)
-                      IconButton(
-                        onPressed: () => _deleteWeeklyPlan(provider),
-                        icon: const Icon(Icons.delete_forever, color: Colors.red),
-                        tooltip: 'Reset Plan',
-                      )
-                    else 
-                      ElevatedButton.icon(
-                        onPressed: () => context.push(Routes.workoutGeneratorRoute),
-                        icon: const Icon(Icons.auto_awesome, color: Colors.white),
-                        label: const Text('AI Build', style: TextStyle(color: Colors.white)),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-                      ),
-                  ],
-                );
-              }
-            ),
-          ),
-
-          // Main Listing
-          Expanded(
-            child: Consumer<WorkoutProvider>(
-              builder: (context, workoutProvider, _) {
-                if (workoutProvider.allWorkouts.isEmpty) {
-                  return _buildEmptyState(context);
-                }
-
-                // Group by Day
-                final Map<String, List<dynamic>> groupedMap = {};
-                final List<dynamic> otherWorkouts = [];
-
-                for (var w in workoutProvider.allWorkouts) {
-                  // Check for [Day] pattern
-                  final regex = RegExp(r'^\[(\w+)\]');
-                  final match = regex.firstMatch(w.name);
-                  if (match != null) {
-                    final day = match.group(1)!;
-                    if (!groupedMap.containsKey(day)) groupedMap[day] = [];
-                    groupedMap[day]!.add(w);
-                  } else {
-                    otherWorkouts.add(w);
-                  }
-                }
-
-                // If no groups, just show list
-                if (groupedMap.isEmpty) {
-                  return ListView.builder(
-                    itemCount: otherWorkouts.length,
-                    itemBuilder: (context, index) => _buildWorkoutCard(
-                        workout: otherWorkouts[index],
-                        onStart: () => _showWorkoutTimerDialog(context, otherWorkouts[index]),
-                        onEdit: () {}, 
-                        isGrouped: false),
-                  );
-                }
-
-                // Sort Days
-                final sortedDays = groupedMap.keys.toList()
-                  ..sort((a, b) => (_dayOrder[a] ?? 99).compareTo(_dayOrder[b] ?? 99));
-
-                return ListView(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  children: [
-                    ...sortedDays.map((day) {
-                      final workouts = groupedMap[day]!;
-                      return Container(
-                        margin: EdgeInsets.only(bottom: 16.h),
-                        decoration: BoxDecoration(
-                          color: ColorManager.surface,
-                          borderRadius: BorderRadius.circular(12.r),
-                          border: Border.all(color: Colors.white10),
-                        ),
-                        child: Theme(
-                          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                          child: ExpansionTile(
-                            initiallyExpanded: true,
-                            title: Text(
-                              day,
+                          if (hasWeeklyPlan)
+                            Text(
+                              'AI Generated Plan',
                               style: TextStyle(
-                                color: ColorManager.primary,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18.sp,
+                                color: ColorManager.gradientStart,
+                                fontSize: 12.sp,
                               ),
                             ),
-                            subtitle: Text(
-                              '${workouts.length} Exercises',
-                              style: TextStyle(color: Colors.white54, fontSize: 12.sp),
-                            ),
-                            children: workouts.map((w) => _buildWorkoutCard(
-                              workout: w,
-                              onStart: () => _showWorkoutTimerDialog(context, w),
-                              onEdit: () {},
-                              isGrouped: true,
-                            )).toList(),
-                          ),
+                         ],
+                       ),
+                      if (hasWeeklyPlan)
+                        IconButton(
+                          onPressed: () => _deleteWeeklyPlan(provider),
+                          icon: const Icon(Icons.delete_forever, color: Colors.red),
+                          tooltip: 'Reset Plan',
+                        )
+                      else 
+                        ElevatedButton.icon(
+                          onPressed: () => context.push(Routes.workoutGeneratorRoute),
+                          icon: const Icon(Icons.auto_awesome, color: Colors.white),
+                          label: const Text('AI Build', style: TextStyle(color: Colors.white)),
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
                         ),
-                      );
-                    }),
-                    if (otherWorkouts.isNotEmpty) ...[
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12.h),
-                        child: const Text('Other Workouts', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                      ),
-                      ...otherWorkouts.map((w) => _buildWorkoutCard(
-                        workout: w,
-                        onStart: () => _showWorkoutTimerDialog(context, w),
-                        onEdit: () {},
-                        isGrouped: false,
-                      )),
-                    ]
-                  ],
-                );
-              },
+                    ],
+                  );
+                }
+              ),
             ),
-          ),
-          
-          PremiumAwareBannerAd(pageName: 'workout'),
-        ],
+
+            // Main Listing
+            Expanded(
+              child: Consumer<WorkoutProvider>(
+                builder: (context, workoutProvider, _) {
+                  if (workoutProvider.allWorkouts.isEmpty) {
+                    return _buildEmptyState(context);
+                  }
+
+                  // Group by Day
+                  final Map<String, List<dynamic>> groupedMap = {};
+                  final List<dynamic> otherWorkouts = [];
+
+                  for (var w in workoutProvider.allWorkouts) {
+                    // Check for [Day] pattern
+                    final regex = RegExp(r'^\[(\w+)\]');
+                    final match = regex.firstMatch(w.name);
+                    if (match != null) {
+                      final day = match.group(1)!;
+                      if (!groupedMap.containsKey(day)) groupedMap[day] = [];
+                      groupedMap[day]!.add(w);
+                    } else {
+                      otherWorkouts.add(w);
+                    }
+                  }
+
+                  // If no groups, just show list
+                  if (groupedMap.isEmpty) {
+                    return ListView.builder(
+                      itemCount: otherWorkouts.length,
+                      itemBuilder: (context, index) => _buildWorkoutCard(
+                          workout: otherWorkouts[index],
+                          onStart: () => _showWorkoutTimerDialog(context, otherWorkouts[index]),
+                          onEdit: () {}, 
+                          isGrouped: false),
+                    );
+                  }
+
+                  // Sort Days
+                  final sortedDays = groupedMap.keys.toList()
+                    ..sort((a, b) => (_dayOrder[a] ?? 99).compareTo(_dayOrder[b] ?? 99));
+
+                  return ListView(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    children: [
+                      ...sortedDays.map((day) {
+                        final workouts = groupedMap[day]!;
+                        return Container(
+                          margin: EdgeInsets.only(bottom: 16.h),
+                          decoration: BoxDecoration(
+                            color: ColorManager.surface,
+                            borderRadius: BorderRadius.circular(12.r),
+                            border: Border.all(color: Colors.white10),
+                          ),
+                          child: Theme(
+                            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                            child: ExpansionTile(
+                              initiallyExpanded: true,
+                              title: Row(
+                                children: [
+                                  Text(
+                                    day,
+                                    style: TextStyle(
+                                      color: ColorManager.primary,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18.sp,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => 
+                                            DayWorkoutSessionPage(
+                                              dayName: day,
+                                              workouts: workouts,
+                                            ),
+                                        ),
+                                      );
+                                    },
+                                    icon: Icon(Icons.play_arrow, size: 16.sp, color: Colors.white),
+                                    label: Text(
+                                      'Start Day', 
+                                      style: TextStyle(fontSize: 12.sp, color: Colors.white, fontWeight: FontWeight.bold)
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: ColorManager.gradientStart,
+                                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                                      minimumSize: Size.zero,
+                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              subtitle: Text(
+                                '${workouts.length} Exercises',
+                                style: TextStyle(color: Colors.white54, fontSize: 12.sp),
+                              ),
+                              children: workouts.map((w) => _buildWorkoutCard(
+                                workout: w,
+                                onStart: () => _showWorkoutTimerDialog(context, w),
+                                onEdit: () {},
+                                isGrouped: true,
+                              )).toList(),
+                            ),
+                          ),
+                        );
+                      }),
+                      if (otherWorkouts.isNotEmpty) ...[
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          child: const Text('Other Workouts', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        ),
+                        ...otherWorkouts.map((w) => _buildWorkoutCard(
+                          workout: w,
+                          onStart: () => _showWorkoutTimerDialog(context, w),
+                          onEdit: () {},
+                          isGrouped: false,
+                        )),
+                      ]
+                    ],
+                  );
+                },
+              ),
+            ),
+            
+            PremiumAwareBannerAd(pageName: 'workout'),
+          ],
+        ),
       ),
     );
   }
@@ -389,44 +430,94 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
      showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: ColorManager.darkGrey,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(SizeManager.s20.r),
-        ),
-        title: Row(
-          children: [
-            Icon(Icons.timer, color: ColorManager.limerGreen2),
-            SizedBox(width: SizeManager.s8.w),
-            Expanded(
-              child: Text(
-                '${workout.name} Timer',
-                style: TextStyle(
-                  color: ColorManager.white,
-                  fontSize: SizeManager.s20.sp,
-                  fontWeight: FontWeight.bold,
+      builder: (context) {
+        // Find exercise video logic
+        String displayName = workout.name;
+        final regex = RegExp(r'^\[\w+\]\s*');
+        displayName = displayName.replaceAll(regex, '');
+        final cleanName = displayName.trim();
+        
+        Exercise? foundExercise;
+        try {
+          final allExercises = [
+            ...ExerciseData.chest,
+            ...ExerciseData.back,
+            ...ExerciseData.shoulders,
+            ...ExerciseData.biceps,
+            ...ExerciseData.triceps,
+            ...ExerciseData.legs,
+            ...ExerciseData.abs,
+            ...ExerciseData.cardio,
+          ];
+          foundExercise = allExercises.firstWhere(
+            (e) => e.name.toLowerCase() == cleanName.toLowerCase(),
+          );
+        } catch (_) {}
+
+        return AlertDialog(
+          backgroundColor: ColorManager.darkGrey,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(SizeManager.s20.r),
+          ),
+          contentPadding: EdgeInsets.zero,
+          title: Row(
+            children: [
+              Icon(Icons.timer, color: ColorManager.limerGreen2),
+              SizedBox(width: SizeManager.s8.w),
+              Expanded(
+                child: Text(
+                  '${workout.name} Timer',
+                  style: TextStyle(
+                    color: ColorManager.white,
+                    fontSize: SizeManager.s20.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+              ),
+            ],
+          ),
+          content: Container(
+            width: SizeManager.s300.w,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (foundExercise != null && foundExercise.videoPath.isNotEmpty)
+                  ClipRRect(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(SizeManager.s20.r)),
+                    child: ExerciseVideoPlayer(
+                      videoPath: foundExercise.videoPath,
+                      height: 200.h,
+                      autoPlay: true,
+                    ),
+                  )
+                else 
+                   Padding(
+                     padding: EdgeInsets.symmetric(vertical: 20.h),
+                     child: Icon(Icons.fitness_center, size: 40.sp, color: ColorManager.primary),
+                   ),
+                
+                Padding(
+                  padding: EdgeInsets.all(16.w),
+                  child: WorkoutTimerWidget(
+                    isRestTimer: false,
+                    initialMinutes: 0, 
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Close',
+                style: TextStyle(color: ColorManager.white70),
               ),
             ),
           ],
-        ),
-        content: Container(
-          width: SizeManager.s300.w,
-          child: WorkoutTimerWidget(
-            isRestTimer: false,
-            initialMinutes: 0, 
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Close',
-              style: TextStyle(color: ColorManager.white70),
-            ),
-          ),
-        ],
-      ),
+        );
+      }
     );
+
   }
 }

@@ -51,29 +51,58 @@ class WorkoutProvider with ChangeNotifier {
   }) async {
     try {
       User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
 
-      await FirebaseFirestore.instance
+      final workoutDoc = FirebaseFirestore.instance
           .collection('workouts')
-          .doc(user!.uid)
+          .doc(user.uid)
           .collection('workoutData')
-          .doc()
-          .set({
-        'name': name,
-        'repNumber': repNumber,
-        'setNumber': setNumber,
-        'dateTime': dateTime,
-      });
-      await FirebaseFirestore.instance
+          .doc();
+      
+      final allWorkoutDoc = FirebaseFirestore.instance
           .collection('allWorkouts')
           .doc(user.uid)
           .collection('allWorkoutsData')
-          .doc()
-          .set({
+          .doc();
+
+      final workoutModel = WorkoutModel(
+        id: workoutDoc.id,
+        name: name,
+        repNumber: repNumber,
+        setNumber: setNumber,
+        dateTime: dateTime,
+      );
+
+       final allWorkoutModel = WorkoutModel(
+        id: allWorkoutDoc.id,
+        name: name,
+        repNumber: repNumber,
+        setNumber: setNumber,
+        dateTime: dateTime,
+      );
+
+      await workoutDoc.set({
         'name': name,
         'repNumber': repNumber,
         'setNumber': setNumber,
         'dateTime': dateTime,
       });
+
+      await allWorkoutDoc.set({
+        'name': name,
+        'repNumber': repNumber,
+        'setNumber': setNumber,
+        'dateTime': dateTime,
+      });
+
+      // Update local state immediately
+      _workouts.add(workoutModel);
+      _allWorkouts.add(allWorkoutModel);
+      
+      // Sort to keep order correct
+      _workouts.sort((a, b) => b.dateTime.compareTo(a.dateTime));
+      // _allWorkouts might need sorting too depending on usage, but usually it is grouped by day or listed
+      
       notifyListeners();
     } catch (e) {
       rethrow;

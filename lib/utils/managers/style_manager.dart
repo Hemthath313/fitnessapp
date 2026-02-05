@@ -287,4 +287,10 @@ class StyleManager {
     fontSize: FontSize.s18.sp,
     letterSpacing: SizeManager.s1,
   );
+  static final skillNameTextStyle = TextStyle(
+    color: ColorManager.white,
+    fontSize: FontSize.s22.sp,
+    fontWeight: FontWightManager.bold,
+    letterSpacing: SizeManager.s1,
+  );
 }

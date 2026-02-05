@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:fitness_app/data/warmup_data.dart';
 
 class JournalPage extends StatefulWidget {
   const JournalPage({super.key});
@@ -18,21 +19,7 @@ class JournalPage extends StatefulWidget {
 }
 
 class _JournalPageState extends State<JournalPage> {
-  final _weightController = TextEditingController();
-  final _repsController = TextEditingController();
-  double? _oneRepMax;
-
-  void _calculate1RM() {
-    final weight = double.tryParse(_weightController.text);
-    final reps = double.tryParse(_repsController.text);
-
-    if (weight != null && reps != null && reps > 0) {
-      setState(() {
-        // Using Epley Formula: 1RM = weight * (1 + reps/30)
-        _oneRepMax = weight * (1 + reps / 30);
-      });
-    }
-  }
+  WarmupRoutine? _selectedWarmup;
 
   @override
   Widget build(BuildContext context) {
@@ -61,20 +48,13 @@ class _JournalPageState extends State<JournalPage> {
             ),
             SizedBox(height: SizeManager.s24.h),
 
-            // Premium Upgrade Prompt (Only for free users)
             if (!Provider.of<SubscriptionProvider>(context).isPremium)
               _buildPremiumUpgradeCard(),
 
             SizedBox(height: SizeManager.s20.h),
-
-            // AI Daily Insight Card
             _buildAIInsightCard(),
-
             SizedBox(height: SizeManager.s20.h),
-
-            // AI Coach Chat Card (Elevated)
             _buildAICoachCard(),
-
             SizedBox(height: SizeManager.s20.h),
 
             // Tools Section
@@ -88,8 +68,8 @@ class _JournalPageState extends State<JournalPage> {
             ),
             SizedBox(height: SizeManager.s16.h),
 
-            // 1RM Calculator Card
-            _build1RMCalculator(),
+            // Smart Warmup Generator Card
+            _buildSmartWarmupGenerator(),
 
             SizedBox(height: SizeManager.s20.h),
 
@@ -119,15 +99,156 @@ class _JournalPageState extends State<JournalPage> {
             ),
             
             SizedBox(height: SizeManager.s20.h),
-
-            // Nutrition Section
             _buildNutritionAnalysisCard(),
-            
             SizedBox(height: SizeManager.s40.h),
             const PremiumAwareBannerAd(pageName: 'journal'),
             SizedBox(height: SizeManager.s16.h),
           ],
         ),
+      ),
+    );
+  }
+
+  // ... (keep previous methods like _buildPremiumUpgradeCard, _buildAIInsightCard, _buildNutritionAnalysisCard)
+
+  Widget _buildSmartWarmupGenerator() {
+    return Container(
+      padding: EdgeInsets.all(SizeManager.s20.w),
+      decoration: BoxDecoration(
+        color: ColorManager.surface,
+        borderRadius: BorderRadius.circular(SizeManager.s20.r),
+        border: Border.all(
+          color: ColorManager.primary.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.directions_run, color: Colors.orangeAccent),
+              SizedBox(width: SizeManager.s8.w),
+              Text(
+                'Smart Warmup Generator',
+                style: TextStyle(
+                  color: ColorManager.white,
+                  fontSize: SizeManager.s18.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: SizeManager.s8.h),
+          Text(
+            'Target specific muscle groups with dynamic mobility routines.',
+            style: TextStyle(color: ColorManager.white70, fontSize: SizeManager.s12.sp),
+          ),
+          SizedBox(height: SizeManager.s20.h),
+
+          // Dropdown Input
+           Container(
+             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+             decoration: BoxDecoration(
+               color: ColorManager.background,
+               borderRadius: BorderRadius.circular(12.r),
+               border: Border.all(color: Colors.white10),
+             ),
+             child: DropdownButtonHideUnderline(
+               child: DropdownButton<WarmupRoutine>(
+                 value: _selectedWarmup,
+                 hint: Text('Select Target (e.g. Leg Day)', style: TextStyle(color: Colors.white54, fontSize: 14.sp)),
+                 dropdownColor: ColorManager.background,
+                 isExpanded: true,
+                 icon: Icon(Icons.keyboard_arrow_down, color: ColorManager.primary),
+                 style: TextStyle(color: Colors.white, fontSize: 14.sp),
+                 items: WarmupData.routines.map((WarmupRoutine routine) {
+                   return DropdownMenuItem<WarmupRoutine>(
+                     value: routine,
+                     child: Text(routine.target),
+                   );
+                 }).toList(),
+                 onChanged: (newValue) => setState(() => _selectedWarmup = newValue),
+               ),
+             ),
+          ),
+
+          if (_selectedWarmup != null) ...[
+            SizedBox(height: 20.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Your Routine:',
+                  style: TextStyle(color: ColorManager.primary, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                ),
+                TextButton.icon(
+                  onPressed: () => setState(() => _selectedWarmup = null),
+                  icon: Icon(Icons.refresh, size: 14.sp, color: Colors.white70),
+                  label: Text('Reset', style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 12.h),
+            ..._selectedWarmup!.exercises.map((exercise) => _buildWarmupItem(exercise)).toList(),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWarmupItem(WarmupExercise exercise) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12.h),
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: Colors.white12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: EdgeInsets.all(8.w),
+            decoration: BoxDecoration(
+              color: Colors.orangeAccent.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.timer_outlined, color: Colors.orangeAccent, size: 16.sp),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      exercise.name,
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14.sp),
+                    ),
+                    Text(
+                      exercise.durationOrReps,
+                      style: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.bold, fontSize: 12.sp),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  exercise.description,
+                  style: TextStyle(color: Colors.white60, fontSize: 12.sp),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -349,159 +470,7 @@ class _JournalPageState extends State<JournalPage> {
     );
   }
 
-  Widget _build1RMCalculator() {
-    return Container(
-      padding: EdgeInsets.all(SizeManager.s20.w),
-      decoration: BoxDecoration(
-        color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(SizeManager.s20.r),
-        border: Border.all(
-          color: ColorManager.primary.withOpacity(0.2),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: ColorManager.primary.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.calculate, color: ColorManager.primary),
-              SizedBox(width: SizeManager.s8.w),
-              Text(
-                '1RM Calculator',
-                style: TextStyle(
-                  color: ColorManager.white,
-                  fontSize: SizeManager.s18.sp,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: SizeManager.s4.h),
-          Text(
-            'Estimate your One Rep Max for any exercise',
-            style: TextStyle(
-              color: ColorManager.white70,
-              fontSize: SizeManager.s12.sp,
-            ),
-          ),
-          SizedBox(height: SizeManager.s20.h),
-          Row(
-            children: [
-              Expanded(
-                child: _buildTextField(
-                  controller: _weightController,
-                  label: 'Weight (kg)',
-                  hint: 'e.g. 100',
-                ),
-              ),
-              SizedBox(width: SizeManager.s12.w),
-              Expanded(
-                child: _buildTextField(
-                  controller: _repsController,
-                  label: 'Reps',
-                  hint: 'e.g. 5',
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: SizeManager.s20.h),
-          if (_oneRepMax != null)
-            Center(
-              child: Column(
-                children: [
-                  Text(
-                    'Your Estimated 1RM',
-                    style: TextStyle(
-                      color: ColorManager.white70,
-                      fontSize: SizeManager.s14.sp,
-                    ),
-                  ),
-                  Text(
-                    '${_oneRepMax!.toStringAsFixed(1)} kg',
-                    style: TextStyle(
-                      color: ColorManager.primary,
-                      fontSize: SizeManager.s32.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: SizeManager.s16.h),
-                ],
-              ),
-            ),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _calculate1RM,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColorManager.primary,
-                padding: EdgeInsets.symmetric(vertical: SizeManager.s12.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(SizeManager.s12.r),
-                ),
-              ),
-              child: Text(
-                'Calculate',
-                style: TextStyle(
-                  color: ColorManager.darkGrey,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: ColorManager.white70,
-            fontSize: SizeManager.s12.sp,
-          ),
-        ),
-        SizedBox(height: SizeManager.s8.h),
-        TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          style: const TextStyle(color: Colors.white),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(color: ColorManager.white2, fontSize: SizeManager.s14.sp),
-            filled: true,
-            fillColor: ColorManager.background,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(SizeManager.s12.r),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: SizeManager.s16.w,
-              vertical: SizeManager.s12.h,
-            ),
-          ),
-          onChanged: (_) {
-            if (_oneRepMax != null) setState(() => _oneRepMax = null);
-          },
-        ),
-      ],
-    );
-  }
 
   Widget _buildNavigationCard({
     required String title,

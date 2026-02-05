@@ -1,29 +1,7 @@
+import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
-
-// Custom leg exercise data with descriptions
-class LegExercise {
-  final String name;
-  final String videoPath;
-  final String description;
-  final String target;
-  final String equipment;
-  final List<String> instructions;
-  final String difficulty;
-  final String setsReps;
-
-  LegExercise({
-    required this.name,
-    required this.videoPath,
-    required this.description,
-    required this.target,
-    required this.equipment,
-    required this.instructions,
-    required this.difficulty,
-    required this.setsReps,
-  });
-}
 
 class LegExercisesPage extends StatefulWidget {
   const LegExercisesPage({super.key});
@@ -33,237 +11,8 @@ class LegExercisesPage extends StatefulWidget {
 }
 
 class _LegExercisesPageState extends State<LegExercisesPage> {
-  // Only show exercises that have local videos
-  final List<LegExercise> legExercises = [
-    LegExercise(
-      name: 'Classic Barbell Squat',
-      videoPath: 'assets/videos/legs/legs_classic_barbell_squat.mp4',
-      description:
-          'The king of leg exercises. Builds massive quadriceps, glutes, and hamstrings while engaging your core. Essential for lower body strength and power.',
-      target: 'Quadriceps, Glutes, Hamstrings, Core',
-      equipment: 'Barbell, Squat Rack',
-      difficulty: 'Intermediate',
-      setsReps: '4 sets × 6-10 reps',
-      instructions: [
-        'Position the barbell on your upper back (not your neck)',
-        'Stand with feet shoulder-width apart, toes slightly pointed out',
-        'Keep your chest up and core tight',
-        'Lower down by pushing your hips back and bending your knees',
-        'Descend until your thighs are parallel to the floor or lower',
-        'Drive through your heels to return to standing position',
-        'Keep your knees tracking over your toes throughout',
-      ],
-    ),
-    LegExercise(
-      name: 'Barbell Front Chest Squat',
-      videoPath: 'assets/videos/legs/legs_barbell_front_chest_squat.mp4',
-      description:
-          'Front-loaded squat variation that emphasizes quadriceps development. The front position requires more core stability and improves squat mechanics.',
-      target: 'Quadriceps, Core, Upper Back',
-      equipment: 'Barbell',
-      difficulty: 'Advanced',
-      setsReps: '4 sets × 6-10 reps',
-      instructions: [
-        'Rest the barbell on your front deltoids and upper chest',
-        'Cross your arms to secure the bar or use a clean grip',
-        'Stand with feet shoulder-width apart',
-        'Keep your torso upright throughout the movement',
-        'Lower down until thighs are parallel to floor',
-        'Drive through your heels to stand up',
-        'Maintain an upright posture to prevent the bar from rolling',
-      ],
-    ),
-    LegExercise(
-      name: 'Barbell Lunge',
-      videoPath: 'assets/videos/legs/legs_barbell_lunge.mp4',
-      description:
-          'Unilateral leg exercise that builds strength and corrects muscle imbalances. Targets quads, glutes, and hamstrings while improving balance and coordination.',
-      target: 'Quadriceps, Glutes, Hamstrings',
-      equipment: 'Barbell',
-      difficulty: 'Intermediate',
-      setsReps: '3 sets × 10-12 reps per leg',
-      instructions: [
-        'Position barbell on your upper back',
-        'Step forward with one leg into a lunge position',
-        'Lower your back knee toward the ground',
-        'Keep your front knee over your ankle, not past your toes',
-        'Push through your front heel to return to start',
-        'Alternate legs or complete all reps on one side first',
-        'Keep your torso upright throughout',
-      ],
-    ),
-    LegExercise(
-      name: 'Dumbbell Lunge',
-      videoPath: 'assets/videos/legs/legs_dumbbell_lunge.mp4',
-      description:
-          'Lunge variation using dumbbells for added resistance. Easier to balance than barbell lunges, making it great for beginners or when focusing on form.',
-      target: 'Quadriceps, Glutes, Hamstrings',
-      equipment: 'Dumbbells',
-      difficulty: 'Beginner',
-      setsReps: '3 sets × 12-15 reps per leg',
-      instructions: [
-        'Hold dumbbells at your sides',
-        'Step forward into a lunge position',
-        'Lower until both knees are at 90-degree angles',
-        'Keep your front knee aligned with your ankle',
-        'Push through your front heel to return',
-        'Maintain an upright torso throughout',
-        'Alternate legs or complete all reps on one side',
-      ],
-    ),
-    LegExercise(
-      name: 'Dumbbell Goblet Squat',
-      videoPath: 'assets/videos/legs/legs_dumbbell_goblet_squat.mp4',
-      description:
-          'Beginner-friendly squat variation that teaches proper squat mechanics. Holding the weight in front helps maintain an upright posture and engages the core.',
-      target: 'Quadriceps, Glutes, Core',
-      equipment: 'Dumbbell',
-      difficulty: 'Beginner',
-      setsReps: '4 sets × 12-15 reps',
-      instructions: [
-        'Hold a dumbbell vertically against your chest',
-        'Stand with feet slightly wider than shoulder-width',
-        'Keep your chest up and core engaged',
-        'Lower down by pushing hips back and bending knees',
-        'Descend until thighs are parallel to floor',
-        'Drive through your heels to stand up',
-        'Keep your knees tracking over your toes',
-      ],
-    ),
-    LegExercise(
-      name: 'Dumbbell Bar Grip Sumo Squat',
-      videoPath: 'assets/videos/legs/legs_dumbbell_bar_grip_sumo_squat.mp4',
-      description:
-          'Wide-stance squat that targets inner thighs and glutes. The sumo position emphasizes the adductors and provides a different angle of muscle activation.',
-      target: 'Quadriceps, Glutes, Inner Thighs',
-      equipment: 'Dumbbell',
-      difficulty: 'Intermediate',
-      setsReps: '4 sets × 12-15 reps',
-      instructions: [
-        'Stand with feet wider than shoulder-width, toes pointed out',
-        'Hold a dumbbell with both hands between your legs',
-        'Keep your chest up and core tight',
-        'Lower down by pushing hips back',
-        'Descend until thighs are parallel to floor',
-        'Drive through your heels to stand up',
-        'Feel the stretch in your inner thighs',
-      ],
-    ),
-    LegExercise(
-      name: 'Smith Chair Squat',
-      videoPath: 'assets/videos/legs/legs_smith_chair_squat.mp4',
-      description:
-          'Machine-assisted squat using a Smith machine with a bench. Provides safety and stability while allowing you to focus on form and depth.',
-      target: 'Quadriceps, Glutes',
-      equipment: 'Smith Machine, Bench',
-      difficulty: 'Beginner',
-      setsReps: '4 sets × 10-12 reps',
-      instructions: [
-        'Position a bench behind you in the Smith machine',
-        'Position the bar on your upper back',
-        'Stand with feet shoulder-width apart',
-        'Lower down until you touch the bench',
-        'Drive through your heels to stand up',
-        'Keep your core engaged throughout',
-        'The bench helps ensure consistent depth',
-      ],
-    ),
-    LegExercise(
-      name: 'Close Feet Leg Press',
-      videoPath: 'assets/videos/legs/legs_close_feet_leg_press.mp4',
-      description:
-          'Leg press variation with narrow foot placement that emphasizes the quadriceps. The close stance targets the outer quads and provides intense quad activation.',
-      target: 'Quadriceps',
-      equipment: 'Leg Press Machine',
-      difficulty: 'Beginner',
-      setsReps: '4 sets × 12-15 reps',
-      instructions: [
-        'Sit in the leg press machine',
-        'Place your feet close together on the platform',
-        'Lower the weight by bending your knees',
-        'Descend until your knees form a 90-degree angle',
-        'Press through your feet to extend your legs',
-        'Keep your back flat against the pad',
-        'Focus on squeezing your quads at the top',
-      ],
-    ),
-    LegExercise(
-      name: 'Lever Leg Extension',
-      videoPath: 'assets/videos/legs/legs_lever_leg_extension.mp4',
-      description:
-          'Isolation exercise that targets the quadriceps. Perfect for finishing your leg workout and achieving a deep quad pump.',
-      target: 'Quadriceps',
-      equipment: 'Leg Extension Machine',
-      difficulty: 'Beginner',
-      setsReps: '3 sets × 12-15 reps',
-      instructions: [
-        'Sit in the leg extension machine',
-        'Adjust the pad to rest on your lower shins',
-        'Grasp the handles for stability',
-        'Extend your legs until they are straight',
-        'Squeeze your quads at the top',
-        'Lower slowly with control',
-        'Keep your back against the pad',
-      ],
-    ),
-    LegExercise(
-      name: 'Lever Lying Leg Curl',
-      videoPath: 'assets/videos/legs/legs_lever_lying_leg_curl.mp4',
-      description:
-          'Isolation exercise for the hamstrings. The lying position provides excellent hamstring activation and helps balance quad-dominant training.',
-      target: 'Hamstrings',
-      equipment: 'Leg Curl Machine',
-      difficulty: 'Beginner',
-      setsReps: '3 sets × 12-15 reps',
-      instructions: [
-        'Lie face down on the leg curl machine',
-        'Position the pad on the back of your ankles',
-        'Grasp the handles for stability',
-        'Curl your heels toward your glutes',
-        'Squeeze your hamstrings at the top',
-        'Lower slowly with control',
-        'Keep your hips pressed against the pad',
-      ],
-    ),
-    LegExercise(
-      name: 'Lever Kneeling Leg Curl',
-      videoPath: 'assets/videos/legs/legs_lever_kneeling_leg_curl.mp4',
-      description:
-          'Kneeling leg curl variation that provides a different angle for hamstring development. The kneeling position offers unique muscle activation.',
-      target: 'Hamstrings',
-      equipment: 'Leg Curl Machine',
-      difficulty: 'Intermediate',
-      setsReps: '3 sets × 12-15 reps',
-      instructions: [
-        'Kneel on the machine with pad on back of ankles',
-        'Grasp the handles for support',
-        'Curl your heels toward your glutes',
-        'Squeeze your hamstrings at the peak',
-        'Lower slowly with control',
-        'Keep your core engaged throughout',
-        'Focus on the hamstring contraction',
-      ],
-    ),
-    LegExercise(
-      name: 'Band Bent Over Hip Extension',
-      videoPath: 'assets/videos/legs/legs_band_bent_over_hip_extension.mp4',
-      description:
-          'Resistance band exercise that targets the glutes and hamstrings. Perfect for home workouts or as a warm-up before heavy leg training.',
-      target: 'Glutes, Hamstrings',
-      equipment: 'Resistance Band',
-      difficulty: 'Beginner',
-      setsReps: '3 sets × 15-20 reps per leg',
-      instructions: [
-        'Secure the band around your ankles or feet',
-        'Bend forward at the hips, keeping back straight',
-        'Extend one leg backward against the band resistance',
-        'Squeeze your glute at the top',
-        'Return slowly to starting position',
-        'Alternate legs or complete all reps on one side',
-        'Keep your core engaged throughout',
-      ],
-    ),
-  ];
+  // Use centralized data
+  final List<Exercise> legExercises = ExerciseData.legs;
 
   @override
   Widget build(BuildContext context) {
@@ -385,7 +134,7 @@ class _LegExercisesPageState extends State<LegExercisesPage> {
     );
   }
 
-  Widget _buildExerciseCard(LegExercise exercise, int index) {
+  Widget _buildExerciseCard(Exercise exercise, int index) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -562,7 +311,7 @@ class _LegExercisesPageState extends State<LegExercisesPage> {
     );
   }
 
-  void _showExerciseDetails(BuildContext context, LegExercise exercise) {
+  void _showExerciseDetails(BuildContext context, Exercise exercise) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,

@@ -1,30 +1,9 @@
+import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 
-// Custom chest exercise data with descriptions
-class ChestExercise {
-  final String name;
-  final String videoPath;
-  final String description;
-  final String target;
-  final String equipment;
-  final List<String> instructions;
-  final String difficulty;
-  final String setsReps;
-
-  ChestExercise({
-    required this.name,
-    required this.videoPath,
-    required this.description,
-    required this.target,
-    required this.equipment,
-    required this.instructions,
-    required this.difficulty,
-    required this.setsReps,
-  });
-}
-
+// Chest Exercises Page using centralized data
 class ChestExercisesPage extends StatefulWidget {
   const ChestExercisesPage({super.key});
 
@@ -33,207 +12,8 @@ class ChestExercisesPage extends StatefulWidget {
 }
 
 class _ChestExercisesPageState extends State<ChestExercisesPage> {
-  // Only show exercises that have local videos
-  final List<ChestExercise> chestExercises = [
-    ChestExercise(
-      name: 'Barbell Bench Press',
-      videoPath: 'assets/videos/chest/chest_barbell_bench_press.mp4',
-      description:
-          'The king of chest exercises. This compound movement builds overall chest mass, shoulder strength, and triceps power. Essential for building a powerful upper body.',
-      target: 'Chest, Shoulders, Triceps',
-      equipment: 'Barbell, Bench',
-      difficulty: 'Intermediate',
-      setsReps: '4 sets × 8-12 reps',
-      instructions: [
-        'Lie flat on the bench with your feet firmly planted on the ground',
-        'Grip the barbell slightly wider than shoulder-width apart',
-        'Unrack the bar and lower it to your chest with control (2-3 seconds)',
-        'Press the bar up explosively until your arms are fully extended',
-        'Keep your core tight, shoulder blades retracted, and maintain proper form',
-        'Breathe out on the way up, breathe in on the way down',
-      ],
-    ),
-    ChestExercise(
-      name: 'Barbell Decline Bench Press',
-      videoPath: 'assets/videos/chest/chest_barbell_decline_bench_press.mp4',
-      description:
-          'Targets the lower portion of your pectoral muscles. The decline angle increases activation of the lower chest, creating a well-rounded, defined chest development.',
-      target: 'Lower Chest, Triceps',
-      equipment: 'Barbell, Decline Bench',
-      difficulty: 'Intermediate',
-      setsReps: '4 sets × 8-10 reps',
-      instructions: [
-        'Secure yourself on the decline bench with your feet locked in place',
-        'Grip the barbell with hands slightly wider than shoulder-width',
-        'Lower the bar to your lower chest with controlled movement',
-        'Press up powerfully, focusing on the lower chest contraction',
-        'Maintain control throughout - don\'t let the bar bounce off your chest',
-        'Keep your core engaged and maintain proper breathing rhythm',
-      ],
-    ),
-    ChestExercise(
-      name: 'Chest Dips',
-      videoPath: 'assets/videos/chest/chest_dips.mp4',
-      description:
-          'Bodyweight exercise that targets the lower chest, shoulders, and triceps. Leaning forward emphasizes the chest muscles, making it an excellent bodyweight chest builder.',
-      target: 'Lower Chest, Shoulders, Triceps',
-      equipment: 'Dip Bars',
-      difficulty: 'Intermediate',
-      setsReps: '3 sets × 8-12 reps',
-      instructions: [
-        'Grip the parallel bars and support your body weight',
-        'Lean forward slightly to target the chest more',
-        'Lower your body by bending your elbows until you feel a stretch',
-        'Press up powerfully, focusing on chest contraction',
-        'Keep your core tight and maintain control throughout',
-        'Don\'t lock out your elbows at the top',
-      ],
-    ),
-    ChestExercise(
-      name: 'Band High Fly',
-      videoPath: 'assets/videos/chest/chest_band_high_fly.mp4',
-      description:
-          'Resistance band exercise that targets the upper chest. The high angle emphasizes the clavicular head of the pectorals, perfect for building upper chest definition.',
-      target: 'Upper Chest, Shoulders',
-      equipment: 'Resistance Band',
-      difficulty: 'Beginner',
-      setsReps: '3 sets × 12-15 reps',
-      instructions: [
-        'Anchor the resistance band at chest height or above',
-        'Hold the band handles with arms extended',
-        'Pull the bands together in a wide arc motion',
-        'Squeeze your chest muscles at the peak contraction',
-        'Return to the starting position with control',
-        'Keep constant tension throughout the movement',
-      ],
-    ),
-    ChestExercise(
-      name: 'Dumbbell Hammer Press',
-      videoPath: 'assets/videos/chest/chest_dumbell_hammer_press.mp4',
-      description:
-          'Neutral grip press that reduces shoulder stress while building chest strength. The hammer grip (palms facing each other) is easier on the rotator cuffs.',
-      target: 'Chest, Triceps',
-      equipment: 'Dumbbells, Bench',
-      difficulty: 'Beginner',
-      setsReps: '4 sets × 10-12 reps',
-      instructions: [
-        'Lie on a bench holding dumbbells with neutral grip (palms facing each other)',
-        'Press the dumbbells straight up until arms are extended',
-        'Lower them with control to chest level',
-        'Keep your wrists straight and maintain the neutral grip',
-        'Focus on the chest contraction throughout',
-        'This grip is gentler on the shoulders than traditional press',
-      ],
-    ),
-    ChestExercise(
-      name: 'Dumbbell Fly (Exercise Ball)',
-      videoPath: 'assets/videos/chest/chest_dumbell_fly_exercise_ball.mp4',
-      description:
-          'Isolation exercise that stretches and contracts the chest muscles. Using an exercise ball adds core stability challenge, making it a functional movement.',
-      target: 'Chest, Core',
-      equipment: 'Dumbbells, Exercise Ball',
-      difficulty: 'Intermediate',
-      setsReps: '3 sets × 12-15 reps',
-      instructions: [
-        'Lie on an exercise ball with your upper back supported',
-        'Hold dumbbells with arms slightly bent (like hugging a tree)',
-        'Lower the weights in a wide arc until you feel a stretch',
-        'Bring them back together in a controlled motion',
-        'Keep your core engaged to maintain balance on the ball',
-        'Focus on the chest squeeze at the top of the movement',
-      ],
-    ),
-    ChestExercise(
-      name: 'Dumbbell Decline Fly (45°)',
-      videoPath: 'assets/videos/chest/chest_dumbell_decline_fly_(45degree).mp4',
-      description:
-          'Isolates the lower chest muscles with a deep stretch. The decline angle maximizes lower pec activation, perfect for building the lower chest definition.',
-      target: 'Lower Chest',
-      equipment: 'Dumbbells, Decline Bench',
-      difficulty: 'Intermediate',
-      setsReps: '3 sets × 12-15 reps',
-      instructions: [
-        'Secure yourself on a decline bench at 45 degrees',
-        'Hold dumbbells with a slight bend in your elbows',
-        'Lower the weights in a wide arc, feeling the stretch',
-        'Bring them together in a controlled hugging motion',
-        'Squeeze your chest muscles at the top',
-        'Maintain control - don\'t let momentum take over',
-      ],
-    ),
-    ChestExercise(
-      name: 'Cable Standing Fly',
-      videoPath: 'assets/videos/chest/chest_cable_standing_fly.mp4',
-      description:
-          'Provides constant tension throughout the movement. Standing position engages your core and stabilizers, making it a functional chest exercise with continuous muscle activation.',
-      target: 'Chest, Core, Shoulders',
-      equipment: 'Cable Machine',
-      difficulty: 'Intermediate',
-      setsReps: '3 sets × 12-15 reps',
-      instructions: [
-        'Stand between two cable machines with handles at chest height',
-        'Grab the handles with a slight bend in your elbows',
-        'Pull the cables together in front of you in an arc motion',
-        'Squeeze your chest muscles hard at the peak contraction',
-        'Return to the starting position with control',
-        'Keep your core engaged and maintain good posture',
-      ],
-    ),
-    ChestExercise(
-      name: 'Lever Chest Press',
-      videoPath: 'assets/videos/chest/chest_lever_chest_press.mp4',
-      description:
-          'Machine-based exercise that provides stability and safety. Perfect for beginners or when you want to isolate the chest without worrying about balance.',
-      target: 'Chest, Triceps',
-      equipment: 'Chest Press Machine',
-      difficulty: 'Beginner',
-      setsReps: '4 sets × 10-12 reps',
-      instructions: [
-        'Sit in the machine with your back flat against the pad',
-        'Adjust the seat so handles are at chest level',
-        'Press the handles forward until arms are extended',
-        'Control the weight back to the starting position',
-        'Keep your core engaged and maintain proper posture',
-        'Focus on the chest contraction throughout the movement',
-      ],
-    ),
-    ChestExercise(
-      name: 'Lever Peck Deck Fly',
-      videoPath: 'assets/videos/chest/chest_lever_peck_dec_fly.mp4',
-      description:
-          'Machine-based fly movement that isolates the chest muscles. The fixed path ensures proper form and maximum chest activation without stressing the shoulders.',
-      target: 'Chest',
-      equipment: 'Pec Deck Machine',
-      difficulty: 'Beginner',
-      setsReps: '3 sets × 12-15 reps',
-      instructions: [
-        'Sit in the machine with your back flat against the pad',
-        'Place your forearms on the pads with elbows at 90 degrees',
-        'Push the pads together in a controlled motion',
-        'Squeeze your chest muscles hard at the peak',
-        'Return to the starting position slowly',
-        'Focus on the stretch and contraction of your chest',
-      ],
-    ),
-    ChestExercise(
-      name: 'Dumbbell Lying Hammer Press',
-      videoPath: 'assets/videos/chest/chest_dumbell_lying_hamme_press.mp4',
-      description:
-          'Neutral grip variation that reduces shoulder stress. The hammer grip (palms facing each other) targets the chest while being easier on the rotator cuffs.',
-      target: 'Chest, Triceps',
-      equipment: 'Dumbbells, Bench',
-      difficulty: 'Beginner',
-      setsReps: '4 sets × 10-12 reps',
-      instructions: [
-        'Lie on a flat bench holding dumbbells with neutral grip',
-        'Press the dumbbells straight up until arms are extended',
-        'Lower them with control to chest level',
-        'Keep your wrists straight and maintain the neutral grip',
-        'Focus on the chest contraction throughout',
-        'This grip is gentler on the shoulders',
-      ],
-    ),
-  ];
+  // Use centralized data
+  final List<Exercise> chestExercises = ExerciseData.chest;
 
   @override
   Widget build(BuildContext context) {
@@ -355,7 +135,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
     );
   }
 
-  Widget _buildExerciseCard(ChestExercise exercise, int index) {
+  Widget _buildExerciseCard(Exercise exercise, int index) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -532,7 +312,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
     );
   }
 
-  void _showExerciseDetails(BuildContext context, ChestExercise exercise) {
+  void _showExerciseDetails(BuildContext context, Exercise exercise) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,

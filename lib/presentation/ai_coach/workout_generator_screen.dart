@@ -1,14 +1,14 @@
-import 'dart:convert';
+import 'package:fitness_app/data/exercise_data.dart';
+import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fitness_app/presentation/in_app_purchases/premimum_screen.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:math';
 
 class WorkoutGeneratorScreen extends StatefulWidget {
   const WorkoutGeneratorScreen({super.key});
@@ -18,9 +18,7 @@ class WorkoutGeneratorScreen extends StatefulWidget {
 }
 
 class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
-  Gemini? gemini;
   bool _isLoading = false;
-  bool _isKeyMissing = false;
   
   // Weekly Schedule Structure: 
   // [ { "day": "Monday", "focus": "Chest", "exercises": [...] }, ... ]
@@ -34,8 +32,6 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
 
   final List<String> _targets = [
     'Full Body',
-    'Upper Body',
-    'Lower Body',
     'Muscle Build (Hypertrophy)',
     'Strength',
     'Fat Loss'
@@ -44,23 +40,12 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
   final List<String> _equipments = [
     'Gym (Full Equipment)',
     'Home (Dumbbells)',
-    'Bodyweight Only'
   ];
   final List<int> _daysOptions = [3, 4, 5, 6];
 
   @override
   void initState() {
     super.initState();
-    final key = dotenv.env['GEMINI_API_KEY'];
-    if (key == null || key.isEmpty) {
-      _isKeyMissing = true;
-    } else {
-      try {
-        gemini = Gemini.instance;
-      } catch (e) {
-        _isKeyMissing = true;
-      }
-    }
   }
 
 
@@ -71,62 +56,121 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
       return;
     }
 
-    if (gemini == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gemini API Key is missing!')),
-      );
-      return;
-    }
-
     setState(() {
       _isLoading = true;
       _generatedWeek = [];
     });
 
-    // Detailed Prompt for Weekly Schedule
-    final prompt =
-        'Generate a $_daysPerWeek-day weekly fitness schedule for a $_level user focusing on $_target using $_equipment. '
-        'Map the days to Monday, Tuesday, etc. (e.g. Monday: Chest, Tuesday: Back...). '
-        'Return ONLY a valid JSON array. '
-        'Structure: [{"day": "Monday", "focus": "Chest", "exercises": [{"name": "Bench Press", "sets": 3, "reps": 10}, ...]}, ...]. '
-        'Include 4-5 exercises per workout day. Do not include markdown formatting.';
+    // Simulate "Thinking" delay for UX
+    await Future.delayed(const Duration(milliseconds: 1500));
 
-    try {
-      final value = await gemini!.prompt(parts: [Part.text(prompt)]);
-      final response = value?.output ?? '';
-      
-      print("Gemini Raw Response: $response");
+    List<Map<String, dynamic>> plan = [];
 
-      String jsonString = response.replaceAll('```json', '').replaceAll('```', '').trim();
-      final startIndex = jsonString.indexOf('[');
-      final endIndex = jsonString.lastIndexOf(']');
-      if (startIndex != -1 && endIndex != -1) {
-        jsonString = jsonString.substring(startIndex, endIndex + 1);
-      }
-
-      final List<dynamic> decoded = jsonDecode(jsonString);
-      
-      setState(() {
-        _generatedWeek = List<Map<String, dynamic>>.from(decoded);
-        _isLoading = false;
-      });
-      
-    } catch (e) {
-      print("Generation Error: $e");
-      setState(() {
-        _isLoading = false;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to generate. Try again or reduce days.')),
-        );
-      }
+    // Generation Logic
+    if (_daysPerWeek == 3) {
+      // 3 Day Full Body Split
+      plan = [
+        _createDayPlan('Monday', 'Full Body A', _mixAllGroups(5)),
+        _createDayPlan('Wednesday', 'Full Body B', _mixAllGroups(5)),
+        _createDayPlan('Friday', 'Full Body C', _mixAllGroups(5)),
+      ];
+    } else if (_daysPerWeek == 4) {
+      // 4 Day Upper / Lower
+      plan = [
+        _createDayPlan('Monday', 'Upper Body', _getUpperBody(6)),
+        _createDayPlan('Tuesday', 'Lower Body', _getRandomExercises(ExerciseData.legs, 5)),
+        _createDayPlan('Thursday', 'Upper Body', _getUpperBody(6)),
+        _createDayPlan('Friday', 'Lower Body', _getRandomExercises(ExerciseData.legs, 5)),
+      ];
+    } else if (_daysPerWeek == 5) {
+      // 5 Day Bro Split
+      plan = [
+        _createDayPlan('Monday', 'Chest', _getRandomExercises(ExerciseData.chest, 4)),
+        _createDayPlan('Tuesday', 'Back', _getRandomExercises(ExerciseData.back, 4)),
+        _createDayPlan('Wednesday', 'Legs', _getRandomExercises(ExerciseData.legs, 5)),
+        _createDayPlan('Thursday', 'Shoulders', _getRandomExercises(ExerciseData.shoulders, 4)),
+        _createDayPlan('Friday', 'Arms', _getRandomExercises(ExerciseData.arms, 4)),
+      ];
+    } else {
+      // 6 Day PPL
+      plan = [
+        _createDayPlan('Monday', 'Push', _getPush(5)),
+        _createDayPlan('Tuesday', 'Pull', _getPull(5)),
+        _createDayPlan('Wednesday', 'Legs', _getRandomExercises(ExerciseData.legs, 5)),
+        _createDayPlan('Thursday', 'Push', _getPush(5)),
+        _createDayPlan('Friday', 'Pull', _getPull(5)),
+        _createDayPlan('Saturday', 'Legs', _getRandomExercises(ExerciseData.legs, 5)),
+      ];
     }
+
+    setState(() {
+      _generatedWeek = plan;
+      _isLoading = false;
+    });
+  }
+
+  Map<String, dynamic> _createDayPlan(String day, String focus, List<Exercise> exercises) {
+    return {
+      'day': day,
+      'focus': focus,
+      'exercises': exercises.map((e) => {
+        'name': e.name,
+        'sets': 3, // Default sets
+        'reps': e.setsReps.contains('x') ? e.setsReps.split('x').last.trim() : '10-12 reps',
+        'videoPath': e.videoPath,
+        'description': e.description,
+        'target': e.target,
+        'equipment': e.equipment,
+        'difficulty': e.difficulty,
+        'instructions': e.instructions,
+        'setsReps': e.setsReps,
+      }).toList(),
+    };
+  }
+
+  // Helper Randomizers
+  List<Exercise> _getRandomExercises(List<Exercise> source, int count) {
+    if (source.isEmpty) return [];
+    var list = List<Exercise>.from(source)..shuffle();
+    return list.take(min(count, list.length)).toList();
+  }
+
+  List<Exercise> _mixAllGroups(int countPerGroup) {
+    // Full Body: 1 chest, 1 back, 1 legs, 1 shoulder, 1 arms
+    return [
+      ..._getRandomExercises(ExerciseData.chest, 1),
+      ..._getRandomExercises(ExerciseData.back, 1),
+      ..._getRandomExercises(ExerciseData.legs, 1),
+      ..._getRandomExercises(ExerciseData.shoulders, 1),
+      ..._getRandomExercises(ExerciseData.arms, 1),
+    ];
+  }
+
+  List<Exercise> _getUpperBody(int count) {
+    return [
+      ..._getRandomExercises(ExerciseData.chest, 2),
+      ..._getRandomExercises(ExerciseData.back, 2),
+      ..._getRandomExercises(ExerciseData.shoulders, 1),
+      ..._getRandomExercises(ExerciseData.arms, 1),
+    ];
+  }
+  
+  List<Exercise> _getPush(int count) {
+    return [
+      ..._getRandomExercises(ExerciseData.chest, 2),
+      ..._getRandomExercises(ExerciseData.shoulders, 2),
+      ..._getRandomExercises(ExerciseData.arms.where((e) => e.target.contains('Triceps')).toList(), 1),
+    ];
+  }
+
+  List<Exercise> _getPull(int count) {
+    return [
+      ..._getRandomExercises(ExerciseData.back, 3),
+      ..._getRandomExercises(ExerciseData.arms.where((e) => e.target.contains('Biceps')).toList(), 2),
+    ];
   }
 
   bool _isSaving = false;
-
-  // ... (existing code)
 
   Future<void> _saveAllWorkouts() async {
     if (_isSaving) return;
@@ -140,7 +184,6 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
     int count = 0;
 
     try {
-      // Show loading indicator
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -155,9 +198,14 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
           final rawName = exercise['name'] ?? 'Exercise';
           final savedName = '[$dayName] $rawName'; 
 
+          // Try to parse reps
+          String reps = exercise['reps'].toString().replaceAll(RegExp(r'[^0-9]'), '');
+          if (reps.isEmpty) reps = "10";
+          if (reps.length > 2) reps = reps.substring(0,2); // handle "10-12" -> "10"
+
           await provider.addNewWorkout(
             name: savedName,
-            repNumber: int.tryParse(exercise['reps'].toString()) ?? 10,
+            repNumber: int.tryParse(reps) ?? 10,
             setNumber: int.tryParse(exercise['sets'].toString()) ?? 3,
             dateTime: now,
           );
@@ -165,7 +213,6 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
         }
       }
 
-      // Refresh provider so the list is updated immediately
       await provider.fetchAndSetWorkouts();
 
       if (mounted) {
@@ -176,12 +223,10 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        // Optional: Navigate back or clear generated week
-        // setState(() { _generatedWeek = []; }); 
       }
     } catch (e) {
       if (mounted) {
-        Navigator.pop(context); // Pop dialog
+        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error saving: $e')),
         );
@@ -194,8 +239,6 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
       }
     }
   }
-
-  // ...
 
   Widget _buildResultsSection() {
     return Column(
@@ -235,14 +278,11 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_isKeyMissing)
-              _buildErrorBanner(),
-
             _buildSelectionSection(),
             SizedBox(height: 24.h),
             
             ElevatedButton(
-              onPressed: (_isLoading || _isKeyMissing) ? null : _generateWorkout,
+              onPressed: _isLoading ? null : _generateWorkout,
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.primary,
                 padding: EdgeInsets.symmetric(vertical: 16.h),
@@ -273,35 +313,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
       ),
     );
   }
-
-  Widget _buildErrorBanner() {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      margin: EdgeInsets.only(bottom: 20.h),
-      decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.red),
-      ),
-      child: Column(
-        children: [
-          Icon(Icons.warning_amber_rounded, color: Colors.red, size: 40.sp),
-          SizedBox(height: 10.h),
-          Text(
-            'Missing API Key',
-            style: TextStyle(color: Colors.red, fontSize: 18.sp, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 8.h),
-          const Text(
-            'Please add GEMINI_API_KEY to your lib/.env file.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ],
-      ),
-    );
-  }
-
+  
   Widget _buildSelectionSection() {
     return Container(
       padding: EdgeInsets.all(16.w),
@@ -355,7 +367,6 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
     );
   }
 
-
   Widget _buildDayCard(Map<String, dynamic> dayPlan) {
     final exercises = dayPlan['exercises'] as List<dynamic>? ?? [];
     
@@ -376,16 +387,300 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
         ),
         children: exercises.map((e) => ListTile(
           dense: true,
-          leading: Icon(Icons.fitness_center, color: Colors.white54, size: 18.sp),
+          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+          leading: Icon(Icons.play_circle_fill, color: ColorManager.primary, size: 24.sp),
           title: Text(
             e['name'],
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          subtitle: Text(
+            e['description'] ?? '',
+             maxLines: 1,
+             overflow: TextOverflow.ellipsis,
+             style: TextStyle(color: Colors.white54, fontSize: 12.sp),
           ),
           trailing: Text(
             '${e['sets']}x${e['reps']}',
             style: TextStyle(color: ColorManager.textSecondary),
           ),
+          onTap: () {
+            // Reconstruct Exercise object for details view
+            final exerciseObj = Exercise(
+              name: e['name'],
+              videoPath: e['videoPath'],
+              description: e['description'],
+              target: e['target'] ?? 'General',
+              equipment: e['equipment'] ?? 'None',
+              difficulty: e['difficulty'] ?? 'All Levels',
+              instructions: List<String>.from(e['instructions'] ?? []),
+              setsReps: e['setsReps'] ?? '${e['sets']}x${e['reps']}',
+            );
+            _showExerciseDetails(context, exerciseObj);
+          },
         )).toList(),
+      ),
+    );
+  }
+
+  void _showExerciseDetails(BuildContext context, Exercise exercise) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.9,
+        decoration: BoxDecoration(
+          color: ColorManager.black,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+        ),
+        child: Column(
+          children: [
+            // Handle bar
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white30,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Video Player
+                    Container(
+                      height: 300,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: ColorManager.primary.withOpacity(0.3),
+                            blurRadius: 20,
+                            spreadRadius: 5,
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: ExerciseVideoPlayer(
+                          videoPath: exercise.videoPath,
+                          height: 300,
+                          autoPlay: true, // Auto-play in detail view
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 24.h),
+
+                    // Exercise Name
+                    Text(
+                      exercise.name,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+
+                    // Description
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: ColorManager.surface,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Text(
+                        exercise.description,
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 16.sp,
+                          height: 1.6,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20.h),
+
+                    // Info Cards
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildDetailCard(
+                            'Target',
+                            exercise.target,
+                            Icons.center_focus_strong,
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: _buildDetailCard(
+                            'Equipment',
+                            exercise.equipment,
+                            Icons.sports_gymnastics,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 12.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildDetailCard(
+                            'Difficulty',
+                            exercise.difficulty,
+                            Icons.trending_up,
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: _buildDetailCard(
+                            'Sets & Reps',
+                            exercise.setsReps,
+                            Icons.repeat,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 24.h),
+
+                    // Instructions
+                    Text(
+                      'How to Perform',
+                      style: TextStyle(
+                        color: ColorManager.primary,
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+                    ...exercise.instructions.asMap().entries.map((entry) {
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: ColorManager.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: ColorManager.primary.withOpacity(0.2),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: ColorManager.primary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '${entry.key + 1}',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16.sp,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 16.w),
+                            Expanded(
+                              child: Text(
+                                entry.value,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15.sp,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    SizedBox(height: 20.h),
+                  ],
+                ),
+              ),
+            ),
+
+            // Close Button
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorManager.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      'Close',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailCard(String label, String value, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: ColorManager.surface,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(
+          color: ColorManager.primary.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: ColorManager.primary, size: 20.sp),
+              SizedBox(width: 8.w),
+              Text(
+                label,
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12.sp,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            value,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }

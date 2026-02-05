@@ -40,8 +40,8 @@ class _ExploreWidgetState extends State<ExploreWidget>
       },
       {
         'image': ImageManager.postWorkout,
-        'title': StringsManager.workoutRecovery,
-        'description': 'Enhance muscle recovery with post-workout tips.',
+        'title': 'Pain Relief & Mobility',
+        'description': 'Targeted exercises to reduce pain and improve flexibility.',
         'onTap': () => context.push(Routes.recoveryRoute),
       },
       {
