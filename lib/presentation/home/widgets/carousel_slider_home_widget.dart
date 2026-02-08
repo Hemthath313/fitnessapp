@@ -1,6 +1,8 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:fitness_app/presentation/home/widgets/carousel_home_box.dart';
+import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/utils/managers/asset_manager.dart';
+import 'package:provider/provider.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +19,7 @@ class CarouselSliderHomeWidget extends StatelessWidget {
       _CarouselItem(
         image: ImageManager.absWorkout,
         title: StringsManager.sixPackChallenge,
-        route: Routes.absRoute,
+        route: Routes.sixPackChallengeRoute,
       ),
       _CarouselItem(
         image: ImageManager.dumbels,
@@ -27,24 +29,35 @@ class CarouselSliderHomeWidget extends StatelessWidget {
       _CarouselItem(
         image: ImageManager.shoulderWorkout,
         title: StringsManager.exerciseOfWeek,
-        route: Routes.comingSoon,
+        route: Routes.exerciseOfTheWeekRoute,
       ),
     ];
 
-    return CarouselSlider(
-      items: carouselItems.map((item) {
-        return CarouselHomeBox(
-          deviceWidth: deviceWidth,
-          image: item.image,
-          title: item.title,
-          onTap: () => context.push(item.route),
+    return Consumer<SubscriptionProvider>(
+      builder: (context, subProvider, _) {
+        return CarouselSlider(
+          items: carouselItems.map((item) {
+            return CarouselHomeBox(
+              deviceWidth: deviceWidth,
+              image: item.image,
+              title: item.title,
+              onTap: () {
+                if (item.route == Routes.workoutSplitsRoute &&
+                    !subProvider.isPremium) {
+                  context.push(Routes.premiumScreen);
+                } else {
+                  context.push(item.route);
+                }
+              },
+            );
+          }).toList(),
+          options: CarouselOptions(
+            autoPlay: true,
+            enlargeCenterPage: true,
+            viewportFraction: deviceWidth < 400 ? 0.9 : 0.8,
+          ),
         );
-      }).toList(),
-      options: CarouselOptions(
-        autoPlay: true,
-        enlargeCenterPage: true,
-        viewportFraction: deviceWidth < 400 ? 0.9 : 0.8,
-      ),
+      },
     );
   }
 }

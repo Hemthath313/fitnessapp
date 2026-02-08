@@ -65,11 +65,37 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
       final userData = homeProvider.userData;
 
       double storedBMR = userData['bmr'] ?? 0.0;
-      double storedBMI = userData['bmi'] ?? 0.0;
-      int dailyCalories =
-          (storedBMR > 0) ? storedBMR.toInt() : (storedBMI * 30).toInt();
+      double weight = userData['weight'] ?? 70.0;
+      
+      // 1. Calculate Maintenance (TDEE)
+      // If storeBMR is 0, use rough estimate: weight * 33 (avg for active-ish people)
+      int maintenanceCalories = (storedBMR > 0) 
+          ? storedBMR.toInt() 
+          : (weight * 33).toInt();
 
-      dailySummary['calories'] = dailyCalories; // 💥 Replac
+      // 2. Set Bulking Goal (Maintenance + 300 surplus)
+      int goalCalories = maintenanceCalories + 300;
+      if (goalCalories < 1500) goalCalories = 2000; // Safety floor
+
+      // 3. Set Macros
+      // Protein: 2.0g per kg bodyweight
+      int goalProtein = (weight * 2.0).toInt();
+      
+      // Fats: 0.9g per kg bodyweight
+      int goalFats = (weight * 0.9).toInt();
+
+      // Carbs: Remainder of calories / 4
+      // kcal from Protein + Fats = (P * 4) + (F * 9)
+      int consumedByPF = (goalProtein * 4) + (goalFats * 9);
+      int goalCarbs = ((goalCalories - consumedByPF) / 4).toInt();
+      if (goalCarbs < 0) goalCarbs = 100; // Safety
+
+      // Update Local State directly
+      dailySummary['calories'] = goalCalories; 
+      dailySummary['protein'] = goalProtein;
+      dailySummary['carbs'] = goalCarbs;
+      dailySummary['fats'] = goalFats;
+
       _resetRemainingMacros();
     });
 
@@ -203,57 +229,24 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
   }
 
   Widget _buildSummaryCard() {
-    final homeProvider = Provider.of<HomeProvider>(context);
-    final userData = homeProvider.userData;
-
-    double storedBMR = userData['bmr'] ?? 0.0;
-    double storedBMI = userData['bmi'] ?? 0.0;
-
-// Use storedBMI or storedBMR directly to calculate
-    int dailyCalories =
-        (storedBMR > 0) ? storedBMR.toInt() : (storedBMI * 30).toInt();
-    double weight = userData['weight'] ?? 60.0; // fallback weight if not stored
-    int protein = (weight * 2.0).toInt(); // 2g per kg
-    int carbs = (weight * 4.0).toInt(); // 4g per kg
-    int fats = (weight * 1.0).toInt(); // 1g per kg
-
-// Example Macro Calculation
-    return Card(
-      color: ColorManager.black54,
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _progressBar(
-                'Calories', dailyCalories, remainingCalories, Colors.orange),
-          ],
-        ),
-      ),
+    return SummaryCard(
+      totalCalories: dailySummary['calories'] ?? 2500,
+      totalProtein: dailySummary['protein'] ?? 150,
+      totalCarbs: dailySummary['carbs'] ?? 300,
+      totalFats: dailySummary['fats'] ?? 80,
+      remainingCalories: remainingCalories,
+      remainingProtein: remainingProtein,
+      remainingCarbs: remainingCarbs,
+      remainingFats: remainingFats,
     );
   }
 
-  Widget _progressBar(String label, int total, int remaining, Color color) {
-    double progress = (total - remaining) / total;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '$label: ${total - remaining}/$total',
-          style: TextStyle(color: ColorManager.white),
-        ),
-        LinearProgressIndicator(
-            value: progress, color: color, backgroundColor: Colors.grey[300]),
-        const SizedBox(height: 8),
-      ],
-    );
-  }
 
   Widget _buildMealList() {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 500),
       child: ListView.builder(
+        padding: const EdgeInsets.only(bottom: 80),
         key: ValueKey(meals.length),
         itemCount: meals.length + 1, // +1 for custom meal button
         itemBuilder: (context, index) {
@@ -278,7 +271,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
         margin: const EdgeInsets.symmetric(vertical: 6),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: ColorManager.black54,
+          color: ColorManager.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.white24),
         ),
@@ -414,14 +407,46 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
     final meal = meals[index];
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true, // Better for responsiveness with keyboard
       backgroundColor: ColorManager.darkGrey,
       builder: (context) {
-        return MealDetailsSheet(
-          meal: meal,
-          onSwapMeal: () => _openMealLibrary(index),
+        return Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: MealDetailsSheet(
+            meal: meal,
+            onSwapMeal: () => _openMealLibrary(index),
+            onAddFood: (foodName) => _addFoodToMeal(index, foodName),
+          ),
         );
       },
     );
+  }
+
+  void _addFoodToMeal(int mealIndex, String foodName) {
+    setState(() {
+      if (meals[mealIndex]['foods'] == null) {
+        meals[mealIndex]['foods'] = [];
+      }
+      // UI update
+      meals[mealIndex]['foods'].add(foodName);
+    });
+    // Persist
+    // We recreate the 'completedMeals' list to update firestore
+    List<String> completed = [];
+    for (var m in meals.where((x) => x['isCompleted'])) {
+      completed.add(m['name']);
+    }
+    _saveToFirestore(completed);
+    
+    // Refresh the sheet by popping and re-showing? 
+    // Actually setState updates the list, but the BottomSheet holds a reference to the specific 'meal' map.
+    // If the map instance is mutated (which it is), and we call setState, the parent rebuilds.
+    // BUT the modal is on top. We might need to handle state in modal or force refresh.
+    // Since we mutate the map object directly, and if MealDetailsSheet is stateless and rebuilt...
+    // The easiest way is to close and reopen, or use a StatefulWidget for the sheet.
+    // For now, let's keep it simple: the sheet might not update instantly if it's open.
+    Navigator.pop(context); // Close sheet to refresh or to confirm
+    _showMealDetails(mealIndex); // Re-open to show new food
   }
 
   void _openMealLibrary(int mealIndex) {
@@ -430,7 +455,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: ColorManager.darkGrey, // Consistent dark theme
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
@@ -439,7 +464,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
           itemBuilder: (context, libIndex) {
             final meal = mealLibrary[libIndex];
             return ListTile(
-              tileColor: ColorManager.black54, // Matches cards and buttons
+              tileColor: ColorManager.surface, // Matches cards and buttons
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -467,7 +492,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
       meals[mealIndex] = {
         ...newMeal,
         'isCompleted': false,
-        'foods': newMeal['foods'] ?? [], // ✅ Ensure foods are included
+        'foods': newMeal['foods'] != null ? List.from(newMeal['foods']) : [], 
       };
     });
     _updateRemainingMacros();
@@ -509,16 +534,16 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
                 ),
               ),
             ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: ColorManager.limerGreen2,
-        onPressed: _markAllMealsComplete,
-        // icon: const Icon(Icons.check_circle),
-        label: const Text(
-          'Complete All Meals',
-          style:
-              TextStyle(color: ColorManager.black, fontWeight: FontWeight.bold),
-        ),
-      ),
+      // floatingActionButton: FloatingActionButton.extended(
+      //   backgroundColor: ColorManager.limerGreen2,
+      //   onPressed: _markAllMealsComplete,
+      //   // icon: const Icon(Icons.check_circle),
+      //   label: const Text(
+      //     'Complete All Meals',
+      //     style:
+      //         TextStyle(color: ColorManager.black, fontWeight: FontWeight.bold),
+      //   ),
+      // ),
     );
   }
 }

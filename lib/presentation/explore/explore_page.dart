@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fitness_app/presentation/banner_ads/banner_ad_service.dart';
+import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/interstitial_ads/interstitial_ad_service.dart';
+import 'package:provider/provider.dart';
 import 'package:fitness_app/utils/managers/asset_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
@@ -29,22 +31,31 @@ class _ExploreWidgetState extends State<ExploreWidget>
         'title': StringsManager.strengh,
         'description': 'Build strength and endurance with tailored workouts.',
         'onTap': () async {
-          // Show interstitial ad when user taps strength workout
-          await InterstitialAdService.showStrengthWorkoutAd();
+          final sub = Provider.of<SubscriptionProvider>(context, listen: false);
+          if (!sub.isPremium) {
+            await InterstitialAdService.showStrengthWorkoutAd();
+          }
           context.push(Routes.bodypartsPage);
         },
       },
       {
         'image': ImageManager.postWorkout,
-        'title': StringsManager.workoutRecovery,
-        'description': 'Enhance muscle recovery with post-workout tips.',
+        'title': 'Pain Relief & Mobility',
+        'description': 'Targeted exercises to reduce pain and improve flexibility.',
         'onTap': () => context.push(Routes.recoveryRoute),
       },
       {
         'image': ImageManager.dietAndNutrition,
         'title': StringsManager.diet,
         'description': 'Nutritional guidance for better performance.',
-        'onTap': () => context.push(Routes.dietRoute),
+        'onTap': () {
+          final sub = Provider.of<SubscriptionProvider>(context, listen: false);
+          if (sub.isPremium) {
+            context.push(Routes.dietRoute);
+          } else {
+            context.push(Routes.premiumScreen);
+          }
+        },
       },
       {
         'image': ImageManager.cardioWorkout,
@@ -105,7 +116,7 @@ class _ExploreWidgetState extends State<ExploreWidget>
               },
             ),
           ),
-          BannerAdWidget(pageName: 'explore'),
+          PremiumAwareBannerAd(pageName: 'explore'),
         ],
       ),
     );

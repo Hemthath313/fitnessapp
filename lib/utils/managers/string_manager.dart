@@ -38,8 +38,8 @@ class StringsManager {
   static const String heightHint = 'Height';
   static const String weightHint = 'Weight';
   static const String genderHint = 'Gender';
-  static const String genderManHint = 'MAN';
-  static const String genderWomanHint = 'WOMAN';
+  static const String genderManHint = 'Male';
+  static const String genderWomanHint = 'Female';
   static const String fitnessioABtitle = 'Gym Buddy';
   static const String accountSpacer = 'Account';
   static const String generalSpacer = 'General';

@@ -57,6 +57,6 @@ class DefaultFirebaseOptions {
     appId: '1:661343486324:android:4999d1d064591987666c21',
     messagingSenderId: '661343486324',
     projectId: 'tracking-ed1ba',
-    storageBucket: 'tracking-ed1ba.firebasestorage.app',
+    storageBucket: 'tracking-ed1ba.appspot.com',
   );
 }

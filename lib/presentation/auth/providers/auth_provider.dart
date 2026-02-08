@@ -5,8 +5,8 @@ import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
+import 'package:fitness_app/utils/widgets/loading_overlay.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -18,9 +18,21 @@ class AuthProvider with ChangeNotifier {
   bool isLoading = true;
 
   AuthProvider() {
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+    // Load initial auth state immediately
+    _loadInitialAuthState();
+    
+    // Listen to auth state changes
+    FirebaseAuth.instance.authStateChanges().listen((User? user) async {
       _user = user;
       if (_user != null) {
+        // Reload user to get latest data including emailVerified status
+        try {
+          await _user!.reload();
+          _user = FirebaseAuth.instance.currentUser;
+        } catch (e) {
+          // If reload fails, continue with current user
+        }
+        
         FirebaseFirestore.instance
             .collection('users')
             .doc(_user!.uid)
@@ -31,14 +43,47 @@ class AuthProvider with ChangeNotifier {
           _isNewUser =
               _user!.metadata.creationTime == _user!.metadata.lastSignInTime &&
                   !_hasAgeParameter!;
+          isLoading = false;
           notifyListeners();
         });
       } else {
+        // User logged out - clear all state
         _hasAgeParameter = null;
         _isNewUser = null;
+        isLoading = false;
         notifyListeners();
       }
     });
+  }
+
+  Future<void> _loadInitialAuthState() async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        await currentUser.reload();
+        _user = currentUser;
+
+        final docSnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(_user!.uid)
+            .get();
+
+        _hasAgeParameter =
+            docSnapshot.exists && docSnapshot.data()!.containsKey('age');
+        _isNewUser =
+            _user!.metadata.creationTime == _user!.metadata.lastSignInTime &&
+                !_hasAgeParameter!;
+      } else {
+        _user = null;
+        _hasAgeParameter = null;
+        _isNewUser = null;
+      }
+      isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      isLoading = false;
+      notifyListeners();
+    }
   }
   void completeUserData() {
     isDataCompleted = true;
@@ -77,23 +122,15 @@ class AuthProvider with ChangeNotifier {
     required String email,
     required BuildContext context,
   }) async {
-    showDialog(
-        context: context,
-        builder: (_) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(50),
-              child: SpinKitSpinningLines(color: ColorManager.limerGreen2),
-            ),
-          );
-        });
+    LoadingOverlay.show(context, message: 'Sending reset link...');
 
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(
         email: email,
       );
-      // ignore: use_build_context_synchronously
-      Navigator.pop(context);
+      if (context.mounted) {
+        LoadingOverlay.hide(context);
+      }
       // ignore: use_build_context_synchronously
       showDialog(
           context: context,
@@ -152,30 +189,44 @@ class AuthProvider with ChangeNotifier {
     required String password,
     required BuildContext context,
   }) async {
-    showDialog(
-      context: context,
-      builder: (_) {
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(50),
-            child: SpinKitSpinningLines(color: ColorManager.limerGreen2),
-          ),
-        );
-      },
-    );
+    LoadingOverlay.show(context, message: 'Signing in...');
 
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      Navigator.pop(context); // Close loading dialog
+      
+      // Reload user data after successful login
+      await loadUserData();
+      
+      // Hide loading overlay before navigation
+      LoadingOverlay.hide(context);
+      
+      // Wait a frame to ensure overlay is dismissed
+      await Future.delayed(const Duration(milliseconds: 100));
+      
+      // Notify listeners (this may trigger router redirect)
       notifyListeners();
+      
+      // After navigation, ensure overlay is hidden
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        LoadingOverlay.hide(null);
+      });
+      
+      // Double check after a delay
+      Future.delayed(const Duration(milliseconds: 300), () {
+        LoadingOverlay.hide(null);
+      });
     } on FirebaseAuthException catch (e) {
-      Navigator.pop(context); // Close loading dialog
+      if (context.mounted) {
+        LoadingOverlay.hide(context);
+      }
       rethrow; // <--- Forward the error back to LoginPage
     } catch (e) {
-      Navigator.pop(context);
+      if (context.mounted) {
+        LoadingOverlay.hide(context);
+      }
       rethrow; // Handle any unexpected error
     }
   }
@@ -185,15 +236,7 @@ class AuthProvider with ChangeNotifier {
     required String password,
     required BuildContext context,
   }) async {
-    showDialog(
-      context: context,
-      builder: (_) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(50),
-          child: SpinKitSpinningLines(color: ColorManager.limerGreen2),
-        ),
-      ),
-    );
+    LoadingOverlay.show(context, message: 'Creating account...');
 
     try {
       print("registerAndVerifyEmail");
@@ -206,12 +249,16 @@ class AuthProvider with ChangeNotifier {
 
       User? user = credential.user;
       await user?.sendEmailVerification();
-      Navigator.pop(context);
+      if (context.mounted) {
+        LoadingOverlay.hide(context);
+      }
 
       notifyListeners(); // Important: Only notify here; no data storage yet.
       context.push(Routes.emailVerify); // Navigate to email verification page
     } on FirebaseAuthException catch (e) {
-      Navigator.pop(context); // Close the dialog immediately
+      if (context.mounted) {
+        LoadingOverlay.hide(context);
+      }
       rethrow;
     }
   }
@@ -230,6 +277,8 @@ class AuthProvider with ChangeNotifier {
     required double bmi,
     required BuildContext context,
   }) async {
+    LoadingOverlay.show(context, message: 'Saving your data...');
+    
     try {
       User? user = FirebaseAuth.instance.currentUser;
 
@@ -257,64 +306,121 @@ class AuthProvider with ChangeNotifier {
         'thigh': 0.0,
         'calf': 0.0,
       });
+      
+      // Hide loading overlay before navigation
+      if (context.mounted) {
+        LoadingOverlay.hide(context);
+        // Wait a frame to ensure overlay is dismissed
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
       notifyListeners();
     } catch (e) {
+      if (context.mounted) {
+        LoadingOverlay.hide(context);
+      }
       rethrow;
     }
   }
 
   Future<void> signInWithGoogle(BuildContext context) async {
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    if (googleUser == null) return;
+    LoadingOverlay.show(context, message: 'Signing in with Google...');
+    
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        if (context.mounted) {
+          LoadingOverlay.hide(context);
+        }
+        return;
+      }
 
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
 
-    final userCredential =
-        await FirebaseAuth.instance.signInWithCredential(credential);
-    final user = userCredential.user;
+      final userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      final user = userCredential.user;
 
-    // Create Firestore doc if it doesn't exist
-    final userDoc =
-        FirebaseFirestore.instance.collection('users').doc(user!.uid);
-    final docSnapshot = await userDoc.get();
+      // Create Firestore doc if it doesn't exist
+      final userDoc =
+          FirebaseFirestore.instance.collection('users').doc(user!.uid);
+      final docSnapshot = await userDoc.get();
 
-    if (!docSnapshot.exists) {
-      await userDoc.set({
-        'email': user.email,
-        'createdAt': FieldValue.serverTimestamp(),
+      if (!docSnapshot.exists) {
+        await userDoc.set({
+          'email': user.email,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+      
+      // Reload user data after successful Google sign in
+      await loadUserData();
+      
+      // Hide loading overlay before navigation
+      LoadingOverlay.hide(context);
+      
+      // Wait a frame to ensure overlay is dismissed
+      await Future.delayed(const Duration(milliseconds: 100));
+      
+      // Notify listeners (this may trigger router redirect)
+      notifyListeners();
+      
+      // After navigation, ensure overlay is hidden
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        LoadingOverlay.hide(null);
       });
+      
+      // Double check after a delay
+      Future.delayed(const Duration(milliseconds: 300), () {
+        LoadingOverlay.hide(null);
+      });
+    } catch (e) {
+      if (context.mounted) {
+        LoadingOverlay.hide(context);
+      }
+      rethrow;
     }
   }
 
   Future<void> loadUserData() async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-
-    if (currentUser != null) {
-      await currentUser.reload();
-      _user = currentUser;
-
-      final docSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(_user!.uid)
-          .get();
-
-      _hasAgeParameter =
-          docSnapshot.exists && docSnapshot.data()!.containsKey('age');
-      _isNewUser =
-          _user!.metadata.creationTime == _user!.metadata.lastSignInTime &&
-              !_hasAgeParameter!;
-    } else {
-      _user = null;
-      _hasAgeParameter = null;
-      _isNewUser = null;
-    }
-
+    isLoading = true;
     notifyListeners();
+    
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+
+      if (currentUser != null) {
+        // Reload user to get latest data including emailVerified status
+        await currentUser.reload();
+        _user = FirebaseAuth.instance.currentUser;
+
+        if (_user != null) {
+          final docSnapshot = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(_user!.uid)
+              .get();
+
+          _hasAgeParameter =
+              docSnapshot.exists && docSnapshot.data()!.containsKey('age');
+          _isNewUser =
+              _user!.metadata.creationTime == _user!.metadata.lastSignInTime &&
+                  !_hasAgeParameter!;
+        }
+      } else {
+        _user = null;
+        _hasAgeParameter = null;
+        _isNewUser = null;
+      }
+    } catch (e) {
+      // Handle error silently
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 }

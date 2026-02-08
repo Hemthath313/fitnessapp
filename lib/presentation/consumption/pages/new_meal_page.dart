@@ -5,8 +5,9 @@ import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/widgets/lime_green_rounded_button.dart';
-import 'package:fitness_app/utils/widgets/small_text_field_widget.dart';
-import 'package:fitness_app/utils/widgets/text_field_underlined.dart';
+import 'package:fitness_app/utils/widgets/text_field_widget.dart';
+import 'package:fitness_app/utils/widgets/loading_overlay.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -75,11 +76,8 @@ class _NewMealPageState extends State<NewMealPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(
-                  left: PaddingManager.p28,
-                  right: PaddingManager.p28,
-                ),
-                child: TextFieldWidgetUnderLined(
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+                child: TextFieldWidget(
                   controller: _mealTitleController,
                   labelHint: StringsManager.mealNameHint,
                   obscureText: false,
@@ -87,71 +85,94 @@ class _NewMealPageState extends State<NewMealPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(
-                  left: PaddingManager.p28,
-                  right: PaddingManager.p28,
-                  top: PaddingManager.p12,
-                ),
-                child: TextFieldWidgetUnderLined(
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+                child: TextFieldWidget(
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                  ],
                   controller: _mealAmountController,
                   labelHint: StringsManager.mealAmountHint,
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
                   obscureText: false,
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(
-                  left: PaddingManager.p28,
-                  right: PaddingManager.p28,
-                  top: PaddingManager.p56,
-                  bottom: PaddingManager.p12,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SmallTextFieldWidget(
-                      controller: _mealCalloriesController,
-                      labelHint: StringsManager.mealCaloriesHint,
-                      obscureText: false,
-                      keyboardType: TextInputType.number,
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(right: 8.w),
+                        child: TextFieldWidget(
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          controller: _mealCalloriesController,
+                          labelHint: StringsManager.mealCaloriesHint,
+                          obscureText: false,
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
                     ),
-                    SmallTextFieldWidget(
-                      controller: _mealFatsController,
-                      labelHint: StringsManager.mealFatsHint,
-                      keyboardType: TextInputType.number,
-                      obscureText: false,
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 8.w),
+                        child: TextFieldWidget(
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                          ],
+                          controller: _mealFatsController,
+                          labelHint: StringsManager.mealFatsHint,
+                          keyboardType: TextInputType.numberWithOptions(decimal: true),
+                          obscureText: false,
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(
-                  left: PaddingManager.p28,
-                  right: PaddingManager.p28,
-                  bottom: PaddingManager.p28,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SmallTextFieldWidget(
-                      controller: _mealCarbsController,
-                      labelHint: StringsManager.mealCarbsHint,
-                      keyboardType: TextInputType.number,
-                      obscureText: false,
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(right: 8.w),
+                        child: TextFieldWidget(
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          controller: _mealCarbsController,
+                          labelHint: StringsManager.mealCarbsHint,
+                          keyboardType: TextInputType.number,
+                          obscureText: false,
+                        ),
+                      ),
                     ),
-                    SmallTextFieldWidget(
-                      controller: _mealProteinsController,
-                      labelHint: StringsManager.mealProteinsHint,
-                      keyboardType: TextInputType.number,
-                      obscureText: false,
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 8.w),
+                        child: TextFieldWidget(
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                          ],
+                          controller: _mealProteinsController,
+                          labelHint: StringsManager.mealProteinsHint,
+                          keyboardType: TextInputType.numberWithOptions(decimal: true),
+                          obscureText: false,
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
               LimeGreenRoundedButtonWidget(
-                onTap: () {
+                onTap: () async {
+                  LoadingOverlay.show(context, message: 'Adding meal...');
                   try {
-                    consumptionProvider.addNewMeal(
+                    await consumptionProvider.addNewMeal(
                       title: _mealTitleController.text,
                       amount: double.parse(_mealAmountController.text),
                       calories: double.parse(_mealCalloriesController.text),
@@ -160,8 +181,14 @@ class _NewMealPageState extends State<NewMealPage> {
                       proteins: double.parse(_mealProteinsController.text),
                       dateTime: DateTime.now(),
                     );
-                    Navigator.of(context).pop();
+                    if (context.mounted) {
+                      LoadingOverlay.hide(context);
+                      Navigator.of(context).pop();
+                    }
                   } catch (e) {
+                    if (context.mounted) {
+                      LoadingOverlay.hide(context);
+                    }
                     rethrow;
                   }
                 },

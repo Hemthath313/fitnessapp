@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/presentation/diet_nutrition/meals/meal_card.dart';
 import 'package:fitness_app/presentation/diet_nutrition/meals/meal_details.dart';
+import 'package:fitness_app/presentation/diet_nutrition/summary_card.dart';
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
@@ -63,11 +64,34 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
       final userData = homeProvider.userData;
 
       double storedBMR = userData['bmr'] ?? 0.0;
-      double storedBMI = userData['bmi'] ?? 0.0;
-      int dailyCalories =
-          (storedBMR > 0) ? storedBMR.toInt() : (storedBMI * 30).toInt();
+      double weight = userData['weight'] ?? 70.0;
 
-      dailySummary['calories'] = dailyCalories; // 💥 Replac
+      // 1. Calculate Maintenance (TDEE)
+      int maintenanceCalories = (storedBMR > 0) 
+          ? storedBMR.toInt() 
+          : (weight * 33).toInt();
+
+      // 2. Set Cutting Goal (Maintenance - 500 deficit)
+      int goalCalories = maintenanceCalories - 500;
+      if (goalCalories < 1200) goalCalories = 1200; // Safety floor
+
+      // 3. Set Macros for Cutting (High Protein to spare muscle)
+      // Protein: 2.2g per kg
+      int goalProtein = (weight * 2.2).toInt();
+      
+      // Fats: 0.8g per kg
+      int goalFats = (weight * 0.8).toInt();
+
+      // Carbs: Remainder
+      int consumedByPF = (goalProtein * 4) + (goalFats * 9);
+      int goalCarbs = ((goalCalories - consumedByPF) / 4).toInt();
+      if (goalCarbs < 0) goalCarbs = 50; // Safety
+
+      dailySummary['calories'] = goalCalories; 
+      dailySummary['protein'] = goalProtein;
+      dailySummary['carbs'] = goalCarbs;
+      dailySummary['fats'] = goalFats;
+
       _resetRemainingMacros();
     });
 
@@ -200,50 +224,15 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
   }
 
   Widget _buildSummaryCard() {
-    final homeProvider = Provider.of<HomeProvider>(context);
-    final userData = homeProvider.userData;
-
-    double storedBMR = userData['bmr'] ?? 0.0;
-    double storedBMI = userData['bmi'] ?? 0.0;
-
-// Use storedBMI or storedBMR directly to calculate
-    int dailyCalories =
-        (storedBMR > 0) ? storedBMR.toInt() : (storedBMI * 30).toInt();
-    double weight = userData['weight'] ?? 60.0; // fallback weight if not stored
-    int protein = (weight * 2.0).toInt(); // 2g per kg
-    int carbs = (weight * 4.0).toInt(); // 4g per kg
-    int fats = (weight * 1.0).toInt(); // 1g per kg
-
-// Example Macro Calculation
-    return Card(
-      color: ColorManager.black54,
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _progressBar(
-                'Calories', dailyCalories, remainingCalories, Colors.orange),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _progressBar(String label, int total, int remaining, Color color) {
-    double progress = (total - remaining) / total;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '$label: ${total - remaining}/$total',
-          style: TextStyle(color: ColorManager.white),
-        ),
-        LinearProgressIndicator(
-            value: progress, color: color, backgroundColor: Colors.grey[300]),
-        const SizedBox(height: 8),
-      ],
+    return SummaryCard(
+      totalCalories: dailySummary['calories'] ?? 2000,
+      totalProtein: dailySummary['protein'] ?? 150,
+      totalCarbs: dailySummary['carbs'] ?? 200,
+      totalFats: dailySummary['fats'] ?? 60,
+      remainingCalories: remainingCalories,
+      remainingProtein: remainingProtein,
+      remainingCarbs: remainingCarbs,
+      remainingFats: remainingFats,
     );
   }
 
@@ -251,6 +240,7 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 500),
       child: ListView.builder(
+        padding: const EdgeInsets.only(bottom: 80),
         key: ValueKey(meals.length),
         itemCount: meals.length + 1, // +1 for custom meal button
         itemBuilder: (context, index) {
@@ -275,7 +265,7 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
         margin: const EdgeInsets.symmetric(vertical: 6),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: ColorManager.black54,
+          color: ColorManager.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.white24),
         ),
@@ -410,14 +400,36 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
     final meal = meals[index];
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: ColorManager.darkGrey,
       builder: (context) {
-        return MealDetailsSheet(
-          meal: meal,
-          onSwapMeal: () => _openMealLibrary(index),
+        return Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: MealDetailsSheet(
+            meal: meal,
+            onSwapMeal: () => _openMealLibrary(index),
+            onAddFood: (foodName) => _addFoodToMeal(index, foodName),
+          ),
         );
       },
     );
+  }
+
+  void _addFoodToMeal(int mealIndex, String foodName) {
+    setState(() {
+      if (meals[mealIndex]['foods'] == null) {
+        meals[mealIndex]['foods'] = [];
+      }
+      meals[mealIndex]['foods'].add(foodName);
+    });
+    List<String> completed = [];
+    for (var m in meals.where((x) => x['isCompleted'])) {
+      completed.add(m['name']);
+    }
+    _saveToFirestore(completed);
+    
+    Navigator.pop(context); 
+    _showMealDetails(mealIndex); 
   }
 
   void _openMealLibrary(int mealIndex) {
@@ -426,7 +438,7 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: ColorManager.darkGrey, // Consistent dark theme
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
@@ -435,7 +447,7 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
           itemBuilder: (context, libIndex) {
             final meal = mealLibrary[libIndex];
             return ListTile(
-              tileColor: ColorManager.black54, // Matches cards and buttons
+              tileColor: ColorManager.surface, // Matches cards and buttons
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -463,7 +475,7 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
       meals[mealIndex] = {
         ...newMeal,
         'isCompleted': false,
-        'foods': newMeal['foods'] ?? [], // ✅ Ensure foods are included
+        'foods': newMeal['foods'] != null ? List.from(newMeal['foods']) : [], 
       };
     });
     _updateRemainingMacros();

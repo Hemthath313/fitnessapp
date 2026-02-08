@@ -98,7 +98,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
             ),
           ),
-          BannerAdWidget(pageName: 'settings'),
+          PremiumAwareBannerAd(pageName: 'settings'),
         ],
       ),
     );

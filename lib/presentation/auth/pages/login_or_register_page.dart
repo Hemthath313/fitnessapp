@@ -2,15 +2,11 @@ import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
 import 'package:fitness_app/presentation/auth/widgets/login_or_register_view.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
-import 'package:fitness_app/utils/managers/style_manager.dart';
-import 'package:fitness_app/utils/managers/value_manager.dart';
-import 'package:fitness_app/utils/router/router.dart';
 import 'package:fitness_app/utils/widgets/custom_google_button.dart';
-import 'package:fitness_app/utils/widgets/lime_green_rounded_button.dart';
+import 'package:fitness_app/utils/widgets/loading_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 enum AuthMode { signUp, signIn }
@@ -31,6 +27,16 @@ class _LoginPageState extends State<LoginPage> {
   AuthMode _authMode = AuthMode.signIn;
 
   @override
+  void initState() {
+    super.initState();
+    // Ensure any lingering overlays are dismissed when login page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      LoadingOverlay.hide(null);
+      LoadingOverlay.forceHide();
+    });
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -49,7 +55,18 @@ class _LoginPageState extends State<LoginPage> {
 
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
+      SnackBar(
+        content: Text(
+          message,
+          style: TextStyle(fontSize: 14.sp),
+        ),
+        backgroundColor: ColorManager.error,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        margin: EdgeInsets.all(16.w),
+      ),
     );
   }
 
@@ -128,80 +145,239 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
+    final isLoading = authProvider.isLoading;
 
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
-      body: SafeArea(
-        bottom: true,
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.only(top: PaddingManager.p8),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: PaddingManager.p4),
-                  child: SizedBox(
-                    width: SizeManager.s200.w,
-                    height: SizeManager.s200.h,
+      backgroundColor: ColorManager.background,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              ColorManager.background,
+              ColorManager.backgroundDark,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          bottom: true,
+          top: true,
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(height: 50.h),
+                  
+                  // Logo/Header Section with attractive design
+                  Column(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(20.w),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              ColorManager.primary.withOpacity(0.2),
+                              ColorManager.secondary.withOpacity(0.1),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.fitness_center,
+                          size: 56.sp,
+                          color: ColorManager.primary,
+                        ),
+                      ),
+                      SizedBox(height: 24.h),
+                      Text(
+                        isLoginView ? 'Welcome Back!' : 'Create Account',
+                        style: TextStyle(
+                          color: ColorManager.textPrimary,
+                          fontSize: 32.sp,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      SizedBox(height: 12.h),
+                      Text(
+                        isLoginView
+                            ? 'Sign in to continue your fitness journey'
+                            : 'Start your fitness journey today',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: ColorManager.textSecondary,
+                          fontSize: 15.sp,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                
+                SizedBox(height: 48.h),
+                
+                // Input Fields
                 LoginOrRegisterView(
                   emailController: _emailController,
                   passwordController: _passwordController,
                   isRegisterView: isRegisterView,
                   repeatPasswordController: _repeatPasswordController,
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(top: PaddingManager.p2),
-                  child: LimeGreenRoundedButtonWidget(
-                    onTap: () => _handleAuthAction(authProvider),
-                    title: isLoginView
-                        ? StringsManager.signIn
-                        : StringsManager.signUp,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: PaddingManager.p16,
-                    vertical: PaddingManager.p12,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        isLoginView
-                            ? StringsManager.dontHaveAcc
-                            : StringsManager.haveAcc,
-                        style: StyleManager.loginPageSubTextTextStyle,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: PaddingManager.p4),
-                        child: GestureDetector(
-                          onTap: _switchAuthMode,
-                          child: Text(
-                            isLoginView
-                                ? StringsManager.signUp
-                                : StringsManager.signIn,
-                            style: TextStyle(
-                                color: ColorManager.limerGreen2,
-                                fontWeight: FontWeight.w500),
-                          ),
-                        ),
+                
+                SizedBox(height: 28.h),
+                
+                // Sign In/Up Button with gradient
+                Container(
+                  height: 56.h,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        ColorManager.primary,
+                        ColorManager.primaryDark,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: ColorManager.primary.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: Offset(0, 4.h),
                       ),
                     ],
                   ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: isLoading ? null : () => _handleAuthAction(authProvider),
+                      borderRadius: BorderRadius.circular(16.r),
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: isLoading
+                            ? SizedBox(
+                                height: 24.h,
+                                width: 24.w,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                            : Text(
+                                isLoginView
+                                    ? StringsManager.signIn
+                                    : StringsManager.signUp,
+                                style: TextStyle(
+                                  fontSize: 17.sp,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.8,
+                                  color: Colors.black,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: PaddingManager.p4),
-                  child: CustomGoogleSignInButton(onTap: () async {
-                    await authProvider.signInWithGoogle(context);
-                  }),
+                
+                SizedBox(height: 24.h),
+                
+                // Divider with better styling
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 1,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.transparent,
+                              ColorManager.textTertiary.withOpacity(0.2),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      child: Text(
+                        'OR',
+                        style: TextStyle(
+                          color: ColorManager.textTertiary,
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        height: 1,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              ColorManager.textTertiary.withOpacity(0.2),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+                
+                SizedBox(height: 24.h),
+                
+                // Google Sign In Button
+                CustomGoogleSignInButton(
+                  onTap: isLoading
+                      ? () {}
+                      : () async {
+                          await authProvider.signInWithGoogle(context);
+                        },
+                ),
+                
+                SizedBox(height: 24.h),
+                
+                // Switch Auth Mode
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      isLoginView
+                          ? StringsManager.dontHaveAcc
+                          : StringsManager.haveAcc,
+                      style: TextStyle(
+                        color: ColorManager.textSecondary,
+                        fontSize: 14.sp,
+                      ),
+                    ),
+                    SizedBox(width: 4.w),
+                    GestureDetector(
+                      onTap: _switchAuthMode,
+                      child: Text(
+                        isLoginView
+                            ? StringsManager.signUp
+                            : StringsManager.signIn,
+                        style: TextStyle(
+                          color: ColorManager.primary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                
+                SizedBox(height: 32.h),
               ],
             ).animate().fadeIn(duration: 500.ms),
           ),
+        ),
         ),
       ),
     );

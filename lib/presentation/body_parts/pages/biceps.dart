@@ -1,10 +1,29 @@
-import 'dart:developer'; // For logging
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:dartz/dartz.dart' as ConnectivityResult;
-import 'package:fitness_app/services/rapid_api_services.dart';
+import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+
+// Custom biceps exercise data with descriptions
+class BicepsExercise {
+  final String name;
+  final String videoPath;
+  final String description;
+  final String target;
+  final String equipment;
+  final List<String> instructions;
+  final String difficulty;
+  final String setsReps;
+
+  BicepsExercise({
+    required this.name,
+    required this.videoPath,
+    required this.description,
+    required this.target,
+    required this.equipment,
+    required this.instructions,
+    required this.difficulty,
+    required this.setsReps,
+  });
+}
 
 class BicepsExercisesPage extends StatefulWidget {
   const BicepsExercisesPage({super.key});
@@ -14,190 +33,800 @@ class BicepsExercisesPage extends StatefulWidget {
 }
 
 class _BicepsExercisesPageState extends State<BicepsExercisesPage> {
-  final RapidApiService _apiService = RapidApiService();
-  List<dynamic> exercises = [];
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    fetchExercises();
-  }
-
-  Future<void> fetchExercises() async {
-    setState(() => isLoading = true);
-
-    try {
-      final connectivityResult = await Connectivity().checkConnectivity();
-      if (connectivityResult == ConnectivityResult.none) {
-        log('No internet connection.');
-        Fluttertoast.showToast(
-          msg: "Please check your internet connection",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.TOP,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-        );
-        setState(() => isLoading = false);
-        return;
-      }
-
-      log('Fetching biceps exercises from API...');
-      final data = await _apiService.getTargetWorkoutData('biceps', {});
-      log('API response: $data');
-
-      setState(() {
-        exercises = data;
-        isLoading = false;
-      });
-    } catch (e) {
-      log('Error fetching exercises: $e');
-      setState(() => isLoading = false);
-
-      Fluttertoast.showToast(
-        msg: "No internet connection. Please try again.",
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
-    }
-  }
+  // Only show exercises that have local videos
+  final List<BicepsExercise> bicepsExercises = [
+    BicepsExercise(
+      name: 'Barbell Curl',
+      videoPath: 'assets/videos/biceps/biceps_barbell_curl.mp4',
+      description:
+          'The classic biceps builder. This fundamental exercise targets both biceps heads effectively, building overall arm mass and strength. Perfect for developing peak and width.',
+      target: 'Biceps, Forearms',
+      equipment: 'Barbell',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 8-12 reps',
+      instructions: [
+        'Stand with feet shoulder-width apart, holding a barbell with an underhand grip',
+        'Keep your elbows close to your torso and your upper arms stationary',
+        'Curl the barbell up by contracting your biceps until the bar is at shoulder level',
+        'Squeeze your biceps hard at the top of the movement',
+        'Slowly lower the barbell back to the starting position',
+        'Keep your core tight and avoid swinging your body',
+      ],
+    ),
+    BicepsExercise(
+      name: 'EZ Barbell Biceps Curl',
+      videoPath: 'assets/videos/biceps/biceps_ez_barbell_biceps_curl.mp4',
+      description:
+          'The angled grip reduces wrist strain while still providing excellent biceps activation. Ideal for those with wrist issues or looking for variety in their biceps training.',
+      target: 'Biceps, Forearms',
+      equipment: 'EZ Barbell',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 8-12 reps',
+      instructions: [
+        'Stand holding an EZ bar with an underhand grip on the angled handles',
+        'Keep your elbows stationary and close to your body',
+        'Curl the bar up by contracting your biceps',
+        'Pause at the top and squeeze your biceps',
+        'Lower the weight slowly with control',
+        'Maintain proper form throughout the movement',
+      ],
+    ),
+    BicepsExercise(
+      name: 'Barbell Drag Curl',
+      videoPath: 'assets/videos/biceps/biceps_barbell_drag_curl.mp4',
+      description:
+          'Advanced variation that keeps constant tension on the biceps. By dragging the bar close to your body, you eliminate momentum and maximize muscle activation.',
+      target: 'Biceps',
+      equipment: 'Barbell',
+      difficulty: 'Advanced',
+      setsReps: '3 sets × 10-12 reps',
+      instructions: [
+        'Stand holding a barbell with an underhand grip',
+        'Keep the bar close to your body throughout the movement',
+        'Drag the bar up your torso by flexing your biceps',
+        'Keep your elbows back and stationary',
+        'Focus on the biceps contraction without swinging',
+        'Lower the bar slowly along the same path',
+      ],
+    ),
+    BicepsExercise(
+      name: 'Barbell Prone Incline Curl',
+      videoPath: 'assets/videos/biceps/biceps_barbell_prone_incline_curl.mp4',
+      description:
+          'Performed on an incline bench, this variation provides a deep stretch and eliminates cheating. The angle targets the long head of the biceps for peak development.',
+      target: 'Biceps (Long Head)',
+      equipment: 'Barbell, Incline Bench',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 10-12 reps',
+      instructions: [
+        'Set an incline bench to 45-60 degrees',
+        'Lie face down on the bench with arms hanging down',
+        'Hold the barbell with an underhand grip',
+        'Curl the bar up by flexing your biceps',
+        'Squeeze at the top and feel the stretch at the bottom',
+        'Control the negative portion of the movement',
+      ],
+    ),
+    BicepsExercise(
+      name: 'Dumbbell Biceps Curl',
+      videoPath: 'assets/videos/biceps/biceps_dumbell_biceps_curl.mp4',
+      description:
+          'Allows independent arm movement, helping correct muscle imbalances. Each arm works independently, ensuring balanced biceps development and improved coordination.',
+      target: 'Biceps, Forearms',
+      equipment: 'Dumbbells',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 10-12 reps',
+      instructions: [
+        'Stand holding dumbbells at your sides with palms facing forward',
+        'Keep your elbows close to your torso and upper arms stationary',
+        'Curl the weights up by contracting your biceps',
+        'Rotate your wrists slightly outward as you curl',
+        'Squeeze your biceps at the top',
+        'Lower the dumbbells slowly with control',
+      ],
+    ),
+    BicepsExercise(
+      name: 'Dumbbell Alternative Biceps Curl',
+      videoPath: 'assets/videos/biceps/biceps_dumbell_alternative_biceps_curl.mp4',
+      description:
+          'Alternating arm movement allows for better focus on each bicep. This unilateral approach helps identify and correct strength imbalances while maintaining intensity.',
+      target: 'Biceps, Forearms',
+      equipment: 'Dumbbells',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 10-12 reps per arm',
+      instructions: [
+        'Stand holding dumbbells at your sides',
+        'Curl one dumbbell up while keeping the other arm stationary',
+        'Lower the first dumbbell as you curl the other',
+        'Alternate arms in a controlled, rhythmic motion',
+        'Focus on the contraction in each arm',
+        'Keep your core engaged and avoid swinging',
+      ],
+    ),
+    BicepsExercise(
+      name: 'Dumbbell Alternative Seated Curl',
+      videoPath: 'assets/videos/biceps/biceps_dumbell_alternative_seated_curl.mp4',
+      description:
+          'Seated position eliminates momentum and body swing. This strict form ensures maximum biceps isolation and is perfect for focusing on muscle contraction.',
+      target: 'Biceps, Forearms',
+      equipment: 'Dumbbells, Bench',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 10-12 reps per arm',
+      instructions: [
+        'Sit on a bench with back support, holding dumbbells at your sides',
+        'Keep your feet flat on the floor and back against the pad',
+        'Alternate curling each dumbbell up',
+        'Focus on strict form without using momentum',
+        'Squeeze each bicep at the top of the curl',
+        'Lower each weight slowly and with control',
+      ],
+    ),
+    BicepsExercise(
+      name: 'Dumbbell Concentration Curl',
+      videoPath: 'assets/videos/biceps/biceps_dumbell_concentration_curl.mp4',
+      description:
+          'The ultimate biceps isolation exercise. Sitting and bracing your arm eliminates all momentum, forcing pure biceps contraction. Excellent for peak development.',
+      target: 'Biceps',
+      equipment: 'Dumbbell, Bench',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 10-12 reps per arm',
+      instructions: [
+        'Sit on a bench with legs spread apart',
+        'Rest your elbow on the inside of your thigh',
+        'Hold a dumbbell with an underhand grip',
+        'Curl the weight up by flexing only your bicep',
+        'Squeeze hard at the top of the movement',
+        'Lower slowly and feel the stretch',
+      ],
+    ),
+    BicepsExercise(
+      name: 'Dumbbell Prone Incline Curl',
+      videoPath: 'assets/videos/biceps/biceps_dumbell_prone_incline_curl.mp4',
+      description:
+          'Lying face down on an incline bench provides a unique angle that stretches the biceps deeply. This position targets the long head for superior peak development.',
+      target: 'Biceps (Long Head)',
+      equipment: 'Dumbbells, Incline Bench',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 10-12 reps',
+      instructions: [
+        'Set an incline bench to 45-60 degrees',
+        'Lie face down with arms hanging down',
+        'Hold dumbbells with an underhand grip',
+        'Curl both dumbbells up simultaneously',
+        'Feel the deep stretch at the bottom',
+        'Squeeze your biceps at the top',
+      ],
+    ),
+    BicepsExercise(
+      name: 'Dumbbell Seated Preacher Curl',
+      videoPath: 'assets/videos/biceps/biceps_dumbell_seated_preacher_curl.mp4',
+      description:
+          'The preacher bench provides support and eliminates cheating. This strict movement ensures maximum biceps activation and is excellent for building peak and definition.',
+      target: 'Biceps',
+      equipment: 'Dumbbell, Preacher Bench',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 10-12 reps per arm',
+      instructions: [
+        'Sit at a preacher bench with your arm resting on the pad',
+        'Hold a dumbbell with an underhand grip',
+        'Curl the weight up by flexing your bicep',
+        'Keep your arm fully supported on the pad',
+        'Squeeze hard at the top',
+        'Lower slowly and feel the stretch',
+      ],
+    ),
+    BicepsExercise(
+      name: 'Dumbbell Crossbody Hammer Curl',
+      videoPath: 'assets/videos/biceps/biceps_dumbell_crossbody_hammer_curl.mp4',
+      description:
+          'Neutral grip variation that targets the brachialis and brachioradialis. The crossbody motion adds a unique angle, building arm thickness and width.',
+      target: 'Brachialis, Brachioradialis, Biceps',
+      equipment: 'Dumbbells',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 10-12 reps per arm',
+      instructions: [
+        'Stand holding dumbbells with a neutral grip (palms facing each other)',
+        'Curl one dumbbell across your body toward the opposite shoulder',
+        'Focus on the brachialis contraction',
+        'Lower slowly and repeat with the other arm',
+        'Alternate arms in a controlled motion',
+        'Keep your core engaged throughout',
+      ],
+    ),
+    BicepsExercise(
+      name: 'Cable One Arm Curl',
+      videoPath: 'assets/videos/biceps/biceps_cable_one_arm_curl.mp4',
+      description:
+          'Cable provides constant tension throughout the entire range of motion. The one-arm approach allows for focused concentration and helps correct imbalances.',
+      target: 'Biceps, Forearms',
+      equipment: 'Cable Machine',
+      difficulty: 'Beginner',
+      setsReps: '3 sets × 10-12 reps per arm',
+      instructions: [
+        'Stand facing a cable machine with a handle attached at the bottom',
+        'Grab the handle with an underhand grip',
+        'Keep your elbow stationary and close to your body',
+        'Curl the handle up by contracting your bicep',
+        'Feel the constant tension from the cable',
+        'Lower slowly and repeat with the other arm',
+      ],
+    ),
+    BicepsExercise(
+      name: 'Cable Standing Inner Curl',
+      videoPath: 'assets/videos/biceps/biceps_cable_standing_inner_curl.mp4',
+      description:
+          'The inner grip targets the short head of the biceps. Cable resistance provides constant tension, maximizing muscle activation throughout the entire movement.',
+      target: 'Biceps (Short Head)',
+      equipment: 'Cable Machine',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 12-15 reps',
+      instructions: [
+        'Stand between two cable machines with handles at the bottom',
+        'Grab both handles with an underhand grip',
+        'Keep your elbows stationary and close to your body',
+        'Curl both handles up simultaneously',
+        'Focus on squeezing your biceps at the top',
+        'Lower slowly and maintain constant tension',
+      ],
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorManager.darkGrey,
-      appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
-        backgroundColor: ColorManager.darkGrey,
-        title: Text(
-          'Biceps Exercises',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : exercises.isEmpty
-              ? Center(
-                  child: Text('No exercises found.',
-                      style: TextStyle(color: Colors.white)))
-              : ListView.builder(
-                  itemCount: exercises.length,
-                  itemBuilder: (context, index) {
-                    final exercise = exercises[index];
-                    return Card(
-                      color: ColorManager.black54,
-                      margin: EdgeInsets.all(12.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
+      body: CustomScrollView(
+        slivers: [
+          // Beautiful App Bar with gradient
+          SliverAppBar(
+            expandedHeight: 200.0,
+            floating: false,
+            pinned: true,
+            backgroundColor: ColorManager.black,
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                'Biceps Workouts',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
+              ),
+              centerTitle: true,
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      ColorManager.black,
+                      ColorManager.darkGrey,
+                      ColorManager.black,
+                    ],
+                  ),
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.fitness_center,
+                    size: 80,
+                    color: ColorManager.limerGreen2.withOpacity(0.3),
+                  ),
+                ),
+              ),
+            ),
+            iconTheme: IconThemeData(color: Colors.white),
+          ),
+
+          // Header Section
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Build Powerful Biceps',
+                    style: TextStyle(
+                      color: ColorManager.limerGreen2,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    '${bicepsExercises.length} premium video workouts',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Container(
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: ColorManager.surface,
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                        color: ColorManager.limerGreen2.withOpacity(0.3),
+                        width: 1,
                       ),
-                      elevation: 4,
-                      child: ListTile(
-                        contentPadding: EdgeInsets.all(10),
-                        leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.network(
-                            exercise['gifUrl'],
-                            width: 80,
-                            height: 80,
-                            fit: BoxFit.cover,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          color: ColorManager.limerGreen2,
+                          size: 24,
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'All exercises include detailed video demonstrations and step-by-step instructions.',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
                           ),
                         ),
-                        title: Text(
-                          exercise['name']
-                              .toString()
-                              .split(' ')
-                              .map((word) =>
-                                  word[0].toUpperCase() + word.substring(1))
-                              .join(' '),
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, color: Colors.white),
-                        ),
-                        subtitle: Text(
-                          'Equipment: ${exercise['equipment']}',
-                          style: TextStyle(fontSize: 12, color: Colors.white70),
-                        ),
-                        onTap: () => showExerciseDetails(context, exercise),
-                      ),
-                    );
-                  },
-                ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Exercises List
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final exercise = bicepsExercises[index];
+                return _buildExerciseCard(exercise, index);
+              },
+              childCount: bicepsExercises.length,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  void showExerciseDetails(BuildContext context, dynamic exercise) {
+  Widget _buildExerciseCard(BicepsExercise exercise, int index) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: ColorManager.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: ColorManager.limerGreen2.withOpacity(0.1),
+            blurRadius: 10,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _showExerciseDetails(context, exercise),
+          borderRadius: BorderRadius.circular(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Video Preview
+              ClipRRect(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                child: Container(
+                  height: 220,
+                  width: double.infinity,
+                  color: ColorManager.black,
+                  child: Stack(
+                    children: [
+                      ExerciseVideoPlayer(
+                        videoPath: exercise.videoPath,
+                        height: 220,
+                        width: double.infinity,
+                      ),
+                      // Play button overlay
+                      Center(
+                        child: Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.black54,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.play_arrow,
+                            color: ColorManager.limerGreen2,
+                            size: 40,
+                          ),
+                        ),
+                      ),
+                      // Difficulty badge
+                      Positioned(
+                        top: 12,
+                        right: 12,
+                        child: Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: ColorManager.limerGreen2.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            exercise.difficulty,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Exercise Info
+              Padding(
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Exercise Name
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            exercise.name,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          color: ColorManager.limerGreen2,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 12),
+
+                    // Description
+                    Text(
+                      exercise.description,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                        height: 1.5,
+                      ),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 16),
+
+                    // Target & Equipment
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildInfoChip(
+                            Icons.center_focus_strong,
+                            exercise.target,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: _buildInfoChip(
+                            Icons.sports_gymnastics,
+                            exercise.equipment,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(IconData icon, String text) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: ColorManager.black87,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: ColorManager.limerGreen2.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: ColorManager.limerGreen2, size: 16),
+          SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 12,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showExerciseDetails(BuildContext context, BicepsExercise exercise) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Padding(
-        padding: EdgeInsets.all(16.0),
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.9,
+        decoration: BoxDecoration(
+          color: ColorManager.black,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  exercise['gifUrl'],
-                  height: 250,
-                  fit: BoxFit.cover,
+            // Handle bar
+            Container(
+              margin: EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white30,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Video Player
+                    Container(
+                      height: 300,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: ColorManager.limerGreen2.withOpacity(0.3),
+                            blurRadius: 20,
+                            spreadRadius: 5,
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: ExerciseVideoPlayer(
+                          videoPath: exercise.videoPath,
+                          height: 300,
+                          autoPlay: true, // Auto-play in detail view
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 24),
+
+                    // Exercise Name
+                    Text(
+                      exercise.name,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+
+                    // Description
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: ColorManager.surface,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Text(
+                        exercise.description,
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 16,
+                          height: 1.6,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+
+                    // Info Cards
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildDetailCard(
+                            'Target',
+                            exercise.target,
+                            Icons.center_focus_strong,
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: _buildDetailCard(
+                            'Equipment',
+                            exercise.equipment,
+                            Icons.sports_gymnastics,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildDetailCard(
+                            'Difficulty',
+                            exercise.difficulty,
+                            Icons.trending_up,
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: _buildDetailCard(
+                            'Sets & Reps',
+                            exercise.setsReps,
+                            Icons.repeat,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 24),
+
+                    // Instructions
+                    Text(
+                      'How to Perform',
+                      style: TextStyle(
+                        color: ColorManager.limerGreen2,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    ...exercise.instructions.asMap().entries.map((entry) {
+                      return Container(
+                        margin: EdgeInsets.only(bottom: 12),
+                        padding: EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: ColorManager.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: ColorManager.limerGreen2.withOpacity(0.2),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: ColorManager.limerGreen2,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '${entry.key + 1}',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 16),
+                            Expanded(
+                              child: Text(
+                                entry.value,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    SizedBox(height: 20),
+                  ],
                 ),
               ),
             ),
-            SizedBox(height: 20),
-            Text(
-              exercise['name']
-                  .toString()
-                  .split(' ')
-                  .map((word) => word[0].toUpperCase() + word.substring(1))
-                  .join(' '),
-              style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: ColorManager.white),
-            ),
-            SizedBox(height: 10),
-            Text(
-                'Target: ${exercise['target'].toString().split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ')}',
-                style: TextStyle(fontSize: 16, color: ColorManager.white)),
-            SizedBox(height: 5),
-            Text(
-                'Equipment: ${exercise['equipment'].toString().split(' ').map((word) => word[0].toUpperCase() + word.substring(1)).join(' ')}',
-                style: TextStyle(fontSize: 16, color: ColorManager.white)),
-            SizedBox(height: 10),
-            Text(
-              'Instructions:',
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: ColorManager.white),
-            ),
-            for (String step in exercise['instructions'])
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: Text('- $step',
-                    style: TextStyle(fontSize: 14, color: ColorManager.white)),
-              ),
-            SizedBox(height: 20),
-            Center(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorManager.limerGreen2),
-                onPressed: () => Navigator.pop(context),
-                child: Text(
-                  'Close',
-                  style: TextStyle(color: Colors.black),
+
+            // Close Button
+            SafeArea(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorManager.limerGreen2,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      'Close',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDetailCard(String label, String value, IconData icon) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: ColorManager.surface,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(
+          color: ColorManager.limerGreen2.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: ColorManager.limerGreen2, size: 20),
+              SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -25,6 +25,16 @@ class WorkoutProvider with ChangeNotifier {
     return [..._allWorkouts];
   }
 
+  void clearAllWorkouts() {
+    _workouts.clear();
+    _allWorkouts.clear();
+    _finishedWorkouts.clear();
+    progressPercent = null;
+    exercisesLeft = null;
+    shownPercent = null;
+    notifyListeners();
+  }
+
   Future<void> getProgressPercent() async {
     final int allWorkoutsNum = _allWorkouts.length;
     final int finishedWorkoutsNum = _finishedWorkouts.length;
@@ -41,29 +51,58 @@ class WorkoutProvider with ChangeNotifier {
   }) async {
     try {
       User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
 
-      await FirebaseFirestore.instance
+      final workoutDoc = FirebaseFirestore.instance
           .collection('workouts')
-          .doc(user!.uid)
+          .doc(user.uid)
           .collection('workoutData')
-          .doc()
-          .set({
-        'name': name,
-        'repNumber': repNumber,
-        'setNumber': setNumber,
-        'dateTime': dateTime,
-      });
-      await FirebaseFirestore.instance
+          .doc();
+      
+      final allWorkoutDoc = FirebaseFirestore.instance
           .collection('allWorkouts')
           .doc(user.uid)
           .collection('allWorkoutsData')
-          .doc()
-          .set({
+          .doc();
+
+      final workoutModel = WorkoutModel(
+        id: workoutDoc.id,
+        name: name,
+        repNumber: repNumber,
+        setNumber: setNumber,
+        dateTime: dateTime,
+      );
+
+       final allWorkoutModel = WorkoutModel(
+        id: allWorkoutDoc.id,
+        name: name,
+        repNumber: repNumber,
+        setNumber: setNumber,
+        dateTime: dateTime,
+      );
+
+      await workoutDoc.set({
         'name': name,
         'repNumber': repNumber,
         'setNumber': setNumber,
         'dateTime': dateTime,
       });
+
+      await allWorkoutDoc.set({
+        'name': name,
+        'repNumber': repNumber,
+        'setNumber': setNumber,
+        'dateTime': dateTime,
+      });
+
+      // Update local state immediately
+      _workouts.add(workoutModel);
+      _allWorkouts.add(allWorkoutModel);
+      
+      // Sort to keep order correct
+      _workouts.sort((a, b) => b.dateTime.compareTo(a.dateTime));
+      // _allWorkouts might need sorting too depending on usage, but usually it is grouped by day or listed
+      
       notifyListeners();
     } catch (e) {
       rethrow;
@@ -73,10 +112,20 @@ class WorkoutProvider with ChangeNotifier {
   Future fetchAndSetWorkouts() async {
     User? user = FirebaseAuth.instance.currentUser;
 
+    // Check if user is authenticated
+    if (user == null) {
+      // Clear all workouts if user is not authenticated
+      _workouts.clear();
+      _allWorkouts.clear();
+      _finishedWorkouts.clear();
+      notifyListeners();
+      return;
+    }
+
     try {
       final workoutSnapshot = await FirebaseFirestore.instance
           .collection('workouts')
-          .doc(user!.uid)
+          .doc(user.uid)
           .collection('workoutData')
           .get();
       final allWorkoutSnapshot = await FirebaseFirestore.instance
@@ -141,7 +190,19 @@ class WorkoutProvider with ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      rethrow;
+      // Handle permission denied or other errors gracefully
+      print('Error fetching workouts: $e');
+      
+      // If it's a permission error, clear the data
+      if (e.toString().contains('PERMISSION_DENIED') || 
+          e.toString().contains('permission-denied')) {
+        _workouts.clear();
+        _allWorkouts.clear();
+        _finishedWorkouts.clear();
+        notifyListeners();
+      } else {
+        rethrow;
+      }
     }
   }
 

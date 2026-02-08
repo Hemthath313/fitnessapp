@@ -10,8 +10,10 @@ class EditTextButton extends StatelessWidget {
   const EditTextButton({
     super.key,
     required this.onTap,
+    this.text,
   });
   final VoidCallback onTap;
+  final String? text;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +31,7 @@ class EditTextButton extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                StringsManager.edit,
+                text ?? StringsManager.edit,
                 textAlign: TextAlign.right,
                 style: StyleManager.editTextButtonTextStyle,
               ),

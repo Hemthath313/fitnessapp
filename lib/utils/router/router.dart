@@ -3,7 +3,11 @@ import 'package:fitness_app/presentation/auth/pages/add_data_page.dart';
 import 'package:fitness_app/presentation/auth/pages/auth_page.dart';
 import 'package:fitness_app/presentation/auth/pages/forgot_password_page.dart';
 import 'package:fitness_app/presentation/auth/pages/login_or_register_page.dart';
+import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
 import 'package:fitness_app/presentation/boarding/pages/boarding_page.dart';
+import 'package:fitness_app/presentation/chat_screen/chat_screen.dart';
+import 'package:fitness_app/presentation/in_app_purchases/premimum_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:fitness_app/presentation/body_parts/pages/abs.dart';
 import 'package:fitness_app/presentation/body_parts/pages/biceps.dart';
 import 'package:fitness_app/presentation/body_parts/pages/body_parts.dart';
@@ -38,6 +42,16 @@ import 'package:fitness_app/presentation/workout_splits/splits/upper_lower_split
 import 'package:fitness_app/presentation/workout_splits/workout_splits.dart';
 import 'package:fitness_app/presentation/workouts/pages/new_exercise_page.dart';
 import 'package:fitness_app/presentation/workouts/pages/workouts_page.dart';
+import 'package:fitness_app/presentation/workout_logs/workout_log_screen.dart';
+import 'package:fitness_app/presentation/workout_logs/workout_history_screen.dart';
+import 'package:fitness_app/presentation/progress_photos/progress_photos_screen.dart';
+import 'package:fitness_app/presentation/progress_photos/add_progress_photo_screen.dart';
+import 'package:fitness_app/presentation/progress_photos/photo_comparison_screen.dart';
+import 'package:fitness_app/presentation/profile/pages/monthly_comparison_page.dart';
+import 'package:fitness_app/presentation/diet_nutrition/pages/protein_chart_page.dart';
+import 'package:fitness_app/presentation/ai_coach/ai_chat_screen.dart';
+import 'package:fitness_app/presentation/challenges/exercise_of_the_week.dart';
+import 'package:fitness_app/presentation/ai_coach/workout_generator_screen.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/widgets/coming_soon.dart';
 import 'package:fitness_app/utils/widgets/page_transition.dart';
@@ -74,9 +88,9 @@ class Routes {
   static const String bulkingDietRoute = '/bulkingDietRoute';
   static const String cuttingDietRoute = '/cuttingDietRoute';
   static const String maintainDietRoute = '/maintainDietRoute';
-  static const String sixPackChallenge = '/sixPackChallenge';
+  static const String sixPackChallengeRoute = '/sixPackChallenge';
   static const String dailyExerciseRoute = '/dailyExerciseRoute';
-  // static const String premiumScreen = '/premiumScreen';
+  static const String premiumScreen = '/premiumScreen';
   static const String workoutSplitsRoute = '/workoutSplitsRoute';
   static const String emailVerify = 'emailVerify';
   static const String broSplit = '/broSplit';
@@ -85,10 +99,71 @@ class Routes {
   static const String upperLowerSplit = '/upperLowerSplit';
   static const String recoveryRoute = '/recovery';
   static const String comingSoon = '/comingSoon';
+  static const String workoutLogRoute = '/workoutLog';
+  static const String workoutHistoryRoute = '/workoutHistory';
+  static const String progressPhotosRoute = '/progressPhotos';
+  static const String addProgressPhotoRoute = '/addProgressPhoto';
+  static const String photoComparisonRoute = '/photoComparison';
+  static const String plateauAnalysisRoute = '/plateauAnalysis';
+  static const String aiChatRoute = '/aiChat';
+  static const String exerciseOfTheWeekRoute = '/exerciseOfTheWeek';
+  static const String workoutGeneratorRoute = '/workoutGenerator';
+  static const String monthlyComparisonRoute = '/monthlyComparison';
+  static const String proteinChartRoute = '/proteinChart';
 }
 
 final GoRouter router = GoRouter(
   initialLocation: Routes.splashScreen,
+  redirect: (BuildContext context, GoRouterState state) {
+    // Don't redirect from splash screen - let it handle navigation
+    if (state.uri.path == Routes.splashScreen) {
+      return null;
+    }
+
+    // Try to get AuthProvider - if not available yet, allow navigation
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      // Wait for initial auth state to load
+      if (authProvider.isLoading) {
+        return Routes.splashScreen;
+      }
+
+      final user = authProvider.user;
+      final hasAgeParameter = authProvider.hasAgeParameter;
+      final emailIsVerified = user?.emailVerified ?? false;
+
+      // If user is logged in and has completed profile, redirect away from auth/login pages
+      if (user != null && hasAgeParameter == true && emailIsVerified) {
+        if (state.uri.path == Routes.loginRoute ||
+            state.uri.path == Routes.authRoute ||
+            state.uri.path == Routes.boardingRoute) {
+          return Routes.mainRoute;
+        }
+      }
+
+      // If user is logged in but needs to add data
+      if (user != null && hasAgeParameter == false && emailIsVerified) {
+        if (state.uri.path == Routes.loginRoute ||
+            state.uri.path == Routes.authRoute ||
+            state.uri.path == Routes.boardingRoute) {
+          return Routes.addDataRoute;
+        }
+      }
+
+      // If user is not logged in, redirect away from protected routes
+      if (user == null) {
+        if (state.uri.path == Routes.mainRoute) {
+          return Routes.boardingRoute;
+        }
+      }
+
+      return null; // No redirect needed
+    } catch (e) {
+      // Provider not available yet, allow navigation
+      return null;
+    }
+  },
   routes: [
     GoRoute(
         path: Routes.boardingRoute,
@@ -134,11 +209,9 @@ final GoRouter router = GoRouter(
       path: Routes.dailyExerciseRoute,
       pageBuilder: (context, state) {
         final day = int.tryParse(state.uri.queryParameters['day'] ?? '1') ?? 1;
-        final exercises = state.extra as List<dynamic>? ?? [];
         return PageTransitions.buildPageWithSlideTransition(
           state.pageKey,
           DailyExercisePage(
-            exercises: exercises,
             day: day,
             onComplete: () {},
           ),
@@ -206,14 +279,11 @@ final GoRouter router = GoRouter(
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, UpperLowerPage())),
 
-    // GoRoute(
-    //     path: Routes.sixPackChallenge,
-    //     pageBuilder: (context, state) =>
-    //         PageTransitions.buildPageWithSlideTransition(
-    //             state.pageKey,
-    //             SixPackChallengeScreen(
-    //               dayNumber: 2,
-    //             ))),
+    GoRoute(
+        path: Routes.sixPackChallengeRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const SixPackChallengeSelectionScreen())),
     GoRoute(
         path: Routes.backRoute,
         pageBuilder: (context, state) =>
@@ -300,11 +370,66 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, ChangeMeasurementsPage())),
+    GoRoute(
+        path: Routes.premiumScreen,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const PremiumScreen())),
+    GoRoute(
+        path: Routes.workoutLogRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const WorkoutLogScreen())),
+    GoRoute(
+        path: Routes.workoutHistoryRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const WorkoutHistoryScreen())),
     // GoRoute(
-    //     path: Routes.premiumScreen,
+    //     path: Routes.progressPhotosRoute,
     //     pageBuilder: (context, state) =>
     //         PageTransitions.buildPageWithSlideTransition(
-    //             state.pageKey, PremiumScreen())),
+    //             state.pageKey, const ProgressPhotosScreen())),
+    // GoRoute(
+    //     path: Routes.addProgressPhotoRoute,
+    //     pageBuilder: (context, state) =>
+    //         PageTransitions.buildPageWithSlideTransition(
+    //             state.pageKey, const AddProgressPhotoScreen())),
+    // GoRoute(
+    //     path: Routes.photoComparisonRoute,
+    //     pageBuilder: (context, state) =>
+    //         PageTransitions.buildPageWithSlideTransition(
+    //             state.pageKey, const PhotoComparisonScreen())),
+    // GoRoute(
+    //     path: Routes.plateauAnalysisRoute,
+    //     pageBuilder: (context, state) =>
+    //         PageTransitions.buildPageWithSlideTransition(
+    //             state.pageKey, const PlateauAnalysisScreen())),
+    GoRoute(
+        path: Routes.aiChatRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const ChatScreen())),
+    GoRoute(
+        path: Routes.exerciseOfTheWeekRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const ExerciseOfTheWeekScreen())),
+    GoRoute(
+        path: Routes.workoutGeneratorRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const WorkoutGeneratorScreen())),
+    GoRoute(
+        path: Routes.monthlyComparisonRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const MonthlyComparisonPage())),
+    GoRoute(
+        path: Routes.proteinChartRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const ProteinChartPage())),
   ],
   errorBuilder: (context, state) {
     return Scaffold(

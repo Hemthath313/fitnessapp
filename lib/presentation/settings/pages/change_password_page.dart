@@ -7,7 +7,7 @@ import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/widgets/lime_green_rounded_button.dart';
-import 'package:fitness_app/utils/widgets/text_field_underlined.dart';
+import 'package:fitness_app/utils/widgets/text_field_widget.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
 
@@ -76,12 +76,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(
-                      left: PaddingManager.p28,
-                      right: PaddingManager.p28,
-                      bottom: PaddingManager.p12,
-                    ),
-                    child: TextFieldWidgetUnderLined(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+                    child: TextFieldWidget(
                       controller: _emailController,
                       labelHint: StringsManager.emailHint,
                       obscureText: false,
@@ -89,29 +85,21 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(
-                      left: PaddingManager.p28,
-                      right: PaddingManager.p28,
-                      bottom: PaddingManager.p12,
-                    ),
-                    child: TextFieldWidgetUnderLined(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+                    child: TextFieldWidget(
                       controller: _oldPasswordController,
                       labelHint: StringsManager.oldPasswordHint,
                       obscureText: true,
-                      keyboardType: TextInputType.emailAddress,
+                      keyboardType: TextInputType.visiblePassword,
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(
-                      left: PaddingManager.p28,
-                      right: PaddingManager.p28,
-                      bottom: PaddingManager.p12,
-                    ),
-                    child: TextFieldWidgetUnderLined(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+                    child: TextFieldWidget(
                       controller: _newPasswordController,
                       labelHint: StringsManager.newPasswordHint,
                       obscureText: true,
-                      keyboardType: TextInputType.emailAddress,
+                      keyboardType: TextInputType.visiblePassword,
                     ),
                   ),
                   LimeGreenRoundedButtonWidget(

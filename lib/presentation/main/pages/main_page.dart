@@ -1,4 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
+import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
 import 'package:fitness_app/presentation/explore/explore_page.dart';
 import 'package:fitness_app/presentation/home/pages/home_page.dart';
@@ -8,11 +10,12 @@ import 'package:fitness_app/presentation/main/widgets/appbar_custom_workouts.dar
 import 'package:fitness_app/presentation/main/widgets/appbar_more.dart';
 import 'package:fitness_app/presentation/more/more_page.dart';
 import 'package:fitness_app/presentation/custom_workouts/custom_workouts_page.dart';
-import 'package:fitness_app/presentation/chat_screen/chat_screen.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/services/connectivity_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
+import 'package:fitness_app/presentation/journal/pages/journal_page.dart';
+import 'package:fitness_app/presentation/main/widgets/appbar_journal.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/widgets/error_boundary.dart';
 import 'package:flutter/material.dart';
@@ -38,8 +41,8 @@ class _MainPageState extends State<MainPage> {
   List<Widget> pages = const [
     HomePage(),
     ExploreWidget(),
+    JournalPage(),
     CustomWorkoutsPage(),
-    ChatScreen(),
     MorePage(),
   ];
 
@@ -48,18 +51,18 @@ class _MainPageState extends State<MainPage> {
       return const HomePageAppBarWidget();
     } else if (isExplorePage) {
       return const ConsumptionPageAppBarWidget();
+    } else if (isJournalPage) {
+      return const JournalAppBarWidget();
     } else if (isCustomWorkoutsPage) {
       return const CustomWorkoutsAppBarWidget();
-    } else if (isChatPage) {
-      return null; // Chat screen has no app bar
     } else if (isMorePage) {
       return const MorePageAppBarWidget();
     }
   }
 
   bool get isMorePage => _currentIndex == 4;
-  bool get isChatPage => _currentIndex == 3;
-  bool get isCustomWorkoutsPage => _currentIndex == 2;
+  bool get isCustomWorkoutsPage => _currentIndex == 3;
+  bool get isJournalPage => _currentIndex == 2;
   bool get isExplorePage => _currentIndex == 1;
   bool get isHomePage => _currentIndex == 0;
 
@@ -67,7 +70,14 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Check if user is authenticated before loading data
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      if (authProvider.user == null) {
+        return; // Don't load data if user is not authenticated
+      }
+
       NetworkService.initialize();
+      Provider.of<SubscriptionProvider>(context, listen: false).refresh();
       final consumptionProvider =
           Provider.of<ConsumptionProvider>(context, listen: false);
       final workoutsProvider =
@@ -75,17 +85,22 @@ class _MainPageState extends State<MainPage> {
       final statisticsProvider =
           Provider.of<StatisticsProvider>(context, listen: false);
 
-      // Load statistics
-      await statisticsProvider.loadStreakData();
+      try {
+        // Load statistics
+        await statisticsProvider.loadStreakData();
 
-      // FIRST: Check and clear water for new day BEFORE loading data
-      await consumptionProvider.clearWaterIfNeeded();
+        // FIRST: Check and clear water for new day BEFORE loading data
+        await consumptionProvider.clearWaterIfNeeded();
 
-      // THEN: Load fresh data after potential reset
-      await consumptionProvider.fetchAndSetMeals();
-      await consumptionProvider.fetchAndSetWater();
-      await workoutsProvider.fetchAndSetWorkouts();
-      await workoutsProvider.getProgressPercent();
+        // THEN: Load fresh data after potential reset
+        await consumptionProvider.fetchAndSetMeals();
+        await consumptionProvider.fetchAndSetWater();
+        await workoutsProvider.fetchAndSetWorkouts();
+        await workoutsProvider.getProgressPercent();
+      } catch (e) {
+        // Handle errors gracefully - don't crash the app
+        print('Error loading initial data: $e');
+      }
 
       final workouts = workoutsProvider.workouts;
       final meals = consumptionProvider.meals;
@@ -121,34 +136,34 @@ class _MainPageState extends State<MainPage> {
     List<Widget> bottomNavItems = [
       Icon(
         Icons.home_outlined,
-        color: isHomePage ? ColorManager.limerGreen2 : ColorManager.grey2,
+        color: isHomePage ? ColorManager.primary : ColorManager.textTertiary,
         size: SizeManager.s28,
       ),
       Icon(
-        Icons.restaurant,
-        color: isExplorePage ? ColorManager.limerGreen2 : ColorManager.grey2,
+        Icons.restaurant_menu_outlined,
+        color: isExplorePage ? ColorManager.primary : ColorManager.textTertiary,
         size: SizeManager.s28,
       ),
       Icon(
-        Icons.fitness_center,
+        Icons.auto_awesome_rounded,
+        color: isJournalPage ? ColorManager.primary : ColorManager.textTertiary,
+        size: SizeManager.s28,
+      ),
+      Icon(
+        Icons.fitness_center_outlined,
         color: isCustomWorkoutsPage
-            ? ColorManager.limerGreen2
-            : ColorManager.grey2,
-        size: SizeManager.s28,
-      ),
-      Icon(
-        Icons.chat_bubble_outline,
-        color: isChatPage ? ColorManager.limerGreen2 : ColorManager.grey2,
+            ? ColorManager.primary
+            : ColorManager.textTertiary,
         size: SizeManager.s28,
       ),
       Icon(
         Icons.person_outline,
-        color: isMorePage ? ColorManager.limerGreen2 : ColorManager.grey2,
+        color: isMorePage ? ColorManager.primary : ColorManager.textTertiary,
         size: SizeManager.s28,
       ),
     ];
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       appBar: appBar() != null
           ? PreferredSize(
               preferredSize: Size(
@@ -162,17 +177,21 @@ class _MainPageState extends State<MainPage> {
         bottom: true,
         minimum: EdgeInsets.zero,
         child: CurvedNavigationBar(
-          color: ColorManager.black87,
+          color: ColorManager.surface,
           buttonBackgroundColor: Colors.transparent,
-          backgroundColor: ColorManager.darkGrey,
+          backgroundColor: ColorManager.background,
           onTap: ontap,
           index: _currentIndex,
           items: bottomNavItems,
         ),
       ),
-      body: ErrorBoundary(
-        child: pages[_currentIndex].animate().fadeIn(duration: 500.ms),
-        fallbackMessage: 'Unable to load this page',
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: ErrorBoundary(
+          child: pages[_currentIndex].animate().fadeIn(duration: 500.ms),
+          fallbackMessage: 'Unable to load this page',
+        ),
       ),
     );
   }

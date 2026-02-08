@@ -9,7 +9,9 @@ import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/widgets/lime_green_rounded_button.dart';
-import 'package:fitness_app/utils/widgets/small_text_field_widget.dart';
+import 'package:fitness_app/utils/widgets/text_field_widget.dart';
+import 'package:fitness_app/utils/widgets/loading_overlay.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
 
@@ -154,17 +156,33 @@ class _ChangeMeasurementsPageState extends State<ChangeMeasurementsPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              SmallTextFieldWidget(
-                                controller: _chestController,
-                                labelHint: StringsManager.chest,
-                                obscureText: false,
-                                keyboardType: TextInputType.number,
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(right: 8.w),
+                                  child: TextFieldWidget(
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                    ],
+                                    controller: _chestController,
+                                    labelHint: StringsManager.chest,
+                                    obscureText: false,
+                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                  ),
+                                ),
                               ),
-                              SmallTextFieldWidget(
-                                controller: _shoulderController,
-                                labelHint: StringsManager.shoulders,
-                                obscureText: false,
-                                keyboardType: TextInputType.number,
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(left: 8.w),
+                                  child: TextFieldWidget(
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                    ],
+                                    controller: _shoulderController,
+                                    labelHint: StringsManager.shoulders,
+                                    obscureText: false,
+                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                  ),
+                                ),
                               )
                             ],
                           ),
@@ -175,17 +193,33 @@ class _ChangeMeasurementsPageState extends State<ChangeMeasurementsPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              SmallTextFieldWidget(
-                                controller: _bicepsController,
-                                labelHint: StringsManager.biceps,
-                                obscureText: false,
-                                keyboardType: TextInputType.number,
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(right: 8.w),
+                                  child: TextFieldWidget(
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                    ],
+                                    controller: _bicepsController,
+                                    labelHint: StringsManager.biceps,
+                                    obscureText: false,
+                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                  ),
+                                ),
                               ),
-                              SmallTextFieldWidget(
-                                controller: _foreArmController,
-                                labelHint: StringsManager.foreArm,
-                                obscureText: false,
-                                keyboardType: TextInputType.number,
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(left: 8.w),
+                                  child: TextFieldWidget(
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                    ],
+                                    controller: _foreArmController,
+                                    labelHint: StringsManager.foreArm,
+                                    obscureText: false,
+                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                  ),
+                                ),
                               )
                             ],
                           ),
@@ -196,17 +230,33 @@ class _ChangeMeasurementsPageState extends State<ChangeMeasurementsPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              SmallTextFieldWidget(
-                                controller: _waistController,
-                                labelHint: StringsManager.waist,
-                                obscureText: false,
-                                keyboardType: TextInputType.number,
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(right: 8.w),
+                                  child: TextFieldWidget(
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                    ],
+                                    controller: _waistController,
+                                    labelHint: StringsManager.waist,
+                                    obscureText: false,
+                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                  ),
+                                ),
                               ),
-                              SmallTextFieldWidget(
-                                controller: _hipsController,
-                                labelHint: StringsManager.hips,
-                                obscureText: false,
-                                keyboardType: TextInputType.number,
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(left: 8.w),
+                                  child: TextFieldWidget(
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                    ],
+                                    controller: _hipsController,
+                                    labelHint: StringsManager.hips,
+                                    obscureText: false,
+                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                  ),
+                                ),
                               )
                             ],
                           ),
@@ -217,17 +267,33 @@ class _ChangeMeasurementsPageState extends State<ChangeMeasurementsPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              SmallTextFieldWidget(
-                                controller: _thighCotroller,
-                                labelHint: StringsManager.thigh,
-                                obscureText: false,
-                                keyboardType: TextInputType.number,
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(right: 8.w),
+                                  child: TextFieldWidget(
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                    ],
+                                    controller: _thighCotroller,
+                                    labelHint: StringsManager.thigh,
+                                    obscureText: false,
+                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                  ),
+                                ),
                               ),
-                              SmallTextFieldWidget(
-                                controller: _calfController,
-                                labelHint: StringsManager.calf,
-                                obscureText: false,
-                                keyboardType: TextInputType.number,
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(left: 8.w),
+                                  child: TextFieldWidget(
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                    ],
+                                    controller: _calfController,
+                                    labelHint: StringsManager.calf,
+                                    obscureText: false,
+                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                  ),
+                                ),
                               )
                             ],
                           ),
@@ -372,10 +438,20 @@ class _ChangeMeasurementsPageState extends State<ChangeMeasurementsPage> {
                     ),
                   ),
                   LimeGreenRoundedButtonWidget(
-                    onTap: () {
-                      updateUsersMeasurements().then(
-                        (value) => Navigator.of(context).pop(),
-                      );
+                    onTap: () async {
+                      LoadingOverlay.show(context, message: 'Updating measurements...');
+                      try {
+                        await updateUsersMeasurements();
+                        if (context.mounted) {
+                          LoadingOverlay.hide(context);
+                          Navigator.of(context).pop();
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          LoadingOverlay.hide(context);
+                        }
+                        rethrow;
+                      }
                     },
                     title: StringsManager.next,
                   )

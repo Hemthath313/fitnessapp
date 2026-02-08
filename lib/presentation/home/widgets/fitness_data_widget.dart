@@ -113,7 +113,7 @@ class FitnessDataWidget extends StatelessWidget {
                       width: (deviceWidth / 3 - 16).w,
                       height: SizeManager.s200.h,
                       decoration: BoxDecoration(
-                        color: ColorManager.black87,
+                        color: ColorManager.surface,
                         borderRadius:
                             BorderRadius.circular(RadiusManager.r15.r),
                       ),
@@ -226,7 +226,7 @@ class FitnessDataWidget extends StatelessWidget {
                                 width: (deviceWidth / 3 - 20).w,
                                 height: SizeManager.s100.h,
                                 decoration: BoxDecoration(
-                                  color: ColorManager.black87,
+                                  color: ColorManager.surfaceLight,
                                   borderRadius: BorderRadius.circular(
                                       RadiusManager.r15.r),
                                 ),
@@ -305,7 +305,7 @@ class FitnessDataWidget extends StatelessWidget {
                               width: (deviceWidth / 3 - 20).w,
                               height: SizeManager.s100.h,
                               decoration: BoxDecoration(
-                                color: ColorManager.black87,
+                                color: ColorManager.surfaceDark,
                                 borderRadius:
                                     BorderRadius.circular(RadiusManager.r15.r),
                               ),
