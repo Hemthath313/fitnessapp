@@ -213,9 +213,9 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             if (!_limitReached && !isThinking)
               _buildSuggestions(),
-              
-            const PremiumAwareBannerAd(pageName: 'chat', bottomMargin: 10.0),
+
             _buildInputArea(),
+            const PremiumAwareBannerAd(pageName: 'chat'),
           ],
         ),
       ),
