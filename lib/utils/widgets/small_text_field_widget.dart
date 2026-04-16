@@ -42,7 +42,7 @@ class SmallTextFieldWidget extends StatelessWidget {
           controller: controller,
           obscureText: obscureText,
           textAlign: TextAlign.start,
-          style: const TextStyle(
+          style:  TextStyle(
             color: ColorManager.white,
             fontWeight: FontWightManager.bold,
           ),
@@ -51,7 +51,7 @@ class SmallTextFieldWidget extends StatelessWidget {
           cursorColor: ColorManager.white,
           decoration: InputDecoration(
             labelText: labelHint,
-            labelStyle: const TextStyle(
+            labelStyle:  TextStyle(
               color: ColorManager.white2,
               fontSize: FontSize.s14,
               letterSpacing: SizeManager.s1_5,

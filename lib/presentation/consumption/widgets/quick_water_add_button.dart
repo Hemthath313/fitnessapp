@@ -29,7 +29,7 @@ class QuickWaterAddButton extends StatelessWidget {
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style:  TextStyle(
               color: ColorManager.white,
               fontSize: FontSize.s20,
               fontWeight: FontWightManager.semiBold,

@@ -324,13 +324,13 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
         backgroundColor: ColorManager.surface,
         title: const Text('Delete Photo?',
             style: TextStyle(color: Colors.white)),
-        content: const Text(
+        content: Text(
             'This action cannot be undone. The photo will be permanently deleted.',
             style: TextStyle(color: ColorManager.textSecondary)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel',
+            child: Text('Cancel',
                 style: TextStyle(color: ColorManager.textSecondary)),
           ),
           ElevatedButton(

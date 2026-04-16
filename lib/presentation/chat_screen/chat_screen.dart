@@ -214,7 +214,7 @@ class _ChatScreenState extends State<ChatScreen> {
             if (!_limitReached && !isThinking)
               _buildSuggestions(),
               
-            BannerAdWidget(pageName: 'chat'),
+            const PremiumAwareBannerAd(pageName: 'chat', bottomMargin: 10.0),
             _buildInputArea(),
           ],
         ),
@@ -273,7 +273,7 @@ class _ChatScreenState extends State<ChatScreen> {
         decoration: BoxDecoration(
           gradient: isUser 
             ? LinearGradient(colors: [ColorManager.primary, ColorManager.primary.withOpacity(0.8)])
-            : const LinearGradient(colors: [ColorManager.surface, ColorManager.surface]),
+            :  LinearGradient(colors: [ColorManager.surface, ColorManager.surface]),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(20),
             topRight: const Radius.circular(20),
@@ -329,7 +329,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return Container(
       width: 6,
       height: 6,
-      decoration: const BoxDecoration(
+      decoration:  BoxDecoration(
         color: ColorManager.textTertiary,
         shape: BoxShape.circle,
       ),
@@ -344,7 +344,7 @@ class _ChatScreenState extends State<ChatScreen> {
         top: 12.h,
         bottom: MediaQuery.of(context).padding.bottom + 12.h
       ),
-      decoration: const BoxDecoration(
+      decoration:  BoxDecoration(
         color: ColorManager.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),

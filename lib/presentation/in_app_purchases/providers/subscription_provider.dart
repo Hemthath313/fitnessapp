@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/services/iap_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'dart:async';
@@ -38,7 +39,7 @@ class SubscriptionProvider with ChangeNotifier {
     // If user logs in with a *new* Firebase account but the Store account already owns
     // the subscription, purchasing again will show "already owned".
     // Auto-restore lets us re-attach the entitlement to the new uid by writing isPremium=true.
-    await autoRestoreIfNeeded();
+    await verifySubscriptionStatus();
     
     _isLoading = false;
     notifyListeners();
@@ -111,25 +112,41 @@ class SubscriptionProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Automatically restore purchases once per app session when needed.
-  /// This is important for the case:
-  /// - user previously purchased with old app email (old Firebase uid)
-  /// - user logs in with new email (new Firebase uid)
-  /// - Store still owns subscription, so buying again says "already owned"
-  Future<void> autoRestoreIfNeeded() async {
-    if (_didAttemptAutoRestore) return;
-    _didAttemptAutoRestore = true;
+  /// Strictly verify subscription status on startup.
+  /// On Android, this checks for expiration by querying past purchases.
+  /// On iOS, it relies on the store's stream updates (or manual restore).
+  Future<void> verifySubscriptionStatus() async {
+    // 1. Android Strict Check
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      final pastPurchases = await _iapService.getAndroidPastPurchases();
+      if (pastPurchases != null) {
+        // Check if any purchase is active (purchased/restored) AND matches our IDs
+        bool hasActiveSubscription = pastPurchases.any((purchase) =>
+            (purchase.status == PurchaseStatus.purchased || purchase.status == PurchaseStatus.restored) &&
+            (purchase.productID == 'premium_monthly' || purchase.productID == 'premium_yearly'));
 
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-    if (_isPremium) return;
+        if (!hasActiveSubscription && _isPremium) {
+          debugPrint('SubscriptionProvider: Expired subscription detected on Android. Downgrading.');
+          await setPremiumStatus(false);
+        } else if (hasActiveSubscription && !_isPremium) {
+           debugPrint('SubscriptionProvider: Active subscription found on Android. Upgrading.');
+           // We found a valid subscription!
+           await setPremiumStatus(true);
+        }
+        return;
+      }
+    }
 
-    try {
-      await _iapService.restorePurchases();
-      // purchase stream will set premium if eligible
-    } catch (e) {
-      // swallow auto-restore errors (user can retry manually)
-      _error = e.toString();
+    // 2. iOS / Generic Fallback
+    // We can't strict-check expiration easily on iOS without a backend or annoying the user with login prompts.
+    // However, we call restorePurchases() if the user CLAIMS to be premium, to try and validate it.
+    // If they are NOT premium, we don't bother (to avoid prompts).
+    if (_isPremium) {
+       try {
+         await _iapService.restorePurchases();
+       } catch (e) {
+         // Ignore errors here
+       }
     }
   }
 

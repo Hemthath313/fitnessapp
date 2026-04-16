@@ -33,7 +33,7 @@ class CarouselHomeBox extends StatelessWidget {
                 borderRadius: BorderRadius.circular(
                   RadiusManager.r15.r,
                 ),
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
                     color: ColorManager.black,
                     blurRadius: 5,

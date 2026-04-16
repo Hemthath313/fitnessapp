@@ -382,7 +382,7 @@ class _MaintainDietScreenState extends State<MaintainDietScreen> {
   Widget _buildTextField(String label, TextEditingController controller,
       {bool isNumber = false}) {
     return TextField(
-      style: const TextStyle(color: ColorManager.white),
+      style:  TextStyle(color: ColorManager.white),
       controller: controller,
       keyboardType: isNumber ? TextInputType.number : TextInputType.text,
       decoration: InputDecoration(labelText: label),
@@ -453,7 +453,7 @@ class _MaintainDietScreenState extends State<MaintainDietScreen> {
               ),
               title: Text(
                 meal['name'],
-                style: const TextStyle(
+                style:  TextStyle(
                   color: ColorManager.white, // Consistent text color
                   fontWeight: FontWeight.bold,
                 ),
@@ -497,7 +497,7 @@ class _MaintainDietScreenState extends State<MaintainDietScreen> {
       backgroundColor: ColorManager.darkGrey,
       appBar: AppBar(
           backgroundColor: ColorManager.black,
-          title: const Text(
+          title:  Text(
             'Maintain Diet Plan',
             style: TextStyle(color: ColorManager.white),
           )),

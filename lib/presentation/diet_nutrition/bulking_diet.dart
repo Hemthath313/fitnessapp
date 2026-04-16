@@ -388,7 +388,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
   Widget _buildTextField(String label, TextEditingController controller,
       {bool isNumber = false}) {
     return TextField(
-      style: const TextStyle(color: ColorManager.white),
+      style:  TextStyle(color: ColorManager.white),
       controller: controller,
       keyboardType: isNumber ? TextInputType.number : TextInputType.text,
       decoration: InputDecoration(labelText: label),
@@ -470,7 +470,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
               ),
               title: Text(
                 meal['name'],
-                style: const TextStyle(
+                style:  TextStyle(
                   color: ColorManager.white, // Consistent text color
                   fontWeight: FontWeight.bold,
                 ),
@@ -513,9 +513,9 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
     return Scaffold(
       backgroundColor: ColorManager.darkGrey,
       appBar: AppBar(
-          iconTheme: const IconThemeData(color: ColorManager.white),
+          iconTheme:  IconThemeData(color: ColorManager.white),
           backgroundColor: ColorManager.black,
-          title: const Text(
+          title:  Text(
             'Bulking Diet Plan',
             style: TextStyle(color: ColorManager.white),
           )),

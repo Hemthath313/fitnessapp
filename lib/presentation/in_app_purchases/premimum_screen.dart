@@ -21,7 +21,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
     // This helps when the store already owns the subscription but user changed app login email.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final sub = Provider.of<SubscriptionProvider>(context, listen: false);
-      sub.autoRestoreIfNeeded();
+      // sub.autoRestoreIfNeeded();
     });
   }
 
@@ -115,8 +115,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
                         onPressed: subProvider.isLoading
                             ? null
                             : () => subProvider.restorePurchases(),
-                        icon: const Icon(Icons.restore, color: ColorManager.textSecondary),
-                        label: const Text(
+                        icon:  Icon(Icons.restore, color: ColorManager.textSecondary),
+                        label:  Text(
                           'Restore',
                           style: TextStyle(color: ColorManager.textSecondary),
                         ),
