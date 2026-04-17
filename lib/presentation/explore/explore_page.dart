@@ -116,7 +116,7 @@ class _ExploreWidgetState extends State<ExploreWidget>
               },
             ),
           ),
-          PremiumAwareBannerAd(pageName: 'explore'),
+          const PremiumAwareBannerAd(pageName: 'explore', bottomMargin: 60.0),
         ],
       ),
     );

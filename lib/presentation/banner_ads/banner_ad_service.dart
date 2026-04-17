@@ -107,14 +107,14 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   }
 }
 
-/// Banner ad that hides for premium users (ad-free experience).
 class PremiumAwareBannerAd extends StatelessWidget {
   final String? pageName;
+  final double bottomMargin;
 
   const PremiumAwareBannerAd({
     super.key,
     this.pageName,
-    // bottomMargin removed — each page's SafeArea handles bottom insets
+    this.bottomMargin = 0.0,
   });
 
   @override
@@ -122,7 +122,18 @@ class PremiumAwareBannerAd extends StatelessWidget {
     return Consumer<SubscriptionProvider>(
       builder: (context, subProvider, _) {
         if (subProvider.isPremium) return const SizedBox.shrink();
-        return BannerAdWidget(pageName: pageName);
+        
+        Widget adWidget = BannerAdWidget(pageName: pageName);
+        if (bottomMargin > 0.0) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              adWidget,
+              SizedBox(height: bottomMargin),
+            ],
+          );
+        }
+        return adWidget;
       },
     );
   }
