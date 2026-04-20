@@ -83,14 +83,6 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      floatingActionButton: Padding(
-        padding: EdgeInsets.only(bottom: 70.h),
-        child: FloatingActionButton(
-          onPressed: () => context.push(Routes.addNewExerciseRoute),
-          backgroundColor: ColorManager.primary,
-          child: const Icon(Icons.add, color: Colors.white),
-        ),
-      ),
       body: SafeArea(
         bottom: true,
         child: Column(
