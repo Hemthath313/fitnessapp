@@ -95,10 +95,10 @@ class _AIChatScreenState extends State<AIChatScreen> {
       backgroundColor: ColorManager.background,
       appBar: AppBar(
         title:
-            const Text('AI Coach Chat', style: TextStyle(color: Colors.white)),
+            Text('AI Coach Chat', style: TextStyle(color: ColorManager.textPrimary)),
         backgroundColor: ColorManager.background,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
       ),
       body: Column(
         children: [
@@ -144,7 +144,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
             padding: EdgeInsets.only(right: 8.w),
             child: ActionChip(
               label: Text(_quickPrompts[index]),
-              labelStyle: TextStyle(color: Colors.white, fontSize: 12.sp),
+              labelStyle: TextStyle(color: ColorManager.textPrimary, fontSize: 12.sp),
               backgroundColor: ColorManager.surface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20.r),
@@ -175,7 +175,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
           Expanded(
             child: TextField(
               controller: _messageController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: ColorManager.textPrimary),
               decoration: InputDecoration(
                 hintText: 'Type a message...',
                 hintStyle: TextStyle(color: ColorManager.textTertiary),
@@ -187,7 +187,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
           ),
           IconButton(
             onPressed: () => _sendMessage(_messageController.text),
-            icon: const Icon(Icons.send_rounded, color: ColorManager.primary),
+            icon: Icon(Icons.send_rounded, color: ColorManager.primary),
           ),
         ],
       ),

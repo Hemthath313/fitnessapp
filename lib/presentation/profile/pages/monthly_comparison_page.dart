@@ -65,11 +65,11 @@ class _MonthlyComparisonPageState extends State<MonthlyComparisonPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       appBar: AppBar(
-        backgroundColor: ColorManager.darkGrey,
+        backgroundColor: ColorManager.background,
         title: Text('Monthly Comparison', style: StyleManager.skillNameTextStyle),
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -119,7 +119,7 @@ class _MonthlyComparisonPageState extends State<MonthlyComparisonPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
+        Text(label, style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),
         SizedBox(height: 4.h),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 12.w),
@@ -133,8 +133,8 @@ class _MonthlyComparisonPageState extends State<MonthlyComparisonPage> {
               value: value,
               isExpanded: true,
               dropdownColor: ColorManager.background,
-              icon: Icon(Icons.arrow_drop_down, color: Colors.white),
-              style: TextStyle(color: Colors.white, fontSize: 14.sp),
+              icon: Icon(Icons.arrow_drop_down, color: ColorManager.textPrimary),
+              style: TextStyle(color: ColorManager.textPrimary, fontSize: 14.sp),
               hint: Text('Select', style: TextStyle(color: Colors.white54)),
               items: List.generate(12, (index) {
                 final monthIndex = index + 1;
@@ -180,12 +180,12 @@ class _MonthlyComparisonPageState extends State<MonthlyComparisonPage> {
       decoration: BoxDecoration(
         color: ColorManager.surface,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: ColorManager.divider),
       ),
       child: Column(
         children: [
           _buildTableHeader(),
-          Divider(color: Colors.white12, height: 1),
+          Divider(color: ColorManager.divider, height: 1),
           ..._bodyParts.map((part) {
              final val1 = data1[part];
              final val2 = data2[part];
@@ -231,7 +231,7 @@ class _MonthlyComparisonPageState extends State<MonthlyComparisonPage> {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.05))),
+        border: Border(bottom: BorderSide(color: ColorManager.surface)),
       ),
       child: Row(
         children: [
@@ -239,7 +239,7 @@ class _MonthlyComparisonPageState extends State<MonthlyComparisonPage> {
             flex: 2,
             child: Text(
               _capitalize(part),
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold),
             ),
           ),
           Expanded(
@@ -252,7 +252,7 @@ class _MonthlyComparisonPageState extends State<MonthlyComparisonPage> {
           Expanded(
             child: Text(
               val2 != null ? val2.toStringAsFixed(1) : '-',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
           ),

@@ -38,7 +38,7 @@ class ExerciseWidget extends StatelessWidget {
       ),
       child: SwipeableTile(
         key: Key(id),
-        color: ColorManager.black87,
+        color: ColorManager.surfaceDark,
         swipeThreshold: 0.2,
         direction: SwipeDirection.horizontal,
         onSwiped: (direction) {
@@ -90,7 +90,7 @@ class ExerciseWidget extends StatelessWidget {
           width: deviceWidth,
           height: SizeManager.s100.h,
           decoration: BoxDecoration(
-            color: ColorManager.black87,
+            color: ColorManager.surfaceDark,
             border: Border(
               bottom: BorderSide(
                 color: ColorManager.limerGreen2,

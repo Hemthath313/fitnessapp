@@ -131,7 +131,7 @@ class _WorkoutTimerWidgetState extends State<WorkoutTimerWidget> {
     return Container(
       padding: EdgeInsets.all(SizeManager.s16.w),
       decoration: BoxDecoration(
-        color: ColorManager.black87,
+        color: ColorManager.surfaceDark,
         borderRadius: BorderRadius.circular(SizeManager.s16.r),
       ),
       child: Column(

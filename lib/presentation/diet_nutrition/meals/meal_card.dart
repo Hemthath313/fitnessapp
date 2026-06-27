@@ -29,7 +29,7 @@ class MealCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black26,
+            color: ColorManager.surfaceDark,
             blurRadius: 6,
             offset: const Offset(2, 2),
           )
@@ -44,7 +44,7 @@ class MealCard extends StatelessWidget {
         ),
         title: Text(
           meal['name'],
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16.sp),
+          style: TextStyle(fontWeight: FontWeight.bold, color: ColorManager.textPrimary, fontSize: 16.sp),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,7 +53,7 @@ class MealCard extends StatelessWidget {
               children: [
                 Text(
                   '${meal['calories']} kcal | ${meal['protein']}g Protein',
-                  style: TextStyle(color: Colors.white70, fontSize: 12.sp),
+                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
                 ),
                 SizedBox(width: 8.w),
                 _buildMacroBadge(),
@@ -67,7 +67,7 @@ class MealCard extends StatelessWidget {
                   'Tap to see details & foods',
                   style: TextStyle(fontSize: 10.sp, color: Colors.white54),
                 ),
-                Icon(Icons.chevron_right, color: Colors.white54, size: 16.sp)
+                Icon(Icons.chevron_right, color: ColorManager.textTertiary, size: 16.sp)
               ],
             ),
           ],

@@ -42,11 +42,11 @@ class MealDetailsSheet extends StatelessWidget {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 20.sp,
-              color: Colors.white,
+              color: ColorManager.textPrimary,
             ),
             textAlign: TextAlign.center,
           ),
-          const Divider(color: Colors.white54),
+          Divider(color: ColorManager.divider),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -54,7 +54,7 @@ class MealDetailsSheet extends StatelessWidget {
                 'Foods & Ingredients:',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: ColorManager.textPrimary,
                   fontSize: 16.sp,
                 ),
               ),
@@ -68,7 +68,7 @@ class MealDetailsSheet extends StatelessWidget {
           Container(
             constraints: BoxConstraints(maxHeight: 200.h),
             child: foods.isEmpty 
-              ? Center(child: Text("No foods listed. Add some!", style: TextStyle(color: Colors.white54, fontSize: 12.sp)))
+              ? Center(child: Text("No foods listed. Add some!", style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp)))
               : ListView.builder(
               shrinkWrap: true,
               itemCount: foods.length,
@@ -83,12 +83,12 @@ class MealDetailsSheet extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.restaurant, color: Colors.white54, size: 14.sp),
+                      Icon(Icons.restaurant, color: ColorManager.textTertiary, size: 14.sp),
                       SizedBox(width: 8.w),
                       Expanded(
                         child: Text(
                           '$food',
-                          style: TextStyle(color: Colors.white, fontSize: 14.sp),
+                          style: TextStyle(color: ColorManager.textPrimary, fontSize: 14.sp),
                         ),
                       ),
                     ],
@@ -98,10 +98,10 @@ class MealDetailsSheet extends StatelessWidget {
             ),
           ),
           SizedBox(height: 12.h),
-          const Divider(color: Colors.white54),
+          Divider(color: ColorManager.divider),
           Text(
             'Macros: ${meal['calories']} kcal | ${meal['protein']}g P | ${meal['carbs']}g C | ${meal['fats']}g F',
-            style: TextStyle(color: Colors.white, fontSize: 14.sp),
+            style: TextStyle(color: ColorManager.textPrimary, fontSize: 14.sp),
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 12.h),
@@ -114,7 +114,7 @@ class MealDetailsSheet extends StatelessWidget {
               icon: Icon(Icons.swap_horiz, size: 20.sp),
               label: Text(
                 'Swap With Library Meal',
-                style: TextStyle(color: ColorManager.black, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(color: ColorManager.background, fontSize: 14.sp, fontWeight: FontWeight.bold),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.limerGreen2,
@@ -136,13 +136,13 @@ class MealDetailsSheet extends StatelessWidget {
       context: context,
       builder: (c) => AlertDialog(
         backgroundColor: ColorManager.surface,
-        title: Text("Add Food Item", style: TextStyle(color: Colors.white, fontSize: 18.sp)),
+        title: Text("Add Food Item", style: TextStyle(color: ColorManager.textPrimary, fontSize: 18.sp)),
         content: TextField(
           controller: controller,
-          style: const TextStyle(color: Colors.white),
-          decoration: const InputDecoration(
+          style: TextStyle(color: ColorManager.textPrimary),
+          decoration: InputDecoration(
             hintText: "e.g., 1 Banana", 
-            hintStyle: TextStyle(color: Colors.white54)
+            hintStyle: TextStyle(color: ColorManager.textTertiary)
           ),
         ),
         actions: [
@@ -194,7 +194,7 @@ class MealDetailsSheet extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: 2.h),
       child: RichText(
         text: TextSpan(
-          style: TextStyle(fontSize: 12.sp, color: Colors.white70),
+          style: TextStyle(fontSize: 12.sp, color: ColorManager.textSecondary),
           children: [
             TextSpan(
               text: '$original: ',

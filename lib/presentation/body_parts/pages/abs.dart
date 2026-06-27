@@ -286,7 +286,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       body: CustomScrollView(
         slivers: [
           // Beautiful App Bar with gradient
@@ -294,12 +294,12 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
             expandedHeight: 200.0,
             floating: false,
             pinned: true,
-            backgroundColor: ColorManager.black,
+            backgroundColor: ColorManager.surface,
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
                 'Abs Workouts',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: ColorManager.textPrimary,
                   fontWeight: FontWeight.bold,
                   fontSize: 24,
                 ),
@@ -326,7 +326,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
                 ),
               ),
             ),
-            iconTheme: IconThemeData(color: Colors.white),
+            iconTheme: IconThemeData(color: ColorManager.textPrimary),
           ),
 
           // Header Section
@@ -348,7 +348,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
                   Text(
                     '${absExercises.length} premium video workouts',
                     style: TextStyle(
-                      color: Colors.white70,
+                      color: ColorManager.textSecondary,
                       fontSize: 16,
                     ),
                   ),
@@ -375,7 +375,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
                           child: Text(
                             'All exercises include detailed video demonstrations and step-by-step instructions.',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: ColorManager.textPrimary,
                               fontSize: 14,
                             ),
                           ),
@@ -431,7 +431,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
                 child: Container(
                   height: 220,
                   width: double.infinity,
-                  color: ColorManager.black,
+                  color: ColorManager.surface,
                   child: Stack(
                     children: [
                       ExerciseVideoPlayer(
@@ -493,7 +493,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
                           child: Text(
                             exercise.name,
                             style: TextStyle(
-                              color: Colors.white,
+                              color: ColorManager.textPrimary,
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
                             ),
@@ -512,7 +512,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
                     Text(
                       exercise.description,
                       style: TextStyle(
-                        color: Colors.white70,
+                        color: ColorManager.textSecondary,
                         fontSize: 14,
                         height: 1.5,
                       ),
@@ -553,7 +553,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: ColorManager.black87,
+        color: ColorManager.surfaceDark,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: ColorManager.limerGreen2.withOpacity(0.2),
@@ -569,7 +569,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
             child: Text(
               text,
               style: TextStyle(
-                color: Colors.white70,
+                color: ColorManager.textSecondary,
                 fontSize: 12,
               ),
               overflow: TextOverflow.ellipsis,
@@ -588,7 +588,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.9,
         decoration: BoxDecoration(
-          color: ColorManager.black,
+          color: ColorManager.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
         ),
         child: Column(
@@ -599,7 +599,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white30,
+                color: ColorManager.divider,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -638,7 +638,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
                     Text(
                       exercise.name,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: ColorManager.textPrimary,
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                       ),
@@ -655,7 +655,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
                       child: Text(
                         exercise.description,
                         style: TextStyle(
-                          color: Colors.white70,
+                          color: ColorManager.textSecondary,
                           fontSize: 16,
                           height: 1.6,
                         ),
@@ -753,7 +753,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
                               child: Text(
                                 entry.value,
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: ColorManager.textPrimary,
                                   fontSize: 15,
                                   height: 1.5,
                                 ),
@@ -823,7 +823,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
               Text(
                 label,
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: ColorManager.textSecondary,
                   fontSize: 12,
                 ),
               ),
@@ -833,7 +833,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
           Text(
             value,
             style: TextStyle(
-              color: Colors.white,
+              color: ColorManager.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),

@@ -11,10 +11,10 @@ class UpperLowerPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: ColorManager.black,
-          title: const Text(
+          backgroundColor: ColorManager.background,
+          title: Text(
             "View Exercises?",
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: ColorManager.textPrimary),
           ),
           content: const Text(
             "Do you want to see the detailed exercises for this split?",
@@ -74,14 +74,14 @@ class UpperLowerPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Upper-Lower Split Workout',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: ColorManager.textPrimary),
         ),
-        backgroundColor: ColorManager.darkGrey,
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: ColorManager.background,
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
       ),
       body: Container(
         padding: const EdgeInsets.all(16.0),
@@ -102,8 +102,8 @@ class UpperLowerPage extends StatelessWidget {
                     child: ListTile(
                       title: Text(
                         '${split['day']} - ${split['title']}',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: ColorManager.textPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
                         ),

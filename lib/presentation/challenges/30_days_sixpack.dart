@@ -24,10 +24,10 @@ class SixPackChallengeSelectionScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: AppBar(
-        title: const Text('30 Day Abs Challenge', style: TextStyle(color: Colors.white)),
+        title: Text('30 Day Abs Challenge', style: TextStyle(color: ColorManager.textPrimary)),
         backgroundColor: ColorManager.background,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
       ),
       body: FutureBuilder<Map<String, dynamic>>(
         future: _fetchProgress(),
@@ -83,7 +83,7 @@ class SixPackChallengeSelectionScreen extends StatelessWidget {
     Color borderColor = Colors.transparent;
     Widget icon = Text('$day',
         style: TextStyle(
-            color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.bold));
+            color: ColorManager.textPrimary, fontSize: 18.sp, fontWeight: FontWeight.bold));
 
     if (isCompleted) {
       bgColor = ColorManager.limerGreen2.withOpacity(0.2);
@@ -93,10 +93,10 @@ class SixPackChallengeSelectionScreen extends StatelessWidget {
     } else if (isPremiumLocked) {
       icon = Icon(Icons.lock, color: Colors.amber, size: 20.sp);
     } else if (isWaitDay) {
-      icon = Icon(Icons.access_time_filled, color: Colors.white24, size: 20.sp);
+      icon = Icon(Icons.access_time_filled, color: ColorManager.divider, size: 20.sp);
     } else if (isLocked) {
       icon =
-          Text('$day', style: TextStyle(color: Colors.white24, fontSize: 18.sp));
+          Text('$day', style: TextStyle(color: ColorManager.divider, fontSize: 18.sp));
     }
 
     return InkWell(
@@ -131,8 +131,8 @@ class SixPackChallengeSelectionScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: ColorManager.surface,
-        title: const Text('Come back tomorrow!',
-            style: TextStyle(color: Colors.white)),
+        title: Text('Come back tomorrow!',
+            style: TextStyle(color: ColorManager.textPrimary)),
         content: const Text(
           'You have already completed a workout today. Rest up and come back tomorrow to keep the streak alive!',
           style: TextStyle(color: Colors.white70),
@@ -141,7 +141,7 @@ class SixPackChallengeSelectionScreen extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child:
-                const Text('OK', style: TextStyle(color: ColorManager.primary)),
+                Text('OK', style: TextStyle(color: ColorManager.primary)),
           ),
         ],
       ),

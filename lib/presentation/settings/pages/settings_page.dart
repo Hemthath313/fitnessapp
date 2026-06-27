@@ -5,6 +5,7 @@ import 'package:fitness_app/presentation/theme/providers/theme_provider.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
@@ -23,101 +24,104 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     final deviceWidth = MediaQuery.of(context).size.width;
 
-    return SafeArea(
-      bottom: true,
-      child: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        left: PaddingManager.p12,
-                        bottom: PaddingManager.p12,
-                        top: PaddingManager.p12,
-                      ),
-                      child: Text(
-                        StringsManager.accountSpacer,
-                        style: StyleManager.settingsPageSpacerTextStyle,
-                      ),
-                    ),
-                  ),
-                  SettingsPageButton(
-                    deviceWidth: deviceWidth,
-                    onTap: () => context.push(Routes.changeEmailRoute),
-                    iconData: Icons.email_outlined,
-                    title: StringsManager.changeEmail,
-                  ),
-                  SettingsPageButton(
-                    deviceWidth: deviceWidth,
-                    onTap: () => context.push(Routes.changePasswordRoute),
-                    iconData: Icons.lock_open_sharp,
-                    title: StringsManager.changePassword,
-                  ),
-                  SettingsPageButton(
-                    deviceWidth: deviceWidth,
-                    onTap: () => context.push(Routes.deleteAccRoute),
-                    iconData: Icons.delete_outlined,
-                    title: StringsManager.deleteAcc,
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        left: PaddingManager.p12,
-                        bottom: PaddingManager.p12,
-                        top: PaddingManager.p12,
-                      ),
-                      child: Text(
-                        StringsManager.generalSpacer,
-                        style: StyleManager.settingsPageSpacerTextStyle,
+    return Scaffold(
+      backgroundColor: ColorManager.background,
+      body: SafeArea(
+        bottom: true,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          left: PaddingManager.p12,
+                          bottom: PaddingManager.p12,
+                          top: PaddingManager.p12,
+                        ),
+                        child: Text(
+                          StringsManager.accountSpacer,
+                          style: StyleManager.settingsPageSpacerTextStyle,
+                        ),
                       ),
                     ),
-                  ),
-                  Consumer<ThemeProvider>(
-                    builder: (context, themeProvider, child) {
-                      return SettingsPageToggle(
-                        deviceWidth: deviceWidth,
-                        iconData: themeProvider.isDarkMode
-                            ? Icons.dark_mode
-                            : Icons.light_mode,
-                        title: 'Dark Mode',
-                        value: themeProvider.isDarkMode,
-                        onChanged: (value) {
-                          themeProvider.toggleTheme();
-                        },
-                      );
-                    },
-                  ),
-                  SettingsPageButton(
-                    deviceWidth: deviceWidth,
-                    onTap: () {
-                      //TODO:
-                    },
-                    iconData: Icons.help_outline,
-                    title: StringsManager.support,
-                  ),
-                  SettingsPageButton(
-                    deviceWidth: deviceWidth,
-                    onTap: () {
-                      //TODO:
-                    },
-                    iconData: Icons.library_books_outlined,
-                    title: StringsManager.termsOfService,
-                  ),
-                ],
-              ).animate().fadeIn(
-                    duration: 500.ms,
-                  ),
+                    SettingsPageButton(
+                      deviceWidth: deviceWidth,
+                      onTap: () => context.push(Routes.changeEmailRoute),
+                      iconData: Icons.email_outlined,
+                      title: StringsManager.changeEmail,
+                    ),
+                    SettingsPageButton(
+                      deviceWidth: deviceWidth,
+                      onTap: () => context.push(Routes.changePasswordRoute),
+                      iconData: Icons.lock_open_sharp,
+                      title: StringsManager.changePassword,
+                    ),
+                    SettingsPageButton(
+                      deviceWidth: deviceWidth,
+                      onTap: () => context.push(Routes.deleteAccRoute),
+                      iconData: Icons.delete_outlined,
+                      title: StringsManager.deleteAcc,
+                    ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          left: PaddingManager.p12,
+                          bottom: PaddingManager.p12,
+                          top: PaddingManager.p12,
+                        ),
+                        child: Text(
+                          StringsManager.generalSpacer,
+                          style: StyleManager.settingsPageSpacerTextStyle,
+                        ),
+                      ),
+                    ),
+                    Consumer<ThemeProvider>(
+                      builder: (context, themeProvider, child) {
+                        return SettingsPageToggle(
+                          deviceWidth: deviceWidth,
+                          iconData: themeProvider.isDarkMode
+                              ? Icons.dark_mode
+                              : Icons.light_mode,
+                          title: 'Dark Mode',
+                          value: themeProvider.isDarkMode,
+                          onChanged: (value) {
+                            themeProvider.toggleTheme();
+                          },
+                        );
+                      },
+                    ),
+                    SettingsPageButton(
+                      deviceWidth: deviceWidth,
+                      onTap: () {
+                        //TODO:
+                      },
+                      iconData: Icons.help_outline,
+                      title: StringsManager.support,
+                    ),
+                    SettingsPageButton(
+                      deviceWidth: deviceWidth,
+                      onTap: () {
+                        //TODO:
+                      },
+                      iconData: Icons.library_books_outlined,
+                      title: StringsManager.termsOfService,
+                    ),
+                  ],
+                ).animate().fadeIn(
+                      duration: 500.ms,
+                    ),
+              ),
             ),
-          ),
-          PremiumAwareBannerAd(pageName: 'settings'),
-        ],
+            PremiumAwareBannerAd(pageName: 'settings'),
+          ],
+        ),
       ),
     );
   }

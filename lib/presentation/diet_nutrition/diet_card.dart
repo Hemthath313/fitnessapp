@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 
 Widget buildDietCard(
@@ -37,7 +38,7 @@ Widget buildDietCard(
             alignment: Alignment.center,
             child: Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 26, // Removed SizeManager.s26 for direct value
                 fontWeight: FontWeight.bold,
                 color: Colors.white,

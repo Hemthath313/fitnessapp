@@ -167,7 +167,7 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         backgroundColor: ColorManager.background,
         elevation: 0,
-        title: const Text('AI Coach', style: TextStyle(color: Colors.white)),
+        title: Text('AI Coach', style: TextStyle(color: ColorManager.textPrimary)),
         centerTitle: true,
         actions: [
           Container(
@@ -231,7 +231,7 @@ class _ChatScreenState extends State<ChatScreen> {
           SizedBox(height: 16.h),
           Text(
             'Ask me anything about fitness!',
-            style: TextStyle(color: Colors.white70, fontSize: 16.sp),
+            style: TextStyle(color: ColorManager.textSecondary, fontSize: 16.sp),
           ),
         ],
       ),
@@ -250,7 +250,7 @@ class _ChatScreenState extends State<ChatScreen> {
           return ActionChip(
             label: Text(_suggestions[index]),
             backgroundColor: ColorManager.surface,
-            labelStyle: TextStyle(color: Colors.white, fontSize: 12.sp),
+            labelStyle: TextStyle(color: ColorManager.textPrimary, fontSize: 12.sp),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
               side: BorderSide(color: ColorManager.primary.withOpacity(0.3)),
@@ -353,11 +353,11 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: TextField(
               controller: _controller,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: ColorManager.textPrimary),
               enabled: !_limitReached,
               decoration: InputDecoration(
                 hintText: _limitReached ? 'Daily limit reached' : 'Ask a question...',
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
+                hintStyle: TextStyle(color: ColorManager.surface),
                 filled: true,
                 fillColor: ColorManager.background,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -401,7 +401,7 @@ class ChatMessage {
 //   @override
 //   Widget build(BuildContext context) {
 //     return Scaffold(
-//       backgroundColor: Colors.black,
+//       backgroundColor: ColorManager.background,
 //       body: Center(
 //         child: Column(
 //           mainAxisAlignment: MainAxisAlignment.center,
@@ -416,7 +416,7 @@ class ChatMessage {
 //             const Text(
 //               'Coming Soon',
 //               style: TextStyle(
-//                 color: Colors.white,
+//                 color: ColorManager.textPrimary,
 //                 fontSize: 28,
 //                 fontWeight: FontWeight.bold,
 //               ),
@@ -425,7 +425,7 @@ class ChatMessage {
 //             const Text(
 //               'Stay tuned for exciting updates!',
 //               style: TextStyle(
-//                 color: Colors.white54,
+//                 color: ColorManager.textTertiary,
 //                 fontSize: 16,
 //               ),
 //             ),

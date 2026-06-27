@@ -48,10 +48,10 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
       context: context,
       builder: (c) => AlertDialog(
         backgroundColor: ColorManager.background,
-        title: const Text('Reset Weekly Plan?', style: TextStyle(color: Colors.white)),
-        content: const Text(
+        title: Text('Reset Weekly Plan?', style: TextStyle(color: ColorManager.textPrimary)),
+        content: Text(
           'This will delete all AI-generated exercises from your schedule. Grouped workouts (e.g. [Monday]...) will be removed.',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: ColorManager.textSecondary),
         ),
         actions: [
           TextButton(
@@ -127,8 +127,8 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                       else 
                         ElevatedButton.icon(
                           onPressed: () => context.push(Routes.workoutGeneratorRoute),
-                          icon: const Icon(Icons.auto_awesome, color: Colors.white),
-                          label: const Text('AI Build', style: TextStyle(color: Colors.white)),
+                          icon: Icon(Icons.auto_awesome, color: ColorManager.textPrimary),
+                          label: Text('AI Build', style: TextStyle(color: ColorManager.textPrimary)),
                           style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
                         ),
                     ],
@@ -188,7 +188,7 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                           decoration: BoxDecoration(
                             color: ColorManager.surface,
                             borderRadius: BorderRadius.circular(12.r),
-                            border: Border.all(color: Colors.white10),
+                            border: Border.all(color: ColorManager.divider),
                           ),
                           child: Theme(
                             data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -218,10 +218,10 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                                         ),
                                       );
                                     },
-                                    icon: Icon(Icons.play_arrow, size: 16.sp, color: Colors.white),
+                                    icon: Icon(Icons.play_arrow, size: 16.sp, color: ColorManager.textPrimary),
                                     label: Text(
                                       'Start Day', 
-                                      style: TextStyle(fontSize: 12.sp, color: Colors.white, fontWeight: FontWeight.bold)
+                                      style: TextStyle(fontSize: 12.sp, color: ColorManager.textPrimary, fontWeight: FontWeight.bold)
                                     ),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: ColorManager.gradientStart,
@@ -234,7 +234,7 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                               ),
                               subtitle: Text(
                                 '${workouts.length} Exercises',
-                                style: TextStyle(color: Colors.white54, fontSize: 12.sp),
+                                style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                               ),
                               children: workouts.map((w) => _buildWorkoutCard(
                                 workout: w,
@@ -249,7 +249,7 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                       if (otherWorkouts.isNotEmpty) ...[
                         Padding(
                           padding: EdgeInsets.symmetric(vertical: 12.h),
-                          child: const Text('Other Workouts', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          child: Text('Other Workouts', style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold)),
                         ),
                         ...otherWorkouts.map((w) => _buildWorkoutCard(
                           workout: w,
@@ -280,22 +280,22 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
           SizedBox(height: 20.h),
           Text(
             'No Weekly Plan',
-            style: TextStyle(color: Colors.white, fontSize: 20.sp, fontWeight: FontWeight.bold),
+            style: TextStyle(color: ColorManager.textPrimary, fontSize: 20.sp, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 10.h),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 40.w),
-            child: const Text(
+            child: Text(
               'Use AI to generate a full weekly schedule instantly.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: ColorManager.textSecondary),
             ),
           ),
           SizedBox(height: 24.h),
           ElevatedButton.icon(
             onPressed: () => context.push(Routes.workoutGeneratorRoute),
-            icon: const Icon(Icons.auto_awesome, color: Colors.white),
-            label: const Text('Generate Plan', style: TextStyle(color: Colors.white)),
+            icon: Icon(Icons.auto_awesome, color: ColorManager.textPrimary),
+            label: Text('Generate Plan', style: TextStyle(color: ColorManager.textPrimary)),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.purple,
               padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 16.h),
@@ -331,9 +331,9 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
       decoration: isGrouped
           ? null
           : BoxDecoration(
-              color: ColorManager.black87,
+              color: ColorManager.surfaceDark,
               borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: Colors.white10),
+              border: Border.all(color: ColorManager.divider),
             ),
       child: Row(
         children: [
@@ -353,13 +353,13 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                 Text(
                   displayName,
                   style: TextStyle(
-                      color: Colors.white,
+                      color: ColorManager.textPrimary,
                       fontWeight: FontWeight.w600,
                       fontSize: 16.sp),
                 ),
                 Text(
                   '${workout.setNumber} sets × ${workout.repNumber} reps',
-                  style: TextStyle(color: Colors.white54, fontSize: 12.sp),
+                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                 ),
               ],
             ),
@@ -383,8 +383,8 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                     context: context, // Use the page context, since this method is in the State
                     builder: (c) => AlertDialog(
                       backgroundColor: ColorManager.background,
-                      title: const Text('Delete Workout?', style: TextStyle(color: Colors.white)),
-                      content: Text('Delete "$displayName"?', style: const TextStyle(color: Colors.white70)),
+                      title: Text('Delete Workout?', style: TextStyle(color: ColorManager.textPrimary)),
+                      content: Text('Delete "$displayName"?', style: TextStyle(color: ColorManager.textSecondary)),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(c, false),
@@ -450,7 +450,7 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
         } catch (_) {}
 
         return AlertDialog(
-          backgroundColor: ColorManager.darkGrey,
+          backgroundColor: ColorManager.background,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(SizeManager.s20.r),
           ),
@@ -463,7 +463,7 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                 child: Text(
                   '${workout.name} Timer',
                   style: TextStyle(
-                    color: ColorManager.white,
+                    color: ColorManager.textPrimary,
                     fontSize: SizeManager.s20.sp,
                     fontWeight: FontWeight.bold,
                   ),

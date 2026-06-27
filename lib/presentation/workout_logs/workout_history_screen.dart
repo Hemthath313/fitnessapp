@@ -22,12 +22,12 @@ class WorkoutHistoryScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: AppBar(
-        title: const Text('Workout History', style: TextStyle(color: Colors.white)),
+        title: Text('Workout History', style: TextStyle(color: ColorManager.textPrimary)),
         backgroundColor: ColorManager.background,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
         actions: [
           IconButton(
-            icon: const Icon(Icons.file_download, color: ColorManager.primary),
+            icon: Icon(Icons.file_download, color: ColorManager.primary),
             onPressed: () {
               if (subProvider.isPremium) {
                 _exportLogs(context, logService);
@@ -70,7 +70,7 @@ class WorkoutHistoryScreen extends StatelessWidget {
                 child: ExpansionTile(
                   iconColor: ColorManager.primary,
                   collapsedIconColor: Colors.white,
-                  title: Text(log.exerciseName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  title: Text(log.exerciseName, style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold)),
                   subtitle: Text(
                     '${DateFormat('MMM dd, yyyy').format(log.date)} • ${log.category}',
                     style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
@@ -88,13 +88,13 @@ class WorkoutHistoryScreen extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text('Set ${entry.key + 1}', style: const TextStyle(color: Colors.white70)),
-                                  Text('${entry.value.reps} reps @ ${entry.value.weight} kg', style: const TextStyle(color: Colors.white)),
+                                  Text('${entry.value.reps} reps @ ${entry.value.weight} kg', style: TextStyle(color: ColorManager.textPrimary)),
                                 ],
                               ),
                             );
                           }),
                           if (log.notes != null && log.notes!.isNotEmpty) ...[
-                            const Divider(color: Colors.white10),
+                            Divider(color: ColorManager.divider),
                             Text('Notes:', style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),
                             Text(log.notes!, style: const TextStyle(color: Colors.white70)),
                           ],
@@ -133,14 +133,14 @@ class WorkoutHistoryScreen extends StatelessWidget {
         context: context,
         builder: (context) => AlertDialog(
           backgroundColor: ColorManager.surface,
-          title: const Text('Export Logs (CSV)', style: TextStyle(color: Colors.white)),
+          title: Text('Export Logs (CSV)', style: TextStyle(color: ColorManager.textPrimary)),
           content: SingleChildScrollView(
             child: Text(csv, style: TextStyle(color: ColorManager.textSecondary, fontSize: 10.sp, fontFamily: 'monospace')),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Close', style: TextStyle(color: Colors.white)),
+              child: Text('Close', style: TextStyle(color: ColorManager.textPrimary)),
             ),
             ElevatedButton(
               onPressed: () {
@@ -169,7 +169,7 @@ class WorkoutHistoryScreen extends StatelessWidget {
           children: [
             Icon(Icons.star, color: Colors.amber),
             SizedBox(width: 10.w),
-            Text('Pro Feature', style: TextStyle(color: Colors.white)),
+            Text('Pro Feature', style: TextStyle(color: ColorManager.textPrimary)),
           ],
         ),
         content: Text(

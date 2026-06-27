@@ -290,8 +290,7 @@ class FitnessDataWidget extends StatelessWidget {
                                               StringsManager.liters,
                                               overflow: TextOverflow.clip,
                                               softWrap: true,
-                                              // style: StyleManager
-                                              //     .homePageS12RegularWhite2,
+                                              style: StyleManager.homePageS12RegularWhite2,
                                             ),
                                           ),
                                         ],

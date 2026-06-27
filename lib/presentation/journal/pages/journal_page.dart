@@ -152,16 +152,16 @@ class _JournalPageState extends State<JournalPage> {
              decoration: BoxDecoration(
                color: ColorManager.background,
                borderRadius: BorderRadius.circular(12.r),
-               border: Border.all(color: Colors.white10),
+               border: Border.all(color: ColorManager.divider),
              ),
              child: DropdownButtonHideUnderline(
                child: DropdownButton<WarmupRoutine>(
                  value: _selectedWarmup,
-                 hint: Text('Select Target (e.g. Leg Day)', style: TextStyle(color: Colors.white54, fontSize: 14.sp)),
+                 hint: Text('Select Target (e.g. Leg Day)', style: TextStyle(color: ColorManager.textTertiary, fontSize: 14.sp)),
                  dropdownColor: ColorManager.background,
                  isExpanded: true,
                  icon: Icon(Icons.keyboard_arrow_down, color: ColorManager.primary),
-                 style: TextStyle(color: Colors.white, fontSize: 14.sp),
+                 style: TextStyle(color: ColorManager.textPrimary, fontSize: 14.sp),
                  items: WarmupData.routines.map((WarmupRoutine routine) {
                    return DropdownMenuItem<WarmupRoutine>(
                      value: routine,
@@ -185,7 +185,7 @@ class _JournalPageState extends State<JournalPage> {
                 TextButton.icon(
                   onPressed: () => setState(() => _selectedWarmup = null),
                   icon: Icon(Icons.refresh, size: 14.sp, color: Colors.white70),
-                  label: Text('Reset', style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
+                  label: Text('Reset', style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.zero,
                     minimumSize: Size.zero,
@@ -207,9 +207,9 @@ class _JournalPageState extends State<JournalPage> {
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: ColorManager.surfaceLight,
         borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: ColorManager.divider),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,7 +232,7 @@ class _JournalPageState extends State<JournalPage> {
                   children: [
                     Text(
                       exercise.name,
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14.sp),
+                      style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold, fontSize: 14.sp),
                     ),
                     Text(
                       exercise.durationOrReps,
@@ -243,7 +243,7 @@ class _JournalPageState extends State<JournalPage> {
                 SizedBox(height: 4.h),
                 Text(
                   exercise.description,
-                  style: TextStyle(color: Colors.white60, fontSize: 12.sp),
+                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
                 ),
               ],
             ),
@@ -282,7 +282,7 @@ class _JournalPageState extends State<JournalPage> {
                 Text(
                   'Upgrade to Pro!',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: ColorManager.textPrimary,
                     fontWeight: FontWeight.bold,
                     fontSize: SizeManager.s18.sp,
                   ),
@@ -291,7 +291,7 @@ class _JournalPageState extends State<JournalPage> {
                 Text(
                   'Ads-free, AI Coach, Pro Tools & More.',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
+                    color: ColorManager.textPrimary.withOpacity(0.85),
                     fontSize: SizeManager.s12.sp,
                   ),
                 ),
@@ -364,7 +364,7 @@ class _JournalPageState extends State<JournalPage> {
           Text(
             'Muscle recovery is peak between 7-9 hours of sleep. Gemini says: Rest is your secret weapon! Tracking your consistency leads to 2x faster results.',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
+              color: ColorManager.textPrimary.withOpacity(0.85),
               fontSize: SizeManager.s14.sp,
               height: 1.4,
             ),
@@ -561,7 +561,7 @@ class _JournalPageState extends State<JournalPage> {
               Text(
                 'AI Personal Coach',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: ColorManager.textPrimary,
                   fontSize: SizeManager.s18.sp,
                   fontWeight: FontWeight.bold,
                 ),

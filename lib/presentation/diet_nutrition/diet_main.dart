@@ -120,13 +120,13 @@ class _DietMainState extends State<DietMain>
     }
 
     return Scaffold(
-      backgroundColor: ColorManager.black,
+      backgroundColor: ColorManager.background,
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: ColorManager.black,
-        title: const Text(
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
+        backgroundColor: ColorManager.background,
+        title: Text(
           'Nutrition Hub',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         elevation: 0,
@@ -150,10 +150,10 @@ class _DietMainState extends State<DietMain>
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Your Active Plan',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: ColorManager.textPrimary,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -212,9 +212,9 @@ class _DietMainState extends State<DietMain>
                                     child: const Icon(Icons.lock, color: Colors.amber, size: 32),
                                   ),
                                   const SizedBox(height: 8),
-                                  const Text(
+                                  Text(
                                     'Tap to Unlock',
-                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                    style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold),
                                   )
                                 ],
                               ),
@@ -231,16 +231,16 @@ class _DietMainState extends State<DietMain>
                     child: Text(
                       'Please set your goal in the Profile tab to unlock your nutrition plan.',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      style: TextStyle(color: ColorManager.textSecondary, fontSize: 14),
                     ),
                   ),
                 ),
 
               const SizedBox(height: 32),
-              const Text(
+              Text(
                 'Strategy Highlights',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: ColorManager.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -251,7 +251,7 @@ class _DietMainState extends State<DietMain>
                 decoration: BoxDecoration(
                   color: ColorManager.surface,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white10),
+                  border: Border.all(color: ColorManager.divider),
                 ),
                 child: Column(
                   children: tips.map((tip) => _buildTipItem(tip)).toList(),
@@ -259,10 +259,10 @@ class _DietMainState extends State<DietMain>
               ),
               const SizedBox(height: 40),
              
-              const Text(
+              Text(
                 'Tools & Resources',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: ColorManager.textPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -295,17 +295,17 @@ class _DietMainState extends State<DietMain>
                           color: ColorManager.primary.withOpacity(0.2),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.menu_book, color: ColorManager.primary, size: 24),
+                        child: Icon(Icons.menu_book, color: ColorManager.primary, size: 24),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          children: [
                             Text(
                               'Food Library',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: ColorManager.textPrimary,
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -314,14 +314,14 @@ class _DietMainState extends State<DietMain>
                             Text(
                               'Browse protein sources & nutritional info',
                               style: TextStyle(
-                                color: Colors.white70,
+                                color: ColorManager.textSecondary,
                                 fontSize: 13,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      const Icon(Icons.arrow_forward_ios, color: Colors.white30, size: 16),
+                      Icon(Icons.arrow_forward_ios, color: ColorManager.divider, size: 16),
                     ],
                   ),
                 ),
@@ -355,20 +355,20 @@ class _DietMainState extends State<DietMain>
           CircleAvatar(
             radius: 25,
             backgroundColor: Colors.white24,
-            child: Icon(icon, color: Colors.white, size: 30),
+            child: Icon(icon, color: ColorManager.textPrimary, size: 30),
           ),
           const SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Current Sprint',
-                style: TextStyle(color: Colors.white70, fontSize: 12),
+                style: TextStyle(color: ColorManager.textSecondary, fontSize: 12),
               ),
               Text(
                 title,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: ColorManager.textPrimary,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
@@ -386,12 +386,12 @@ class _DietMainState extends State<DietMain>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.check_circle_outline, color: ColorManager.primary, size: 18),
+          Icon(Icons.check_circle_outline, color: ColorManager.primary, size: 18),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(color: Colors.white70, fontSize: 14, height: 1.4),
+              style: TextStyle(color: ColorManager.textSecondary, fontSize: 14, height: 1.4),
             ),
           ),
         ],
@@ -411,10 +411,10 @@ class _DietMainState extends State<DietMain>
 //     return Scaffold(
 //       appBar: AppBar(
 //         backgroundColor: ColorManager.black54,
-//         iconTheme: const IconThemeData(color: Colors.white),
+//         iconTheme: IconThemeData(color: ColorManager.textPrimary),
 //         // title: const Text(
 //         //   'Diet Plans',
-//         //   style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+//         //   style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold),
 //         // ),
 //         centerTitle: true,
 //         elevation: 0,
@@ -424,7 +424,7 @@ class _DietMainState extends State<DietMain>
 //         child: Text(
 //           'Coming Soon',
 //           style: TextStyle(
-//             color: Colors.white,
+//             color: ColorManager.textPrimary,
 //             fontSize: 24,
 //             fontWeight: FontWeight.bold,
 //           ),

@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'dart:async';
 import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
 import 'package:fitness_app/utils/router/router.dart';
@@ -107,7 +108,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Pure black background
+      backgroundColor: ColorManager.background, // Pure black background
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

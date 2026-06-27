@@ -36,12 +36,12 @@ class WorkoutSplitListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
+        title: Text(
           'Workout Splits',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: ColorManager.textPrimary),
         ),
-        backgroundColor: ColorManager.darkGrey,
+        backgroundColor: ColorManager.background,
       ),
       body: Column(
         children: [
@@ -51,7 +51,7 @@ class WorkoutSplitListPage extends StatelessWidget {
               '"Push yourself because no one else is going to do it for you."',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white,
+                color: ColorManager.textPrimary,
                 fontSize: 16,
                 fontStyle: FontStyle.italic,
               ),
@@ -90,8 +90,8 @@ class WorkoutSplitListPage extends StatelessWidget {
                       ),
                       title: Text(
                         split.name,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: ColorManager.textPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
                         ),
@@ -111,7 +111,7 @@ class WorkoutSplitListPage extends StatelessWidget {
                           const SizedBox(height: 5),
                           Text(
                             '${split.recommendedDays} days/week',
-                            style: const TextStyle(color: Colors.white),
+                            style: TextStyle(color: ColorManager.textPrimary),
                           ),
                         ],
                       ),
@@ -124,7 +124,7 @@ class WorkoutSplitListPage extends StatelessWidget {
           ),
         ],
       ),
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
     );
   }
 }

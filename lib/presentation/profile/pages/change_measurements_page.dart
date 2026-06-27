@@ -122,7 +122,7 @@ class _ChangeMeasurementsPageState extends State<ChangeMeasurementsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       appBar: PreferredSize(
         preferredSize: Size(
           double.infinity,

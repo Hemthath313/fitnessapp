@@ -155,9 +155,9 @@ class _AddDataPageState extends State<AddDataPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       appBar: AppBar(
-        backgroundColor: ColorManager.darkGrey,
+        backgroundColor: ColorManager.background,
         elevation: SizeManager.s0,
       ),
       body: SafeArea(

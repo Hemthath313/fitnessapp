@@ -34,8 +34,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('Go Premium', style: TextStyle(color: Colors.white)),
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
+        title: Text('Go Premium', style: TextStyle(color: ColorManager.textPrimary)),
       ),
       body: subProvider.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -59,7 +59,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                       style: TextStyle(
                         fontSize: 24.sp,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: ColorManager.textPrimary,
                       ),
                     ),
                   ),
@@ -84,7 +84,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: ColorManager.textPrimary,
                       ),
                     ),
                   ),
@@ -101,9 +101,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
                         children: [
                           Icon(Icons.check_circle, color: ColorManager.primary),
                           SizedBox(width: SizeManager.s12.w),
-                          const Text(
+                          Text(
                             'You are already a Premium member!',
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -140,7 +140,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
+                        color: ColorManager.surface,
                         borderRadius: BorderRadius.circular(20.r),
                       ),
                       child: Row(
@@ -292,7 +292,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                   ),
                 Text(
                   product.title.split('(')[0].trim(),
-                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: ColorManager.textPrimary),
                 ),
                 Text(
                   product.description,

@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -165,7 +166,7 @@ class _ExerciseVideoPlayerState extends State<ExerciseVideoPlayer> {
       ),
       child: Center(
         child: CircularProgressIndicator(
-          color: Colors.white,
+          color: ColorManager.textPrimary,
         ),
       ),
     );

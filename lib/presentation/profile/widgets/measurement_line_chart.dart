@@ -32,7 +32,7 @@ class MeasurementLineChart extends StatelessWidget {
               child: Text(
                 title,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: ColorManager.textPrimary,
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
                 ),
@@ -112,7 +112,7 @@ class MeasurementLineChart extends StatelessWidget {
                           show: true,
                           drawVerticalLine: false,
                           getDrawingHorizontalLine: (value) => FlLine(
-                            color: Colors.white10,
+                            color: ColorManager.divider,
                             strokeWidth: 1,
                           ),
                         ),

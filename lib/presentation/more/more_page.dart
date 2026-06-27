@@ -63,7 +63,7 @@ class MorePage extends StatelessWidget {
                             Text(
                               '$firstName $surname',
                               style: TextStyle(
-                                color: ColorManager.white,
+                                color: Colors.white,
                                 fontSize: SizeManager.s20.sp,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -72,7 +72,7 @@ class MorePage extends StatelessWidget {
                             Text(
                               email,
                               style: TextStyle(
-                                color: ColorManager.white70,
+                                color: ColorManager.textSecondary,
                                 fontSize: SizeManager.s14.sp,
                               ),
                             ),
@@ -168,7 +168,7 @@ class MorePage extends StatelessWidget {
                               themeProvider.isDarkMode
                                   ? Icons.dark_mode_rounded
                                   : Icons.light_mode_rounded,
-                              color: ColorManager.primary,
+                              color: ColorManager.textSecondary,
                               size: SizeManager.s24.sp,
                             ),
                           ),
@@ -298,14 +298,14 @@ class MorePage extends StatelessWidget {
                   Text(
                     'Fitness App',
                     style: TextStyle(
-                      color: ColorManager.white70,
+                      color: ColorManager.textSecondary,
                       fontSize: SizeManager.s14.sp,
                     ),
                   ),
                   Text(
                     'Version 1.0.0',
                     style: TextStyle(
-                      color: ColorManager.white70,
+                      color: ColorManager.textSecondary,
                       fontSize: SizeManager.s12.sp,
                     ),
                   ),
@@ -322,7 +322,7 @@ class MorePage extends StatelessWidget {
     return Text(
       title,
       style: TextStyle(
-        color: ColorManager.white,
+        color: ColorManager.textPrimary,
         fontSize: SizeManager.s18.sp,
         fontWeight: FontWeight.bold,
       ),
@@ -346,7 +346,7 @@ class MorePage extends StatelessWidget {
         decoration: BoxDecoration(
           color: isDangerous
               ? ColorManager.red.withOpacity(0.1)
-              : ColorManager.black87,
+              : ColorManager.surface,
           borderRadius: BorderRadius.circular(SizeManager.s16.r),
           border: Border.all(
             color: isDangerous ? ColorManager.red : color.withOpacity(0.3),
@@ -375,7 +375,7 @@ class MorePage extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      color: ColorManager.white,
+                      color: ColorManager.textPrimary,
                       fontSize: SizeManager.s16.sp,
                       fontWeight: FontWeight.bold,
                     ),
@@ -384,7 +384,7 @@ class MorePage extends StatelessWidget {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: ColorManager.white70,
+                      color: ColorManager.textSecondary,
                       fontSize: SizeManager.s12.sp,
                     ),
                   ),
@@ -393,7 +393,7 @@ class MorePage extends StatelessWidget {
             ),
             Icon(
               Icons.arrow_forward_ios,
-              color: ColorManager.white70,
+              color: ColorManager.textSecondary,
               size: SizeManager.s16.sp,
             ),
           ],
@@ -407,14 +407,14 @@ class MorePage extends StatelessWidget {
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: ColorManager.darkGrey,
+        backgroundColor: ColorManager.background,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(SizeManager.s16.r),
         ),
         title: Text(
           'Logout',
           style: TextStyle(
-            color: ColorManager.white,
+            color: ColorManager.textPrimary,
             fontSize: SizeManager.s18.sp,
             fontWeight: FontWeight.bold,
           ),
@@ -422,7 +422,7 @@ class MorePage extends StatelessWidget {
         content: Text(
           'Are you sure you want to logout?',
           style: TextStyle(
-            color: ColorManager.white70,
+            color: ColorManager.textSecondary,
             fontSize: SizeManager.s14.sp,
           ),
         ),
@@ -431,7 +431,7 @@ class MorePage extends StatelessWidget {
             onPressed: () => Navigator.pop(dialogContext),
             child: Text(
               'Cancel',
-              style: TextStyle(color: ColorManager.white70),
+              style: TextStyle(color: ColorManager.textSecondary),
             ),
           ),
           _LogoutButton(parentContext: context),
@@ -537,13 +537,13 @@ class _LogoutButtonState extends State<_LogoutButton> {
               width: 16.w,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(ColorManager.white),
+                valueColor: AlwaysStoppedAnimation<Color>(ColorManager.textPrimary),
               ),
             )
           : Text(
               'Logout',
               style: TextStyle(
-                color: ColorManager.white,
+                color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),

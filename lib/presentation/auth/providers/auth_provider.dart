@@ -139,7 +139,7 @@ class AuthProvider with ChangeNotifier {
               child: Padding(
                 padding: const EdgeInsets.all(PaddingManager.p40),
                 child: AlertDialog(
-                  backgroundColor: ColorManager.darkGrey,
+                  backgroundColor: ColorManager.background,
                   title: Text(
                     StringsManager.success,
                     textAlign: TextAlign.center,
@@ -166,7 +166,7 @@ class AuthProvider with ChangeNotifier {
               child: Padding(
                 padding: const EdgeInsets.all(PaddingManager.p40),
                 child: AlertDialog(
-                  backgroundColor: ColorManager.darkGrey,
+                  backgroundColor: ColorManager.background,
                   title: Text(
                     StringsManager.wrongEmail,
                     textAlign: TextAlign.center,

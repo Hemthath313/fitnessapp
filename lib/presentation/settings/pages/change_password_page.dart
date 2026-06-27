@@ -51,7 +51,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     }
 
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       appBar: PreferredSize(
         preferredSize: Size(
           double.infinity,

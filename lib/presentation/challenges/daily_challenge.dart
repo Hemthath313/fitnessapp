@@ -79,7 +79,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
   void showExerciseDetails(BuildContext context, ChallengeExercise exercise) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.black,
+      backgroundColor: ColorManager.background,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -148,19 +148,19 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
     final exercises = ChallengeData.sixPackCurriculum[widget.day] ?? [];
 
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: ColorManager.darkGrey,
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
+        backgroundColor: ColorManager.background,
         title: Text('Day ${widget.day} - 3 Workouts',
-            style: const TextStyle(color: Colors.white)),
+            style: TextStyle(color: ColorManager.textPrimary)),
       ),
       body: Stack(
         children: [
           if (exercises.isEmpty)
-            const Center(
+            Center(
               child: Text('Curriculum not found for this day.',
-                  style: TextStyle(color: Colors.white)),
+                  style: TextStyle(color: ColorManager.textPrimary)),
             )
           else
             ListView.builder(
@@ -305,7 +305,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
         content: Text(
           'Keep going! Only ${30 - widget.day} days left for your six-pack transformation.',
           textAlign: TextAlign.center,
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: ColorManager.textPrimary),
         ),
         actions: [
           Center(
@@ -344,14 +344,14 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'Unbelievable! You\'ve crushed the 30-Day Six-Pack Challenge. We\'d love to hear your story!',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: ColorManager.textPrimary),
             ),
             SizedBox(height: 16.h),
             TextField(
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: ColorManager.textPrimary),
               maxLines: 3,
               decoration: InputDecoration(
                 hintText: 'Share your feedback...',
@@ -423,7 +423,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
                 style: TextStyle(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: ColorManager.textPrimary,
                 ),
               ),
               SizedBox(height: SizeManager.s12.h),

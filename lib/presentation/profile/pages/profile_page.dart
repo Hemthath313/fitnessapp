@@ -67,7 +67,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               width: deviceWidth,
                               height: SizeManager.s60.h,
                               decoration: BoxDecoration(
-                                color: ColorManager.black87,
+                                color: ColorManager.surfaceDark,
                                 borderRadius: BorderRadius.circular(
                                   RadiusManager.r40.r,
                                 ),
@@ -142,7 +142,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s150.w,
-                                      color: ColorManager.black87,
+                                      color: ColorManager.surfaceDark,
                                     )
                                   ],
                                 ),
@@ -170,7 +170,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s130.w,
-                                      color: ColorManager.black87,
+                                      color: ColorManager.surfaceDark,
                                     )
                                   ],
                                 ),
@@ -198,7 +198,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s110.w,
-                                      color: ColorManager.black87,
+                                      color: ColorManager.surfaceDark,
                                     )
                                   ],
                                 ),
@@ -226,7 +226,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s100.w,
-                                      color: ColorManager.black87,
+                                      color: ColorManager.surfaceDark,
                                     )
                                   ],
                                 ),
@@ -254,7 +254,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s140.w,
-                                      color: ColorManager.black87,
+                                      color: ColorManager.surfaceDark,
                                     )
                                   ],
                                 ),
@@ -282,7 +282,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s140.w,
-                                      color: ColorManager.black87,
+                                      color: ColorManager.surfaceDark,
                                     )
                                   ],
                                 ),
@@ -310,7 +310,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s150.w,
-                                      color: ColorManager.black87,
+                                      color: ColorManager.surfaceDark,
                                     )
                                   ],
                                 ),
@@ -338,7 +338,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s140.w,
-                                      color: ColorManager.black87,
+                                      color: ColorManager.surfaceDark,
                                     )
                                   ],
                                 ),
@@ -472,7 +472,7 @@ class _ProfilePageState extends State<ProfilePage> {
               Text(
                 'Advanced Analytics',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: ColorManager.textPrimary,
                   fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
                 ),
@@ -495,7 +495,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Text(
                     'PRO',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: ColorManager.textPrimary,
                       fontSize: 10.sp,
                       fontWeight: FontWeight.bold,
                     ),
@@ -535,7 +535,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Text(
                         'Unlock Advanced Metrics',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: ColorManager.textPrimary,
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
                         ),

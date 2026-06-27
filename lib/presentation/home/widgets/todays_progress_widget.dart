@@ -55,7 +55,7 @@ class TodaysMotivationWidget extends StatelessWidget {
       child: Container(
         width: deviceWidth,
         decoration: BoxDecoration(
-          color: ColorManager.black87,
+          color: ColorManager.surfaceDark,
           borderRadius: BorderRadius.circular(24),
         ),
         child: Padding(

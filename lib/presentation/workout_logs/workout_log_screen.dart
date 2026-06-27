@@ -69,9 +69,9 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: AppBar(
-        title: const Text('Log Workout', style: TextStyle(color: Colors.white)),
+        title: Text('Log Workout', style: TextStyle(color: ColorManager.textPrimary)),
         backgroundColor: ColorManager.background,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.w),
@@ -80,7 +80,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
           children: [
             TextField(
               controller: _exerciseController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: ColorManager.textPrimary),
               decoration: InputDecoration(
                 labelText: 'Exercise Name',
                 labelStyle: TextStyle(color: ColorManager.textSecondary),
@@ -90,11 +90,11 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
             SizedBox(height: 20.h),
             Row(
               children: [
-                Text('Category: ', style: TextStyle(color: Colors.white, fontSize: 16.sp)),
+                Text('Category: ', style: TextStyle(color: ColorManager.textPrimary, fontSize: 16.sp)),
                 DropdownButton<String>(
                   value: _category,
                   dropdownColor: ColorManager.surface,
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: ColorManager.textPrimary),
                   items: ['Strength', 'Cardio', 'Mobility', 'Other']
                       .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                       .toList(),
@@ -103,7 +103,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
               ],
             ),
             SizedBox(height: 20.h),
-            Text('Sets', style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.bold)),
+            Text('Sets', style: TextStyle(color: ColorManager.textPrimary, fontSize: 18.sp, fontWeight: FontWeight.bold)),
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -122,7 +122,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                       Expanded(
                         child: TextField(
                           keyboardType: TextInputType.number,
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: ColorManager.textPrimary),
                           decoration: const InputDecoration(labelText: 'Kg', labelStyle: TextStyle(color: Colors.grey)),
                           onChanged: (val) => _sets[index] = WorkoutSet(weight: double.tryParse(val) ?? 0, reps: _sets[index].reps),
                         ),
@@ -131,7 +131,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                       Expanded(
                         child: TextField(
                           keyboardType: TextInputType.number,
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: ColorManager.textPrimary),
                           decoration: const InputDecoration(labelText: 'Reps', labelStyle: TextStyle(color: Colors.grey)),
                           onChanged: (val) => _sets[index] = WorkoutSet(weight: _sets[index].weight, reps: int.tryParse(val) ?? 0),
                         ),
@@ -147,14 +147,14 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
             ),
             TextButton.icon(
               onPressed: _addSet,
-              icon: const Icon(Icons.add, color: ColorManager.primary),
-              label: const Text('Add Set', style: TextStyle(color: ColorManager.primary)),
+              icon: Icon(Icons.add, color: ColorManager.primary),
+              label: Text('Add Set', style: TextStyle(color: ColorManager.primary)),
             ),
             SizedBox(height: 20.h),
             TextField(
               controller: _notesController,
               maxLines: 3,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: ColorManager.textPrimary),
               decoration: InputDecoration(
                 labelText: 'Notes',
                 labelStyle: TextStyle(color: ColorManager.textSecondary),

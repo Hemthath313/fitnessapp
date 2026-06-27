@@ -87,23 +87,23 @@ class _AddProgressPhotoScreenState extends State<AddProgressPhotoScreen> {
               Text(
                 'Choose Photo Source',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: ColorManager.textPrimary,
                   fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               SizedBox(height: 16.h),
               ListTile(
-                leading: const Icon(Icons.camera_alt, color: ColorManager.primary),
-                title: const Text('Camera', style: TextStyle(color: Colors.white)),
+                leading: Icon(Icons.camera_alt, color: ColorManager.primary),
+                title: Text('Camera', style: TextStyle(color: ColorManager.textPrimary)),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.camera);
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library, color: ColorManager.primary),
-                title: const Text('Gallery', style: TextStyle(color: Colors.white)),
+                leading: Icon(Icons.photo_library, color: ColorManager.primary),
+                title: Text('Gallery', style: TextStyle(color: ColorManager.textPrimary)),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImage(ImageSource.gallery);
@@ -162,9 +162,9 @@ class _AddProgressPhotoScreenState extends State<AddProgressPhotoScreen> {
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: AppBar(
-        title: const Text('Add Progress Photo', style: TextStyle(color: Colors.white)),
+        title: Text('Add Progress Photo', style: TextStyle(color: ColorManager.textPrimary)),
         backgroundColor: ColorManager.background,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(SizeManager.s16.w),
@@ -205,7 +205,7 @@ class _AddProgressPhotoScreenState extends State<AddProgressPhotoScreen> {
             // Category selector
             Text(
               'Photo Category',
-              style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
+              style: TextStyle(color: ColorManager.textPrimary, fontSize: 16.sp, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 12.h),
             Row(
@@ -224,7 +224,7 @@ class _AddProgressPhotoScreenState extends State<AddProgressPhotoScreen> {
             TextField(
               controller: _weightController,
               keyboardType: TextInputType.number,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: ColorManager.textPrimary),
               decoration: InputDecoration(
                 labelText: 'Current Weight (kg)',
                 labelStyle: TextStyle(color: ColorManager.textSecondary),
@@ -236,7 +236,7 @@ class _AddProgressPhotoScreenState extends State<AddProgressPhotoScreen> {
                   borderRadius: BorderRadius.circular(12.r),
                   borderSide: BorderSide.none,
                 ),
-                prefixIcon: const Icon(Icons.monitor_weight, color: ColorManager.primary),
+                prefixIcon: Icon(Icons.monitor_weight, color: ColorManager.primary),
               ),
             ),
 
@@ -246,7 +246,7 @@ class _AddProgressPhotoScreenState extends State<AddProgressPhotoScreen> {
             TextField(
               controller: _notesController,
               maxLines: 3,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: ColorManager.textPrimary),
               decoration: InputDecoration(
                 labelText: 'Notes',
                 labelStyle: TextStyle(color: ColorManager.textSecondary),
@@ -258,7 +258,7 @@ class _AddProgressPhotoScreenState extends State<AddProgressPhotoScreen> {
                   borderRadius: BorderRadius.circular(12.r),
                   borderSide: BorderSide.none,
                 ),
-                prefixIcon: const Icon(Icons.notes, color: ColorManager.primary),
+                prefixIcon: Icon(Icons.notes, color: ColorManager.primary),
               ),
             ),
 

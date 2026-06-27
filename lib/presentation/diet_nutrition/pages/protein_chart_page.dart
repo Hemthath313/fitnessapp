@@ -8,14 +8,14 @@ class ProteinChartPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorManager.black,
+      backgroundColor: ColorManager.background,
       appBar: AppBar(
-        backgroundColor: ColorManager.black,
-        title: const Text(
+        backgroundColor: ColorManager.background,
+        title: Text(
           'Food Library',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold),
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -59,8 +59,8 @@ class ProteinChartPage extends StatelessWidget {
           const SizedBox(width: 12),
           Text(
             title,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: ColorManager.textPrimary,
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
@@ -75,7 +75,7 @@ class ProteinChartPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: ColorManager.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: ColorManager.divider),
       ),
       child: Column(
         children: items.map((item) => _buildFoodItem(item)).toList(),
@@ -86,8 +86,8 @@ class ProteinChartPage extends StatelessWidget {
   Widget _buildFoodItem(FoodItem item) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.white10)),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: ColorManager.divider)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,8 +98,8 @@ class ProteinChartPage extends StatelessWidget {
               Expanded(
                 child: Text(
                   item.name,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: ColorManager.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -107,8 +107,8 @@ class ProteinChartPage extends StatelessWidget {
               ),
               Text(
                 '${item.calories} cal ${item.quantity}',
-                style: const TextStyle(
-                  color: Colors.white54,
+                style: TextStyle(
+                  color: ColorManager.textTertiary,
                   fontSize: 12,
                 ),
               ),

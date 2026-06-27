@@ -61,13 +61,13 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorManager.black,
+      backgroundColor: ColorManager.background,
       appBar: AppBar(
-        iconTheme: IconThemeData(color: ColorManager.white),
-        backgroundColor: ColorManager.black,
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
+        backgroundColor: ColorManager.background,
         title: Text(
           'Select a Body Part',
-          style: TextStyle(color: ColorManager.white),
+          style: TextStyle(color: ColorManager.textPrimary),
         ),
         centerTitle: true,
       ),
@@ -128,8 +128,8 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
                         bodyPart,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: ColorManager.textPrimary,
                           fontSize: 18.0,
                           fontWeight: FontWeight.bold,
                         ),

@@ -32,7 +32,7 @@ class SettingsPageButton extends StatelessWidget {
           width: deviceWidth,
           height: SizeManager.s70.h,
           decoration: BoxDecoration(
-            color: ColorManager.black87,
+            color: ColorManager.surface,
             borderRadius: BorderRadius.circular(
               RadiusManager.r15.r,
             ),
@@ -53,7 +53,7 @@ class SettingsPageButton extends StatelessWidget {
                 child: Icon(
                   iconData,
                   size: SizeManager.s24,
-                  color: ColorManager.white,
+                  color: ColorManager.textPrimary,
                 ),
               )
             ],

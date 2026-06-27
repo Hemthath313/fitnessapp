@@ -63,7 +63,7 @@ class _BoardingPageState extends State<BoardingPage> {
     }
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: ColorManager.black,
+      backgroundColor: ColorManager.background,
       body: Stack(
         children: [
           PageView.builder(
@@ -97,7 +97,7 @@ class _BoardingPageState extends State<BoardingPage> {
               height: SizeManager.s270.h,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: ColorManager.black87,
+                color: ColorManager.surfaceDark,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(RadiusManager.r15.r),
                   topRight: Radius.circular(RadiusManager.r15.r),
@@ -132,7 +132,7 @@ class _BoardingPageState extends State<BoardingPage> {
                           borderRadius: BorderRadius.circular(
                             RadiusManager.r24.r,
                           ),
-                          color: ColorManager.black87,
+                          color: ColorManager.surfaceDark,
                           dotBorder: DotBorder(
                             width: SizeManager.s1_5.w,
                             color: ColorManager.white,

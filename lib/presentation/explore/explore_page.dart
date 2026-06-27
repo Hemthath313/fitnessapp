@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_app/presentation/banner_ads/banner_ad_service.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
@@ -188,15 +189,28 @@ class ExploreCard extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 4.0,
+                                color: Colors.black.withOpacity(0.8),
+                                offset: const Offset(1, 1),
+                              ),
+                            ],
                           ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       description,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(color: Colors.white70),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            blurRadius: 4.0,
+                            color: Colors.black.withOpacity(0.8),
+                            offset: const Offset(1, 1),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

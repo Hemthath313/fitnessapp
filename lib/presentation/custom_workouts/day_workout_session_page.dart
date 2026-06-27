@@ -45,17 +45,17 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
+          icon: Icon(Icons.close, color: ColorManager.textPrimary),
           onPressed: () => _confirmExit(),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.list, color: Colors.white),
+            icon: Icon(Icons.list, color: ColorManager.textPrimary),
             tooltip: 'Workout List',
             onPressed: _showWorkoutList,
           ),
           IconButton(
-            icon: const Icon(Icons.timer_outlined, color: Colors.white),
+            icon: Icon(Icons.timer_outlined, color: ColorManager.textPrimary),
             tooltip: 'Manual Stopwatch',
             onPressed: () => _showManualStopwatch(context),
           ),
@@ -66,7 +66,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
             Text(
               widget.dayName,
               style: TextStyle(
-                color: Colors.white,
+                color: ColorManager.textPrimary,
                 fontWeight: FontWeight.bold,
                 fontSize: 16.sp,
               ),
@@ -74,7 +74,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
             Text(
               'Exercise ${_currentIndex + 1} of ${widget.workouts.length}',
               style: TextStyle(
-                color: Colors.white70,
+                color: ColorManager.textSecondary,
                 fontSize: 12.sp,
               ),
             ),
@@ -97,7 +97,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: ColorManager.darkGrey,
+        backgroundColor: ColorManager.background,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20.r),
         ),
@@ -105,10 +105,10 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
           children: [
             Icon(Icons.timer, color: ColorManager.limerGreen2),
             SizedBox(width: 8.w),
-            const Text(
+            Text(
               'Manual Stopwatch',
               style: TextStyle(
-                color: Colors.white,
+                color: ColorManager.textPrimary,
                 fontFamily: 'Roboto', // Assuming default font
                 fontWeight: FontWeight.bold,
               ),
@@ -148,7 +148,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
             Text(
               'Session Overview',
               style: TextStyle(
-                color: Colors.white,
+                color: ColorManager.textPrimary,
                 fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
               ),
@@ -169,7 +169,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                     decoration: BoxDecoration(
                       color: isCurrent 
                           ? ColorManager.primary.withOpacity(0.2) 
-                          : Colors.white.withOpacity(0.05),
+                          : ColorManager.surface,
                       borderRadius: BorderRadius.circular(12.r),
                       border: isCurrent 
                           ? Border.all(color: ColorManager.primary) 
@@ -192,7 +192,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                       subtitle: Text(
                         '${w.setNumber} Sets × ${w.repNumber} Reps',
                         style: TextStyle(
-                          color: Colors.white38,
+                          color: ColorManager.textTertiary,
                           fontSize: 12.sp,
                         ),
                       ),
@@ -260,7 +260,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                           displayName,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Colors.white,
+                            color: ColorManager.textPrimary,
                             fontSize: 24.sp,
                             fontWeight: FontWeight.bold,
                           ),
@@ -307,7 +307,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: ColorManager.textPrimary,
               ),
             ),
           ),
@@ -350,21 +350,21 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
           SizedBox(height: 32.h),
           Text(
             'Up Next:',
-            style: TextStyle(color: Colors.white54, fontSize: 14.sp),
+            style: TextStyle(color: ColorManager.textTertiary, fontSize: 14.sp),
           ),
           SizedBox(height: 8.h),
           Text(
             nextName,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white, 
+              color: ColorManager.textPrimary, 
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
             ),
           ),
           Text(
              '${nextWorkout.setNumber} sets • ${nextWorkout.repNumber} reps',
-             style: TextStyle(color: Colors.white70, fontSize: 14.sp),
+             style: TextStyle(color: ColorManager.textSecondary, fontSize: 14.sp),
           ),
         ],
         Spacer(),
@@ -414,7 +414,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                Text(
                  'Day Completed!',
                  style: TextStyle(
-                   color: Colors.white,
+                   color: ColorManager.textPrimary,
                    fontSize: 28.sp,
                    fontWeight: FontWeight.bold,
                  ),
@@ -423,7 +423,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                Text(
                  'You crushed ${widget.dayName} workout.',
                  textAlign: TextAlign.center,
-                 style: TextStyle(color: Colors.white70, fontSize: 16.sp),
+                 style: TextStyle(color: ColorManager.textSecondary, fontSize: 16.sp),
                ),
                SizedBox(height: 48.h),
                SizedBox(
@@ -448,7 +448,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                      style: TextStyle(
                        fontSize: 18.sp,
                        fontWeight: FontWeight.bold,
-                       color: Colors.white,
+                       color: ColorManager.textPrimary,
                      ),
                    ),
                  ),
@@ -464,13 +464,13 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       decoration: BoxDecoration(
-        color: Colors.white10,
+        color: ColorManager.divider,
         borderRadius: BorderRadius.circular(20.r),
       ),
       child: Text(
         label,
         style: TextStyle(
-          color: Colors.white,
+          color: ColorManager.textPrimary,
           fontWeight: FontWeight.w500,
           fontSize: 14.sp,
         ),
@@ -501,7 +501,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
       context: context,
       builder: (c) => AlertDialog(
         backgroundColor: ColorManager.background,
-        title: const Text('Exit Workout?', style: TextStyle(color: Colors.white)),
+        title: Text('Exit Workout?', style: TextStyle(color: ColorManager.textPrimary)),
         content: const Text(
           'Your progress for this session will be lost.',
           style: TextStyle(color: Colors.white70),
