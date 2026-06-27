@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:flutter/services.dart';
 
 class IAPService {
@@ -65,6 +66,24 @@ class IAPService {
 
   Future<void> restorePurchases() async {
     await _iap.restorePurchases();
+  }
+
+  /// Android-specific: Check past purchases synchronously to detect expiration.
+  Future<List<PurchaseDetails>?> getAndroidPastPurchases() async {
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      // Accessing the Android-specific platform addition
+      // Note: This requires the platform interface to match. 
+      // If 'InAppPurchaseAndroidPlatformAddition' is not found, ensuring imports.
+      try {
+         final addition = _iap.getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
+         final response = await addition.queryPastPurchases();
+         return response.pastPurchases;
+      } catch (e) {
+        debugPrint('Error querying Android past purchases: $e');
+        return null;
+      }
+    }
+    return null;
   }
 
   void _onPurchaseUpdate(List<PurchaseDetails> purchaseDetailsList) {

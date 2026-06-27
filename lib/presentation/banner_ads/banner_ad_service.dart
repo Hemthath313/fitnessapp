@@ -22,7 +22,6 @@ class BannerAdWidget extends StatefulWidget {
 class _BannerAdWidgetState extends State<BannerAdWidget> {
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
-  String? _errorMessage;
   AdSize? _adSize;
 
   @override
@@ -76,16 +75,10 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
           if (mounted) {
             setState(() {
               _isAdLoaded = true;
-              _errorMessage = null;
             });
           }
         },
         onAdFailedToLoad: (ad, error) {
-          if (mounted) {
-            setState(() {
-              _errorMessage = error.message;
-            });
-          }
           ad.dispose();
         },
       ),
@@ -94,22 +87,16 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_isAdLoaded || _bannerAd == null) {
+      return const SizedBox.shrink();
+    }
+
     final double displayHeight = _adSize?.height.toDouble() ?? 50.0;
 
-    return Container(
+    return SizedBox(
       width: double.infinity,
       height: displayHeight,
-      alignment: Alignment.center,
-      child: _isAdLoaded && _bannerAd != null
-          ? AdWidget(ad: _bannerAd!)
-          : _errorMessage != null
-              ? const SizedBox.shrink()
-              : Center(
-                  child: Text(
-                    'Loading Ad...',
-                    style: TextStyle(color: Colors.grey.withOpacity(0.5), fontSize: 10),
-                  ),
-                ),
+      child: AdWidget(ad: _bannerAd!),
     );
   }
 
@@ -120,18 +107,33 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   }
 }
 
-/// Banner ad that hides for premium users (ad-free experience).
 class PremiumAwareBannerAd extends StatelessWidget {
   final String? pageName;
+  final double bottomMargin;
 
-  const PremiumAwareBannerAd({super.key, this.pageName});
+  const PremiumAwareBannerAd({
+    super.key,
+    this.pageName,
+    this.bottomMargin = 0.0,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Consumer<SubscriptionProvider>(
       builder: (context, subProvider, _) {
         if (subProvider.isPremium) return const SizedBox.shrink();
-        return BannerAdWidget(pageName: pageName);
+        
+        Widget adWidget = BannerAdWidget(pageName: pageName);
+        if (bottomMargin > 0.0) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              adWidget,
+              SizedBox(height: bottomMargin),
+            ],
+          );
+        }
+        return adWidget;
       },
     );
   }

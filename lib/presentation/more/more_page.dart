@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
+import 'package:fitness_app/presentation/theme/providers/theme_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
@@ -122,6 +123,96 @@ class MorePage extends StatelessWidget {
 
             // Account Settings Section
             _buildSectionTitle('Account Settings'),
+            SizedBox(height: SizeManager.s12.h),
+
+            /// THEME SWITCH HERE
+            Consumer<ThemeProvider>(
+              builder: (context, themeProvider, child) {
+                return Padding(
+                  padding: EdgeInsets.symmetric(horizontal: SizeManager.s4.w),
+                  child: GestureDetector(
+                    onTap: () => themeProvider.toggleTheme(),
+                    child: Container(
+                      padding: EdgeInsets.all(SizeManager.s16.w),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            ColorManager.surface,
+                            ColorManager.surfaceLight,
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(SizeManager.s16.r),
+                        border: Border.all(
+                          color: ColorManager.primary.withOpacity(0.3),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: ColorManager.primary.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(SizeManager.s12.w),
+                            decoration: BoxDecoration(
+                              color: ColorManager.primary.withOpacity(0.1),
+                              borderRadius:
+                                  BorderRadius.circular(SizeManager.s12.r),
+                            ),
+                            child: Icon(
+                              themeProvider.isDarkMode
+                                  ? Icons.dark_mode_rounded
+                                  : Icons.light_mode_rounded,
+                              color: ColorManager.primary,
+                              size: SizeManager.s24.sp,
+                            ),
+                          ),
+                          SizedBox(width: SizeManager.s16.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  themeProvider.isDarkMode
+                                      ? 'Dark Mode'
+                                      : 'Light Mode',
+                                  style: TextStyle(
+                                    color: ColorManager.textPrimary,
+                                    fontSize: SizeManager.s16.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: SizeManager.s4.h),
+                                Text(
+                                  'Tap to switch theme',
+                                  style: TextStyle(
+                                    color: ColorManager.textSecondary,
+                                    fontSize: SizeManager.s12.sp,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Switch(
+                            value: themeProvider.isDarkMode,
+                            onChanged: (value) => themeProvider.toggleTheme(),
+                            activeColor: ColorManager.primary,
+                            activeTrackColor:
+                                ColorManager.primary.withOpacity(0.5),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+
             SizedBox(height: SizeManager.s12.h),
             _buildMenuCard(
               context,

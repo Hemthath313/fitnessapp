@@ -38,7 +38,7 @@ class EditTextButton extends StatelessWidget {
               SizedBox(
                 width: SizeManager.s3.w,
               ),
-              const Icon(
+               Icon(
                 Icons.edit,
                 color: ColorManager.white,
                 size: SizeManager.s18,

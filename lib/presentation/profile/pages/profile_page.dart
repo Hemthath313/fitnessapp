@@ -4,6 +4,7 @@ import 'package:fitness_app/presentation/profile/providers/profile_provider.dart
 import 'package:fitness_app/presentation/profile/widgets/edit_text_button.dart';
 import 'package:fitness_app/presentation/profile/widgets/weight_data_text_row.dart';
 import 'package:fitness_app/presentation/profile/widgets/weight_line_chart.dart';
+import 'package:fitness_app/presentation/theme/providers/theme_provider.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -344,6 +345,95 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                             ],
                           ),
+                          
+                          // Theme Toggle Card
+                          SizedBox(height: 16.h),
+                          Consumer<ThemeProvider>(
+                            builder: (context, themeProvider, child) {
+                              return Padding(
+                                padding: EdgeInsets.symmetric(horizontal: PaddingManager.p12),
+                                child: GestureDetector(
+                                  onTap: () => themeProvider.toggleTheme(),
+                                  child: Container(
+                                    width: deviceWidth,
+                                    padding: EdgeInsets.all(16.w),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          ColorManager.surface,
+                                          ColorManager.surfaceLight,
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      borderRadius: BorderRadius.circular(16.r),
+                                      border: Border.all(
+                                        color: ColorManager.primary.withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: ColorManager.primary.withOpacity(0.1),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: EdgeInsets.all(12.w),
+                                          decoration: BoxDecoration(
+                                            color: ColorManager.primary.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(12.r),
+                                          ),
+                                          child: Icon(
+                                            themeProvider.isDarkMode
+                                                ? Icons.dark_mode_rounded
+                                                : Icons.light_mode_rounded,
+                                            color: ColorManager.primary,
+                                            size: 28.sp,
+                                          ),
+                                        ),
+                                        SizedBox(width: 16.w),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                themeProvider.isDarkMode ? 'Dark Mode' : 'Light Mode',
+                                                style: TextStyle(
+                                                  color: ColorManager.textPrimary,
+                                                  fontSize: 16.sp,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              SizedBox(height: 4.h),
+                                              Text(
+                                                'Tap to switch theme',
+                                                style: TextStyle(
+                                                  color: ColorManager.textSecondary,
+                                                  fontSize: 12.sp,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Switch(
+                                          value: themeProvider.isDarkMode,
+                                          onChanged: (value) => themeProvider.toggleTheme(),
+                                          activeColor: ColorManager.primary,
+                                          activeTrackColor: ColorManager.primary.withOpacity(0.5),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          SizedBox(height: 16.h),
+                          
                           EditTextButton(
                               onTap: () =>
                                   context.push(Routes.changeWeightRoute)),

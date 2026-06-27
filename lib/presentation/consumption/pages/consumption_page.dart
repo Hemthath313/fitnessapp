@@ -82,7 +82,7 @@ class _ConsumptionPageState extends State<ConsumptionPage> {
                       alignment: Alignment.bottomRight,
                       child: FloatingActionButton(
                           backgroundColor: ColorManager.limerGreen2,
-                          child: const Icon(
+                          child:  Icon(
                             Icons.water_drop_outlined,
                             color: ColorManager.darkGrey,
                             size: SizeManager.s28,

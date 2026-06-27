@@ -33,7 +33,7 @@ class NeuButton extends StatelessWidget {
             radius,
           ),
           boxShadow: [
-            const BoxShadow(
+             BoxShadow(
               color: ColorManager.black,
               blurRadius: 15,
               spreadRadius: 1,

@@ -101,7 +101,7 @@ class _JournalPageState extends State<JournalPage> {
             SizedBox(height: SizeManager.s20.h),
             _buildNutritionAnalysisCard(),
             SizedBox(height: SizeManager.s40.h),
-            const PremiumAwareBannerAd(pageName: 'journal'),
+            const PremiumAwareBannerAd(pageName: 'journal', bottomMargin: 60.0),
             SizedBox(height: SizeManager.s16.h),
           ],
         ),

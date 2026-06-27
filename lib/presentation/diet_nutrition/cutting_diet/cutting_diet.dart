@@ -382,7 +382,7 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
   Widget _buildTextField(String label, TextEditingController controller,
       {bool isNumber = false}) {
     return TextField(
-      style: const TextStyle(color: ColorManager.white),
+      style:  TextStyle(color: ColorManager.white),
       controller: controller,
       keyboardType: isNumber ? TextInputType.number : TextInputType.text,
       decoration: InputDecoration(labelText: label),
@@ -453,7 +453,7 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
               ),
               title: Text(
                 meal['name'],
-                style: const TextStyle(
+                style:  TextStyle(
                   color: ColorManager.white, // Consistent text color
                   fontWeight: FontWeight.bold,
                 ),
@@ -497,7 +497,7 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
       backgroundColor: ColorManager.darkGrey,
       appBar: AppBar(
           backgroundColor: ColorManager.black,
-          title: const Text(
+          title:  Text(
             'Cutting Diet Plan',
             style: TextStyle(color: ColorManager.white),
           )),
@@ -520,7 +520,7 @@ class _CuttingDietScreenState extends State<CuttingDietScreen> {
         backgroundColor: ColorManager.limerGreen2,
         onPressed: _markAllMealsComplete,
         // icon: const Icon(Icons.check_circle),
-        label: const Text(
+        label:  Text(
           'Complete All Meals',
           style:
               TextStyle(color: ColorManager.black, fontWeight: FontWeight.bold),

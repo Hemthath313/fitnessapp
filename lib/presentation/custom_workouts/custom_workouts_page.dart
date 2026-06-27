@@ -83,11 +83,6 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push(Routes.addNewExerciseRoute),
-        backgroundColor: ColorManager.primary,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
       body: SafeArea(
         bottom: true,
         child: Column(
@@ -269,7 +264,7 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
               ),
             ),
             
-            PremiumAwareBannerAd(pageName: 'workout'),
+            const PremiumAwareBannerAd(pageName: 'workout', bottomMargin: 60.0),
           ],
         ),
       ),

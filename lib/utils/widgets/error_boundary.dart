@@ -35,7 +35,7 @@ class ErrorBoundary extends StatelessWidget {
                 const SizedBox(height: 16),
                 Text(
                   fallbackMessage ?? 'Something went wrong',
-                  style: const TextStyle(
+                  style:  TextStyle(
                     color: ColorManager.white,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

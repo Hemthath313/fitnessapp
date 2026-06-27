@@ -36,13 +36,13 @@ class TextFieldWidgetUnderLined extends StatelessWidget {
           autocorrect: false,
           keyboardType: keyboardType,
           cursorColor: ColorManager.white,
-          style: const TextStyle(
+          style:  TextStyle(
             color: ColorManager.white,
             fontWeight: FontWightManager.bold,
           ),
           decoration: InputDecoration(
             labelText: labelHint,
-            labelStyle: const TextStyle(
+            labelStyle:  TextStyle(
               color: ColorManager.white2,
               fontSize: FontSize.s14,
               letterSpacing: SizeManager.s1_5,

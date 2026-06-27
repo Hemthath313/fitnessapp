@@ -109,7 +109,7 @@ class _SettingsPageAppBarWidgetState extends State<SettingsPageAppBarWidget> {
                         valueColor: AlwaysStoppedAnimation<Color>(ColorManager.white),
                       ),
                     )
-                  : const Icon(
+                  :  Icon(
                       Icons.logout_sharp,
                       size: SizeManager.s26,
                       color: ColorManager.white,

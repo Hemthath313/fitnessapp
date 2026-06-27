@@ -1,5 +1,7 @@
 import 'package:fitness_app/presentation/banner_ads/banner_ad_service.dart';
 import 'package:fitness_app/presentation/settings/widgets/button_settings.dart';
+import 'package:fitness_app/presentation/settings/widgets/toggle_settings.dart';
+import 'package:fitness_app/presentation/theme/providers/theme_provider.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -7,6 +9,7 @@ import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -75,6 +78,21 @@ class _SettingsPageState extends State<SettingsPage> {
                         style: StyleManager.settingsPageSpacerTextStyle,
                       ),
                     ),
+                  ),
+                  Consumer<ThemeProvider>(
+                    builder: (context, themeProvider, child) {
+                      return SettingsPageToggle(
+                        deviceWidth: deviceWidth,
+                        iconData: themeProvider.isDarkMode
+                            ? Icons.dark_mode
+                            : Icons.light_mode,
+                        title: 'Dark Mode',
+                        value: themeProvider.isDarkMode,
+                        onChanged: (value) {
+                          themeProvider.toggleTheme();
+                        },
+                      );
+                    },
                   ),
                   SettingsPageButton(
                     deviceWidth: deviceWidth,

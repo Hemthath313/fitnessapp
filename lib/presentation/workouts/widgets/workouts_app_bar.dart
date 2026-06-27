@@ -29,7 +29,7 @@ class NewExercisePageAppBar extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).pop();
             },
-            icon: const Icon(
+            icon:  Icon(
               Icons.arrow_back_ios_new,
               size: SizeManager.s26,
               color: ColorManager.white,
