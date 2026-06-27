@@ -34,6 +34,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         elevation: SizeManager.s0,
       ),
       body: SafeArea(
+        bottom: true,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,

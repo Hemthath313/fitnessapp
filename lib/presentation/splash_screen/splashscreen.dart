@@ -61,21 +61,33 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> navigate() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
+    // Wait for initial auth state to load (with timeout)
+    int attempts = 0;
+    while (authProvider.isLoading && attempts < 10) {
+      await Future.delayed(const Duration(milliseconds: 100));
+      attempts++;
+    }
+
     // Ensure user data is loaded before proceeding
     await authProvider.loadUserData();
+
+    // Wait a bit more to ensure state is updated
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    if (!mounted) return;
 
     final user = authProvider.user;
     final hasAgeParameter = authProvider.hasAgeParameter;
     final emailIsVerified = user?.emailVerified ?? false;
 
-    if (user != null && hasAgeParameter == true) {
-      if (mounted) context.go(Routes.mainRoute);
+    if (user != null && hasAgeParameter == true && emailIsVerified) {
+      context.go(Routes.mainRoute);
     } else if (user != null &&
         hasAgeParameter == false &&
         emailIsVerified == true) {
-      if (mounted) context.go(Routes.addDataRoute);
+      context.go(Routes.addDataRoute);
     } else {
-      if (mounted) context.go(Routes.boardingRoute);
+      context.go(Routes.boardingRoute);
     }
   }
 

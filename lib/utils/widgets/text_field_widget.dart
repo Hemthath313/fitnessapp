@@ -1,8 +1,7 @@
 import 'package:fitness_app/utils/managers/color_manager.dart';
-import 'package:fitness_app/utils/managers/font_manager.dart';
-import 'package:fitness_app/utils/managers/value_manager.dart';
-import 'package:fitness_app/utils/widgets/neu_dark_container_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TextFieldWidget extends StatelessWidget {
   const TextFieldWidget({
@@ -11,49 +10,79 @@ class TextFieldWidget extends StatelessWidget {
     required this.labelHint,
     required this.obscureText,
     required this.keyboardType,
+    this.inputFormatters,
+    this.width,
+    this.height,
   });
 
   final TextEditingController controller;
   final bool obscureText;
   final String labelHint;
   final TextInputType keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final double? width;
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
-    final deviceWidth = MediaQuery.of(context).size.width;
-    return NeuButton(
-      width: deviceWidth,
-      height: SizeManager.s70,
-      radius: RadiusManager.r15,
-      child: Padding(
-        padding: const EdgeInsets.all(PaddingManager.p8),
-        child: TextField(
-          controller: controller,
-          obscureText: obscureText,
-          textAlign: TextAlign.start,
-          style: const TextStyle(color: ColorManager.white),
-          autocorrect: false,
-          keyboardType: keyboardType,
-          cursorColor: ColorManager.white,
-          decoration: InputDecoration(
-            labelText: labelHint,
-            labelStyle: const TextStyle(
-              color: ColorManager.white,
-              fontSize: FontSize.s14,
-              letterSpacing: SizeManager.s1_5,
-              fontWeight: FontWightManager.semiBold,
-            ),
-            focusedBorder: const OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.transparent,
-              ),
-            ),
-            enabledBorder: const OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.transparent,
-              ),
+    return Container(
+      width: width,
+      height: height ?? 56.h,
+      decoration: BoxDecoration(
+        color: ColorManager.surface,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: ColorManager.surfaceLight.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: TextField(
+        inputFormatters: inputFormatters,
+        controller: controller,
+        obscureText: obscureText,
+        textAlign: TextAlign.start,
+        style: TextStyle(
+          color: ColorManager.textPrimary,
+          fontSize: 16.sp,
+          height: 1.4,
+        ),
+        autocorrect: false,
+        keyboardType: keyboardType,
+        cursorColor: ColorManager.primary,
+        decoration: InputDecoration(
+          labelText: labelHint,
+          labelStyle: TextStyle(
+            color: ColorManager.textSecondary,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+          ),
+          floatingLabelStyle: TextStyle(
+            color: ColorManager.primary,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+          ),
+          hintText: labelHint,
+          hintStyle: TextStyle(
+            color: ColorManager.textTertiary,
+            fontSize: 16.sp,
+          ),
+          filled: true,
+          fillColor: Colors.transparent,
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide(
+              color: ColorManager.primary,
+              width: 2,
             ),
           ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16.r),
+            borderSide: BorderSide(
+              color: Colors.transparent,
+              width: 0,
+            ),
+          ),
+          contentPadding: EdgeInsets.symmetric(vertical: 18.h, horizontal: 20.w),
         ),
       ),
     );

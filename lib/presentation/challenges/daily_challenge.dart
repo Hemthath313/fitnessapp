@@ -1,4 +1,5 @@
 import 'package:fitness_app/utils/managers/color_manager.dart';
+import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -78,13 +79,11 @@ class DailyExercisePage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  exercise['gifUrl'],
-                  height: 250,
-                  fit: BoxFit.cover,
-                ),
+              child: ExerciseVideoPlayer(
+                videoPath: exercise['localVideoPath'],
+                gifUrl: exercise['gifUrl'],
+                height: 250,
+                autoPlay: true, // Auto-play in detail view
               ),
             ),
             SizedBox(height: 20),
@@ -181,14 +180,11 @@ class DailyExercisePage extends StatelessWidget {
                       ? () => showExerciseDetails(context, exercise)
                       : null,
                   contentPadding: EdgeInsets.all(10),
-                  leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      exercise['gifUrl'],
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
-                    ),
+                  leading: ExerciseVideoPlayer(
+                    videoPath: exercise['localVideoPath'],
+                    gifUrl: exercise['gifUrl'],
+                    width: 80,
+                    height: 80,
                   ),
                   title: Text(
                     '${exercise['name']}'

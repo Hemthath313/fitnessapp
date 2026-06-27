@@ -91,6 +91,8 @@ class SizeManager {
   static const double s1100 = 1100.0;
 
   static var s6;
+
+  static get s32 => null;
 }
 
 class RadiusManager {

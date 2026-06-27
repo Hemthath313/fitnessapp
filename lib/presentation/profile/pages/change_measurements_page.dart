@@ -9,7 +9,9 @@ import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/widgets/lime_green_rounded_button.dart';
-import 'package:fitness_app/utils/widgets/small_text_field_widget.dart';
+import 'package:fitness_app/utils/widgets/text_field_widget.dart';
+import 'package:fitness_app/utils/widgets/loading_overlay.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
 
@@ -129,255 +131,334 @@ class _ChangeMeasurementsPageState extends State<ChangeMeasurementsPage> {
         child: const ChangeDataPagesAppBar(),
       ),
       body: SafeArea(
+          bottom: true,
           child: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(PaddingManager.p28),
-                child: Text(
-                  StringsManager.changeMeasurementsText,
-                  textAlign: TextAlign.center,
-                  style: StyleManager.settingsOptionTiteTextStyle,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(PaddingManager.p28),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding:
-                          const EdgeInsets.only(bottom: PaddingManager.p12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SmallTextFieldWidget(
-                            controller: _chestController,
-                            labelHint: StringsManager.chest,
-                            obscureText: false,
-                            keyboardType: TextInputType.number,
-                          ),
-                          SmallTextFieldWidget(
-                            controller: _shoulderController,
-                            labelHint: StringsManager.shoulders,
-                            obscureText: false,
-                            keyboardType: TextInputType.number,
-                          )
-                        ],
-                      ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(PaddingManager.p28),
+                    child: Text(
+                      StringsManager.changeMeasurementsText,
+                      textAlign: TextAlign.center,
+                      style: StyleManager.settingsOptionTiteTextStyle,
                     ),
-                    Padding(
-                      padding:
-                          const EdgeInsets.only(bottom: PaddingManager.p12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SmallTextFieldWidget(
-                            controller: _bicepsController,
-                            labelHint: StringsManager.biceps,
-                            obscureText: false,
-                            keyboardType: TextInputType.number,
-                          ),
-                          SmallTextFieldWidget(
-                            controller: _foreArmController,
-                            labelHint: StringsManager.foreArm,
-                            obscureText: false,
-                            keyboardType: TextInputType.number,
-                          )
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding:
-                          const EdgeInsets.only(bottom: PaddingManager.p12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SmallTextFieldWidget(
-                            controller: _waistController,
-                            labelHint: StringsManager.waist,
-                            obscureText: false,
-                            keyboardType: TextInputType.number,
-                          ),
-                          SmallTextFieldWidget(
-                            controller: _hipsController,
-                            labelHint: StringsManager.hips,
-                            obscureText: false,
-                            keyboardType: TextInputType.number,
-                          )
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding:
-                          const EdgeInsets.only(bottom: PaddingManager.p12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SmallTextFieldWidget(
-                            controller: _thighCotroller,
-                            labelHint: StringsManager.thigh,
-                            obscureText: false,
-                            keyboardType: TextInputType.number,
-                          ),
-                          SmallTextFieldWidget(
-                            controller: _calfController,
-                            labelHint: StringsManager.calf,
-                            obscureText: false,
-                            keyboardType: TextInputType.number,
-                          )
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: PaddingManager.p56),
-                      child: Container(
-                        width: SizeManager.s400.w,
-                        height: SizeManager.s50.h,
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: ColorManager.limerGreen2,
-                              width: SizeManager.s0_7.h,
-                            ),
-                          ),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton2(
-                            // dropdownDecoration: BoxDecoration(
-                            //   color: ColorManager.darkGrey,
-                            //   borderRadius: BorderRadius.circular(
-                            //     RadiusManager.r15.r,
-                            //   ),
-                            // ),
-                            onChanged: _onChangedActivity,
-                            value: _valueActivity,
-                            // iconSize: SizeManager.s0,
-                            hint: Text(
-                              StringsManager.activityHint,
-                              style: StyleManager.registerTextfieldTextStyle,
-                            ),
-                            items: [
-                              DropdownMenuItem(
-                                value: StringsManager.activityLowHint,
-                                child: Text(
-                                  StringsManager.activityLowHint,
-                                  style:
-                                      StyleManager.registerTextfieldTextStyle,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(PaddingManager.p28),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(bottom: PaddingManager.p12),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(right: 8.w),
+                                  child: TextFieldWidget(
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                    ],
+                                    controller: _chestController,
+                                    labelHint: StringsManager.chest,
+                                    obscureText: false,
+                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                  ),
                                 ),
                               ),
-                              DropdownMenuItem(
-                                value: StringsManager.activityLightHint,
-                                child: Text(
-                                  StringsManager.activityLightHint,
-                                  style:
-                                      StyleManager.registerTextfieldTextStyle,
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(left: 8.w),
+                                  child: TextFieldWidget(
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                    ],
+                                    controller: _shoulderController,
+                                    labelHint: StringsManager.shoulders,
+                                    obscureText: false,
+                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                  ),
                                 ),
-                              ),
-                              DropdownMenuItem(
-                                value: StringsManager.activityModerateHint,
-                                child: Text(
-                                  StringsManager.activityModerateHint,
-                                  style:
-                                      StyleManager.registerTextfieldTextStyle,
-                                ),
-                              ),
-                              DropdownMenuItem(
-                                value: StringsManager.activityHighHint,
-                                child: Text(
-                                  StringsManager.activityHighHint,
-                                  style:
-                                      StyleManager.registerTextfieldTextStyle,
-                                ),
-                              ),
-                              DropdownMenuItem(
-                                value: StringsManager.activityVeryHighHint,
-                                child: Text(
-                                  StringsManager.activityVeryHighHint,
-                                  style:
-                                      StyleManager.registerTextfieldTextStyle,
-                                ),
-                              ),
+                              )
                             ],
                           ),
                         ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: PaddingManager.p28),
-                      child: Container(
-                        width: SizeManager.s400.w,
-                        height: SizeManager.s50.h,
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: ColorManager.limerGreen2,
-                              width: SizeManager.s0_7.h,
-                            ),
-                          ),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton2(
-                            // dropdownDecoration: BoxDecoration(
-                            //   color: ColorManager.darkGrey,
-                            //   borderRadius: BorderRadius.circular(
-                            //     RadiusManager.r15.r,
-                            //   ),
-                            // ),
-                            onChanged: _onChangedGoals,
-                            value: _valueGoals,
-                            // iconSize: SizeManager.s0,
-                            hint: Text(
-                              StringsManager.goalHint,
-                              style: StyleManager.registerTextfieldTextStyle,
-                            ),
-                            items: [
-                              DropdownMenuItem(
-                                value: StringsManager.lose,
-                                child: Text(
-                                  StringsManager.loseWeightHint,
-                                  style:
-                                      StyleManager.registerTextfieldTextStyle,
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(bottom: PaddingManager.p12),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(right: 8.w),
+                                  child: TextFieldWidget(
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                    ],
+                                    controller: _bicepsController,
+                                    labelHint: StringsManager.biceps,
+                                    obscureText: false,
+                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                  ),
                                 ),
                               ),
-                              DropdownMenuItem(
-                                value: StringsManager.maintain,
-                                child: Text(
-                                  StringsManager.maintainWeightHint,
-                                  style:
-                                      StyleManager.registerTextfieldTextStyle,
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(left: 8.w),
+                                  child: TextFieldWidget(
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                    ],
+                                    controller: _foreArmController,
+                                    labelHint: StringsManager.foreArm,
+                                    obscureText: false,
+                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                  ),
                                 ),
-                              ),
-                              DropdownMenuItem(
-                                value: StringsManager.gain,
-                                child: Text(
-                                  StringsManager.gainWeightHint,
-                                  style:
-                                      StyleManager.registerTextfieldTextStyle,
-                                ),
-                              ),
+                              )
                             ],
                           ),
                         ),
-                      ),
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(bottom: PaddingManager.p12),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(right: 8.w),
+                                  child: TextFieldWidget(
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                    ],
+                                    controller: _waistController,
+                                    labelHint: StringsManager.waist,
+                                    obscureText: false,
+                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(left: 8.w),
+                                  child: TextFieldWidget(
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                    ],
+                                    controller: _hipsController,
+                                    labelHint: StringsManager.hips,
+                                    obscureText: false,
+                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(bottom: PaddingManager.p12),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(right: 8.w),
+                                  child: TextFieldWidget(
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                    ],
+                                    controller: _thighCotroller,
+                                    labelHint: StringsManager.thigh,
+                                    obscureText: false,
+                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(left: 8.w),
+                                  child: TextFieldWidget(
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                                    ],
+                                    controller: _calfController,
+                                    labelHint: StringsManager.calf,
+                                    obscureText: false,
+                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(top: PaddingManager.p56),
+                          child: Container(
+                            width: SizeManager.s400.w,
+                            height: SizeManager.s50.h,
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: ColorManager.limerGreen2,
+                                  width: SizeManager.s0_7.h,
+                                ),
+                              ),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton2(
+                                // dropdownDecoration: BoxDecoration(
+                                //   color: ColorManager.darkGrey,
+                                //   borderRadius: BorderRadius.circular(
+                                //     RadiusManager.r15.r,
+                                //   ),
+                                // ),
+                                onChanged: _onChangedActivity,
+                                value: _valueActivity,
+                                // iconSize: SizeManager.s0,
+                                hint: Text(
+                                  StringsManager.activityHint,
+                                  style:
+                                      StyleManager.registerTextfieldTextStyle,
+                                ),
+                                items: [
+                                  DropdownMenuItem(
+                                    value: StringsManager.activityLowHint,
+                                    child: Text(
+                                      StringsManager.activityLowHint,
+                                      style: StyleManager
+                                          .registerTextfieldTextStyle,
+                                    ),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: StringsManager.activityLightHint,
+                                    child: Text(
+                                      StringsManager.activityLightHint,
+                                      style: StyleManager
+                                          .registerTextfieldTextStyle,
+                                    ),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: StringsManager.activityModerateHint,
+                                    child: Text(
+                                      StringsManager.activityModerateHint,
+                                      style: StyleManager
+                                          .registerTextfieldTextStyle,
+                                    ),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: StringsManager.activityHighHint,
+                                    child: Text(
+                                      StringsManager.activityHighHint,
+                                      style: StyleManager
+                                          .registerTextfieldTextStyle,
+                                    ),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: StringsManager.activityVeryHighHint,
+                                    child: Text(
+                                      StringsManager.activityVeryHighHint,
+                                      style: StyleManager
+                                          .registerTextfieldTextStyle,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(top: PaddingManager.p28),
+                          child: Container(
+                            width: SizeManager.s400.w,
+                            height: SizeManager.s50.h,
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: ColorManager.limerGreen2,
+                                  width: SizeManager.s0_7.h,
+                                ),
+                              ),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton2(
+                                // dropdownDecoration: BoxDecoration(
+                                //   color: ColorManager.darkGrey,
+                                //   borderRadius: BorderRadius.circular(
+                                //     RadiusManager.r15.r,
+                                //   ),
+                                // ),
+                                onChanged: _onChangedGoals,
+                                value: _valueGoals,
+                                // iconSize: SizeManager.s0,
+                                hint: Text(
+                                  StringsManager.goalHint,
+                                  style:
+                                      StyleManager.registerTextfieldTextStyle,
+                                ),
+                                items: [
+                                  DropdownMenuItem(
+                                    value: StringsManager.lose,
+                                    child: Text(
+                                      StringsManager.loseWeightHint,
+                                      style: StyleManager
+                                          .registerTextfieldTextStyle,
+                                    ),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: StringsManager.maintain,
+                                    child: Text(
+                                      StringsManager.maintainWeightHint,
+                                      style: StyleManager
+                                          .registerTextfieldTextStyle,
+                                    ),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: StringsManager.gain,
+                                    child: Text(
+                                      StringsManager.gainWeightHint,
+                                      style: StyleManager
+                                          .registerTextfieldTextStyle,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  LimeGreenRoundedButtonWidget(
+                    onTap: () async {
+                      LoadingOverlay.show(context, message: 'Updating measurements...');
+                      try {
+                        await updateUsersMeasurements();
+                        if (context.mounted) {
+                          LoadingOverlay.hide(context);
+                          Navigator.of(context).pop();
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          LoadingOverlay.hide(context);
+                        }
+                        rethrow;
+                      }
+                    },
+                    title: StringsManager.next,
+                  )
+                ],
               ),
-              LimeGreenRoundedButtonWidget(
-                onTap: () {
-                  updateUsersMeasurements().then(
-                    (value) => Navigator.of(context).pop(),
-                  );
-                },
-                title: StringsManager.next,
-              )
-            ],
-          ),
-        ),
-      )),
+            ),
+          )),
     ).animate().fadeIn(
           duration: 500.ms,
         );

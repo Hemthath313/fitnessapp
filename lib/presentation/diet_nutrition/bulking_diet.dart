@@ -219,7 +219,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
 
 // Example Macro Calculation
     return Card(
-      color: ColorManager.black54,
+      color: ColorManager.surface,
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
@@ -278,7 +278,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
         margin: const EdgeInsets.symmetric(vertical: 6),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: ColorManager.black54,
+          color: ColorManager.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.white24),
         ),
@@ -439,7 +439,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
           itemBuilder: (context, libIndex) {
             final meal = mealLibrary[libIndex];
             return ListTile(
-              tileColor: ColorManager.black54, // Matches cards and buttons
+              tileColor: ColorManager.surface, // Matches cards and buttons
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),

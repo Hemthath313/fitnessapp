@@ -24,7 +24,7 @@ class MealCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: meal['isCompleted']
             ? Colors.green.withOpacity(0.2)
-            : ColorManager.black54,
+            : ColorManager.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(

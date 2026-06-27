@@ -3,7 +3,9 @@ import 'package:fitness_app/presentation/auth/pages/add_data_page.dart';
 import 'package:fitness_app/presentation/auth/pages/auth_page.dart';
 import 'package:fitness_app/presentation/auth/pages/forgot_password_page.dart';
 import 'package:fitness_app/presentation/auth/pages/login_or_register_page.dart';
+import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
 import 'package:fitness_app/presentation/boarding/pages/boarding_page.dart';
+import 'package:provider/provider.dart';
 import 'package:fitness_app/presentation/body_parts/pages/abs.dart';
 import 'package:fitness_app/presentation/body_parts/pages/biceps.dart';
 import 'package:fitness_app/presentation/body_parts/pages/body_parts.dart';
@@ -89,6 +91,56 @@ class Routes {
 
 final GoRouter router = GoRouter(
   initialLocation: Routes.splashScreen,
+  redirect: (BuildContext context, GoRouterState state) {
+    // Don't redirect from splash screen - let it handle navigation
+    if (state.uri.path == Routes.splashScreen) {
+      return null;
+    }
+
+    // Try to get AuthProvider - if not available yet, allow navigation
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      
+      // Wait for initial auth state to load
+      if (authProvider.isLoading) {
+        return Routes.splashScreen;
+      }
+
+      final user = authProvider.user;
+      final hasAgeParameter = authProvider.hasAgeParameter;
+      final emailIsVerified = user?.emailVerified ?? false;
+
+      // If user is logged in and has completed profile, redirect away from auth/login pages
+      if (user != null && hasAgeParameter == true && emailIsVerified) {
+        if (state.uri.path == Routes.loginRoute || 
+            state.uri.path == Routes.authRoute ||
+            state.uri.path == Routes.boardingRoute) {
+          return Routes.mainRoute;
+        }
+      }
+      
+      // If user is logged in but needs to add data
+      if (user != null && hasAgeParameter == false && emailIsVerified) {
+        if (state.uri.path == Routes.loginRoute || 
+            state.uri.path == Routes.authRoute ||
+            state.uri.path == Routes.boardingRoute) {
+          return Routes.addDataRoute;
+        }
+      }
+
+      // If user is not logged in, redirect away from protected routes
+      if (user == null) {
+        if (state.uri.path == Routes.mainRoute) {
+          return Routes.boardingRoute;
+        }
+      }
+
+      return null; // No redirect needed
+    } catch (e) {
+      // Provider not available yet, allow navigation
+      return null;
+    }
+  },
   routes: [
     GoRoute(
         path: Routes.boardingRoute,

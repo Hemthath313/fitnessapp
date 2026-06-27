@@ -1,3 +1,4 @@
+import 'package:fitness_app/presentation/banner_ads/banner_ad_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -91,59 +92,63 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Center(
-        child: Column(
-          children: [
-            const SizedBox(height: kToolbarHeight + 10), // Space for app bar
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.all(16),
-                itemCount: _messages.length + (isThinking ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index == _messages.length && isThinking) {
-                    return _buildTypingIndicator();
-                  }
-                  final message = _messages[index];
-                  final isUser = message.isUser;
+      backgroundColor: ColorManager.background,
+      body: SafeArea(
+        bottom: true,
+        child: Center(
+          child: Column(
+            children: [
+              const SizedBox(height: kToolbarHeight + 10), // Space for app bar
+              Expanded(
+                child: ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _messages.length + (isThinking ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index == _messages.length && isThinking) {
+                      return _buildTypingIndicator();
+                    }
+                    final message = _messages[index];
+                    final isUser = message.isUser;
 
-                  return Align(
-                    alignment:
-                        isUser ? Alignment.centerRight : Alignment.centerLeft,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeOut,
-                      constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.7,
-                      ),
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: isUser
-                            ? ColorManager.limerGreen2
-                            : Colors.grey[800],
-                        borderRadius: BorderRadius.only(
-                          topLeft: const Radius.circular(16),
-                          topRight: const Radius.circular(16),
-                          bottomLeft: Radius.circular(isUser ? 16 : 0),
-                          bottomRight: Radius.circular(isUser ? 0 : 16),
+                    return Align(
+                      alignment:
+                          isUser ? Alignment.centerRight : Alignment.centerLeft,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOut,
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.7,
+                        ),
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isUser
+                              ? ColorManager.primary
+                              : ColorManager.surface,
+                          borderRadius: BorderRadius.only(
+                            topLeft: const Radius.circular(16),
+                            topRight: const Radius.circular(16),
+                            bottomLeft: Radius.circular(isUser ? 16 : 0),
+                            bottomRight: Radius.circular(isUser ? 0 : 16),
+                          ),
+                        ),
+                        child: Text(
+                          message.message,
+                          style: TextStyle(
+                            color: isUser ? Colors.black : ColorManager.textPrimary,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
-                      child: Text(
-                        message.message,
-                        style: TextStyle(
-                          color: isUser ? Colors.black : Colors.white,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
-            _buildInputArea(),
-          ],
+              BannerAdWidget(pageName: 'chat'),
+              _buildInputArea(),
+            ],
+          ),
         ),
       ),
     );
@@ -157,29 +162,29 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: TextField(
               controller: _controller,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: ColorManager.textPrimary),
               decoration: InputDecoration(
                 hintText: 'Ask a fitness question...',
-                hintStyle: const TextStyle(color: Colors.white54),
+                hintStyle: const TextStyle(color: ColorManager.textTertiary),
                 filled: true,
-                fillColor: Colors.grey[850],
+                fillColor: ColorManager.surface,
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
-                  borderSide: const BorderSide(color: Colors.lime, width: 1),
+                  borderSide: const BorderSide(color: ColorManager.primary, width: 1),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
                   borderSide:
-                      const BorderSide(color: Colors.limeAccent, width: 2),
+                      const BorderSide(color: ColorManager.primary, width: 2),
                 ),
               ),
             ),
           ),
           const SizedBox(width: 8),
           IconButton(
-            icon: const Icon(Icons.send, color: Colors.lime),
+            icon: const Icon(Icons.send, color: ColorManager.primary),
             onPressed: _sendMessage,
           ),
         ],
@@ -194,12 +199,12 @@ class _ChatScreenState extends State<ChatScreen> {
         margin: const EdgeInsets.symmetric(vertical: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.grey[800],
+          color: ColorManager.surface,
           borderRadius: BorderRadius.circular(16),
         ),
         child: const Text(
           '...',
-          style: TextStyle(color: Colors.white, fontSize: 20),
+          style: TextStyle(color: ColorManager.textPrimary, fontSize: 20),
         ),
       ),
     );

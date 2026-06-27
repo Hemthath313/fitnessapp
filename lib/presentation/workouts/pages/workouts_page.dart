@@ -1,6 +1,7 @@
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/presentation/workouts/widgets/exercise_widget.dart';
 import 'package:fitness_app/presentation/workouts/widgets/new_exercise_button.dart';
+import 'package:fitness_app/presentation/interstitial_ads/interstitial_ad_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
@@ -18,6 +19,15 @@ class WorkoutPage extends StatefulWidget {
 }
 
 class _WorkoutPageState extends State<WorkoutPage> {
+  int _workoutCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Load interstitial ad when page initializes
+    InterstitialAdService.loadInterstitialAd();
+  }
+
   Future<void> _handleRefresh() async {
     setState(() {
       Provider.of<WorkoutProvider>(context, listen: false)
@@ -30,10 +40,19 @@ class _WorkoutPageState extends State<WorkoutPage> {
     );
   }
 
+  void _showInterstitialAd() {
+    _workoutCount++;
+    // Show interstitial ad every 3 workouts
+    if (_workoutCount % 3 == 0) {
+      InterstitialAdService.showWorkoutCompletionAd();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<WorkoutProvider>(
       builder: (context, workoutsProvider, _) => SafeArea(
+        bottom: true,
         child: LiquidPullToRefresh(
           height: SizeManager.s250.h,
           color: ColorManager.darkGrey,
@@ -79,7 +98,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                                   },
                                 );
                               },
-                              onFinished: (_) {
+                              onFinished: (_) async {
                                 setState(
                                   () {
                                     workoutsProvider.finishWorkout(
@@ -94,6 +113,11 @@ class _WorkoutPageState extends State<WorkoutPage> {
                                     );
                                   },
                                 );
+                                // Update statistics and show achievement notifications
+                                await WorkoutProvider
+                                    .updateStatisticsAfterWorkout(context);
+                                // Show interstitial ad after workout completion
+                                _showInterstitialAd();
                               },
                             );
                           },

@@ -7,7 +7,7 @@ import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/widgets/lime_green_rounded_button.dart';
-import 'package:fitness_app/utils/widgets/text_field_underlined.dart';
+import 'package:fitness_app/utils/widgets/text_field_widget.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
 
@@ -60,67 +60,56 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         child: const ChangeDataPagesAppBar(),
       ),
       body: SafeArea(
+          bottom: true,
           child: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(PaddingManager.p28),
-                child: Text(
-                  StringsManager.changePWtext,
-                  textAlign: TextAlign.center,
-                  style: StyleManager.settingsOptionTiteTextStyle,
-                ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(PaddingManager.p28),
+                    child: Text(
+                      StringsManager.changePWtext,
+                      textAlign: TextAlign.center,
+                      style: StyleManager.settingsOptionTiteTextStyle,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+                    child: TextFieldWidget(
+                      controller: _emailController,
+                      labelHint: StringsManager.emailHint,
+                      obscureText: false,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+                    child: TextFieldWidget(
+                      controller: _oldPasswordController,
+                      labelHint: StringsManager.oldPasswordHint,
+                      obscureText: true,
+                      keyboardType: TextInputType.visiblePassword,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+                    child: TextFieldWidget(
+                      controller: _newPasswordController,
+                      labelHint: StringsManager.newPasswordHint,
+                      obscureText: true,
+                      keyboardType: TextInputType.visiblePassword,
+                    ),
+                  ),
+                  LimeGreenRoundedButtonWidget(
+                    onTap: changePassword,
+                    title: StringsManager.next,
+                  )
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: PaddingManager.p28,
-                  right: PaddingManager.p28,
-                  bottom: PaddingManager.p12,
-                ),
-                child: TextFieldWidgetUnderLined(
-                  controller: _emailController,
-                  labelHint: StringsManager.emailHint,
-                  obscureText: false,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: PaddingManager.p28,
-                  right: PaddingManager.p28,
-                  bottom: PaddingManager.p12,
-                ),
-                child: TextFieldWidgetUnderLined(
-                  controller: _oldPasswordController,
-                  labelHint: StringsManager.oldPasswordHint,
-                  obscureText: true,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: PaddingManager.p28,
-                  right: PaddingManager.p28,
-                  bottom: PaddingManager.p12,
-                ),
-                child: TextFieldWidgetUnderLined(
-                  controller: _newPasswordController,
-                  labelHint: StringsManager.newPasswordHint,
-                  obscureText: true,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-              ),
-              LimeGreenRoundedButtonWidget(
-                onTap: changePassword,
-                title: StringsManager.next,
-              )
-            ],
-          ),
-        ),
-      )),
+            ),
+          )),
     ).animate().fadeIn(
           duration: 500.ms,
         );

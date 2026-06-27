@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/model/workout_model.dart';
+import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class WorkoutProvider with ChangeNotifier {
   final List<WorkoutModel> _workouts = [];
@@ -21,6 +23,16 @@ class WorkoutProvider with ChangeNotifier {
 
   List<WorkoutModel> get allWorkouts {
     return [..._allWorkouts];
+  }
+
+  void clearAllWorkouts() {
+    _workouts.clear();
+    _allWorkouts.clear();
+    _finishedWorkouts.clear();
+    progressPercent = null;
+    exercisesLeft = null;
+    shownPercent = null;
+    notifyListeners();
   }
 
   Future<void> getProgressPercent() async {
@@ -71,10 +83,20 @@ class WorkoutProvider with ChangeNotifier {
   Future fetchAndSetWorkouts() async {
     User? user = FirebaseAuth.instance.currentUser;
 
+    // Check if user is authenticated
+    if (user == null) {
+      // Clear all workouts if user is not authenticated
+      _workouts.clear();
+      _allWorkouts.clear();
+      _finishedWorkouts.clear();
+      notifyListeners();
+      return;
+    }
+
     try {
       final workoutSnapshot = await FirebaseFirestore.instance
           .collection('workouts')
-          .doc(user!.uid)
+          .doc(user.uid)
           .collection('workoutData')
           .get();
       final allWorkoutSnapshot = await FirebaseFirestore.instance
@@ -139,7 +161,19 @@ class WorkoutProvider with ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      rethrow;
+      // Handle permission denied or other errors gracefully
+      print('Error fetching workouts: $e');
+      
+      // If it's a permission error, clear the data
+      if (e.toString().contains('PERMISSION_DENIED') || 
+          e.toString().contains('permission-denied')) {
+        _workouts.clear();
+        _allWorkouts.clear();
+        _finishedWorkouts.clear();
+        notifyListeners();
+      } else {
+        rethrow;
+      }
     }
   }
 
@@ -262,10 +296,39 @@ class WorkoutProvider with ChangeNotifier {
         'dateTime': dateTime,
         'id': workoutID,
       });
+
+      // Update streak and statistics
+      // This needs to be called from the widget that has access to context
+
       notifyListeners();
     } catch (e) {
       notifyListeners();
       rethrow;
+    }
+  }
+
+  static Future<void> updateStatisticsAfterWorkout(BuildContext context) async {
+    try {
+      final statisticsProvider =
+          Provider.of<StatisticsProvider>(context, listen: false);
+      await statisticsProvider.updateStreak();
+
+      // Check for new achievements and show notification
+      final newAchievements = statisticsProvider.unlockedAchievements;
+
+      if (newAchievements.isNotEmpty) {
+        // Show achievement notification
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text('🎉 New Achievement Unlocked: ${newAchievements.last}!'),
+            backgroundColor: Colors.amber,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error updating statistics: $e');
     }
   }
 }

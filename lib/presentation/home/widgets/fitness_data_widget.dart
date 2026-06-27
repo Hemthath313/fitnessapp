@@ -28,10 +28,50 @@ class FitnessDataWidget extends StatelessWidget {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return SpinKitSpinningLines(color: ColorManager.limerGreen2);
             } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
+              return Container(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Icon(Icons.error_outline,
+                        color: ColorManager.red, size: 48),
+                    SizedBox(height: 16),
+                    Text(
+                      'Unable to load fitness data',
+                      style: TextStyle(color: ColorManager.white, fontSize: 16),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Please check your internet connection',
+                      style: TextStyle(color: ColorManager.grey2, fontSize: 14),
+                    ),
+                  ],
+                ),
+              );
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return Container(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Icon(Icons.info_outline,
+                        color: ColorManager.limerGreen2, size: 48),
+                    SizedBox(height: 16),
+                    Text(
+                      'No fitness data available',
+                      style: TextStyle(color: ColorManager.white, fontSize: 16),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Please complete your profile setup',
+                      style: TextStyle(color: ColorManager.grey2, fontSize: 14),
+                    ),
+                  ],
+                ),
+              );
             } else {
-              double bmr = homeProvider.userData['bmr'];
-              double bmi = homeProvider.userData['bmi'];
+              // Safe null checks for user data
+              final userData = snapshot.data!;
+              final bmr = userData['bmr'] as double? ?? 0.0;
+              final bmi = userData['bmi'] as double? ?? 0.0;
               Color getProgressColor(double bmi) {
                 var isNormalBMI = bmi >= 18.5 && bmi <= 25;
                 var isUnderOrOverWeight =
@@ -73,7 +113,7 @@ class FitnessDataWidget extends StatelessWidget {
                       width: (deviceWidth / 3 - 16).w,
                       height: SizeManager.s200.h,
                       decoration: BoxDecoration(
-                        color: ColorManager.black87,
+                        color: ColorManager.surface,
                         borderRadius:
                             BorderRadius.circular(RadiusManager.r15.r),
                       ),
@@ -180,13 +220,13 @@ class FitnessDataWidget extends StatelessWidget {
                             Padding(
                               padding: EdgeInsets.only(
                                 left: PaddingManager.p12.w,
-                                right: PaddingManager.p12.w,
+                                right: PaddingManager.p4.w,
                               ),
                               child: Container(
-                                width: (deviceWidth / 3 - 16).w,
+                                width: (deviceWidth / 3 - 20).w,
                                 height: SizeManager.s100.h,
                                 decoration: BoxDecoration(
-                                  color: ColorManager.black87,
+                                  color: ColorManager.surfaceLight,
                                   borderRadius: BorderRadius.circular(
                                       RadiusManager.r15.r),
                                 ),
@@ -262,10 +302,10 @@ class FitnessDataWidget extends StatelessWidget {
                               ),
                             ),
                             Container(
-                              width: (deviceWidth / 3 - 16).w,
+                              width: (deviceWidth / 3 - 20).w,
                               height: SizeManager.s100.h,
                               decoration: BoxDecoration(
-                                color: ColorManager.black87,
+                                color: ColorManager.surfaceDark,
                                 borderRadius:
                                     BorderRadius.circular(RadiusManager.r15.r),
                               ),
@@ -284,15 +324,12 @@ class FitnessDataWidget extends StatelessWidget {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.center,
                                       children: [
-                                        Text(
-                                          StringsManager.calories,
-                                          style:TextStyle(
-                                            color: ColorManager.white,
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                          )
-                                          
-                                        ),
+                                        Text(StringsManager.calories,
+                                            style: TextStyle(
+                                              color: ColorManager.white,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                            )),
                                         Icon(
                                           Icons.local_pizza_outlined,
                                           size: SizeManager.s28,

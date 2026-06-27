@@ -8,11 +8,12 @@ import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/widgets/lime_green_rounded_button.dart';
-import 'package:fitness_app/utils/widgets/small_text_field_widget.dart';
+import 'package:fitness_app/utils/widgets/text_field_widget.dart';
+import 'package:fitness_app/utils/widgets/loading_overlay.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-
 
 class NewExercisePage extends StatefulWidget {
   const NewExercisePage({super.key});
@@ -59,6 +60,7 @@ class _NewExercisePageState extends State<NewExercisePage> {
       ),
       backgroundColor: ColorManager.darkGrey,
       body: SafeArea(
+        bottom: true,
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -101,7 +103,6 @@ class _NewExercisePageState extends State<NewExercisePage> {
                       // ),
                       onChanged: _onChangedExercise,
                       value: _valueExercise,
-                      // iconSize: SizeManager.s0,
                       hint: Text(
                         StringsManager.exerciseHint,
                         style: StyleManager.registerTextfieldTextStyle,
@@ -116,33 +117,56 @@ class _NewExercisePageState extends State<NewExercisePage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SmallTextFieldWidget(
-                      controller: _setNumberController,
-                      labelHint: StringsManager.setNumberHint,
-                      obscureText: false,
-                      keyboardType: TextInputType.number,
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(right: 8.w),
+                        child: TextFieldWidget(
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          controller: _setNumberController,
+                          labelHint: StringsManager.setNumberHint,
+                          obscureText: false,
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
                     ),
-                    SmallTextFieldWidget(
-                      controller: _repNumberController,
-                      labelHint: StringsManager.repNumberHint,
-                      keyboardType: TextInputType.number,
-                      obscureText: false,
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 8.w),
+                        child: TextFieldWidget(
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          controller: _repNumberController,
+                          labelHint: StringsManager.repNumberHint,
+                          keyboardType: TextInputType.number,
+                          obscureText: false,
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
               LimeGreenRoundedButtonWidget(
-                onTap: () {
+                onTap: () async {
+                  LoadingOverlay.show(context, message: 'Adding workout...');
                   try {
-                    workoutProvider.addNewWorkout(
+                    await workoutProvider.addNewWorkout(
                       name: _valueExercise!,
                       repNumber: int.parse(_repNumberController.text),
                       setNumber: int.parse(_setNumberController.text),
                       dateTime: DateTime.now(),
                     );
-                    workoutProvider.getProgressPercent();
-                    Navigator.of(context).pop();
+                    await workoutProvider.getProgressPercent();
+                    if (context.mounted) {
+                      LoadingOverlay.hide(context);
+                      Navigator.of(context).pop();
+                    }
                   } catch (e) {
+                    if (context.mounted) {
+                      LoadingOverlay.hide(context);
+                    }
                     rethrow;
                   }
                 },

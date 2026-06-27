@@ -1,47 +1,54 @@
 import 'package:fitness_app/utils/managers/color_manager.dart';
-import 'package:fitness_app/utils/managers/font_manager.dart';
-import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class LimeGreenRoundedButtonWidget extends StatelessWidget {
   const LimeGreenRoundedButtonWidget({
     super.key,
     required this.onTap,
     required this.title,
+    this.isLoading = false,
   });
 
   final VoidCallback onTap;
   final String title;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.only(
-          top: PaddingManager.p28,
-          right: PaddingManager.p28,
-          left: PaddingManager.p28,
-        ),
-        child: Container(
-          height: SizeManager.s50,
-          width: SizeManager.s400,
-          decoration: BoxDecoration(
-            color: ColorManager.limerGreen2,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Center(
-            child: Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: ColorManager.black,
-                fontSize: FontSize.s22,
-                fontWeight: FontWightManager.bold,
-                letterSpacing: SizeManager.s1_5,
-              ),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      child: SizedBox(
+        height: 48.h,
+        child: ElevatedButton(
+          onPressed: isLoading ? null : onTap,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: ColorManager.primary,
+            foregroundColor: Colors.black,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.r),
             ),
+            disabledBackgroundColor: ColorManager.primary.withOpacity(0.6),
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
           ),
+          child: isLoading
+              ? SizedBox(
+                  height: 20.h,
+                  width: 20.w,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                  ),
+                )
+              : Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
         ),
       ),
     );
