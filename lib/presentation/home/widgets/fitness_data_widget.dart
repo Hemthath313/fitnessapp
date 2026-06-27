@@ -100,284 +100,207 @@ class FitnessDataWidget extends StatelessWidget {
                 }
               }
 
-              return Padding(
-                padding: EdgeInsets.only(
-                  left: PaddingManager.p12.w,
-                  right: PaddingManager.p12.w,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Container(
-                      width: (deviceWidth / 3 - 16).w,
-                      height: SizeManager.s200.h,
-                      decoration: BoxDecoration(
-                        color: ColorManager.surface,
-                        borderRadius:
-                            BorderRadius.circular(RadiusManager.r15.r),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(
-                              top: PaddingManager.p12.h,
-                              bottom: PaddingManager.p12.h,
-                            ),
-                            child: CircularPercentIndicator(
-                              circularStrokeCap: CircularStrokeCap.round,
-                              radius: RadiusManager.r40.r,
-                              lineWidth: SizeManager.s8.w,
-                              percent: bmi / 40,
-                              progressColor: getProgressColor(bmi),
-                              backgroundColor: ColorManager.grey3,
-                              animateFromLastPercent: true,
-                              animation: true,
-                              center: Icon(
-                                Icons.favorite_border,
-                                color: getProgressColor(bmi),
-                                size: SizeManager.s28,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            'BMI ${bmi.toStringAsFixed(1)}',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: ColorManager.white,
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            // style: StyleManager.homePageS20BoldWhite,
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                              top: PaddingManager.p12.h,
-                              bottom: PaddingManager.p12.h,
-                            ),
-                            child: Text(
-                              getMessage(bmi),
-                              textAlign: TextAlign.center,
-                              style: StyleManager.fitnessBmiTextStyle,
-                            ),
-                          )
-                        ],
-                      ),
+            final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+            final cardBg = isDarkMode ? ColorManager.surface : ColorManager.primary;
+            final textColor = isDarkMode ? ColorManager.textPrimary : Colors.white;
+            final secondaryTextColor = isDarkMode ? ColorManager.textSecondary : Colors.white.withOpacity(0.8);
+            final iconColor = isDarkMode ? ColorManager.primary : Colors.white;
+
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: PaddingManager.p12.w),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  // 1. BMI Card (Left - Tall)
+                  Container(
+                    width: (deviceWidth / 3 - 16).w,
+                    height: SizeManager.s200.h,
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(RadiusManager.r15.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: (isDarkMode ? Colors.black : ColorManager.primary).withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        )
+                      ],
                     ),
-                    Column(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        CircularPercentIndicator(
+                          circularStrokeCap: CircularStrokeCap.round,
+                          radius: RadiusManager.r40.r,
+                          lineWidth: SizeManager.s8.w,
+                          percent: (bmi / 40).clamp(0.0, 1.0),
+                          progressColor: iconColor,
+                          backgroundColor: isDarkMode ? Colors.white10 : Colors.white24,
+                          animateFromLastPercent: true,
+                          animation: true,
+                          center: Icon(Icons.favorite_rounded, color: iconColor, size: SizeManager.s28),
+                        ),
+                        SizedBox(height: 12.h),
+                        Text(
+                          'BMI ${bmi.toStringAsFixed(1)}',
+                          style: TextStyle(color: textColor, fontSize: 17, fontWeight: FontWeight.bold),
+                        ),
                         Padding(
-                          padding: EdgeInsets.only(
-                            left: PaddingManager.p12.w,
-                            bottom: PaddingManager.p12.h,
+                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+                          child: Text(
+                            StringsManager.normalBmi,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: secondaryTextColor, fontSize: 11),
                           ),
-                          child: Container(
-                            height: 90,
-                            width: (deviceWidth * (2 / 3) - 10).w,
-                            decoration: BoxDecoration(
-                              color: ColorManager.limerGreen2,
-                              borderRadius: BorderRadius.circular(
-                                RadiusManager.r15.r,
+                        )
+                      ],
+                    ),
+                  ),
+                  // 2. Right Column (Consumption + Row(Water, Calories))
+                  Column(
+                    children: [
+                      // Calorie Consumption Card (Big)
+                      Padding(
+                        padding: EdgeInsets.only(left: PaddingManager.p12.w, bottom: PaddingManager.p12.h),
+                        child: Container(
+                          height: 90,
+                          width: (deviceWidth * (2 / 3) - 10).w,
+                          decoration: BoxDecoration(
+                            color: cardBg,
+                            borderRadius: BorderRadius.circular(RadiusManager.r15.r),
+                            boxShadow: [
+                              BoxShadow(
+                                color: (isDarkMode ? Colors.black : ColorManager.primary).withOpacity(0.1),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              )
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                StringsManager.kcalConsumption,
+                                style: TextStyle(color: textColor, fontSize: 17, fontWeight: FontWeight.bold),
                               ),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text(
-                                  StringsManager.kcalConsumption,
-                                  style: TextStyle(
-                                    color: ColorManager.darkGrey,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  bmr.toStringAsFixed(0),
-                                  style: TextStyle(
-                                    color: ColorManager.darkGrey,
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  // style: StyleManager.homePageS20BoldDarkGrey,
-                                ),
-                                Text(StringsManager.kcalPerDay,
-                                    style: TextStyle(
-                                      color: ColorManager.darkGrey,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
-                                    )
-                                    // StyleManager.homePageS16RegularDarkGrey,
-                                    ),
-                              ],
-                            ),
+                              Text(
+                                bmr.toStringAsFixed(0),
+                                style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                StringsManager.kcalPerDay,
+                                style: TextStyle(color: secondaryTextColor, fontSize: 14, fontWeight: FontWeight.w700),
+                              ),
+                            ],
                           ),
                         ),
-                        Row(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(
-                                left: PaddingManager.p12.w,
-                                right: PaddingManager.p4.w,
-                              ),
-                              child: Container(
-                                width: (deviceWidth / 3 - 20).w,
-                                height: SizeManager.s100.h,
-                                decoration: BoxDecoration(
-                                  color: ColorManager.surfaceLight,
-                                  borderRadius: BorderRadius.circular(
-                                      RadiusManager.r15.r),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                        left: PaddingManager.p12.w,
-                                        right: PaddingManager.p12.w,
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            StringsManager.water,
-                                            style: TextStyle(
-                                              color: ColorManager.white,
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                            // style: StyleManager
-                                            //     .homePageS17BoldWhite,
-                                          ),
-                                          Icon(
-                                            Icons.water_drop_outlined,
-                                            size: SizeManager.s28,
-                                            color: ColorManager.limerGreen2,
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                        left: PaddingManager.p12.w,
-                                        right: PaddingManager.p12.w,
-                                        top: PaddingManager.p12.h,
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
-                                          Text(
-                                            consumptionProvider.waterADay
-                                                .toStringAsFixed(1),
-                                            overflow: TextOverflow.clip,
-                                            style: StyleManager
-                                                .homePageS20BoldWhite,
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsets.only(
-                                              left: PaddingManager.p12.w,
-                                            ),
-                                            child: Text(
-                                              StringsManager.liters,
-                                              overflow: TextOverflow.clip,
-                                              softWrap: true,
-                                              style: StyleManager.homePageS12RegularWhite2,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Container(
+                      ),
+                      // Bottom Row: Water & Calories Spent
+                      Row(
+                        children: [
+                          // Water Card
+                          Padding(
+                            padding: EdgeInsets.only(left: PaddingManager.p12.w, right: PaddingManager.p4.w),
+                            child: Container(
                               width: (deviceWidth / 3 - 20).w,
                               height: SizeManager.s100.h,
                               decoration: BoxDecoration(
-                                color: ColorManager.surfaceDark,
-                                borderRadius:
-                                    BorderRadius.circular(RadiusManager.r15.r),
+                                color: cardBg,
+                                borderRadius: BorderRadius.circular(RadiusManager.r15.r),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: (isDarkMode ? Colors.black : ColorManager.primary).withOpacity(0.1),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  )
+                                ],
                               ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Padding(
-                                    padding: EdgeInsets.only(
-                                      left: PaddingManager.p14.w,
-                                      right: PaddingManager.p12.w,
-                                    ),
+                                    padding: EdgeInsets.symmetric(horizontal: 12.w),
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(StringsManager.calories,
-                                            style: TextStyle(
-                                              color: ColorManager.white,
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
-                                            )),
-                                        Icon(
-                                          Icons.local_pizza_outlined,
-                                          size: SizeManager.s28,
-                                          color: ColorManager.limerGreen2,
-                                        )
+                                        Text(StringsManager.water, style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
+                                        Icon(Icons.local_drink_rounded, color: iconColor, size: 24.sp),
                                       ],
                                     ),
                                   ),
+                                  SizedBox(height: 12.h),
                                   Padding(
-                                    padding: EdgeInsets.only(
-                                      left: PaddingManager.p12.w,
-                                      right: PaddingManager.p12.w,
-                                      top: PaddingManager.p12.h,
-                                    ),
+                                    padding: EdgeInsets.symmetric(horizontal: 12.w),
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
+                                      crossAxisAlignment: CrossAxisAlignment.end,
                                       children: [
                                         Text(
-                                          consumptionProvider.consumedCalories
-                                              .toStringAsFixed(0),
-                                          style:
-                                              StyleManager.homePageS20BoldWhite,
+                                          consumptionProvider.waterADay.toStringAsFixed(1),
+                                          style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold),
                                         ),
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                            left: PaddingManager.p12.w,
-                                          ),
-                                          child: Text(
-                                            StringsManager.kcal,
-                                            style: StyleManager
-                                                .homePageS12RegularWhite2,
-                                          ),
-                                        ),
+                                        SizedBox(width: 4.w),
+                                        Text(StringsManager.liters, style: TextStyle(color: secondaryTextColor, fontSize: 12)),
                                       ],
                                     ),
                                   )
                                 ],
                               ),
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
+                          ),
+                          // Calories Spent Card
+                          Container(
+                            width: (deviceWidth / 3 - 20).w,
+                            height: SizeManager.s100.h,
+                            decoration: BoxDecoration(
+                              color: cardBg,
+                              borderRadius: BorderRadius.circular(RadiusManager.r15.r),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: (isDarkMode ? Colors.black : ColorManager.primary).withOpacity(0.1),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                )
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 12.w),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(StringsManager.calories, style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
+                                      Icon(Icons.local_pizza_rounded, color: iconColor, size: 24.sp),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(height: 12.h),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 12.w),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        consumptionProvider.consumedCalories.toStringAsFixed(0),
+                                        style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold),
+                                      ),
+                                      SizedBox(width: 4.w),
+                                      Text(StringsManager.kcal, style: TextStyle(color: secondaryTextColor, fontSize: 12)),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
             }
           }),
     );

@@ -198,8 +198,8 @@ class _LegExercisesPageState extends State<LegExercisesPage> {
                           ),
                           child: Text(
                             exercise.difficulty,
-                            style: TextStyle(
-                              color: Colors.black,
+                            style: const TextStyle(
+                              color: Colors.white,
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                             ),
@@ -471,8 +471,8 @@ class _LegExercisesPageState extends State<LegExercisesPage> {
                               child: Center(
                                 child: Text(
                                   '${entry.key + 1}',
-                                  style: TextStyle(
-                                    color: Colors.black,
+                                  style: const TextStyle(
+                                    color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
                                   ),
@@ -515,10 +515,10 @@ class _LegExercisesPageState extends State<LegExercisesPage> {
                       ),
                     ),
                     onPressed: () => Navigator.pop(context),
-                    child: Text(
+                    child: const Text(
                       'Close',
                       style: TextStyle(
-                        color: Colors.black,
+                        color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),

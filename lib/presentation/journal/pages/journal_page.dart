@@ -258,16 +258,11 @@ class _JournalPageState extends State<JournalPage> {
       margin: EdgeInsets.only(top: SizeManager.s12.h),
       padding: EdgeInsets.all(SizeManager.s16.w),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            ColorManager.secondary.withOpacity(0.8),
-            ColorManager.secondaryDark,
-          ],
-        ),
+        color: ColorManager.primary,
         borderRadius: BorderRadius.circular(SizeManager.s20.r),
         boxShadow: [
           BoxShadow(
-            color: ColorManager.secondary.withOpacity(0.3),
+            color: ColorManager.primary.withOpacity(0.3),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -282,7 +277,7 @@ class _JournalPageState extends State<JournalPage> {
                 Text(
                   'Upgrade to Pro!',
                   style: TextStyle(
-                    color: ColorManager.textPrimary,
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: SizeManager.s18.sp,
                   ),
@@ -291,7 +286,7 @@ class _JournalPageState extends State<JournalPage> {
                 Text(
                   'Ads-free, AI Coach, Pro Tools & More.',
                   style: TextStyle(
-                    color: ColorManager.textPrimary.withOpacity(0.85),
+                    color: Colors.white.withOpacity(0.9),
                     fontSize: SizeManager.s12.sp,
                   ),
                 ),
@@ -302,13 +297,13 @@ class _JournalPageState extends State<JournalPage> {
             onPressed: () => context.push(Routes.premiumScreen),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
-              foregroundColor: ColorManager.secondary,
+              foregroundColor: ColorManager.primary,
               padding: EdgeInsets.symmetric(horizontal: 16.w),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.r),
               ),
             ),
-            child: Text(
+            child: const Text(
               'Get Pro',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
@@ -536,17 +531,10 @@ class _JournalPageState extends State<JournalPage> {
     return Container(
       padding: EdgeInsets.all(SizeManager.s20.w),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            ColorManager.surface,
-            isPremium ? Colors.purple.withOpacity(0.1) : ColorManager.surface,
-          ],
-        ),
+        color: ColorManager.surface,
         borderRadius: BorderRadius.circular(SizeManager.s20.r),
         border: Border.all(
-          color: isPremium
-              ? Colors.purple.withOpacity(0.3)
-              : ColorManager.primary.withOpacity(0.2),
+          color: ColorManager.primary.withOpacity(0.2),
           width: 1,
         ),
       ),
@@ -556,7 +544,7 @@ class _JournalPageState extends State<JournalPage> {
           Row(
             children: [
               Icon(Icons.auto_awesome,
-                  color: isPremium ? Colors.purpleAccent : ColorManager.primary),
+                  color: ColorManager.primary),
               SizedBox(width: SizeManager.s8.w),
               Text(
                 'AI Personal Coach',
@@ -604,15 +592,14 @@ class _JournalPageState extends State<JournalPage> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    isPremium ? Colors.purpleAccent : ColorManager.primary,
+                backgroundColor: ColorManager.primary,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(SizeManager.s12.r)),
               ),
               child: Text(
                 isPremium ? 'Chat Now' : 'Unlock Now',
                 style: TextStyle(
-                    color: isPremium ? Colors.white : ColorManager.darkGrey,
+                    color: Colors.white,
                     fontWeight: FontWeight.bold),
               ),
             ),

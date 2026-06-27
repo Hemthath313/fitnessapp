@@ -177,7 +177,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
           Icons.auto_awesome, 
           'AI Workout Generator', 
           'Build unlimited personalized weekly workout plans with AI.',
-          Colors.purpleAccent,
+          Colors.tealAccent,
         ),
         _buildFeatureItem(
           Icons.restaurant_menu, 
@@ -195,7 +195,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
           Icons.analytics, 
           'Elite Analytics', 
           'Deep dive into your progress with interactive charts.',
-          Colors.pinkAccent,
+          Colors.orangeAccent,
         ),
         _buildFeatureItem(
           Icons.ads_click, 
@@ -287,7 +287,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     ),
                     child: Text(
                       'BEST VALUE',
-                      style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.black),
+                      style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ),
                 Text(
@@ -310,7 +310,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
             onPressed: () => provider.buyProduct(product),
             style: ElevatedButton.styleFrom(
               backgroundColor: isYearly ? ColorManager.primary : ColorManager.surfaceLight,
-              foregroundColor: isYearly ? Colors.black : ColorManager.textPrimary,
+              foregroundColor: isYearly ? Colors.white : ColorManager.textPrimary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
               elevation: 0,
             ),

@@ -128,8 +128,8 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
                         bodyPart,
-                        style: TextStyle(
-                          color: ColorManager.textPrimary,
+                        style: const TextStyle(
+                          color: Colors.white,
                           fontSize: 18.0,
                           fontWeight: FontWeight.bold,
                         ),

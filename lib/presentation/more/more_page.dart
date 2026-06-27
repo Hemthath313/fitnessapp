@@ -15,134 +15,128 @@ class MorePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+    return Consumer2<HomeProvider, ThemeProvider>(
+      builder: (context, homeProvider, themeProvider, _) {
+        return SafeArea(
+          bottom: true,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(SizeManager.s16.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Profile Header
+                FutureBuilder<Map<String, dynamic>>(
+                  future: homeProvider.fetchUserData(),
+                  builder: (context, snapshot) {
+                    final userData = snapshot.data ?? {};
+                    final firstName = userData['first name'] ?? 'User';
+                    final surname = userData['surname'] ?? '';
+                    final email = FirebaseAuth.instance.currentUser?.email ?? '';
 
-    return SafeArea(
-      bottom: true,
-      child: SingleChildScrollView(
-        padding: EdgeInsets.all(SizeManager.s16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Profile Header
-            FutureBuilder<Map<String, dynamic>>(
-              future: homeProvider.fetchUserData(),
-              builder: (context, snapshot) {
-                final userData = snapshot.data ?? {};
-                final firstName = userData['first name'] ?? 'User';
-                final surname = userData['surname'] ?? '';
-                final email = FirebaseAuth.instance.currentUser?.email ?? '';
-
-                return Container(
-                  padding: EdgeInsets.all(SizeManager.s20.w),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        ColorManager.limerGreen2.withOpacity(0.3),
-                        ColorManager.limerGreen2.withOpacity(0.1),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(SizeManager.s20.r),
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: SizeManager.s40.r,
-                        backgroundColor: ColorManager.limerGreen2,
-                        child: Icon(
-                          Icons.person,
-                          size: SizeManager.s40.sp,
-                          color: ColorManager.darkGrey,
-                        ),
-                      ),
-                      SizedBox(width: SizeManager.s16.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '$firstName $surname',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: SizeManager.s20.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: SizeManager.s4.h),
-                            Text(
-                              email,
-                              style: TextStyle(
-                                color: ColorManager.textSecondary,
-                                fontSize: SizeManager.s14.sp,
-                              ),
-                            ),
+                    return Container(
+                      padding: EdgeInsets.all(SizeManager.s20.w),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            ColorManager.primary.withOpacity(themeProvider.isDarkMode ? 0.2 : 0.3),
+                            ColorManager.primary.withOpacity(0.1),
                           ],
                         ),
+                        borderRadius: BorderRadius.circular(SizeManager.s20.r),
+                        border: Border.all(
+                          color: ColorManager.primary.withOpacity(0.2),
+                        ),
                       ),
-                    ],
-                  ),
-                );
-              },
-            ),
-            SizedBox(height: SizeManager.s24.h),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: SizeManager.s40.r,
+                            backgroundColor: ColorManager.primary.withOpacity(0.2),
+                            child: Icon(
+                              Icons.person,
+                              size: SizeManager.s40.sp,
+                              color: ColorManager.primary,
+                            ),
+                          ),
+                          SizedBox(width: SizeManager.s16.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '$firstName $surname',
+                                  style: TextStyle(
+                                    color: ColorManager.textPrimary,
+                                    fontSize: SizeManager.s20.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: SizeManager.s4.h),
+                                Text(
+                                  email,
+                                  style: TextStyle(
+                                    color: ColorManager.textSecondary,
+                                    fontSize: SizeManager.s14.sp,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                SizedBox(height: SizeManager.s24.h),
 
-            // Premium Section
-            _buildSectionTitle('Premium'),
-            SizedBox(height: SizeManager.s12.h),
-            _buildMenuCard(
-              context,
-              icon: Icons.workspace_premium,
-              title: 'Go Premium',
-              subtitle: 'Ad-free, workout splits, diet plans & more',
-              color: ColorManager.primary,
-              onTap: () => context.push(Routes.premiumScreen),
-            ),
-            SizedBox(height: SizeManager.s24.h),
+                // Premium Section
+                _buildSectionTitle('Premium'),
+                SizedBox(height: SizeManager.s12.h),
+                _buildMenuCard(
+                  context,
+                  icon: Icons.workspace_premium,
+                  title: 'Go Premium',
+                  subtitle: 'Ad-free, workout splits, diet plans & more',
+                  color: ColorManager.primary,
+                  onTap: () => context.push(Routes.premiumScreen),
+                ),
+                SizedBox(height: SizeManager.s24.h),
 
-            // Body & Measurements Section
-            _buildSectionTitle('Body & Measurements'),
-            SizedBox(height: SizeManager.s12.h),
-            _buildMenuCard(
-              context,
-              icon: Icons.monitor_weight,
-              title: 'Update Weight',
-              subtitle: 'Track your weight progress',
-              color: Colors.blue,
-              onTap: () => context.push(Routes.changeWeightRoute),
-            ),
-            SizedBox(height: SizeManager.s12.h),
-            _buildMenuCard(
-              context,
-              icon: Icons.straighten,
-              title: 'Body Measurements',
-              subtitle: 'Update body measurements',
-              color: Colors.purple,
-              onTap: () => context.push(Routes.changeMeasurementsRoute),
-            ),
-            SizedBox(height: SizeManager.s24.h),
+                // Body & Measurements Section
+                _buildSectionTitle('Body & Measurements'),
+                SizedBox(height: SizeManager.s12.h),
+                _buildMenuCard(
+                  context,
+                  icon: Icons.monitor_weight,
+                  title: 'Update Weight',
+                  subtitle: 'Track your weight progress',
+                  color: Colors.blue,
+                  onTap: () => context.push(Routes.changeWeightRoute),
+                ),
+                SizedBox(height: SizeManager.s12.h),
+                _buildMenuCard(
+                  context,
+                  icon: Icons.straighten,
+                  title: 'Body Measurements',
+                  subtitle: 'Update body measurements',
+                  color: Colors.purple,
+                  onTap: () => context.push(Routes.changeMeasurementsRoute),
+                ),
+                SizedBox(height: SizeManager.s24.h),
 
-            // Account Settings Section
-            _buildSectionTitle('Account Settings'),
-            SizedBox(height: SizeManager.s12.h),
+                // Account Settings Section
+                _buildSectionTitle('Account Settings'),
+                SizedBox(height: SizeManager.s12.h),
 
-            /// THEME SWITCH HERE
-            Consumer<ThemeProvider>(
-              builder: (context, themeProvider, child) {
-                return Padding(
+                // Theme Toggle
+                Padding(
                   padding: EdgeInsets.symmetric(horizontal: SizeManager.s4.w),
                   child: GestureDetector(
                     onTap: () => themeProvider.toggleTheme(),
                     child: Container(
                       padding: EdgeInsets.all(SizeManager.s16.w),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            ColorManager.surface,
-                            ColorManager.surfaceLight,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
+                        color: ColorManager.surface,
                         borderRadius: BorderRadius.circular(SizeManager.s16.r),
                         border: Border.all(
                           color: ColorManager.primary.withOpacity(0.3),
@@ -168,7 +162,7 @@ class MorePage extends StatelessWidget {
                               themeProvider.isDarkMode
                                   ? Icons.dark_mode_rounded
                                   : Icons.light_mode_rounded,
-                              color: ColorManager.textSecondary,
+                              color: ColorManager.primary,
                               size: SizeManager.s24.sp,
                             ),
                           ),
@@ -209,112 +203,112 @@ class MorePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                );
-              },
-            ),
-
-            SizedBox(height: SizeManager.s12.h),
-            _buildMenuCard(
-              context,
-              icon: Icons.lock_outline,
-              title: 'Change Password',
-              subtitle: 'Update your account password',
-              color: Colors.orange,
-              onTap: () => context.push(Routes.changePasswordRoute),
-            ),
-            SizedBox(height: SizeManager.s12.h),
-            _buildMenuCard(
-              context,
-              icon: Icons.email_outlined,
-              title: 'Change Email',
-              subtitle: 'Update your email address',
-              color: Colors.teal,
-              onTap: () => context.push(Routes.changeEmailRoute),
-            ),
-            SizedBox(height: SizeManager.s12.h),
-            _buildMenuCard(
-              context,
-              icon: Icons.settings_outlined,
-              title: 'App Settings',
-              subtitle: 'Preferences and notifications',
-              color: Colors.grey,
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Settings coming soon!'),
-                    backgroundColor: ColorManager.limerGreen2,
-                  ),
-                );
-              },
-            ),
-            SizedBox(height: SizeManager.s24.h),
-
-            // Danger Zone
-            _buildSectionTitle('Danger Zone'),
-            SizedBox(height: SizeManager.s12.h),
-            _buildMenuCard(
-              context,
-              icon: Icons.delete_outline,
-              title: 'Delete Account',
-              subtitle: 'Permanently remove your account',
-              color: ColorManager.red,
-              isDangerous: true,
-              onTap: () => context.push(Routes.deleteAccRoute),
-            ),
-            SizedBox(height: SizeManager.s28.h),
-
-            // Logout Button
-            Center(
-              child: OutlinedButton.icon(
-                onPressed: () => _showLogoutDialog(context),
-                icon: Icon(Icons.logout, color: ColorManager.red),
-                label: Text(
-                  'Logout',
-                  style: TextStyle(
-                    color: ColorManager.red,
-                    fontSize: SizeManager.s16.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
                 ),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: ColorManager.red, width: 2),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: SizeManager.s28.w,
-                    vertical: SizeManager.s16.h,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(SizeManager.s12.r),
-                  ),
+
+                SizedBox(height: SizeManager.s12.h),
+                _buildMenuCard(
+                  context,
+                  icon: Icons.lock_outline,
+                  title: 'Change Password',
+                  subtitle: 'Update your account password',
+                  color: Colors.orange,
+                  onTap: () => context.push(Routes.changePasswordRoute),
                 ),
-              ),
-            ),
+                SizedBox(height: SizeManager.s12.h),
+                _buildMenuCard(
+                  context,
+                  icon: Icons.email_outlined,
+                  title: 'Change Email',
+                  subtitle: 'Update your email address',
+                  color: Colors.teal,
+                  onTap: () => context.push(Routes.changeEmailRoute),
+                ),
+                SizedBox(height: SizeManager.s12.h),
+                _buildMenuCard(
+                  context,
+                  icon: Icons.settings_outlined,
+                  title: 'App Settings',
+                  subtitle: 'Preferences and notifications',
+                  color: Colors.grey,
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Settings coming soon!'),
+                        backgroundColor: ColorManager.primary,
+                      ),
+                    );
+                  },
+                ),
+                SizedBox(height: SizeManager.s24.h),
 
-            SizedBox(height: SizeManager.s40.h),
+                // Danger Zone
+                _buildSectionTitle('Danger Zone'),
+                SizedBox(height: SizeManager.s12.h),
+                _buildMenuCard(
+                  context,
+                  icon: Icons.delete_outline,
+                  title: 'Delete Account',
+                  subtitle: 'Permanently remove your account',
+                  color: ColorManager.red,
+                  isDangerous: true,
+                  onTap: () => context.push(Routes.deleteAccRoute),
+                ),
+                SizedBox(height: SizeManager.s28.h),
 
-            // App Info
-            Center(
-              child: Column(
-                children: [
-                  Text(
-                    'Fitness App',
-                    style: TextStyle(
-                      color: ColorManager.textSecondary,
-                      fontSize: SizeManager.s14.sp,
+                // Logout Button
+                Center(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _showLogoutDialog(context),
+                    icon: Icon(Icons.logout, color: ColorManager.red),
+                    label: Text(
+                      'Logout',
+                      style: TextStyle(
+                        color: ColorManager.red,
+                        fontSize: SizeManager.s16.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: ColorManager.red, width: 2),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: SizeManager.s28.w,
+                        vertical: SizeManager.s16.h,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(SizeManager.s12.r),
+                      ),
                     ),
                   ),
-                  Text(
-                    'Version 1.0.0',
-                    style: TextStyle(
-                      color: ColorManager.textSecondary,
-                      fontSize: SizeManager.s12.sp,
-                    ),
+                ),
+
+                SizedBox(height: SizeManager.s40.h),
+
+                // App Info
+                Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        'Fitness App',
+                        style: TextStyle(
+                          color: ColorManager.textSecondary,
+                          fontSize: SizeManager.s14.sp,
+                        ),
+                      ),
+                      Text(
+                        'Version 1.0.0',
+                        style: TextStyle(
+                          color: ColorManager.textSecondary,
+                          fontSize: SizeManager.s12.sp,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 

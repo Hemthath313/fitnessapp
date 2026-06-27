@@ -79,7 +79,7 @@ class QuickActionsWidget extends StatelessWidget {
                 child: _QuickActionCard(
                   icon: Icons.restaurant_menu,
                   label: 'Diet Plans',
-                  color: Colors.purple,
+                  color: Colors.orange,
                   onTap: () {
                     final sub = Provider.of<SubscriptionProvider>(context,
                         listen: false);

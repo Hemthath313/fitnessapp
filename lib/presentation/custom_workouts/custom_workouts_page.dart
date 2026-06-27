@@ -127,9 +127,9 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                       else 
                         ElevatedButton.icon(
                           onPressed: () => context.push(Routes.workoutGeneratorRoute),
-                          icon: Icon(Icons.auto_awesome, color: ColorManager.textPrimary),
-                          label: Text('AI Build', style: TextStyle(color: ColorManager.textPrimary)),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+                          icon: const Icon(Icons.auto_awesome, color: Colors.white),
+                          label: const Text('AI Build', style: TextStyle(color: Colors.white)),
+                          style: ElevatedButton.styleFrom(backgroundColor: ColorManager.primary),
                         ),
                     ],
                   );
@@ -276,7 +276,7 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.calendar_month_rounded, size: 80.sp, color: Colors.purple.withOpacity(0.5)),
+          Icon(Icons.calendar_month_rounded, size: 80.sp, color: ColorManager.primary.withOpacity(0.2)),
           SizedBox(height: 20.h),
           Text(
             'No Weekly Plan',
@@ -294,10 +294,10 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
           SizedBox(height: 24.h),
           ElevatedButton.icon(
             onPressed: () => context.push(Routes.workoutGeneratorRoute),
-            icon: Icon(Icons.auto_awesome, color: ColorManager.textPrimary),
-            label: Text('Generate Plan', style: TextStyle(color: ColorManager.textPrimary)),
+            icon: Icon(Icons.auto_awesome, color: Colors.white),
+            label: Text('Generate Plan', style: TextStyle(color: Colors.white)),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.purple,
+              backgroundColor: ColorManager.primary,
               padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 16.h),
             ),
           ),
