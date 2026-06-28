@@ -174,16 +174,7 @@ class _MainPageState extends State<MainPage> {
             )
           : null,
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: ColorManager.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 8,
-              offset: const Offset(0, -4),
-            ),
-          ],
-        ),
+        color: ColorManager.surface,
         child: SafeArea(
           bottom: true,
           top: false,
