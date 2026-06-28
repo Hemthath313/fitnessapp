@@ -136,29 +136,29 @@ class _MainPageState extends State<MainPage> {
     List<Widget> bottomNavItems = [
       Icon(
         Icons.home_outlined,
-        color: isHomePage ? ColorManager.primary : ColorManager.textTertiary,
+        color: isHomePage ? Colors.white : ColorManager.textTertiary,
         size: SizeManager.s28,
       ),
       Icon(
         Icons.restaurant_menu_outlined,
-        color: isExplorePage ? ColorManager.primary : ColorManager.textTertiary,
+        color: isExplorePage ? Colors.white : ColorManager.textTertiary,
         size: SizeManager.s28,
       ),
       Icon(
         Icons.auto_awesome_rounded,
-        color: isJournalPage ? ColorManager.primary : ColorManager.textTertiary,
+        color: isJournalPage ? Colors.white : ColorManager.textTertiary,
         size: SizeManager.s28,
       ),
       Icon(
         Icons.fitness_center_outlined,
         color: isCustomWorkoutsPage
-            ? ColorManager.primary
+            ? Colors.white
             : ColorManager.textTertiary,
         size: SizeManager.s28,
       ),
       Icon(
         Icons.person_outline,
-        color: isMorePage ? ColorManager.primary : ColorManager.textTertiary,
+        color: isMorePage ? Colors.white : ColorManager.textTertiary,
         size: SizeManager.s28,
       ),
     ];
@@ -173,16 +173,30 @@ class _MainPageState extends State<MainPage> {
               child: appBar()!,
             )
           : null,
-      bottomNavigationBar: SafeArea(
-        bottom: true,
-        minimum: EdgeInsets.zero,
-        child: CurvedNavigationBar(
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
           color: ColorManager.surface,
-          buttonBackgroundColor: Colors.transparent,
-          backgroundColor: ColorManager.background,
-          onTap: ontap,
-          index: _currentIndex,
-          items: bottomNavItems,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          bottom: true,
+          top: false,
+          minimum: EdgeInsets.zero,
+          child: CurvedNavigationBar(
+            height: 60,
+            color: ColorManager.surface,
+            buttonBackgroundColor: ColorManager.primary,
+            backgroundColor: Colors.transparent,
+            onTap: ontap,
+            index: _currentIndex,
+            items: bottomNavItems,
+          ),
         ),
       ),
       body: SafeArea(

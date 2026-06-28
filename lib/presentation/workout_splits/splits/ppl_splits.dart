@@ -16,9 +16,9 @@ class PPLPage extends StatelessWidget {
             "View Exercises?",
             style: TextStyle(color: ColorManager.textPrimary),
           ),
-          content: const Text(
+          content: Text(
             "Do you want to see the detailed exercises for this split?",
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: ColorManager.textSecondary),
           ),
           actions: [
             TextButton(
@@ -107,7 +107,7 @@ class PPLPage extends StatelessWidget {
                       ),
                       subtitle: Text(
                         'Focus: ${split['focus']}',
-                        style: const TextStyle(color: Colors.white70),
+                        style: TextStyle(color: ColorManager.textSecondary),
                       ),
                     ),
                   );

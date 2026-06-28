@@ -43,29 +43,46 @@ class _AIChatScreenState extends State<AIChatScreen> {
 
     _scrollToBottom();
 
+    ChatMessage? aiMessage;
+
     try {
       gemini.streamGenerateContent(text).listen(
         (value) {
-          final response = value.output ?? "";
-          if (response.isNotEmpty) {
+          final chunk = value.output ?? "";
+          if (chunk.isNotEmpty) {
             setState(() {
               _isTyping = false;
-              _messages.add(ChatMessage(
-                text: response,
-                isUser: false,
-              ));
+              if (aiMessage == null) {
+                aiMessage = ChatMessage(text: chunk, isUser: false);
+                _messages.add(aiMessage!);
+              } else {
+                aiMessage!.text += chunk;
+              }
             });
             _scrollToBottom();
           }
         },
         onError: (e) {
+          String userFriendlyMessage = "Sorry, I'm having trouble connecting to Gemini. Please check your API key.";
+          final errStr = e.toString().toLowerCase();
+          if (errStr.contains('503') || errStr.contains('demand') || errStr.contains('busy') || errStr.contains('unavailable')) {
+            userFriendlyMessage = "The AI is currently experiencing high demand. Please try again in a few moments!";
+          } else if (errStr.contains('quota') || errStr.contains('limit')) {
+            userFriendlyMessage = "AI limit reached or API quota exceeded. Please try again later.";
+          } else if (errStr.contains('403') || errStr.contains('suspended') || errStr.contains('permission')) {
+            userFriendlyMessage = "API Key error or access denied. Please check your credentials.";
+          }
+
           setState(() {
             _isTyping = false;
-            _messages.add(ChatMessage(
-              text:
-                  "Sorry, I'm having trouble connecting to Gemini. Please check your API key.",
-              isUser: false,
-            ));
+            if (aiMessage == null) {
+              _messages.add(ChatMessage(
+                text: userFriendlyMessage,
+                isUser: false,
+              ));
+            } else {
+              aiMessage!.text = userFriendlyMessage;
+            }
           });
           _scrollToBottom();
         },
@@ -196,10 +213,10 @@ class _AIChatScreenState extends State<AIChatScreen> {
 }
 
 class ChatMessage extends StatelessWidget {
-  final String text;
+  String text;
   final bool isUser;
 
-  const ChatMessage({super.key, required this.text, required this.isUser});
+  ChatMessage({super.key, required this.text, required this.isUser});
 
   @override
   Widget build(BuildContext context) {

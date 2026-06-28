@@ -165,6 +165,7 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                   // If no groups, just show list
                   if (groupedMap.isEmpty) {
                     return ListView.builder(
+                      padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 80.h),
                       itemCount: otherWorkouts.length,
                       itemBuilder: (context, index) => _buildWorkoutCard(
                           workout: otherWorkouts[index],
@@ -179,7 +180,7 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                     ..sort((a, b) => (_dayOrder[a] ?? 99).compareTo(_dayOrder[b] ?? 99));
 
                   return ListView(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 80.h),
                     children: [
                       ...sortedDays.map((day) {
                         final workouts = groupedMap[day]!;
@@ -220,10 +221,10 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                                         ),
                                       );
                                     },
-                                    icon: Icon(Icons.play_arrow, size: 16.sp, color: ColorManager.textPrimary),
+                                    icon: Icon(Icons.play_arrow, size: 16.sp, color: Colors.white),
                                     label: Text(
                                       'Start Day', 
-                                      style: TextStyle(fontSize: 12.sp, color: ColorManager.textPrimary, fontWeight: FontWeight.bold)
+                                      style: TextStyle(fontSize: 12.sp, color: Colors.white, fontWeight: FontWeight.bold)
                                     ),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: ColorManager.gradientStart,

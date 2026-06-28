@@ -6,6 +6,8 @@ import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+enum AICoachPersonality { motivator, scientist, companion }
+
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
 
@@ -14,6 +16,18 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  AICoachPersonality _personality = AICoachPersonality.motivator;
+
+  final List<String> _dailyTips = [
+    "Drinking 500ml of water can boost your metabolism by 30% for over an hour.",
+    "Progressive overload (gradually increasing weight or reps) is key to building muscle.",
+    "Rest days are when your muscles actually grow and recover. Don't skip them!",
+    "Lifting weights burns calories during the workout, but muscle tissue burns calories even at rest.",
+    "A high-protein snack before bed can support muscle synthesis and recovery overnight.",
+    "Compound exercises (squats, deadlifts, bench press) engage multiple muscles and burn more energy.",
+    "Stretching after a workout helps reduce soreness and improves joint flexibility.",
+    "Consistency beats intensity. 3 moderate workouts a week is better than 1 extreme session.",
+  ];
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final List<ChatMessage> _messages = [];
@@ -120,36 +134,84 @@ class _ChatScreenState extends State<ChatScreen> {
     await _incrementCount();
 
     await _askGemini(userMessage);
-
-    if (mounted) {
-      setState(() {
-        isThinking = false;
-      });
-    }
-
-    _scrollToBottom();
   }
 
   Future<void> _askGemini(String question) async {
+    String personalityInstruction = "";
+    switch (_personality) {
+      case AICoachPersonality.motivator:
+        personalityInstruction = 
+            "Act as a high-energy fitness trainer like Arnold Schwarzenegger. "
+            "Use bodybuilding slang, words like 'crush it', 'heavy', 'pump', and lots of fitness/flexing emojis. "
+            "Be extremely motivating and intense. ";
+        break;
+      case AICoachPersonality.scientist:
+        personalityInstruction = 
+            "Act as a detailed, fact-oriented sports science researcher. "
+            "Explain the physiological mechanism briefly, use precise numbers (macronutrients, reps, rests), "
+            "be formal and highly detailed, avoiding hype. ";
+        break;
+      case AICoachPersonality.companion:
+        personalityInstruction = 
+            "Act as a supportive, warm, and friendly fitness partner. "
+            "Emphasize mental wellness, proper recovery, sleep, and warm, encouraging words. ";
+        break;
+    }
+
     final prompt =
-        "Answer only fitness and health and supplement diet calories protein foods related questions. "
-        "Keep the answer concise (under 100 words) if possible. "
+        "Instructions: $personalityInstruction Answer only fitness, health, supplement, diet, calories, protein, and workout related questions. "
+        "Keep the answer concise (under 100 words). "
         "Question: $question";
 
+    ChatMessage? aiMessage;
+
     try {
-      final value = await gemini!.prompt(parts: [Part.text(prompt)]);
-      final response = value?.output ?? 'No response from AI.';
+      final stream = gemini!.streamGenerateContent(prompt);
+      
+      await for (final value in stream) {
+        final chunk = value.output ?? "";
+        if (chunk.isNotEmpty) {
+          if (mounted) {
+            setState(() {
+              if (aiMessage == null) {
+                aiMessage = ChatMessage(message: chunk, isUser: false);
+                _messages.add(aiMessage!);
+                isThinking = false;
+              } else {
+                aiMessage!.message += chunk;
+              }
+            });
+            _scrollToBottom();
+          }
+        }
+      }
+    } catch (e) {
+      String userFriendlyMessage = "Sorry, I'm having trouble connecting to the AI. Please try again.";
+      final errStr = e.toString().toLowerCase();
+      if (errStr.contains('503') || errStr.contains('demand') || errStr.contains('busy') || errStr.contains('unavailable')) {
+        userFriendlyMessage = "The AI is currently experiencing high demand. Please try again in a few moments!";
+      } else if (errStr.contains('quota') || errStr.contains('limit')) {
+        userFriendlyMessage = "AI limit reached or API quota exceeded. Please try again later.";
+      } else if (errStr.contains('403') || errStr.contains('suspended') || errStr.contains('permission')) {
+        userFriendlyMessage = "API Key error or access denied. Please check your credentials.";
+      }
 
       if (mounted) {
         setState(() {
-          _messages.add(ChatMessage(message: response, isUser: false));
+          if (aiMessage == null) {
+            _messages.add(ChatMessage(message: userFriendlyMessage, isUser: false));
+          } else {
+            aiMessage!.message = userFriendlyMessage;
+          }
         });
+        _scrollToBottom();
       }
-    } catch (e) {
+    } finally {
       if (mounted) {
         setState(() {
-          _messages.add(ChatMessage(message: "Error: Unable to connect to AI.", isUser: false));
+          isThinking = false;
         });
+        _scrollToBottom();
       }
     }
   }
@@ -201,6 +263,7 @@ class _ChatScreenState extends State<ChatScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            _buildPersonalitySelector(),
             Expanded(
               child: _messages.isEmpty 
                 ? _buildEmptyState()
@@ -228,18 +291,221 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+  Widget _buildPersonalitySelector() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
+      color: ColorManager.surface,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Icon(Icons.auto_awesome, color: ColorManager.primary, size: 48.sp),
-          SizedBox(height: 16.h),
           Text(
-            'Ask me anything about fitness!',
-            style: TextStyle(color: ColorManager.textSecondary, fontSize: 16.sp),
+            'Coach Style:',
+            style: TextStyle(
+              color: ColorManager.textSecondary,
+              fontSize: 12.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Row(
+            children: [
+              _buildPersonalityChip(AICoachPersonality.motivator, '⚡ Arnold'),
+              SizedBox(width: 8.w),
+              _buildPersonalityChip(AICoachPersonality.scientist, '🔬 Scientist'),
+              SizedBox(width: 8.w),
+              _buildPersonalityChip(AICoachPersonality.companion, '🤝 Friendly'),
+            ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPersonalityChip(AICoachPersonality p, String label) {
+    final isSelected = _personality == p;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _personality = p;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+        decoration: BoxDecoration(
+          color: isSelected ? ColorManager.primary : ColorManager.background,
+          borderRadius: BorderRadius.circular(15.r),
+          border: Border.all(
+            color: isSelected ? ColorManager.primary : ColorManager.divider,
+            width: 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : ColorManager.textSecondary,
+            fontWeight: FontWeight.bold,
+            fontSize: 11.sp,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    final dayOfMonth = DateTime.now().day;
+    final dailyTip = _dailyTips[(dayOfMonth - 1) % _dailyTips.length];
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [ColorManager.primary.withOpacity(0.15), ColorManager.primary.withOpacity(0.05)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(color: ColorManager.primary.withOpacity(0.2)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.lightbulb_outline_rounded, color: ColorManager.primary, size: 28.sp),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '💡 Daily Fitness Fact',
+                        style: TextStyle(
+                          color: ColorManager.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13.sp,
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        dailyTip,
+                        style: TextStyle(
+                          color: ColorManager.textSecondary,
+                          fontSize: 12.sp,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 24.h),
+          Text(
+            'Quick Action Guides',
+            style: TextStyle(
+              color: ColorManager.textPrimary,
+              fontWeight: FontWeight.bold,
+              fontSize: 16.sp,
+            ),
+          ),
+          SizedBox(height: 12.h),
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisSpacing: 12.w,
+            mainAxisSpacing: 12.h,
+            childAspectRatio: 1.4,
+            children: [
+              _buildCategoryCard(
+                '🍏',
+                'Diet Planner',
+                'Get custom protein & meal tips.',
+                'Build a high-protein diet plan for muscle gain',
+              ),
+              _buildCategoryCard(
+                '💪',
+                'Form Check',
+                'Learn how to do exercises safely.',
+                'Show me key tips to keep my squat form perfect',
+              ),
+              _buildCategoryCard(
+                '😴',
+                'Recovery',
+                'Optimize sleep and muscle rest.',
+                'How can I optimize sleep and recovery for bodybuilding?',
+              ),
+              _buildCategoryCard(
+                '⚡',
+                'Motivation',
+                'Get an instant mental energy boost.',
+                'Give me a short, intense pump-up speech for my workout',
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryCard(String emoji, String title, String desc, String promptText) {
+    return InkWell(
+      onTap: () => _sendMessage(text: promptText),
+      borderRadius: BorderRadius.circular(16.r),
+      child: Container(
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          color: ColorManager.surface,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: ColorManager.divider),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(emoji, style: TextStyle(fontSize: 20.sp)),
+                Icon(Icons.arrow_forward_rounded, color: ColorManager.textTertiary, size: 16.sp),
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: ColorManager.textPrimary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.sp,
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  desc,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: ColorManager.textSecondary,
+                    fontSize: 10.sp,
+                    height: 1.2,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -393,7 +659,7 @@ class _ChatScreenState extends State<ChatScreen> {
 }
 
 class ChatMessage {
-  final String message;
+  String message;
   final bool isUser;
 
   ChatMessage({required this.message, required this.isUser});

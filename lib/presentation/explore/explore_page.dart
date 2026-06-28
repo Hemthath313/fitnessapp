@@ -102,7 +102,7 @@ class _ExploreWidgetState extends State<ExploreWidget>
         children: [
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.only(left: 12.0, right: 12.0, top: 12.0, bottom: 80.0),
               itemCount: cards.length,
               itemBuilder: (context, index) {
                 return RepaintBoundary(
