@@ -60,26 +60,30 @@ class _ChatScreenState extends State<ChatScreen> {
     final today = DateTime.now().toIso8601String().split('T')[0]; // YYYY-MM-DD
     final lastDate = prefs.getString('chat_last_date');
     
-    setState(() {
-      if (lastDate != today) {
-        // New day, reset count
-        _questionsCount = 0;
-        prefs.setString('chat_last_date', today);
-        prefs.setInt('chat_count', 0);
-      } else {
-        // Same day, load count
-        _questionsCount = prefs.getInt('chat_count') ?? 0;
-      }
-      _limitReached = _questionsCount >= _dailyLimit;
-    });
+    if (mounted) {
+      setState(() {
+        if (lastDate != today) {
+          // New day, reset count
+          _questionsCount = 0;
+          prefs.setString('chat_last_date', today);
+          prefs.setInt('chat_count', 0);
+        } else {
+          // Same day, load count
+          _questionsCount = prefs.getInt('chat_count') ?? 0;
+        }
+        _limitReached = _questionsCount >= _dailyLimit;
+      });
+    }
   }
 
   Future<void> _incrementCount() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _questionsCount++;
-      _limitReached = _questionsCount >= _dailyLimit;
-    });
+    if (mounted) {
+      setState(() {
+        _questionsCount++;
+        _limitReached = _questionsCount >= _dailyLimit;
+      });
+    }
     await prefs.setInt('chat_count', _questionsCount);
   }
 
@@ -117,9 +121,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
     await _askGemini(userMessage);
 
-    setState(() {
-      isThinking = false;
-    });
+    if (mounted) {
+      setState(() {
+        isThinking = false;
+      });
+    }
 
     _scrollToBottom();
   }
@@ -291,7 +297,7 @@ class _ChatScreenState extends State<ChatScreen> {
         child: Text(
           message.message,
           style: TextStyle(
-            color: isUser ? Colors.black : Colors.white,
+            color: isUser ? Colors.white : ColorManager.textPrimary,
             fontSize: 15.sp,
             fontWeight: isUser ? FontWeight.w500 : FontWeight.normal,
           ),
@@ -357,7 +363,7 @@ class _ChatScreenState extends State<ChatScreen> {
               enabled: !_limitReached,
               decoration: InputDecoration(
                 hintText: _limitReached ? 'Daily limit reached' : 'Ask a question...',
-                hintStyle: TextStyle(color: ColorManager.surface),
+                hintStyle: TextStyle(color: ColorManager.textTertiary),
                 filled: true,
                 fillColor: ColorManager.background,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),

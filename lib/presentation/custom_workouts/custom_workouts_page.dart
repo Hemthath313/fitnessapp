@@ -82,7 +82,7 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: ColorManager.background,
       body: SafeArea(
         bottom: true,
         child: Column(
@@ -183,13 +183,15 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                     children: [
                       ...sortedDays.map((day) {
                         final workouts = groupedMap[day]!;
-                        return Container(
+                        return Card(
                           margin: EdgeInsets.only(bottom: 16.h),
-                          decoration: BoxDecoration(
-                            color: ColorManager.surface,
+                          color: ColorManager.surface,
+                          shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12.r),
-                            border: Border.all(color: ColorManager.divider),
+                            side: BorderSide(color: ColorManager.divider),
                           ),
+                          elevation: 0,
+                          clipBehavior: Clip.antiAlias,
                           child: Theme(
                             data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
                             child: ExpansionTile(

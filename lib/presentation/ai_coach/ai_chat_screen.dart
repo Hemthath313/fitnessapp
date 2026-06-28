@@ -217,11 +217,18 @@ class ChatMessage extends StatelessWidget {
             bottomLeft: Radius.circular(isUser ? 20.r : 0),
             bottomRight: Radius.circular(isUser ? 0 : 20.r),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Text(
           text,
           style: TextStyle(
-            color: isUser ? Colors.black : Colors.white,
+            color: isUser ? Colors.white : ColorManager.textPrimary,
             fontSize: 14.sp,
           ),
         ),

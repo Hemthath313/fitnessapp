@@ -15,8 +15,12 @@ class ChallengeExercise {
 }
 
 class ChallengeData {
-  static const Map<int, List<ChallengeExercise>> sixPackCurriculum = {
-    1: [
+  static final Map<int, List<ChallengeExercise>> sixPackCurriculum = _generateCurriculum();
+
+  static Map<int, List<ChallengeExercise>> _generateCurriculum() {
+    final Map<int, List<ChallengeExercise>> curriculum = {};
+    
+    const day1Exercises = [
       ChallengeExercise(
         name: 'Crunch',
         target: 'Upper Abs',
@@ -38,8 +42,9 @@ class ChallengeData {
         videoPath: 'assets/videos/abs/abs_plank.mp4', 
         setsReps: '3 sets x 45 seconds',
       ),
-    ],
-    2: [
+    ];
+
+    const day2Exercises = [
       ChallengeExercise(
         name: 'V-Up',
         target: 'Upper & Lower Abs',
@@ -61,9 +66,70 @@ class ChallengeData {
         videoPath: 'assets/videos/abs/abs_vertical_leg_raise.mp4',
         setsReps: '3 sets x 10 reps',
       ),
-    ],
-    // ... Additional days can be added here
-  };
+    ];
+
+    const day3Exercises = [
+      ChallengeExercise(
+        name: 'Russian Twist',
+        target: 'Obliques',
+        equipment: 'None',
+        videoPath: 'assets/videos/abs/abs_air_twist_crunch.mp4',
+        setsReps: '3 sets x 20 reps',
+      ),
+      ChallengeExercise(
+        name: 'Twisting Crunch',
+        target: 'Upper Abs & Obliques',
+        equipment: 'None',
+        videoPath: 'assets/videos/abs/abs_twisting_crunch.mp4',
+        setsReps: '3 sets x 15 reps',
+      ),
+      ChallengeExercise(
+        name: 'Flutter Kicks',
+        target: 'Lower Abs',
+        equipment: 'None',
+        videoPath: 'assets/videos/abs/abs_vertical_leg_raise.mp4',
+        setsReps: '3 sets x 30 seconds',
+      ),
+    ];
+
+    for (int day = 1; day <= 30; day++) {
+      final setsMultiplier = day > 20 ? 4 : 3;
+      final repModifier = day > 20 ? 1.5 : (day > 10 ? 1.25 : 1.0);
+
+      final List<ChallengeExercise> baseExercises;
+      if (day % 3 == 1) {
+        baseExercises = day1Exercises;
+      } else if (day % 3 == 2) {
+        baseExercises = day2Exercises;
+      } else {
+        baseExercises = day3Exercises;
+      }
+
+      curriculum[day] = baseExercises.map((e) {
+        String setsRepsText = e.setsReps;
+        if (e.setsReps.contains('reps')) {
+          final parts = e.setsReps.split(' x ');
+          final baseReps = int.tryParse(parts[1].split(' ')[0]) ?? 15;
+          final adjustedReps = (baseReps * repModifier).round();
+          setsRepsText = '$setsMultiplier sets x $adjustedReps reps';
+        } else if (e.setsReps.contains('seconds')) {
+          final parts = e.setsReps.split(' x ');
+          final baseSeconds = int.tryParse(parts[1].split(' ')[0]) ?? 30;
+          final adjustedSeconds = (baseSeconds * repModifier).round();
+          setsRepsText = '$setsMultiplier sets x $adjustedSeconds seconds';
+        }
+        return ChallengeExercise(
+          name: e.name,
+          target: e.target,
+          equipment: e.equipment,
+          videoPath: e.videoPath,
+          setsReps: setsRepsText,
+        );
+      }).toList();
+    }
+
+    return curriculum;
+  }
 
   static const ChallengeExercise weeklyFeaturedExercise = ChallengeExercise(
     name: 'Cable Kneeling Crunch',

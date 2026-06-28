@@ -133,9 +133,9 @@ class SixPackChallengeSelectionScreen extends StatelessWidget {
         backgroundColor: ColorManager.surface,
         title: Text('Come back tomorrow!',
             style: TextStyle(color: ColorManager.textPrimary)),
-        content: const Text(
+        content: Text(
           'You have already completed a workout today. Rest up and come back tomorrow to keep the streak alive!',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: ColorManager.textSecondary),
         ),
         actions: [
           TextButton(
