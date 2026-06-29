@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:fitness_app/presentation/profile/widgets/muscle_activation_chart.dart';
 
 class MorePage extends StatelessWidget {
   const MorePage({super.key});
@@ -122,6 +123,12 @@ class MorePage extends StatelessWidget {
                   color: Colors.purple,
                   onTap: () => context.push(Routes.changeMeasurementsRoute),
                 ),
+                SizedBox(height: SizeManager.s24.h),
+
+                // Advanced Analytics Section
+                _buildSectionTitle('Advanced Analytics'),
+                SizedBox(height: SizeManager.s12.h),
+                const MuscleActivationChart(),
                 SizedBox(height: SizeManager.s24.h),
 
                 // Account Settings Section

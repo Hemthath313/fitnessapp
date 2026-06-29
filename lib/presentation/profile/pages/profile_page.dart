@@ -17,6 +17,7 @@ import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/profile/widgets/measurement_line_chart.dart';
+import 'package:fitness_app/presentation/profile/widgets/muscle_activation_chart.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -434,6 +435,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                   context.push(Routes.changeWeightRoute)),
                           const WeightDataTextRowWidget(),
                           const WeightLineChart(),
+                          SizedBox(height: 16.h),
+                          const MuscleActivationChart(),
+                          SizedBox(height: 16.h),
                           
                           // Pro Features Section
                           _buildProAnalyticsSection(context),

@@ -44,6 +44,7 @@ import 'package:fitness_app/presentation/workouts/pages/new_exercise_page.dart';
 import 'package:fitness_app/presentation/workouts/pages/workouts_page.dart';
 import 'package:fitness_app/presentation/workout_logs/workout_log_screen.dart';
 import 'package:fitness_app/presentation/workout_logs/workout_history_screen.dart';
+import 'package:fitness_app/presentation/workout_logs/exercise_tracker_page.dart';
 import 'package:fitness_app/presentation/progress_photos/progress_photos_screen.dart';
 import 'package:fitness_app/presentation/progress_photos/add_progress_photo_screen.dart';
 import 'package:fitness_app/presentation/progress_photos/photo_comparison_screen.dart';
@@ -110,6 +111,7 @@ class Routes {
   static const String workoutGeneratorRoute = '/workoutGenerator';
   static const String monthlyComparisonRoute = '/monthlyComparison';
   static const String proteinChartRoute = '/proteinChart';
+  static const String exerciseTracker = '/exerciseTracker';
 }
 
 final GoRouter router = GoRouter(
@@ -385,6 +387,13 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, const WorkoutHistoryScreen())),
+    GoRoute(
+        path: Routes.exerciseTracker,
+        pageBuilder: (context, state) {
+          final exerciseName = state.uri.queryParameters['exerciseName'] ?? 'Exercise';
+          return PageTransitions.buildPageWithSlideTransition(
+              state.pageKey, ExerciseTrackerPage(exerciseName: exerciseName));
+        }),
     // GoRoute(
     //     path: Routes.progressPhotosRoute,
     //     pageBuilder: (context, state) =>
