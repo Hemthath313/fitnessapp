@@ -13,6 +13,10 @@ import 'package:fitness_app/presentation/custom_workouts/custom_workouts_page.da
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/services/connectivity_service.dart';
+import 'package:fitness_app/services/notification_service.dart';
+import 'package:fitness_app/services/update_service.dart';
+import 'package:fitness_app/services/review_service.dart';
+import 'package:fitness_app/presentation/widgets/update_dialog.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/presentation/journal/pages/journal_page.dart';
 import 'package:fitness_app/presentation/main/widgets/appbar_journal.dart';
@@ -78,6 +82,41 @@ class _MainPageState extends State<MainPage> {
 
       NetworkService.initialize();
       Provider.of<SubscriptionProvider>(context, listen: false).refresh();
+
+      // Initialize Push Notifications
+      try {
+        await NotificationService().initialize();
+      } catch (e) {
+        print('Error initializing NotificationService: $e');
+      }
+
+      // Check for App Updates
+      try {
+        final updateInfo = await UpdateService().checkForUpdates();
+        if (updateInfo.hasUpdate && mounted) {
+          showDialog(
+            context: context,
+            barrierDismissible: !updateInfo.isForceUpdate,
+            builder: (BuildContext context) {
+              return UpdateDialog(
+                isForceUpdate: updateInfo.isForceUpdate,
+                releaseNotes: updateInfo.releaseNotes,
+                updateUrl: updateInfo.updateUrl,
+              );
+            },
+          );
+        }
+      } catch (e) {
+        print('Error checking for updates: $e');
+      }
+
+      // Increment app launch count for rating prompts
+      try {
+        await ReviewService().incrementAppLaunches();
+      } catch (e) {
+        print('Error incrementing app launches: $e');
+      }
+
       final consumptionProvider =
           Provider.of<ConsumptionProvider>(context, listen: false);
       final workoutsProvider =

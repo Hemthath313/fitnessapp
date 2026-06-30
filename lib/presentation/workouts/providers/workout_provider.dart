@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/model/workout_model.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
+import 'package:fitness_app/services/review_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -325,6 +326,13 @@ class WorkoutProvider with ChangeNotifier {
         'dateTime': dateTime,
         'id': workoutID,
       });
+
+      // Increment review counter
+      try {
+        await ReviewService().incrementWorkoutsLogged();
+      } catch (e) {
+        print('Error incrementing workouts count for review: $e');
+      }
 
       // Update streak and statistics
       // This needs to be called from the widget that has access to context

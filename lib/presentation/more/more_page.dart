@@ -7,6 +7,7 @@ import 'package:fitness_app/utils/router/router.dart';
 import 'package:fitness_app/utils/widgets/loading_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fitness_app/presentation/widgets/feedback_dialog.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_app/presentation/profile/widgets/muscle_activation_chart.dart';
@@ -233,16 +234,14 @@ class MorePage extends StatelessWidget {
                 SizedBox(height: SizeManager.s12.h),
                 _buildMenuCard(
                   context,
-                  icon: Icons.settings_outlined,
-                  title: 'App Settings',
-                  subtitle: 'Preferences and notifications',
-                  color: Colors.grey,
+                  icon: Icons.rate_review_outlined,
+                  title: 'Feedback & Support',
+                  subtitle: 'Rate your experience or suggest features',
+                  color: Colors.teal,
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Settings coming soon!'),
-                        backgroundColor: ColorManager.primary,
-                      ),
+                    showDialog(
+                      context: context,
+                      builder: (context) => const FeedbackDialog(),
                     );
                   },
                 ),

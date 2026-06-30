@@ -74,6 +74,16 @@ service cloud.firestore {
       }
     }
     
+    // Config collection (public read, write denied)
+    match /config/{document=**} {
+      allow read: if true;
+    }
+
+    // Feedback collection (create-only for authenticated users)
+    match /feedback/{documentId} {
+      allow create: if isAuthenticated();
+    }
+
     // Deny all other access
     match /{document=**} {
       allow read, write: if false;
