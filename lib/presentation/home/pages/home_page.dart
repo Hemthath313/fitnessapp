@@ -38,13 +38,14 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Today's Progress - Shows BMI, Calories, Water
+            FitnessDataWidget(),
+            SizedBox(height: SizeManager.s16.h),
+
             // Quick Actions
             const QuickActionsWidget(),
             SizedBox(height: SizeManager.s16.h),
 
-            // Today's Progress - Shows BMI, Calories, Water
-            FitnessDataWidget(),
-            SizedBox(height: SizeManager.s16.h),
             const HomePageTextSpacerWidget(
               title: StringsManager.challenges,
             ),

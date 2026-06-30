@@ -166,11 +166,12 @@ class ExploreCard extends StatelessWidget {
                 ),
               ),
               Container(
+                height: 210,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   gradient: LinearGradient(
                     colors: [
-                      Colors.black.withOpacity(0.6),
+                      Colors.black.withOpacity(0.7),
                       Colors.transparent,
                     ],
                     begin: Alignment.bottomCenter,
