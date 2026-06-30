@@ -109,6 +109,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                                   repNumber: workout.repNumber,
                                   setNumber: workout.setNumber,
                                   dateTime: workout.dateTime,
+                                  context: context,
                                 );
 
                                 workoutsProvider.deleteWorkout(

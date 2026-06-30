@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/model/workout_model.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/services/review_service.dart';
+import 'package:fitness_app/presentation/widgets/rating_prompt_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -310,6 +311,7 @@ class WorkoutProvider with ChangeNotifier {
     required int repNumber,
     required int setNumber,
     required DateTime dateTime,
+    BuildContext? context,
   }) async {
     try {
       User? user = FirebaseAuth.instance.currentUser;
@@ -329,7 +331,14 @@ class WorkoutProvider with ChangeNotifier {
 
       // Increment review counter
       try {
-        await ReviewService().incrementWorkoutsLogged();
+        final bool isEligible = await ReviewService().incrementWorkoutsLogged();
+        if (isEligible && context != null && context.mounted) {
+          showDialog(
+            context: context,
+            barrierDismissible: true,
+            builder: (context) => const RatingPromptDialog(),
+          );
+        }
       } catch (e) {
         print('Error incrementing workouts count for review: $e');
       }

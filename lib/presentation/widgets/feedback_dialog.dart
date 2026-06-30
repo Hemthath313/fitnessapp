@@ -9,7 +9,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:io' show Platform;
 
 class FeedbackDialog extends StatefulWidget {
-  const FeedbackDialog({super.key});
+  final int? initialRating;
+  const FeedbackDialog({super.key, this.initialRating});
 
   @override
   State<FeedbackDialog> createState() => _FeedbackDialogState();
@@ -17,9 +18,15 @@ class FeedbackDialog extends StatefulWidget {
 
 class _FeedbackDialogState extends State<FeedbackDialog> {
   final TextEditingController _feedbackController = TextEditingController();
-  int _selectedStars = 5;
+  late int _selectedStars;
   bool _isSubmitting = false;
   String _errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedStars = widget.initialRating ?? 5;
+  }
 
   Future<void> _submitFeedback() async {
     final feedbackText = _feedbackController.text.trim();

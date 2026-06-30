@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:fitness_app/presentation/boarding/widgets/slider_boarding.dart';
 import 'package:fitness_app/utils/managers/asset_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
@@ -93,71 +94,88 @@ class _BoardingPageState extends State<BoardingPage> {
           ),
           Align(
             alignment: Alignment.bottomCenter,
-            child: Container(
-              height: SizeManager.s270.h,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: ColorManager.surfaceDark,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(RadiusManager.r15.r),
-                  topRight: Radius.circular(RadiusManager.r15.r),
-                ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(RadiusManager.r30.r),
+                topRight: Radius.circular(RadiusManager.r30.r),
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: PaddingManager.p28),
-                    child: SmoothPageIndicator(
-                      controller: _pageController,
-                      count: imgList.length,
-                      effect: CustomizableEffect(
-                        spacing: SizeManager.s16,
-                        dotDecoration: DotDecoration(
-                          width: SizeManager.s8.w,
-                          height: SizeManager.s8.h,
-                          color: ColorManager.white,
-                          borderRadius: BorderRadius.circular(
-                            RadiusManager.r24.r,
-                          ),
-                          dotBorder: DotBorder(
-                            width: SizeManager.s1_5.w,
-                            color: ColorManager.white,
-                          ),
-                        ),
-                        activeDotDecoration: DotDecoration(
-                          width: SizeManager.s20.w,
-                          height: SizeManager.s20.h,
-                          borderRadius: BorderRadius.circular(
-                            RadiusManager.r24.r,
-                          ),
-                          color: ColorManager.surfaceDark,
-                          dotBorder: DotBorder(
-                            width: SizeManager.s1_5.w,
-                            color: ColorManager.white,
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                child: Container(
+                  height: SizeManager.s270.h,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.65), // Sleek dark glass overlay
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(RadiusManager.r30.r),
+                      topRight: Radius.circular(RadiusManager.r30.r),
+                    ),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.15),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: PaddingManager.p28),
+                        child: SmoothPageIndicator(
+                          controller: _pageController,
+                          count: imgList.length,
+                          effect: CustomizableEffect(
+                            spacing: SizeManager.s16,
+                            dotDecoration: DotDecoration(
+                              width: SizeManager.s8.w,
+                              height: SizeManager.s8.h,
+                              color: Colors.white.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(
+                                RadiusManager.r24.r,
+                              ),
+                              dotBorder: DotBorder(
+                                width: SizeManager.s1.w,
+                                color: Colors.white.withOpacity(0.5),
+                              ),
+                            ),
+                            activeDotDecoration: DotDecoration(
+                              width: SizeManager.s12.w,
+                              height: SizeManager.s12.h,
+                              borderRadius: BorderRadius.circular(
+                                RadiusManager.r24.r,
+                              ),
+                              color: ColorManager.primary, // Brand blue indicator
+                              dotBorder: DotBorder(
+                                width: SizeManager.s1_5.w,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: PaddingManager.p28),
-                    child: AnimatedBuilder(
-                      animation: _pageController,
-                      builder: (context, _) => Text(
-                        textList[_pageController.page?.round() ?? 0],
-                        style: TextStyle(
-                          color: ColorManager.white,
-                          fontSize: SizeManager.s24.sp,
-                          fontWeight: FontWeight.bold,
+                      Padding(
+                        padding:  EdgeInsets.only(
+                          top: PaddingManager.p20,
+                          left: PaddingManager.p20,
+                          right: PaddingManager.p20,
                         ),
-                        textAlign: TextAlign.center,
-                      ).animate().fadeIn(duration: 500.ms),
-                    ),
+                        child: AnimatedBuilder(
+                          animation: _pageController,
+                          builder: (context, _) => Text(
+                            textList[_pageController.page?.round() ?? 0],
+                            style: TextStyle(
+                              color: Colors.white, // Highly visible constant white text
+                              fontSize: SizeManager.s20.sp, // Elegant sizing
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ).animate().fadeIn(duration: 500.ms),
+                        ),
+                      ),
+                      const SliderBoardingWidget(),
+                    ],
                   ),
-                  const SliderBoardingWidget(),
-                ],
+                ),
               ),
             ),
           ),

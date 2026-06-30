@@ -64,13 +64,15 @@ class _MyAppState extends State<MyApp> {
           SystemChrome.setSystemUIOverlayStyle(
             SystemUiOverlayStyle(
               systemNavigationBarColor:
-                  themeProvider.isDarkMode ? ColorManager.surface : Colors.white,
+                  themeProvider.isDarkMode ? ColorManager.surface : ColorManager.background,
               systemNavigationBarDividerColor: Colors.transparent,
               systemNavigationBarIconBrightness:
                   themeProvider.isDarkMode ? Brightness.light : Brightness.dark,
               statusBarColor: Colors.transparent,
               statusBarIconBrightness:
                   themeProvider.isDarkMode ? Brightness.light : Brightness.dark,
+              statusBarBrightness:
+                  themeProvider.isDarkMode ? Brightness.dark : Brightness.light,
             ),
           );
           return ScreenUtilInit(
@@ -89,6 +91,14 @@ class _MyAppState extends State<MyApp> {
                     darkTheme: _buildDarkTheme(),
                     themeMode: themeProvider.themeMode,
                     routerConfig: router,
+                    builder: (context, child) {
+                      return MediaQuery(
+                        data: MediaQuery.of(context).copyWith(
+                          textScaler: const TextScaler.linear(1.0), // Clamps system text scale factor to standard size
+                        ),
+                        child: child!,
+                      );
+                    },
                   ),
                   if (themeProvider.isProcessing)
                     Container(

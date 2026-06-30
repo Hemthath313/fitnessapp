@@ -48,11 +48,14 @@ class _SliderBoardingWidgetState extends State<SliderBoardingWidget>
     return Padding(
       padding: const EdgeInsets.all(PaddingManager.p20),
       child: SlideAction(
-        outerColor: ColorManager.black87,
-        innerColor: ColorManager.limeGreen,
+        outerColor: Colors.white.withOpacity(0.08), // Frosted glass slider lane
+        innerColor: ColorManager.primary, // Brand electric blue button
         sliderButtonIcon: SlideTransition(
           position: _offsetAnimation,
-          child: const Icon(Icons.double_arrow_sharp),
+          child: const Icon(
+            Icons.double_arrow_sharp,
+            color: Colors.white, // Clean white icon on primary blue background
+          ),
         ),
         text: '',
         onSubmit: () {
@@ -62,14 +65,14 @@ class _SliderBoardingWidgetState extends State<SliderBoardingWidget>
         child: SlideTransition(
           position: _offsetAnimation,
           child: Shimmer.fromColors(
-            baseColor: ColorManager.white,
-            highlightColor: Colors.grey.shade400,
+            baseColor: Colors.white.withOpacity(0.8), // Pure white text shimmer
+            highlightColor: Colors.white,
             child: Text(
               StringsManager.swipeToPrc,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: SizeManager.s18,
                 fontWeight: FontWeight.w600,
-                color: ColorManager.white,
+                color: Colors.white,
               ),
             ),
           ),

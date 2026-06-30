@@ -21,6 +21,9 @@ class ColorManager {
   static const Color accent = Color(0xFFFF4757);
   static const Color accentLight = Color(0xFFFF6B78);
 
+  /// Accent – Neon Volt Green (for high-energy actions, buttons, and badges)
+  static const Color neonVolt = Color(0xFFD4FF2A);
+
   /// Success – Teal Green (completed sets, goals met)
   static const Color success = Color(0xFF2ECC71);
   static const Color successLight = Color(0xFF58D68D);

@@ -55,7 +55,7 @@ class ReviewService {
         print('ReviewService: Workouts Logged Count incremented to $currentWorkouts');
       }
 
-      return await _evaluateAndPrompt();
+      return await _isEligibleForPrompt();
     } catch (e) {
       if (kDebugMode) {
         print('ReviewService: Error incrementing workouts: $e');
@@ -64,38 +64,52 @@ class ReviewService {
     }
   }
 
-  /// Evaluates counts and triggers native prompt if rules match
-  Future<bool> _evaluateAndPrompt() async {
+  /// Checks if counts meet thresholds and hasn't prompted yet
+  Future<bool> _isEligibleForPrompt() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       
-      // Stop if already prompted
       if (prefs.getBool(_keyHasPrompted) ?? false) return false;
 
       final int launches = prefs.getInt(_keyLaunchCount) ?? 0;
       final int workouts = prefs.getInt(_keyWorkoutCount) ?? 0;
 
-      if (launches >= _launchThreshold && workouts >= _workoutThreshold) {
-        final bool isAvailable = await _inAppReview.isAvailable();
-        if (isAvailable) {
-          await _inAppReview.requestReview();
-          await prefs.setBool(_keyHasPrompted, true);
-          if (kDebugMode) {
-            print('ReviewService: Native In-App Review Prompt triggered successfully.');
-          }
-          return true;
-        } else {
-          if (kDebugMode) {
-            print('ReviewService: In-App Review API is not available on this device.');
-          }
+      return launches >= _launchThreshold && workouts >= _workoutThreshold;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Marks the review as prompted in shared preferences
+  Future<void> markAsPrompted() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_keyHasPrompted, true);
+      if (kDebugMode) {
+        print('ReviewService: Gated review marked as prompted.');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('ReviewService: Error marking as prompted: $e');
+      }
+    }
+  }
+
+  /// Triggers the native in-app store review prompt
+  Future<void> requestNativeReview() async {
+    try {
+      final bool isAvailable = await _inAppReview.isAvailable();
+      if (isAvailable) {
+        await _inAppReview.requestReview();
+        if (kDebugMode) {
+          print('ReviewService: Native In-App Review Prompt triggered successfully.');
         }
       }
     } catch (e) {
       if (kDebugMode) {
-        print('ReviewService: Error during review request evaluation: $e');
+        print('ReviewService: Error during native review request: $e');
       }
     }
-    return false;
   }
 
   /// Explicitly redirects user to the App Store or Google Play Store listing
