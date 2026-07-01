@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:fitness_app/presentation/journal/widgets/weekly_schedule_widget.dart';
 
 class JournalPage extends StatefulWidget {
   const JournalPage({super.key});
@@ -50,9 +51,9 @@ class _JournalPageState extends State<JournalPage> {
               _buildPremiumUpgradeCard(),
 
             SizedBox(height: SizeManager.s20.h),
-            _buildAIInsightCard(),
-            SizedBox(height: SizeManager.s20.h),
             _buildAICoachCard(),
+            SizedBox(height: SizeManager.s20.h),
+            const WeeklyScheduleWidget(),
             SizedBox(height: SizeManager.s20.h),
 
             // Navigation Cards
@@ -67,7 +68,7 @@ class _JournalPageState extends State<JournalPage> {
                     onTap: () => context.push(Routes.workoutHistoryRoute),
                   ),
                 ),
-                SizedBox(width: SizeManager.s8.w),
+                SizedBox(width: SizeManager.s12.w),
                 Expanded(
                   child: _buildNavigationCard(
                     title: 'Analytics',
@@ -77,21 +78,9 @@ class _JournalPageState extends State<JournalPage> {
                     onTap: () => context.push(Routes.strengthAnalyticsRoute),
                   ),
                 ),
-                SizedBox(width: SizeManager.s8.w),
-                Expanded(
-                  child: _buildNavigationCard(
-                    title: 'Transformation',
-                    subtitle: '30-Day Progress',
-                    icon: Icons.auto_graph_rounded,
-                    color: Colors.blue,
-                    onTap: () => context.push(Routes.sixPackChallengeRoute),
-                  ),
-                ),
               ],
             ),
             
-            SizedBox(height: SizeManager.s20.h),
-            _buildNutritionAnalysisCard(),
             SizedBox(height: SizeManager.s40.h),
             const PremiumAwareBannerAd(pageName: 'journal', bottomMargin: 60.0),
             SizedBox(height: SizeManager.s16.h),
@@ -164,127 +153,7 @@ class _JournalPageState extends State<JournalPage> {
     );
   }
 
-  Widget _buildAIInsightCard() {
-    return Container(
-      padding: EdgeInsets.all(SizeManager.s20.w),
-      decoration: BoxDecoration(
-        color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(SizeManager.s20.r),
-        border: Border.all(
-          color: ColorManager.primary.withOpacity(0.2),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: ColorManager.primary.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: SizeManager.s12.h),
-          Row(
-            children: [
-              Icon(Icons.auto_awesome, color: Colors.amber, size: 14.sp),
-              SizedBox(width: 4.w),
-              Text(
-                'AI Analysis based on your activity',
-                style: TextStyle(
-                  color: ColorManager.textTertiary,
-                  fontSize: 10.sp,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildNutritionAnalysisCard() {
-    final isPremium = Provider.of<SubscriptionProvider>(context).isPremium;
-
-    return Container(
-      padding: EdgeInsets.all(SizeManager.s20.w),
-      decoration: BoxDecoration(
-        color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(SizeManager.s20.r),
-        border: Border.all(
-          color: Colors.orange.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.restaurant_menu, color: Colors.orange),
-              SizedBox(width: SizeManager.s8.w),
-              Text(
-                'Smart Nutrition Analysis',
-                style: TextStyle(
-                  color: ColorManager.white,
-                  fontSize: SizeManager.s18.sp,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Spacer(),
-              if (!isPremium)
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                  decoration: BoxDecoration(
-                    color: Colors.amber,
-                    borderRadius: BorderRadius.circular(4.r),
-                  ),
-                  child: Text(
-                    'PRO',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 8.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          SizedBox(height: SizeManager.s12.h),
-          Text(
-            isPremium
-                ? 'Your macro distribution is optimal for muscle gain. Try increasing protein by 10g in your morning meal.'
-                : 'Unlock intelligent meal analysis and macro tracking suggestions.',
-            style: TextStyle(
-              color: ColorManager.textSecondary,
-              fontSize: SizeManager.s12.sp,
-            ),
-          ),
-          if (!isPremium) ...[
-            SizedBox(height: SizeManager.s16.h),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () => context.push(Routes.premiumScreen),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: Colors.orange),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                ),
-                child: Text(
-                  'Analyze My Nutrition',
-                  style: TextStyle(color: Colors.orange),
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
 
 
 

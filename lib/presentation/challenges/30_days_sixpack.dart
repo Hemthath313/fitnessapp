@@ -9,8 +9,27 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-class SixPackChallengeSelectionScreen extends StatelessWidget {
+class SixPackChallengeSelectionScreen extends StatefulWidget {
   const SixPackChallengeSelectionScreen({super.key});
+
+  @override
+  State<SixPackChallengeSelectionScreen> createState() => _SixPackChallengeSelectionScreenState();
+}
+
+class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelectionScreen> {
+  Future<Map<String, dynamic>>? _progressFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshProgress();
+  }
+
+  void _refreshProgress() {
+    setState(() {
+      _progressFuture = _fetchProgress();
+    });
+  }
 
   Future<Map<String, dynamic>> _fetchProgress() async {
     final userId = FirebaseAuth.instance.currentUser!.uid;
@@ -30,7 +49,7 @@ class SixPackChallengeSelectionScreen extends StatelessWidget {
         iconTheme: IconThemeData(color: ColorManager.textPrimary),
       ),
       body: FutureBuilder<Map<String, dynamic>>(
-        future: _fetchProgress(),
+        future: _progressFuture,
         builder: (context, snapshot) {
           final progress = snapshot.data ?? {};
           final lastDay = progress['lastCompletedDay'] ?? 0;
@@ -111,7 +130,9 @@ class SixPackChallengeSelectionScreen extends StatelessWidget {
             const SnackBar(content: Text('Complete previous days first!')),
           );
         } else {
-          context.push('${Routes.dailyExerciseRoute}?day=$day');
+          context.push('${Routes.dailyExerciseRoute}?day=$day').then((_) {
+            if (mounted) _refreshProgress();
+          });
         }
       },
       borderRadius: BorderRadius.circular(12.r),

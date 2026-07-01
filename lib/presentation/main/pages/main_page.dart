@@ -189,7 +189,7 @@ class _MainPageState extends State<MainPage> {
         size: SizeManager.s28,
       ),
       Icon(
-        Icons.fitness_center_outlined,
+        Icons.insights_rounded,
         color: isCustomWorkoutsPage
             ? Colors.white
             : ColorManager.textTertiary,
