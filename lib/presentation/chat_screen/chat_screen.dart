@@ -1,8 +1,10 @@
 import 'package:fitness_app/presentation/banner_ads/banner_ad_service.dart';
+import 'dart:async';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -164,6 +166,9 @@ class _ChatScreenState extends State<ChatScreen> {
         "Question: $question";
 
     ChatMessage? aiMessage;
+    String targetContent = "";
+    Timer? typingTimer;
+    bool streamCompleted = false;
 
     try {
       final stream = gemini!.streamGenerateContent(prompt);
@@ -171,21 +176,45 @@ class _ChatScreenState extends State<ChatScreen> {
       await for (final value in stream) {
         final chunk = value.output ?? "";
         if (chunk.isNotEmpty) {
+          targetContent += chunk;
+
           if (mounted) {
             setState(() {
               if (aiMessage == null) {
-                aiMessage = ChatMessage(message: chunk, isUser: false);
+                aiMessage = ChatMessage(message: "", isUser: false);
                 _messages.add(aiMessage!);
                 isThinking = false;
-              } else {
-                aiMessage!.message += chunk;
+                
+                // Start typing timer
+                int currentIndex = 0;
+                typingTimer = Timer.periodic(const Duration(milliseconds: 15), (timer) {
+                  if (!mounted) {
+                    timer.cancel();
+                    return;
+                  }
+                  
+                  if (currentIndex < targetContent.length) {
+                    setState(() {
+                      // Catch up if far behind
+                      final diff = targetContent.length - currentIndex;
+                      final charsToAdd = diff > 40 ? 12 : (diff > 15 ? 4 : 1);
+                      aiMessage!.message += targetContent.substring(currentIndex, currentIndex + charsToAdd);
+                      currentIndex += charsToAdd;
+                    });
+                    _scrollToBottom();
+                  } else if (streamCompleted) {
+                    timer.cancel();
+                  }
+                });
               }
             });
-            _scrollToBottom();
           }
         }
       }
+      streamCompleted = true;
     } catch (e) {
+      streamCompleted = true;
+      typingTimer?.cancel();
       String userFriendlyMessage = "Sorry, I'm having trouble connecting to the AI. Please try again.";
       final errStr = e.toString().toLowerCase();
       if (errStr.contains('503') || errStr.contains('demand') || errStr.contains('busy') || errStr.contains('unavailable')) {
@@ -583,27 +612,13 @@ class _ChatScreenState extends State<ChatScreen> {
           borderRadius: BorderRadius.circular(20),
         ),
         child: SizedBox(
-          width: 40,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _dot(0),
-              _dot(1),
-              _dot(2),
-            ],
+          width: 35.w,
+          height: 12.h,
+          child: SpinKitThreeBounce(
+            color: ColorManager.textTertiary,
+            size: 8.sp,
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _dot(int index) {
-    return Container(
-      width: 6,
-      height: 6,
-      decoration:  BoxDecoration(
-        color: ColorManager.textTertiary,
-        shape: BoxShape.circle,
       ),
     );
   }

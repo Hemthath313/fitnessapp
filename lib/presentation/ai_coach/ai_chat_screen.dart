@@ -17,8 +17,8 @@ class _AIChatScreenState extends State<AIChatScreen> {
   final gemini = Gemini.instance;
   bool _isTyping = false;
 
-  final List<ChatMessage> _messages = [
-    ChatMessage(
+  final List<ChatModel> _messages = [
+    ChatModel(
       text:
           "Hello! I'm your AI Personal Trainer powered by Gemini. How can I help you today?",
       isUser: false,
@@ -36,14 +36,14 @@ class _AIChatScreenState extends State<AIChatScreen> {
     if (text.trim().isEmpty || _isTyping) return;
 
     setState(() {
-      _messages.add(ChatMessage(text: text, isUser: true));
+      _messages.add(ChatModel(text: text, isUser: true));
       _messageController.clear();
       _isTyping = true;
     });
 
     _scrollToBottom();
 
-    ChatMessage? aiMessage;
+    ChatModel? aiMessageModel;
 
     try {
       gemini.streamGenerateContent(text).listen(
@@ -52,11 +52,11 @@ class _AIChatScreenState extends State<AIChatScreen> {
           if (chunk.isNotEmpty) {
             setState(() {
               _isTyping = false;
-              if (aiMessage == null) {
-                aiMessage = ChatMessage(text: chunk, isUser: false);
-                _messages.add(aiMessage!);
+              if (aiMessageModel == null) {
+                aiMessageModel = ChatModel(text: chunk, isUser: false);
+                _messages.add(aiMessageModel!);
               } else {
-                aiMessage!.text += chunk;
+                aiMessageModel!.text += chunk;
               }
             });
             _scrollToBottom();
@@ -75,13 +75,13 @@ class _AIChatScreenState extends State<AIChatScreen> {
 
           setState(() {
             _isTyping = false;
-            if (aiMessage == null) {
-              _messages.add(ChatMessage(
+            if (aiMessageModel == null) {
+              _messages.add(ChatModel(
                 text: userFriendlyMessage,
                 isUser: false,
               ));
             } else {
-              aiMessage!.text = userFriendlyMessage;
+              aiMessageModel!.text = userFriendlyMessage;
             }
           });
           _scrollToBottom();
@@ -124,7 +124,10 @@ class _AIChatScreenState extends State<AIChatScreen> {
               controller: _scrollController,
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
               itemCount: _messages.length,
-              itemBuilder: (context, index) => _messages[index],
+              itemBuilder: (context, index) {
+                final message = _messages[index];
+                return ChatMessage(text: message.text, isUser: message.isUser);
+              },
             ),
           ),
           if (_isTyping)
@@ -213,10 +216,10 @@ class _AIChatScreenState extends State<AIChatScreen> {
 }
 
 class ChatMessage extends StatelessWidget {
-  String text;
+  final String text;
   final bool isUser;
 
-  ChatMessage({super.key, required this.text, required this.isUser});
+  const ChatMessage({super.key, required this.text, required this.isUser});
 
   @override
   Widget build(BuildContext context) {
@@ -253,3 +256,11 @@ class ChatMessage extends StatelessWidget {
     );
   }
 }
+
+class ChatModel {
+  String text;
+  final bool isUser;
+
+  ChatModel({required this.text, required this.isUser});
+}
+
