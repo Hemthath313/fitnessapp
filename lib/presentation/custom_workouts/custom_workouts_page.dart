@@ -1,4 +1,5 @@
 import 'package:fitness_app/presentation/banner_ads/banner_ad_service.dart';
+import 'package:fitness_app/utils/widgets/loading_overlay.dart';
 import 'package:fitness_app/presentation/custom_workouts/day_workout_session_page.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
@@ -68,15 +69,32 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
     );
 
     if (confirm == true) {
-      final aiWorkouts = provider.allWorkouts.where((w) => w.name.startsWith('[')).toList();
-      for (var w in aiWorkouts) {
-        // Assuming provider has a way to delete by ID, specifically for allWorkouts
-        // The current provider method deleteWorkout checks 'workouts' collection, may need verify
-        // But for now we stick to what we have or just recreate the logic if needed
-        // The provider has `deleteAllWorkout` for "allWorkouts" collection usage
-        await provider.deleteAllWorkout(allWorkoutID: w.id);
+      if (!mounted) return;
+      LoadingOverlay.show(context, message: 'Resetting weekly plan...');
+      try {
+        await provider.deleteWeeklyPlan();
+        if (!mounted) return;
+        await provider.fetchAndSetWorkouts();
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error resetting weekly plan: $e',
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: ColorManager.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+          ),
+        );
+      } finally {
+        if (mounted) {
+          LoadingOverlay.hide(context);
+        }
       }
-      provider.fetchAndSetWorkouts();
     }
   }
 
@@ -403,12 +421,36 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                   );
                   
                   if (confirm == true) {
-                    await Provider.of<WorkoutProvider>(context, listen: false)
-                        .deleteAllWorkout(allWorkoutID: workout.id);
-                        
-                    // Manually trigger fetch to update UI immediately
-                    if (context.mounted) {
-                      Provider.of<WorkoutProvider>(context, listen: false).fetchAndSetWorkouts();
+                    if (!mounted) return;
+                    LoadingOverlay.show(context, message: 'Deleting workout...');
+                    try {
+                      await Provider.of<WorkoutProvider>(context, listen: false)
+                          .deleteWorkoutByNameAndAllWorkoutId(
+                            name: workout.name,
+                            allWorkoutId: workout.id,
+                          );
+                      
+                      if (!mounted) return;
+                      await Provider.of<WorkoutProvider>(context, listen: false).fetchAndSetWorkouts();
+                    } catch (e) {
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Error deleting workout: $e',
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          backgroundColor: ColorManager.error,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                        ),
+                      );
+                    } finally {
+                      if (mounted) {
+                        LoadingOverlay.hide(context);
+                      }
                     }
                   }
                 },

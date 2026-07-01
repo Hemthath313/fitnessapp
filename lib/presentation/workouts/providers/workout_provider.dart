@@ -377,6 +377,86 @@ class WorkoutProvider with ChangeNotifier {
     }
   }
 
+  Future<void> deleteWeeklyPlan() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final batch = FirebaseFirestore.instance.batch();
+
+      // Fetch from workouts subcollection
+      final workoutsSnapshot = await FirebaseFirestore.instance
+          .collection('workouts')
+          .doc(user.uid)
+          .collection('workoutData')
+          .get();
+
+      for (var doc in workoutsSnapshot.docs) {
+        final name = doc.data()['name'] as String? ?? '';
+        if (name.startsWith('[')) {
+          batch.delete(doc.reference);
+        }
+      }
+
+      // Fetch from allWorkouts subcollection
+      final allWorkoutsSnapshot = await FirebaseFirestore.instance
+          .collection('allWorkouts')
+          .doc(user.uid)
+          .collection('allWorkoutsData')
+          .get();
+
+      for (var doc in allWorkoutsSnapshot.docs) {
+        final name = doc.data()['name'] as String? ?? '';
+        if (name.startsWith('[')) {
+          batch.delete(doc.reference);
+        }
+      }
+
+      await batch.commit();
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteWorkoutByNameAndAllWorkoutId({
+    required String name,
+    required String allWorkoutId,
+  }) async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final batch = FirebaseFirestore.instance.batch();
+
+      // Delete from allWorkouts
+      final allWorkoutRef = FirebaseFirestore.instance
+          .collection('allWorkouts')
+          .doc(user.uid)
+          .collection('allWorkoutsData')
+          .doc(allWorkoutId);
+      batch.delete(allWorkoutRef);
+
+      // Query workouts collection to find matching document by name
+      final workoutsSnapshot = await FirebaseFirestore.instance
+          .collection('workouts')
+          .doc(user.uid)
+          .collection('workoutData')
+          .where('name', isEqualTo: name)
+          .get();
+
+      for (var doc in workoutsSnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      await batch.commit();
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
   Future<void> finishWorkout({
     required String workoutID,
     required String name,
