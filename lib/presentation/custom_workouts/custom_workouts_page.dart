@@ -8,6 +8,7 @@ import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
+import 'package:fitness_app/presentation/widgets/interactive_exercise_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -424,98 +425,75 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
   }
 
   void _showWorkoutTimerDialog(BuildContext context, dynamic workout) {
-     // Same implementation as before
-     showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        // Find exercise video logic
-        String displayName = workout.name;
-        final regex = RegExp(r'^\[\w+\]\s*');
-        displayName = displayName.replaceAll(regex, '');
-        final cleanName = displayName.trim();
-        
-        Exercise? foundExercise;
-        try {
-          final allExercises = [
-            ...ExerciseData.chest,
-            ...ExerciseData.back,
-            ...ExerciseData.shoulders,
-            ...ExerciseData.biceps,
-            ...ExerciseData.triceps,
-            ...ExerciseData.legs,
-            ...ExerciseData.abs,
-            ...ExerciseData.cardio,
-          ];
-          foundExercise = allExercises.firstWhere(
-            (e) => e.name.toLowerCase() == cleanName.toLowerCase(),
-          );
-        } catch (_) {}
+    String displayName = workout.name;
+    final regex = RegExp(r'^\[\w+\]\s*');
+    displayName = displayName.replaceAll(regex, '');
+    final cleanName = displayName.trim();
+    
+    Exercise? foundExercise;
+    try {
+      final allExercises = [
+        ...ExerciseData.chest,
+        ...ExerciseData.back,
+        ...ExerciseData.shoulders,
+        ...ExerciseData.biceps,
+        ...ExerciseData.triceps,
+        ...ExerciseData.legs,
+        ...ExerciseData.abs,
+        ...ExerciseData.cardio,
+      ];
+      foundExercise = allExercises.firstWhere(
+        (e) => e.name.toLowerCase() == cleanName.toLowerCase(),
+      );
+    } catch (_) {}
 
-        return AlertDialog(
-          backgroundColor: ColorManager.background,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(SizeManager.s20.r),
-          ),
-          contentPadding: EdgeInsets.zero,
-          title: Row(
-            children: [
-              Icon(Icons.timer, color: ColorManager.limerGreen2),
-              SizedBox(width: SizeManager.s8.w),
-              Expanded(
-                child: Text(
-                  '${workout.name} Timer',
-                  style: TextStyle(
-                    color: ColorManager.textPrimary,
-                    fontSize: SizeManager.s20.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          content: Container(
-            width: SizeManager.s300.w,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (foundExercise != null && foundExercise.videoPath.isNotEmpty)
-                  ClipRRect(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(SizeManager.s20.r)),
-                    child: ExerciseVideoPlayer(
-                      videoPath: foundExercise.videoPath,
-                      height: 200.h,
-                      autoPlay: true,
-                    ),
-                  )
-                else 
-                   Padding(
-                     padding: EdgeInsets.symmetric(vertical: 20.h),
-                     child: Icon(Icons.fitness_center, size: 40.sp, color: ColorManager.primary),
-                   ),
-                
-                Padding(
-                  padding: EdgeInsets.all(16.w),
-                  child: WorkoutTimerWidget(
-                    isRestTimer: false,
-                    initialMinutes: 0, 
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                'Close',
-                style: TextStyle(color: ColorManager.white70),
-              ),
-            ),
-          ],
-        );
+    String category = 'Chest';
+    if (foundExercise != null) {
+      if (ExerciseData.chest.any((e) => e.name == foundExercise!.name)) {
+        category = 'Chest';
+      } else if (ExerciseData.biceps.any((e) => e.name == foundExercise!.name)) {
+        category = 'Biceps';
+      } else if (ExerciseData.back.any((e) => e.name == foundExercise!.name)) {
+        category = 'Lats';
+      } else if (ExerciseData.triceps.any((e) => e.name == foundExercise!.name)) {
+        category = 'Triceps';
+      } else if (ExerciseData.legs.any((e) => e.name == foundExercise!.name)) {
+        category = 'Legs';
+      } else if (ExerciseData.abs.any((e) => e.name == foundExercise!.name)) {
+        category = 'Abs';
+      } else if (ExerciseData.shoulders.any((e) => e.name == foundExercise!.name)) {
+        category = 'Shoulder';
+      } else if (ExerciseData.cardio.any((e) => e.name == foundExercise!.name)) {
+        category = 'Cardio';
       }
+    }
+
+    final exerciseToUse = foundExercise ?? Exercise(
+      name: cleanName,
+      videoPath: '',
+      description: 'Custom exercise routine.',
+      target: 'N/A',
+      equipment: 'N/A',
+      instructions: const ['Perform the custom exercise as scheduled.'],
+      difficulty: 'Intermediate',
+      setsReps: '${workout.setNumber} sets x ${workout.repNumber} reps',
     );
 
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => InteractiveExerciseDetailWidget(
+        name: exerciseToUse.name,
+        videoPath: exerciseToUse.videoPath,
+        description: exerciseToUse.description,
+        target: exerciseToUse.target,
+        equipment: exerciseToUse.equipment,
+        instructions: exerciseToUse.instructions,
+        difficulty: exerciseToUse.difficulty,
+        setsReps: exerciseToUse.setsReps,
+        category: category,
+      ),
+    );
   }
 }

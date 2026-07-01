@@ -111,6 +111,78 @@ class WorkoutProvider with ChangeNotifier {
     }
   }
 
+  Future<void> addNewWorkouts(List<WorkoutModel> newWorkouts) async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final batch = FirebaseFirestore.instance.batch();
+      final List<WorkoutModel> workoutsToAdd = [];
+      final List<WorkoutModel> allWorkoutsToAdd = [];
+
+      for (var workout in newWorkouts) {
+        final workoutDoc = FirebaseFirestore.instance
+            .collection('workouts')
+            .doc(user.uid)
+            .collection('workoutData')
+            .doc();
+        
+        final allWorkoutDoc = FirebaseFirestore.instance
+            .collection('allWorkouts')
+            .doc(user.uid)
+            .collection('allWorkoutsData')
+            .doc();
+
+        final workoutModel = WorkoutModel(
+          id: workoutDoc.id,
+          name: workout.name,
+          repNumber: workout.repNumber,
+          setNumber: workout.setNumber,
+          dateTime: workout.dateTime,
+        );
+
+        final allWorkoutModel = WorkoutModel(
+          id: allWorkoutDoc.id,
+          name: workout.name,
+          repNumber: workout.repNumber,
+          setNumber: workout.setNumber,
+          dateTime: workout.dateTime,
+        );
+
+        batch.set(workoutDoc, {
+          'name': workout.name,
+          'repNumber': workout.repNumber,
+          'setNumber': workout.setNumber,
+          'dateTime': workout.dateTime,
+        });
+
+        batch.set(allWorkoutDoc, {
+          'name': workout.name,
+          'repNumber': workout.repNumber,
+          'setNumber': workout.setNumber,
+          'dateTime': workout.dateTime,
+        });
+
+        workoutsToAdd.add(workoutModel);
+        allWorkoutsToAdd.add(allWorkoutModel);
+      }
+
+      await batch.commit();
+
+      // Update local state immediately
+      _workouts.addAll(workoutsToAdd);
+      _allWorkouts.addAll(allWorkoutsToAdd);
+      
+      // Sort to keep order correct
+      _workouts.sort((a, b) => b.dateTime.compareTo(a.dateTime));
+      
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
   Future fetchAndSetWorkouts() async {
     User? user = FirebaseAuth.instance.currentUser;
 

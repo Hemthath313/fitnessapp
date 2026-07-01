@@ -3,6 +3,7 @@ import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fitness_app/presentation/in_app_purchases/premimum_screen.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
+import 'package:fitness_app/model/workout_model.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter/material.dart';
@@ -190,6 +191,8 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
         builder: (c) => const Center(child: CircularProgressIndicator()),
       );
 
+      final List<WorkoutModel> workoutsToSave = [];
+
       for (var dayPlan in _generatedWeek) {
         final dayName = dayPlan['day'] ?? 'Day';
         final exercises = dayPlan['exercises'] as List<dynamic>? ?? [];
@@ -203,14 +206,21 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
           if (reps.isEmpty) reps = "10";
           if (reps.length > 2) reps = reps.substring(0,2); // handle "10-12" -> "10"
 
-          await provider.addNewWorkout(
-            name: savedName,
-            repNumber: int.tryParse(reps) ?? 10,
-            setNumber: int.tryParse(exercise['sets'].toString()) ?? 3,
-            dateTime: now,
+          workoutsToSave.add(
+            WorkoutModel(
+              id: '',
+              name: savedName,
+              repNumber: int.tryParse(reps) ?? 10,
+              setNumber: int.tryParse(exercise['sets'].toString()) ?? 3,
+              dateTime: now,
+            ),
           );
           count++;
         }
+      }
+
+      if (workoutsToSave.isNotEmpty) {
+        await provider.addNewWorkouts(workoutsToSave);
       }
 
       await provider.fetchAndSetWorkouts();
@@ -219,8 +229,20 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
         Navigator.pop(context); // Pop dialog
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Saved $count exercises to My Workouts!'),
-            backgroundColor: Colors.green,
+            content: Text(
+              'Saved $count exercises to My Workouts!',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            backgroundColor: ColorManager.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            margin: EdgeInsets.all(16.w),
           ),
         );
       }
@@ -228,7 +250,22 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving: $e')),
+          SnackBar(
+            content: Text(
+              'Error saving: $e',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            backgroundColor: ColorManager.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            margin: EdgeInsets.all(16.w),
+          ),
         );
       }
     } finally {
