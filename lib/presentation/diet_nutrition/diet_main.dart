@@ -7,8 +7,8 @@ import 'package:fitness_app/utils/managers/asset_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:go_router/go_router.dart';
-import 'package:fitness_app/presentation/diet_nutrition/widgets/weekly_progress_card.dart';
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class DietMain extends StatefulWidget {
   const DietMain({super.key});
@@ -22,6 +22,11 @@ class _DietMainState extends State<DietMain>
   late AnimationController _controller;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _fadeAnimation;
+
+  // Macro Calculator State
+  double _calculatorWeight = 70.0;
+  String _calculatorActivity = 'MODERATE';
+  bool _isCalculatorExpanded = false;
 
   @override
   void initState() {
@@ -46,6 +51,20 @@ class _DietMainState extends State<DietMain>
     );
 
     _controller.forward();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+        final userData = homeProvider.userData;
+        setState(() {
+          _calculatorWeight = (userData['weight'] ?? 70.0) as double;
+          _calculatorActivity = userData['activity']?.toString().toUpperCase() ?? 'MODERATE';
+          if (_calculatorWeight <= 0) {
+            _calculatorWeight = 70.0;
+          }
+        });
+      }
+    });
   }
 
   @override
@@ -138,15 +157,19 @@ class _DietMainState extends State<DietMain>
             )
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: SlideTransition(
+          position: _slideAnimation,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildGoalBanner(goal, goalDescription, goalIcon),
               const SizedBox(height: 32),
-              
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -177,7 +200,7 @@ class _DietMainState extends State<DietMain>
                 ],
               ),
               const SizedBox(height: 16),
-              
+
               if (currentPlanImage != null && currentPlanAction != null)
                 Stack(
                   children: [
@@ -235,6 +258,9 @@ class _DietMainState extends State<DietMain>
                     ),
                   ),
                 ),
+
+              const SizedBox(height: 32),
+              _buildMacroCalculator(goal, Provider.of<HomeProvider>(context).userData['bmr']?.toDouble()),
 
               const SizedBox(height: 32),
               Text(
@@ -332,8 +358,10 @@ class _DietMainState extends State<DietMain>
           ),
         ),
       ),
-    );
-  }
+    ),
+  ),
+);
+}
 
   Widget _buildGoalBanner(String? goal, String title, IconData icon) {
     return Container(
@@ -396,6 +424,337 @@ class _DietMainState extends State<DietMain>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildMacroCalculator(String? goal, double? cachedBMR) {
+    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+    final userData = homeProvider.userData;
+    final gender = userData['gender']?.toString() ?? 'Male';
+    final height = (userData['height'] ?? 170.0) as double;
+    final age = (userData['age'] ?? 25) as int;
+
+    double basicBmr;
+    if (gender.toLowerCase() == 'female') {
+      basicBmr = 447.593 + (9.247 * _calculatorWeight) + (3.098 * height) - (4.330 * age);
+    } else {
+      basicBmr = 88.362 + (13.397 * _calculatorWeight) + (4.799 * height) - (5.677 * age);
+    }
+
+    double activityFactor = 1.2;
+    if (_calculatorActivity == 'LIGHT') {
+      activityFactor = 1.375;
+    } else if (_calculatorActivity == 'MODERATE') {
+      activityFactor = 1.55;
+    } else if (_calculatorActivity == 'HIGH' || _calculatorActivity == 'VERY HIGH') {
+      activityFactor = 1.725;
+    }
+
+    double usersBmr = basicBmr * activityFactor;
+
+    double calculatedCaloriesDouble;
+    if (goal == 'LOSE') {
+      calculatedCaloriesDouble = usersBmr - (usersBmr * 0.2);
+    } else if (goal == 'GAIN') {
+      calculatedCaloriesDouble = usersBmr + (usersBmr * 0.2);
+    } else {
+      calculatedCaloriesDouble = usersBmr;
+    }
+
+    int calculatedCalories = calculatedCaloriesDouble.round();
+    if (calculatedCalories < 1200) {
+      calculatedCalories = 1200;
+    }
+
+    double proteinMultiplier = 1.6;
+    if (goal == 'GAIN') {
+      proteinMultiplier = 2.0;
+    } else if (goal == 'LOSE') {
+      proteinMultiplier = 2.2;
+    }
+    int calculatedProtein = (_calculatorWeight * proteinMultiplier).round();
+
+    int calculatedFats = (_calculatorWeight * 0.9).round();
+    if (calculatedFats < 40) {
+      calculatedFats = 40;
+    }
+
+    int caloriesFromProtein = calculatedProtein * 4;
+    int caloriesFromFats = calculatedFats * 9;
+    int remainingCals = calculatedCalories - (caloriesFromProtein + caloriesFromFats);
+    int calculatedCarbs = (remainingCals / 4).round();
+    if (calculatedCarbs < 50) {
+      calculatedCarbs = 50;
+    }
+
+    int totalGramsCaloric = (calculatedCarbs * 4) + (calculatedProtein * 4) + (calculatedFats * 9);
+    double carbsPercent = totalGramsCaloric > 0 ? (calculatedCarbs * 4) / totalGramsCaloric : 0.0;
+    double proteinPercent = totalGramsCaloric > 0 ? (calculatedProtein * 4) / totalGramsCaloric : 0.0;
+    double fatsPercent = totalGramsCaloric > 0 ? (calculatedFats * 9) / totalGramsCaloric : 0.0;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: ColorManager.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: ColorManager.divider),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _isCalculatorExpanded = !_isCalculatorExpanded;
+          });
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.calculate_outlined, color: ColorManager.primary, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Macro & Calorie Estimator',
+                        style: TextStyle(
+                          color: ColorManager.textPrimary,
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Icon(
+                    _isCalculatorExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    color: ColorManager.textSecondary,
+                    size: 24,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              AnimatedCrossFade(
+                firstChild: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _collapsedMetric('Calories', '$calculatedCalories kcal'),
+                    _collapsedMetric('Carbs', '${calculatedCarbs}g'),
+                    _collapsedMetric('Protein', '${calculatedProtein}g'),
+                    _collapsedMetric('Fats', '${calculatedFats}g'),
+                  ],
+                ),
+                secondChild: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Divider(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Adjust Weight:',
+                          style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp),
+                        ),
+                        Text(
+                          '${_calculatorWeight.toStringAsFixed(1)} kg',
+                          style: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.bold, fontSize: 15.sp),
+                        ),
+                      ],
+                    ),
+                    SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        activeTrackColor: ColorManager.primary,
+                        inactiveTrackColor: ColorManager.divider,
+                        thumbColor: ColorManager.primary,
+                        overlayColor: ColorManager.primary.withOpacity(0.2),
+                        valueIndicatorColor: ColorManager.primary,
+                      ),
+                      child: Slider(
+                        value: _calculatorWeight,
+                        min: 40.0,
+                        max: 150.0,
+                        divisions: 220,
+                        label: '${_calculatorWeight.toStringAsFixed(1)} kg',
+                        onChanged: (val) {
+                          setState(() {
+                            _calculatorWeight = val;
+                          });
+                        },
+                      ),
+                    ),
+                    
+                    Text(
+                      'Activity Level:',
+                      style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _activityChip('LOW', 'Low', 'Low'),
+                        _activityChip('MODERATE', 'Moderate', 'Moderate'),
+                        _activityChip('HIGH', 'Active', 'Active'),
+                      ],
+                    ),
+                    
+                    const Divider(height: 32),
+                    
+                    Center(
+                      child: Column(
+                        children: [
+                          Text(
+                            'Estimated Daily Caloric Needs',
+                            style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '$calculatedCalories kcal',
+                            style: TextStyle(
+                              color: ColorManager.textPrimary,
+                              fontSize: 28.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            goal == 'GAIN' 
+                                ? 'Includes +300 kcal bulking surplus'
+                                : (goal == 'LOSE' ? 'Includes -400 kcal shredding deficit' : 'Maintenance balance'),
+                            style: TextStyle(color: ColorManager.primary, fontSize: 11.sp, fontStyle: FontStyle.italic),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: SizedBox(
+                        height: 12,
+                        width: double.infinity,
+                        child: Row(
+                          children: [
+                            if (carbsPercent > 0)
+                              Expanded(
+                                flex: (carbsPercent * 100).round(),
+                                child: Container(color: Colors.teal),
+                              ),
+                            if (proteinPercent > 0)
+                              Expanded(
+                                flex: (proteinPercent * 100).round(),
+                                child: Container(color: Colors.orange),
+                              ),
+                            if (fatsPercent > 0)
+                              Expanded(
+                                flex: (fatsPercent * 100).round(),
+                                child: Container(color: Colors.purple),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _macroLabel('Carbs', '${calculatedCarbs}g', Colors.teal, '${(carbsPercent * 100).toInt()}%'),
+                        _macroLabel('Protein', '${calculatedProtein}g', Colors.orange, '${(proteinPercent * 100).toInt()}%'),
+                        _macroLabel('Fats', '${calculatedFats}g', Colors.purple, '${(fatsPercent * 100).toInt()}%'),
+                      ],
+                    ),
+                  ],
+                ),
+                crossFadeState: _isCalculatorExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                duration: const Duration(milliseconds: 300),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _collapsedMetric(String title, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: TextStyle(
+            color: ColorManager.textPrimary,
+            fontSize: 13.sp,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _activityChip(String code, String label, String tooltip) {
+    final isSelected = _calculatorActivity == code;
+    return ChoiceChip(
+      label: Text(label, style: TextStyle(fontSize: 12.sp)),
+      selected: isSelected,
+      selectedColor: ColorManager.primary.withOpacity(0.2),
+      checkmarkColor: ColorManager.primary,
+      labelStyle: TextStyle(
+        color: isSelected ? ColorManager.primary : ColorManager.textSecondary,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      ),
+      backgroundColor: ColorManager.surface,
+      side: BorderSide(color: isSelected ? ColorManager.primary : ColorManager.divider),
+      onSelected: (val) {
+        if (val) {
+          setState(() {
+            _calculatorActivity = code;
+          });
+        }
+      },
+    );
+  }
+
+  Widget _macroLabel(String title, String grams, Color color, String pct) {
+    return Row(
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$title ($pct)',
+              style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+            ),
+            Text(
+              grams,
+              style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold, fontSize: 13.sp),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

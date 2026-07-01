@@ -814,9 +814,9 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
       builder: (c) => AlertDialog(
         backgroundColor: ColorManager.background,
         title: Text('Exit Workout?', style: TextStyle(color: ColorManager.textPrimary)),
-        content: const Text(
+        content: Text(
           'Your progress for this session will be lost.',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: ColorManager.textSecondary),
         ),
         actions: [
           TextButton(

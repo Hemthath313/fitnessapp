@@ -38,6 +38,12 @@ class _WorkoutTimerWidgetState extends State<WorkoutTimerWidget> {
       _initialSeconds = _seconds;
       _isCountdown = true;
     }
+    // Auto-start rest timer immediately so user doesn't need to press play
+    if (widget.isRestTimer) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _startTimer();
+      });
+    }
   }
 
   @override

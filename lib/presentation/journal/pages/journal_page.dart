@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:fitness_app/data/warmup_data.dart';
 
 class JournalPage extends StatefulWidget {
   const JournalPage({super.key});
@@ -19,7 +18,6 @@ class JournalPage extends StatefulWidget {
 }
 
 class _JournalPageState extends State<JournalPage> {
-  WarmupRoutine? _selectedWarmup;
 
   @override
   Widget build(BuildContext context) {
@@ -57,35 +55,29 @@ class _JournalPageState extends State<JournalPage> {
             _buildAICoachCard(),
             SizedBox(height: SizeManager.s20.h),
 
-            // Tools Section
-            Text(
-              'Smart Tools',
-              style: TextStyle(
-                color: ColorManager.white,
-                fontSize: SizeManager.s18.sp,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: SizeManager.s16.h),
-
-            // Smart Warmup Generator Card
-            _buildSmartWarmupGenerator(),
-
-            SizedBox(height: SizeManager.s20.h),
-
             // Navigation Cards
             Row(
               children: [
                 Expanded(
                   child: _buildNavigationCard(
                     title: 'Workout History',
-                    subtitle: 'Review your progress',
+                    subtitle: 'Review your logs',
                     icon: Icons.history_toggle_off_rounded,
                     color: Colors.teal,
                     onTap: () => context.push(Routes.workoutHistoryRoute),
                   ),
                 ),
-                SizedBox(width: SizeManager.s12.w),
+                SizedBox(width: SizeManager.s8.w),
+                Expanded(
+                  child: _buildNavigationCard(
+                    title: 'Analytics',
+                    subtitle: 'PRs & Progress',
+                    icon: Icons.bar_chart_rounded,
+                    color: Colors.deepPurple,
+                    onTap: () => context.push(Routes.strengthAnalyticsRoute),
+                  ),
+                ),
+                SizedBox(width: SizeManager.s8.w),
                 Expanded(
                   child: _buildNavigationCard(
                     title: 'Transformation',
@@ -111,147 +103,6 @@ class _JournalPageState extends State<JournalPage> {
 
   // ... (keep previous methods like _buildPremiumUpgradeCard, _buildAIInsightCard, _buildNutritionAnalysisCard)
 
-  Widget _buildSmartWarmupGenerator() {
-    return Container(
-      padding: EdgeInsets.all(SizeManager.s20.w),
-      decoration: BoxDecoration(
-        color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(SizeManager.s20.r),
-        border: Border.all(
-          color: ColorManager.primary.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.directions_run, color: Colors.orangeAccent),
-              SizedBox(width: SizeManager.s8.w),
-              Text(
-                'Smart Warmup Generator',
-                style: TextStyle(
-                  color: ColorManager.white,
-                  fontSize: SizeManager.s18.sp,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: SizeManager.s8.h),
-          Text(
-            'Target specific muscle groups with dynamic mobility routines.',
-            style: TextStyle(color: ColorManager.white70, fontSize: SizeManager.s12.sp),
-          ),
-          SizedBox(height: SizeManager.s20.h),
-
-          // Dropdown Input
-           Container(
-             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-             decoration: BoxDecoration(
-               color: ColorManager.background,
-               borderRadius: BorderRadius.circular(12.r),
-               border: Border.all(color: ColorManager.divider),
-             ),
-             child: DropdownButtonHideUnderline(
-               child: DropdownButton<WarmupRoutine>(
-                 value: _selectedWarmup,
-                 hint: Text('Select Target (e.g. Leg Day)', style: TextStyle(color: ColorManager.textTertiary, fontSize: 14.sp)),
-                 dropdownColor: ColorManager.background,
-                 isExpanded: true,
-                 icon: Icon(Icons.keyboard_arrow_down, color: ColorManager.primary),
-                 style: TextStyle(color: ColorManager.textPrimary, fontSize: 14.sp),
-                 items: WarmupData.routines.map((WarmupRoutine routine) {
-                   return DropdownMenuItem<WarmupRoutine>(
-                     value: routine,
-                     child: Text(routine.target),
-                   );
-                 }).toList(),
-                 onChanged: (newValue) => setState(() => _selectedWarmup = newValue),
-               ),
-             ),
-          ),
-
-          if (_selectedWarmup != null) ...[
-            SizedBox(height: 20.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Your Routine:',
-                  style: TextStyle(color: ColorManager.primary, fontSize: 14.sp, fontWeight: FontWeight.bold),
-                ),
-                TextButton.icon(
-                  onPressed: () => setState(() => _selectedWarmup = null),
-                  icon: Icon(Icons.refresh, size: 14.sp, color: Colors.white70),
-                  label: Text('Reset', style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 12.h),
-            ..._selectedWarmup!.exercises.map((exercise) => _buildWarmupItem(exercise)).toList(),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWarmupItem(WarmupExercise exercise) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: ColorManager.surfaceLight,
-        borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: ColorManager.divider),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: EdgeInsets.all(8.w),
-            decoration: BoxDecoration(
-              color: Colors.orangeAccent.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.timer_outlined, color: Colors.orangeAccent, size: 16.sp),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      exercise.name,
-                      style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold, fontSize: 14.sp),
-                    ),
-                    Text(
-                      exercise.durationOrReps,
-                      style: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.bold, fontSize: 12.sp),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  exercise.description,
-                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildPremiumUpgradeCard() {
     return Container(
@@ -334,36 +185,6 @@ class _JournalPageState extends State<JournalPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: ColorManager.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                child: Icon(Icons.psychology, color: ColorManager.primary, size: 22.sp),
-              ),
-              SizedBox(width: SizeManager.s12.w),
-              Text(
-                'AI Daily Insight',
-                style: TextStyle(
-                  color: ColorManager.primary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: SizeManager.s16.sp,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: SizeManager.s16.h),
-          Text(
-            'Muscle recovery is peak between 7-9 hours of sleep. Gemini says: Rest is your secret weapon! Tracking your consistency leads to 2x faster results.',
-            style: TextStyle(
-              color: ColorManager.textPrimary.withOpacity(0.85),
-              fontSize: SizeManager.s14.sp,
-              height: 1.4,
-            ),
-          ),
           SizedBox(height: SizeManager.s12.h),
           Row(
             children: [

@@ -10,9 +10,12 @@ import 'package:fitness_app/utils/router/router.dart';
 import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fitness_app/presentation/widgets/interactive_exercise_detail.dart';
+import 'package:fitness_app/model/workout_log.dart';
+import 'package:fitness_app/services/workout_log_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class CustomWorkoutsPage extends StatefulWidget {
@@ -169,7 +172,6 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                   final List<dynamic> otherWorkouts = [];
 
                   for (var w in workoutProvider.allWorkouts) {
-                    // Check for [Day] pattern
                     final regex = RegExp(r'^\[(\w+)\]');
                     final match = regex.firstMatch(w.name);
                     if (match != null) {
@@ -183,14 +185,23 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
 
                   // If no groups, just show list
                   if (groupedMap.isEmpty) {
-                    return ListView.builder(
-                      padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 80.h),
-                      itemCount: otherWorkouts.length,
-                      itemBuilder: (context, index) => _buildWorkoutCard(
-                          workout: otherWorkouts[index],
-                          onStart: () => _showWorkoutTimerDialog(context, otherWorkouts[index]),
-                          onEdit: () {}, 
-                          isGrouped: false),
+                    return StreamBuilder<List<WorkoutLog>>(
+                      stream: WorkoutLogService().getLogs(),
+                      builder: (context, snap) {
+                        final logs = snap.data ?? [];
+                        final latestLogMap = _buildLatestLogMap(logs);
+                        return ListView.builder(
+                          padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 80.h),
+                          itemCount: otherWorkouts.length,
+                          itemBuilder: (context, index) => _buildWorkoutCard(
+                            workout: otherWorkouts[index],
+                            onStart: () => _showWorkoutTimerDialog(context, otherWorkouts[index]),
+                            onEdit: () {},
+                            isGrouped: false,
+                            latestLogMap: latestLogMap,
+                          ),
+                        );
+                      },
                     );
                   }
 
@@ -198,89 +209,133 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                   final sortedDays = groupedMap.keys.toList()
                     ..sort((a, b) => (_dayOrder[a] ?? 99).compareTo(_dayOrder[b] ?? 99));
 
-                  return ListView(
-                    padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 80.h),
-                    children: [
-                      ...sortedDays.map((day) {
-                        final workouts = groupedMap[day]!;
-                        return Card(
-                          margin: EdgeInsets.only(bottom: 16.h),
-                          color: ColorManager.surface,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                            side: BorderSide(color: ColorManager.divider),
-                          ),
-                          elevation: 0,
-                          clipBehavior: Clip.antiAlias,
-                          child: Theme(
-                            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                            child: ExpansionTile(
-                              initiallyExpanded: true,
-                              title: Row(
-                                children: [
-                                  Text(
-                                    day,
-                                    style: TextStyle(
-                                      color: ColorManager.primary,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18.sp,
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  ElevatedButton.icon(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => 
-                                            DayWorkoutSessionPage(
-                                              dayName: day,
-                                              workouts: workouts,
+                  return StreamBuilder<List<WorkoutLog>>(
+                    stream: WorkoutLogService().getLogs(),
+                    builder: (context, snap) {
+                      final logs = snap.data ?? [];
+                      final latestLogMap = _buildLatestLogMap(logs);
+
+                      return ListView(
+                        padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 80.h),
+                        children: [
+                          ...sortedDays.map((day) {
+                            final workouts = groupedMap[day]!;
+
+                            // Find last date any exercise from this day was logged THIS WEEK
+                            // so "Start Day" resets each new week
+                            final now = DateTime.now();
+                            final startOfWeek = now.subtract(Duration(days: now.weekday - 1)); // Monday
+                            final weekStart = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+
+                            DateTime? lastDone;
+                            for (var w in workouts) {
+                              final cleanName = w.name.replaceAll(RegExp(r'^\[\w+\]\s*'), '').trim().toLowerCase();
+                              final log = latestLogMap[cleanName];
+                              if (log != null && log.date.isAfter(weekStart)) {
+                                if (lastDone == null || log.date.isAfter(lastDone)) {
+                                  lastDone = log.date;
+                                }
+                              }
+                            }
+
+                            return Card(
+                              margin: EdgeInsets.only(bottom: 16.h),
+                              color: ColorManager.surface,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                                side: BorderSide(
+                                  color: lastDone != null ? ColorManager.primary.withValues(alpha: 0.4) : ColorManager.divider,
+                                ),
+                              ),
+                              elevation: 0,
+                              clipBehavior: Clip.antiAlias,
+                              child: Theme(
+                                data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                                child: ExpansionTile(
+                                  initiallyExpanded: true,
+                                  title: Row(
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            day,
+                                            style: TextStyle(
+                                              color: ColorManager.primary,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18.sp,
                                             ),
+                                          ),
+                                          if (lastDone != null)
+                                            Text(
+                                              'Last done: ${DateFormat('MMM d').format(lastDone)}',
+                                              style: TextStyle(
+                                                color: Colors.green,
+                                                fontSize: 10.sp,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                      const Spacer(),
+                                      ElevatedButton.icon(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                DayWorkoutSessionPage(
+                                                  dayName: day,
+                                                  workouts: workouts,
+                                                ),
+                                            ),
+                                          );
+                                        },
+                                        icon: Icon(Icons.play_arrow, size: 16.sp, color: Colors.white),
+                                        label: Text(
+                                          lastDone != null ? 'Redo' : 'Start Day',
+                                          style: TextStyle(fontSize: 12.sp, color: Colors.white, fontWeight: FontWeight.bold),
                                         ),
-                                      );
-                                    },
-                                    icon: Icon(Icons.play_arrow, size: 16.sp, color: Colors.white),
-                                    label: Text(
-                                      'Start Day', 
-                                      style: TextStyle(fontSize: 12.sp, color: Colors.white, fontWeight: FontWeight.bold)
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: ColorManager.gradientStart,
-                                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                                      minimumSize: Size.zero,
-                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                    ),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: lastDone != null ? Colors.green : ColorManager.gradientStart,
+                                          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                                          minimumSize: Size.zero,
+                                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                  subtitle: Text(
+                                    '${workouts.length} Exercises',
+                                    style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
+                                  ),
+                                  children: workouts.map((w) => _buildWorkoutCard(
+                                    workout: w,
+                                    onStart: () => _showWorkoutTimerDialog(context, w),
+                                    onEdit: () {},
+                                    isGrouped: true,
+                                    latestLogMap: latestLogMap,
+                                  )).toList(),
+                                ),
                               ),
-                              subtitle: Text(
-                                '${workouts.length} Exercises',
-                                style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
-                              ),
-                              children: workouts.map((w) => _buildWorkoutCard(
-                                workout: w,
-                                onStart: () => _showWorkoutTimerDialog(context, w),
-                                onEdit: () {},
-                                isGrouped: true,
-                              )).toList(),
+                            );
+                          }),
+                          if (otherWorkouts.isNotEmpty) ...[
+                            Padding(
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
+                              child: Text('Other Workouts', style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold)),
                             ),
-                          ),
-                        );
-                      }),
-                      if (otherWorkouts.isNotEmpty) ...[
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                          child: Text('Other Workouts', style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold)),
-                        ),
-                        ...otherWorkouts.map((w) => _buildWorkoutCard(
-                          workout: w,
-                          onStart: () => _showWorkoutTimerDialog(context, w),
-                          onEdit: () {},
-                          isGrouped: false,
-                        )),
-                      ]
-                    ],
+                            ...otherWorkouts.map((w) => _buildWorkoutCard(
+                              workout: w,
+                              onStart: () => _showWorkoutTimerDialog(context, w),
+                              onEdit: () {},
+                              isGrouped: false,
+                              latestLogMap: latestLogMap,
+                            )),
+                          ],
+                        ],
+                      );
+                    },
                   );
                 },
               ),
@@ -333,11 +388,24 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
     );
   }
 
+  /// Builds a map of exercise name (lowercase) -> most recent WorkoutLog
+  Map<String, WorkoutLog> _buildLatestLogMap(List<WorkoutLog> logs) {
+    final Map<String, WorkoutLog> map = {};
+    for (final log in logs) {
+      final key = log.exerciseName.trim().toLowerCase();
+      if (!map.containsKey(key) || log.date.isAfter(map[key]!.date)) {
+        map[key] = log;
+      }
+    }
+    return map;
+  }
+
   Widget _buildWorkoutCard({
     required dynamic workout,
     required VoidCallback onStart,
     required VoidCallback onEdit,
     required bool isGrouped,
+    Map<String, WorkoutLog>? latestLogMap,
   }) {
     // If grouped, remove the [Day] prefix from display name
     String displayName = workout.name;
@@ -346,10 +414,25 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
       displayName = displayName.replaceAll(regex, '');
     }
 
+    // Lookup previous log for this exercise
+    final cleanKey = displayName.trim().toLowerCase();
+    final prevLog = latestLogMap?[cleanKey];
+
+    // Build last session summary string
+    String? lastSessionText;
+    String? nudgeText;
+    if (prevLog != null && prevLog.sets.isNotEmpty) {
+      final date = DateFormat('MMM d').format(prevLog.date);
+      final topSet = prevLog.sets.reduce((a, b) => a.weight >= b.weight ? a : b);
+      lastSessionText = '${prevLog.sets.length} sets · ${topSet.weight.toInt()}kg × ${topSet.reps} reps · $date';
+      // Progressive overload nudge: suggest +2.5kg
+      final suggestedWeight = topSet.weight + 2.5;
+      nudgeText = '🔺 Try ${suggestedWeight.toStringAsFixed(1)}kg today';
+    }
+
     return Container(
-      margin:
-          EdgeInsets.symmetric(vertical: 4.h, horizontal: isGrouped ? 0 : 0),
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+      margin: EdgeInsets.symmetric(vertical: 4.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       decoration: isGrouped
           ? null
           : BoxDecoration(
@@ -358,11 +441,12 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
               border: Border.all(color: ColorManager.divider),
             ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
+              color: Colors.blue.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.fitness_center, color: Colors.blue, size: 16.sp),
@@ -383,6 +467,34 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                   '${workout.setNumber} sets × ${workout.repNumber} reps',
                   style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                 ),
+                if (lastSessionText != null) ...[
+                  SizedBox(height: 5.h),
+                  Row(
+                    children: [
+                      Icon(Icons.history, size: 11.sp, color: Colors.teal),
+                      SizedBox(width: 4.w),
+                      Flexible(
+                        child: Text(
+                          lastSessionText,
+                          style: TextStyle(color: Colors.teal, fontSize: 11.sp),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (nudgeText != null)
+                    Padding(
+                      padding: EdgeInsets.only(top: 2.h),
+                      child: Text(
+                        nudgeText,
+                        style: TextStyle(
+                          color: Colors.orange,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                ],
               ],
             ),
           ),
@@ -402,7 +514,7 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
               IconButton(
                 onPressed: () async {
                    final confirm = await showDialog<bool>(
-                    context: context, // Use the page context, since this method is in the State
+                    context: context,
                     builder: (c) => AlertDialog(
                       backgroundColor: ColorManager.background,
                       title: Text('Delete Workout?', style: TextStyle(color: ColorManager.textPrimary)),

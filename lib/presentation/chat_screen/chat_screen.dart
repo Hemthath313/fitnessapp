@@ -7,6 +7,9 @@ import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
+import 'package:fitness_app/presentation/home/providers/home_provider.dart';
 
 enum AICoachPersonality { motivator, scientist, companion }
 
@@ -103,7 +106,38 @@ class _ChatScreenState extends State<ChatScreen> {
     await prefs.setInt('chat_count', _questionsCount);
   }
 
-  Future<void> _sendMessage({String? text}) async {
+  Future<void> _runWorkoutAudit() async {
+    final workoutsProvider = Provider.of<WorkoutProvider>(context, listen: false);
+    final allExercises = workoutsProvider.allWorkouts;
+    
+    String exerciseListStr = "";
+    if (allExercises.isEmpty) {
+      exerciseListStr = "No exercises logged in my plan currently.";
+    } else {
+      exerciseListStr = allExercises.map((w) => "- ${w.name}: ${w.setNumber} sets x ${w.repNumber} reps").join("\n");
+    }
+
+    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+    final userData = homeProvider.userData;
+    final goal = userData['goal']?.toString() ?? 'MAINTAIN';
+    final weight = userData['weight'] ?? 70.0;
+
+    final prompt =
+        "Act as a professional fitness trainer and auditor. "
+        "Analyze my current workout plan details and provide a constructive, structured review. "
+        "User Profile: Weight is ${weight}kg, Goal is $goal. "
+        "My Workout Plan:\n$exerciseListStr\n\n"
+        "Instructions: Be highly specific to the exercises listed. "
+        "Critique:\n"
+        "1. Muscle balance & targeting (are any groups over-trained or neglected?)\n"
+        "2. Training volume adequacy & rest recommendations\n"
+        "3. Three actionable, customized recommendations to optimize this plan.\n"
+        "Keep the critique brief, motivating, and highly practical (under 180 words).";
+
+    await _sendMessage(text: "🔍 Audit My Workout Plan", systemPrompt: prompt);
+  }
+
+  Future<void> _sendMessage({String? text, String? systemPrompt}) async {
     final userMessage = text ?? _controller.text.trim();
     if (userMessage.isEmpty) return;
 
@@ -135,7 +169,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // Increment limit BEFORE sending (to prevent spamming)
     await _incrementCount();
 
-    await _askGemini(userMessage);
+    await _askGemini(systemPrompt ?? userMessage);
   }
 
   Future<void> _askGemini(String question) async {
@@ -429,6 +463,68 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [ColorManager.primary, ColorManager.primary.withValues(alpha: 0.8)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16.r),
+              boxShadow: [
+                BoxShadow(
+                  color: ColorManager.primary.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                )
+              ],
+            ),
+            child: InkWell(
+              onTap: _runWorkoutAudit,
+              borderRadius: BorderRadius.circular(16.r),
+              child: Padding(
+                padding: EdgeInsets.all(16.w),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(10.w),
+                      decoration: const BoxDecoration(
+                        color: Colors.white24,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.analytics_outlined, color: Colors.white, size: 24),
+                    ),
+                    SizedBox(width: 14.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '🔍 Audit My Workout Plan',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14.sp,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            'AI reads your active exercises and critiques your weekly splits, muscle balance, and volume.',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 11.sp,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 14),
+                  ],
+                ),
+              ),
             ),
           ),
           SizedBox(height: 24.h),
