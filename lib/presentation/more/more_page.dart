@@ -10,7 +10,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/presentation/widgets/feedback_dialog.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:fitness_app/presentation/profile/widgets/muscle_activation_chart.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MorePage extends StatelessWidget {
   const MorePage({super.key});
@@ -107,15 +107,7 @@ class MorePage extends StatelessWidget {
                 // Body & Measurements Section
                 _buildSectionTitle('Body & Measurements'),
                 SizedBox(height: SizeManager.s12.h),
-                _buildMenuCard(
-                  context,
-                  icon: Icons.monitor_weight,
-                  title: 'Update Weight',
-                  subtitle: 'Track your weight progress',
-                  color: Colors.blue,
-                  onTap: () => context.push(Routes.changeWeightRoute),
-                ),
-                SizedBox(height: SizeManager.s12.h),
+
                 _buildMenuCard(
                   context,
                   icon: Icons.straighten,
@@ -126,11 +118,7 @@ class MorePage extends StatelessWidget {
                 ),
                 SizedBox(height: SizeManager.s24.h),
 
-                // Advanced Analytics Section
-                _buildSectionTitle('Advanced Analytics'),
-                SizedBox(height: SizeManager.s12.h),
-                const MuscleActivationChart(),
-                SizedBox(height: SizeManager.s24.h),
+
 
                 // Account Settings Section
                 _buildSectionTitle('Account Settings'),
@@ -243,6 +231,40 @@ class MorePage extends StatelessWidget {
                       context: context,
                       builder: (context) => const FeedbackDialog(),
                     );
+                  },
+                ),
+                SizedBox(height: SizeManager.s12.h),
+                _buildMenuCard(
+                  context,
+                  icon: Icons.support_agent_rounded,
+                  title: 'Contact Support',
+                  subtitle: 'Email buddyspps204@gmail.com',
+                  color: Colors.blueAccent,
+                  onTap: () async {
+                    final Uri emailLaunchUri = Uri(
+                      scheme: 'mailto',
+                      path: 'buddyspps204@gmail.com',
+                      queryParameters: {
+                        'subject': 'Support Request - Fitness App',
+                      },
+                    );
+                    try {
+                      final bool launched = await launchUrl(
+                        emailLaunchUri,
+                        mode: LaunchMode.externalApplication,
+                      );
+                      if (!launched && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Could not open email client. Please email buddyspps204@gmail.com')),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Could not open email client. Please email buddyspps204@gmail.com')),
+                        );
+                      }
+                    }
                   },
                 ),
                 SizedBox(height: SizeManager.s24.h),

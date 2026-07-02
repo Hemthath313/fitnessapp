@@ -51,6 +51,7 @@ import 'package:fitness_app/presentation/progress_photos/add_progress_photo_scre
 import 'package:fitness_app/presentation/progress_photos/photo_comparison_screen.dart';
 import 'package:fitness_app/presentation/profile/pages/monthly_comparison_page.dart';
 import 'package:fitness_app/presentation/diet_nutrition/pages/protein_chart_page.dart';
+import 'package:fitness_app/presentation/progress/muscle_analytics_page.dart';
 import 'package:fitness_app/presentation/ai_coach/ai_chat_screen.dart';
 import 'package:fitness_app/presentation/challenges/exercise_of_the_week.dart';
 import 'package:fitness_app/presentation/ai_coach/workout_generator_screen.dart';
@@ -114,6 +115,7 @@ class Routes {
   static const String proteinChartRoute = '/proteinChart';
   static const String exerciseTracker = '/exerciseTracker';
   static const String strengthAnalyticsRoute = '/strengthAnalytics';
+  static const String muscleAnalyticsRoute = '/muscleAnalytics';
 }
 
 final GoRouter router = GoRouter(
@@ -446,6 +448,11 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, const StrengthAnalyticsPage())),
+    GoRoute(
+        path: Routes.muscleAnalyticsRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const MuscleAnalyticsPage())),
   ],
   errorBuilder: (context, state) {
     return Scaffold(

@@ -61,21 +61,23 @@ class _JournalPageState extends State<JournalPage> {
               children: [
                 Expanded(
                   child: _buildNavigationCard(
-                    title: 'Workout History',
-                    subtitle: 'Review your logs',
-                    icon: Icons.history_toggle_off_rounded,
-                    color: Colors.teal,
-                    onTap: () => context.push(Routes.workoutHistoryRoute),
+                    title: 'Meal Planner',
+                    subtitle: 'Custom meal schedules',
+                    icon: Icons.flatware_rounded,
+                    color: Colors.orange,
+                    isLocked: true,
+                    onTap: null,
                   ),
                 ),
                 SizedBox(width: SizeManager.s12.w),
                 Expanded(
                   child: _buildNavigationCard(
-                    title: 'Analytics',
-                    subtitle: 'PRs & Progress',
-                    icon: Icons.bar_chart_rounded,
-                    color: Colors.deepPurple,
-                    onTap: () => context.push(Routes.strengthAnalyticsRoute),
+                    title: 'AI Scanner',
+                    subtitle: 'Scan food to get proteins, carbs & fats per 100g',
+                    icon: Icons.qr_code_scanner_rounded,
+                    color: Colors.green,
+                    isLocked: true,
+                    onTap: null,
                   ),
                 ),
               ],
@@ -162,55 +164,99 @@ class _JournalPageState extends State<JournalPage> {
     required String subtitle,
     required IconData icon,
     required Color color,
-    required VoidCallback onTap,
+    VoidCallback? onTap,
+    bool isLocked = false,
   }) {
+    final cardContent = Stack(
+      children: [
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(SizeManager.s16.w),
+          height: SizeManager.s150.h,
+          decoration: BoxDecoration(
+            color: ColorManager.surface,
+            borderRadius: BorderRadius.circular(SizeManager.s16.r),
+            border: Border.all(
+              color: color.withOpacity(0.2),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.all(SizeManager.s10.w),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: SizeManager.s28.sp),
+              ),
+              SizedBox(height: SizeManager.s12.h),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: ColorManager.white,
+                  fontSize: SizeManager.s14.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: SizeManager.s4.h),
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: ColorManager.white70,
+                  fontSize: SizeManager.s11.sp,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (isLocked)
+          Positioned(
+            top: 12.h,
+            right: 12.w,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+              decoration: BoxDecoration(
+                color: Colors.amber.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(6.r),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'COMING SOON',
+                    style: TextStyle(
+                      color: Colors.amber,
+                      fontSize: 8.sp,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  SizedBox(width: 4.w),
+                  Icon(
+                    Icons.lock_rounded,
+                    color: Colors.amber,
+                    size: 11.sp,
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+
+    if (onTap == null) {
+      return cardContent;
+    }
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(SizeManager.s16.r),
-      child: Container(
-        padding: EdgeInsets.all(SizeManager.s16.w),
-        height: SizeManager.s150.h,
-        decoration: BoxDecoration(
-          color: ColorManager.surface,
-          borderRadius: BorderRadius.circular(SizeManager.s16.r),
-          border: Border.all(
-            color: color.withOpacity(0.2),
-            width: 1,
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: EdgeInsets.all(SizeManager.s10.w),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: SizeManager.s28.sp),
-            ),
-            SizedBox(height: SizeManager.s12.h),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: ColorManager.white,
-                fontSize: SizeManager.s14.sp,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: SizeManager.s4.h),
-            Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: ColorManager.white70,
-                fontSize: SizeManager.s11.sp,
-              ),
-            ),
-          ],
-        ),
-      ),
+      child: cardContent,
     );
   }
 

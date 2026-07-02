@@ -192,10 +192,24 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                           color: ColorManager.primary,
                           shape: BoxShape.circle,
                         ),
-                        markerDecoration: BoxDecoration(
-                          color: Colors.greenAccent,
-                          shape: BoxShape.circle,
-                        ),
+                      ),
+                      calendarBuilders: CalendarBuilders(
+                        markerBuilder: (context, date, events) {
+                          if (events.isNotEmpty) {
+                            return Positioned(
+                              bottom: 6.h,
+                              child: Container(
+                                width: 6.w,
+                                height: 6.w,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.greenAccent,
+                                ),
+                              ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
                       ),
                       eventLoader: (day) {
                         final normalized = _normalizeDate(day);

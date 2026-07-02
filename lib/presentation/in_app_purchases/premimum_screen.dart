@@ -174,6 +174,12 @@ class _PremiumScreenState extends State<PremiumScreen> {
     return Column(
       children: [
         _buildFeatureItem(
+          Icons.smart_toy_rounded, 
+          'Personal Coach AI', 
+          'Get real-time feedback and dynamic adjustments from your AI Coach.',
+          Colors.purpleAccent,
+        ),
+        _buildFeatureItem(
           Icons.auto_awesome, 
           'AI Workout Generator', 
           'Build unlimited personalized weekly workout plans with AI.',
@@ -186,16 +192,10 @@ class _PremiumScreenState extends State<PremiumScreen> {
           Colors.orangeAccent,
         ),
         _buildFeatureItem(
-          Icons.fitness_center, 
-          'Unlimited Custom Workouts', 
-          'Create and save infinite custom routines.',
-          Colors.blueAccent,
-        ),
-        _buildFeatureItem(
-          Icons.analytics, 
-          'Elite Analytics', 
-          'Deep dive into your progress with interactive charts.',
-          Colors.orangeAccent,
+          Icons.star_purple500_sharp, 
+          'Future Premium Features', 
+          'Lock in access to all upcoming advanced features and updates.',
+          Colors.yellowAccent,
         ),
         _buildFeatureItem(
           Icons.ads_click, 
