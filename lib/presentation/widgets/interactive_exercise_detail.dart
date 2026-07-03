@@ -168,6 +168,14 @@ class _InteractiveExerciseDetailWidgetState
             }
           }
         });
+      } else {
+        setState(() {
+          _previousLog = null;
+          _historicMaxWeight = 0.0;
+          for (var set in _sets) {
+            set.weightController.text = "";
+          }
+        });
       }
     } catch (_) {} finally {
       setState(() {
@@ -362,6 +370,82 @@ class _InteractiveExerciseDetailWidgetState
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _confirmDeleteLog(WorkoutLog log) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: ColorManager.surface,
+        title: Text('Delete Log?', style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold)),
+        content: Text(
+          'Are you sure you want to delete this workout log? This will remove these sets from your history and charts.',
+          style: TextStyle(color: ColorManager.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel', style: TextStyle(color: ColorManager.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              try {
+                await _logService.deleteLog(log.id);
+                await _loadPreviousLogAndMax();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Log deleted successfully'),
+                      backgroundColor: ColorManager.success,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to delete log: $e'),
+                      backgroundColor: ColorManager.error,
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _reuseSets(WorkoutLog log) {
+    setState(() {
+      for (var set in _sets) {
+        set.dispose();
+      }
+      _sets.clear();
+
+      for (var setObj in log.sets) {
+        _sets.add(
+          SetLogInput(
+            defaultWeight: setObj.weight.toStringAsFixed(setObj.weight % 1 == 0 ? 0 : 1),
+            defaultReps: setObj.reps.toString(),
+            isCompleted: false,
+          ),
+        );
+      }
+      
+      _currentTab = 1; // Navigate to Log Set tab
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Copied ${log.sets.length} sets to "Log Set" tab!'),
+        backgroundColor: ColorManager.success,
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -868,7 +952,24 @@ class _InteractiveExerciseDetailWidgetState
                           fontSize: 13.sp,
                         ),
                       ),
-                      Icon(Icons.calendar_month, color: ColorManager.primary, size: 18.sp),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.replay, color: ColorManager.primary, size: 18.sp),
+                            tooltip: 'Reuse these sets',
+                            constraints: const BoxConstraints(),
+                            padding: EdgeInsets.symmetric(horizontal: 4.w),
+                            onPressed: () => _reuseSets(log),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.delete_outline, color: Colors.redAccent, size: 18.sp),
+                            tooltip: 'Delete this log',
+                            constraints: const BoxConstraints(),
+                            padding: EdgeInsets.symmetric(horizontal: 4.w),
+                            onPressed: () => _confirmDeleteLog(log),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                   const Divider(),
