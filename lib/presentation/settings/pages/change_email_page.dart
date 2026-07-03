@@ -50,7 +50,7 @@ class _ChangeEmailPageState extends State<ChangeEmailPage> {
     }
 
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       appBar: PreferredSize(
         preferredSize: Size(
           double.infinity,

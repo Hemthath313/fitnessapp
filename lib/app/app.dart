@@ -1,7 +1,9 @@
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import '../presentation/auth/providers/auth_provider.dart';
 import '../presentation/consumption/providers/consumption_provider.dart';
@@ -22,59 +24,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(
-          value: AuthProvider(),
-        ),
-        ChangeNotifierProvider.value(
-          value: SettingsProvider(),
-        ),
-        ChangeNotifierProvider.value(
-          value: HomeProvider(),
-        ),
-        ChangeNotifierProvider.value(
-          value: WorkoutProvider(),
-        ),
-        ChangeNotifierProvider.value(
-          value: ConsumptionProvider(),
-        ),
-        ChangeNotifierProvider.value(
-          value: ProfileProvider(),
-        ),
-        ChangeNotifierProvider.value(
-          value: SubscriptionProvider(),
-        ),
-        ChangeNotifierProvider.value(
-          value: StatisticsProvider(),
-        ),
-        ChangeNotifierProvider.value(
-          value: ProgressPhotoProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => ThemeProvider(),
-        ),
-      ],
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) {
-          return ScreenUtilInit(
-            builder: (context, child) => MaterialApp.router(
-              title: 'Fitness App',
-              debugShowCheckedModeBanner: false,
-              theme: _buildLightTheme(),
-              darkTheme: _buildDarkTheme(),
-              themeMode: themeProvider.themeMode,
-              routerConfig: router,
-            ),
-            designSize: const Size(430, 810),
-          );
-        },
-      ),
-    );
-  }
-
   /// Build the light theme with modern fitness colors
   ThemeData _buildLightTheme() {
     return ThemeData(
@@ -466,6 +415,116 @@ class _MyAppState extends State<MyApp> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(
+          value: AuthProvider(),
+        ),
+        ChangeNotifierProvider.value(
+          value: SettingsProvider(),
+        ),
+        ChangeNotifierProvider.value(
+          value: HomeProvider(),
+        ),
+        ChangeNotifierProvider.value(
+          value: WorkoutProvider(),
+        ),
+        ChangeNotifierProvider.value(
+          value: ConsumptionProvider(),
+        ),
+        ChangeNotifierProvider.value(
+          value: ProfileProvider(),
+        ),
+        ChangeNotifierProvider.value(
+          value: SubscriptionProvider(),
+        ),
+        ChangeNotifierProvider.value(
+          value: StatisticsProvider(),
+        ),
+        ChangeNotifierProvider.value(
+          value: ProgressPhotoProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ThemeProvider(),
+        ),
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          SystemChrome.setSystemUIOverlayStyle(
+            SystemUiOverlayStyle(
+              systemNavigationBarColor:
+                  themeProvider.isDarkMode ? ColorManager.surface : ColorManager.background,
+              systemNavigationBarDividerColor: Colors.transparent,
+              systemNavigationBarIconBrightness:
+                  themeProvider.isDarkMode ? Brightness.light : Brightness.dark,
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness:
+                  themeProvider.isDarkMode ? Brightness.light : Brightness.dark,
+              statusBarBrightness:
+                  themeProvider.isDarkMode ? Brightness.dark : Brightness.light,
+            ),
+          );
+          return ScreenUtilInit(
+            designSize: const Size(430, 810),
+            minTextAdapt: true,
+            splitScreenMode: true,
+            builder: (context, child) => Directionality(
+              textDirection: TextDirection.ltr,
+              child: Stack(
+                children: [
+                  MaterialApp.router(
+                    key: ValueKey(themeProvider.isDarkMode),
+                    title: 'Fitness App',
+                    debugShowCheckedModeBanner: false,
+                    theme: _buildLightTheme(),
+                    darkTheme: _buildDarkTheme(),
+                    themeMode: themeProvider.themeMode,
+                    routerConfig: router,
+                    builder: (context, child) {
+                      return MediaQuery(
+                        data: MediaQuery.of(context).copyWith(
+                          textScaler: const TextScaler.linear(1.0), // Clamps system text scale factor to standard size
+                        ),
+                        child: child!,
+                      );
+                    },
+                  ),
+                  if (themeProvider.isProcessing)
+                    Container(
+                      color: Colors.black.withOpacity(0.7),
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const CircularProgressIndicator(
+                              color: ColorManager.primary,
+                              strokeWidth: 5,
+                            ),
+                            const SizedBox(height: 24),
+                            Text(
+                              'Applying Theme...',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.none,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ).animate().fadeIn(duration: 200.ms),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

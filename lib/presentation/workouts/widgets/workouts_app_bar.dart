@@ -12,7 +12,7 @@ class NewExercisePageAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppBar(
       elevation: 0.0,
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       leading: Padding(
         padding: const EdgeInsets.only(left: PaddingManager.p12),
         child: Container(

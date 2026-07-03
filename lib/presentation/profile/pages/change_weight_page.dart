@@ -89,55 +89,130 @@ class _ChangeWeightPageState extends State<ChangeWeightPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
-      appBar: PreferredSize(
-        preferredSize: Size(
-          double.infinity,
-          SizeManager.s60.h,
+      backgroundColor: ColorManager.background,
+      appBar: AppBar(
+        title: Text(
+          'Log Weight',
+          style: TextStyle(
+            color: ColorManager.white,
+            fontSize: 20.sp,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        child: const ChangeDataPagesAppBar(),
+        backgroundColor: ColorManager.background,
+        elevation: 0,
+        iconTheme: IconThemeData(color: ColorManager.white),
       ),
       body: SafeArea(
-          bottom: true,
-          child: SingleChildScrollView(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(PaddingManager.p28),
-                    child: Text(
-                      StringsManager.changeWeightText,
-                      textAlign: TextAlign.center,
-                      style: StyleManager.settingsOptionTiteTextStyle,
-                    ),
-                  ),
-                  SizedBox(
-                    child: Image.asset(
-                      ImageManager.weight,
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
-                    child: TextFieldWidget(
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                      ],
-                      controller: _weightController,
-                      labelHint: StringsManager.weightHint,
-                      obscureText: false,
-                      keyboardType: TextInputType.numberWithOptions(decimal: true),
-                    ),
-                  ),
-                  LimeGreenRoundedButtonWidget(
-                    onTap: changeWeight,
-                    title: StringsManager.next,
-                  )
-                ],
+        bottom: true,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: 30.h),
+              // Scale Icon in circle
+              Container(
+                width: 120.w,
+                height: 120.w,
+                decoration: BoxDecoration(
+                  color: ColorManager.primary.withOpacity(0.08),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: ColorManager.primary.withOpacity(0.15), width: 2),
+                ),
+                child: Icon(
+                  Icons.scale,
+                  color: ColorManager.primary,
+                  size: 56.sp,
+                ),
               ),
-            ),
-          )),
+              SizedBox(height: 32.h),
+              
+              // Helper text
+              Text(
+                'Enter your current weight:',
+                style: TextStyle(
+                  color: ColorManager.textPrimary,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 16.h),
+              
+              // Custom interactive weight input
+              Center(
+                child: Container(
+                  width: 160.w,
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  decoration: BoxDecoration(
+                    color: ColorManager.surface,
+                    borderRadius: BorderRadius.circular(20.r),
+                    border: Border.all(color: ColorManager.divider),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      IntrinsicWidth(
+                        child: TextField(
+                          controller: _weightController,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          textAlign: TextAlign.center,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                          ],
+                          style: TextStyle(
+                            color: ColorManager.white,
+                            fontSize: 32.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        'kg',
+                        style: TextStyle(
+                          color: ColorManager.textSecondary,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 24.h),
+              
+              // Detailed Tip Text
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                child: Text(
+                  'Keeping your weight up to date ensures your calorie budgets, progress charts, and training intensity recommendations remain accurate.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: ColorManager.textSecondary,
+                    fontSize: 13.sp,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+              SizedBox(height: 48.h),
+              
+              // Continue button
+              LimeGreenRoundedButtonWidget(
+                onTap: changeWeight,
+                title: StringsManager.next,
+              ),
+            ],
+          ),
+        ),
+      ),
     ).animate().fadeIn(
           duration: 500.ms,
         );

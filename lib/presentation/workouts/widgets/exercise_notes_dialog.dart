@@ -59,7 +59,7 @@ class _ExerciseNotesDialogState extends State<ExerciseNotesDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(SizeManager.s20.r),
       ),

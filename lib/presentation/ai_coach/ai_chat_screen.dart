@@ -17,8 +17,8 @@ class _AIChatScreenState extends State<AIChatScreen> {
   final gemini = Gemini.instance;
   bool _isTyping = false;
 
-  final List<ChatMessage> _messages = [
-    ChatMessage(
+  final List<ChatModel> _messages = [
+    ChatModel(
       text:
           "Hello! I'm your AI Personal Trainer powered by Gemini. How can I help you today?",
       isUser: false,
@@ -36,36 +36,53 @@ class _AIChatScreenState extends State<AIChatScreen> {
     if (text.trim().isEmpty || _isTyping) return;
 
     setState(() {
-      _messages.add(ChatMessage(text: text, isUser: true));
+      _messages.add(ChatModel(text: text, isUser: true));
       _messageController.clear();
       _isTyping = true;
     });
 
     _scrollToBottom();
 
+    ChatModel? aiMessageModel;
+
     try {
       gemini.streamGenerateContent(text).listen(
         (value) {
-          final response = value.output ?? "";
-          if (response.isNotEmpty) {
+          final chunk = value.output ?? "";
+          if (chunk.isNotEmpty) {
             setState(() {
               _isTyping = false;
-              _messages.add(ChatMessage(
-                text: response,
-                isUser: false,
-              ));
+              if (aiMessageModel == null) {
+                aiMessageModel = ChatModel(text: chunk, isUser: false);
+                _messages.add(aiMessageModel!);
+              } else {
+                aiMessageModel!.text += chunk;
+              }
             });
             _scrollToBottom();
           }
         },
         onError: (e) {
+          String userFriendlyMessage = "Sorry, I'm having trouble connecting to Gemini. Please check your API key.";
+          final errStr = e.toString().toLowerCase();
+          if (errStr.contains('503') || errStr.contains('demand') || errStr.contains('busy') || errStr.contains('unavailable')) {
+            userFriendlyMessage = "The AI is currently experiencing high demand. Please try again in a few moments!";
+          } else if (errStr.contains('quota') || errStr.contains('limit')) {
+            userFriendlyMessage = "AI limit reached or API quota exceeded. Please try again later.";
+          } else if (errStr.contains('403') || errStr.contains('suspended') || errStr.contains('permission')) {
+            userFriendlyMessage = "API Key error or access denied. Please check your credentials.";
+          }
+
           setState(() {
             _isTyping = false;
-            _messages.add(ChatMessage(
-              text:
-                  "Sorry, I'm having trouble connecting to Gemini. Please check your API key.",
-              isUser: false,
-            ));
+            if (aiMessageModel == null) {
+              _messages.add(ChatModel(
+                text: userFriendlyMessage,
+                isUser: false,
+              ));
+            } else {
+              aiMessageModel!.text = userFriendlyMessage;
+            }
           });
           _scrollToBottom();
         },
@@ -95,10 +112,10 @@ class _AIChatScreenState extends State<AIChatScreen> {
       backgroundColor: ColorManager.background,
       appBar: AppBar(
         title:
-            const Text('AI Coach Chat', style: TextStyle(color: Colors.white)),
+            Text('AI Coach Chat', style: TextStyle(color: ColorManager.textPrimary)),
         backgroundColor: ColorManager.background,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
       ),
       body: Column(
         children: [
@@ -107,7 +124,10 @@ class _AIChatScreenState extends State<AIChatScreen> {
               controller: _scrollController,
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
               itemCount: _messages.length,
-              itemBuilder: (context, index) => _messages[index],
+              itemBuilder: (context, index) {
+                final message = _messages[index];
+                return ChatMessage(text: message.text, isUser: message.isUser);
+              },
             ),
           ),
           if (_isTyping)
@@ -144,7 +164,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
             padding: EdgeInsets.only(right: 8.w),
             child: ActionChip(
               label: Text(_quickPrompts[index]),
-              labelStyle: TextStyle(color: Colors.white, fontSize: 12.sp),
+              labelStyle: TextStyle(color: ColorManager.textPrimary, fontSize: 12.sp),
               backgroundColor: ColorManager.surface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20.r),
@@ -175,7 +195,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
           Expanded(
             child: TextField(
               controller: _messageController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: ColorManager.textPrimary),
               decoration: InputDecoration(
                 hintText: 'Type a message...',
                 hintStyle: TextStyle(color: ColorManager.textTertiary),
@@ -187,7 +207,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
           ),
           IconButton(
             onPressed: () => _sendMessage(_messageController.text),
-            icon: const Icon(Icons.send_rounded, color: ColorManager.primary),
+            icon: Icon(Icons.send_rounded, color: ColorManager.primary),
           ),
         ],
       ),
@@ -217,11 +237,18 @@ class ChatMessage extends StatelessWidget {
             bottomLeft: Radius.circular(isUser ? 20.r : 0),
             bottomRight: Radius.circular(isUser ? 0 : 20.r),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Text(
           text,
           style: TextStyle(
-            color: isUser ? Colors.black : Colors.white,
+            color: isUser ? Colors.white : ColorManager.textPrimary,
             fontSize: 14.sp,
           ),
         ),
@@ -229,3 +256,11 @@ class ChatMessage extends StatelessWidget {
     );
   }
 }
+
+class ChatModel {
+  String text;
+  final bool isUser;
+
+  ChatModel({required this.text, required this.isUser});
+}
+

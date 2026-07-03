@@ -57,7 +57,7 @@ class _NewMealPageState extends State<NewMealPage> {
         ),
         child: const NewMealPageAppBar(),
       ),
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       body: SafeArea(
         bottom: true,
         child: SingleChildScrollView(

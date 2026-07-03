@@ -37,12 +37,16 @@ class AuthProvider with ChangeNotifier {
             .collection('users')
             .doc(_user!.uid)
             .get()
+            .timeout(const Duration(seconds: 5))
             .then((docSnapshot) {
           _hasAgeParameter =
               docSnapshot.exists && docSnapshot.data()!.containsKey('age');
           _isNewUser =
               _user!.metadata.creationTime == _user!.metadata.lastSignInTime &&
                   !_hasAgeParameter!;
+          isLoading = false;
+          notifyListeners();
+        }).catchError((error) {
           isLoading = false;
           notifyListeners();
         });
@@ -66,7 +70,8 @@ class AuthProvider with ChangeNotifier {
         final docSnapshot = await FirebaseFirestore.instance
             .collection('users')
             .doc(_user!.uid)
-            .get();
+            .get()
+            .timeout(const Duration(seconds: 5));
 
         _hasAgeParameter =
             docSnapshot.exists && docSnapshot.data()!.containsKey('age');
@@ -98,6 +103,7 @@ class AuthProvider with ChangeNotifier {
             .collection('users')
             .doc(_user!.uid)
             .get()
+            .timeout(const Duration(seconds: 5))
             .then((docSnapshot) {
           _hasAgeParameter =
               docSnapshot.exists && docSnapshot.data()!.containsKey('age');
@@ -105,6 +111,8 @@ class AuthProvider with ChangeNotifier {
               _user!.metadata.creationTime == _user!.metadata.lastSignInTime &&
                   !_hasAgeParameter!;
           notifyListeners();
+        }).catchError((error) {
+          // Ignore error silently
         });
       } else {
         _hasAgeParameter = null;
@@ -139,7 +147,7 @@ class AuthProvider with ChangeNotifier {
               child: Padding(
                 padding: const EdgeInsets.all(PaddingManager.p40),
                 child: AlertDialog(
-                  backgroundColor: ColorManager.darkGrey,
+                  backgroundColor: ColorManager.background,
                   title: Text(
                     StringsManager.success,
                     textAlign: TextAlign.center,
@@ -166,7 +174,7 @@ class AuthProvider with ChangeNotifier {
               child: Padding(
                 padding: const EdgeInsets.all(PaddingManager.p40),
                 child: AlertDialog(
-                  backgroundColor: ColorManager.darkGrey,
+                  backgroundColor: ColorManager.background,
                   title: Text(
                     StringsManager.wrongEmail,
                     textAlign: TextAlign.center,
@@ -403,7 +411,8 @@ class AuthProvider with ChangeNotifier {
           final docSnapshot = await FirebaseFirestore.instance
               .collection('users')
               .doc(_user!.uid)
-              .get();
+              .get()
+              .timeout(const Duration(seconds: 5));
 
           _hasAgeParameter =
               docSnapshot.exists && docSnapshot.data()!.containsKey('age');

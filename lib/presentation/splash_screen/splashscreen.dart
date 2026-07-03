@@ -1,5 +1,7 @@
+import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'dart:async';
 import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
+import 'package:fitness_app/services/notification_service.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -21,6 +23,13 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
+
+    // Request notification permission immediately on app launch
+    try {
+      NotificationService().initialize();
+    } catch (e) {
+      print('Error initializing notifications on launch: $e');
+    }
 
     // Animation controller (Runs only once)
     _controller = AnimationController(
@@ -107,7 +116,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Pure black background
+      backgroundColor: ColorManager.background, // Pure black background
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

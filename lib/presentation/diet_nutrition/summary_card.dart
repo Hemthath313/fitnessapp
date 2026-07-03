@@ -47,7 +47,7 @@ class SummaryCard extends StatelessWidget {
             children: [
               _buildMacroItem('Protein', totalProtein, remainingProtein, Colors.orangeAccent),
               _buildMacroItem('Carbs', totalCarbs, remainingCarbs, Colors.blueAccent),
-              _buildMacroItem('Fats', totalFats, remainingFats, Colors.pinkAccent),
+              _buildMacroItem('Fats', totalFats, remainingFats, Colors.amberAccent),
             ],
           ),
         ],

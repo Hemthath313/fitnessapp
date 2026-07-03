@@ -138,7 +138,7 @@ class ProfileProvider with ChangeNotifier {
         );
       }
 
-      notifyListeners();
+      await fetchAndSetFlSpots();
     } catch (e) {
       rethrow;
     }

@@ -9,8 +9,27 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-class SixPackChallengeSelectionScreen extends StatelessWidget {
+class SixPackChallengeSelectionScreen extends StatefulWidget {
   const SixPackChallengeSelectionScreen({super.key});
+
+  @override
+  State<SixPackChallengeSelectionScreen> createState() => _SixPackChallengeSelectionScreenState();
+}
+
+class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelectionScreen> {
+  Future<Map<String, dynamic>>? _progressFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshProgress();
+  }
+
+  void _refreshProgress() {
+    setState(() {
+      _progressFuture = _fetchProgress();
+    });
+  }
 
   Future<Map<String, dynamic>> _fetchProgress() async {
     final userId = FirebaseAuth.instance.currentUser!.uid;
@@ -24,13 +43,13 @@ class SixPackChallengeSelectionScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: AppBar(
-        title: const Text('30 Day Abs Challenge', style: TextStyle(color: Colors.white)),
+        title: Text('30 Day Abs Challenge', style: TextStyle(color: ColorManager.textPrimary)),
         backgroundColor: ColorManager.background,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
       ),
       body: FutureBuilder<Map<String, dynamic>>(
-        future: _fetchProgress(),
+        future: _progressFuture,
         builder: (context, snapshot) {
           final progress = snapshot.data ?? {};
           final lastDay = progress['lastCompletedDay'] ?? 0;
@@ -83,7 +102,7 @@ class SixPackChallengeSelectionScreen extends StatelessWidget {
     Color borderColor = Colors.transparent;
     Widget icon = Text('$day',
         style: TextStyle(
-            color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.bold));
+            color: ColorManager.textPrimary, fontSize: 18.sp, fontWeight: FontWeight.bold));
 
     if (isCompleted) {
       bgColor = ColorManager.limerGreen2.withOpacity(0.2);
@@ -93,10 +112,10 @@ class SixPackChallengeSelectionScreen extends StatelessWidget {
     } else if (isPremiumLocked) {
       icon = Icon(Icons.lock, color: Colors.amber, size: 20.sp);
     } else if (isWaitDay) {
-      icon = Icon(Icons.access_time_filled, color: Colors.white24, size: 20.sp);
+      icon = Icon(Icons.access_time_filled, color: ColorManager.divider, size: 20.sp);
     } else if (isLocked) {
       icon =
-          Text('$day', style: TextStyle(color: Colors.white24, fontSize: 18.sp));
+          Text('$day', style: TextStyle(color: ColorManager.divider, fontSize: 18.sp));
     }
 
     return InkWell(
@@ -111,7 +130,9 @@ class SixPackChallengeSelectionScreen extends StatelessWidget {
             const SnackBar(content: Text('Complete previous days first!')),
           );
         } else {
-          context.push('${Routes.dailyExerciseRoute}?day=$day');
+          context.push('${Routes.dailyExerciseRoute}?day=$day').then((_) {
+            if (mounted) _refreshProgress();
+          });
         }
       },
       borderRadius: BorderRadius.circular(12.r),
@@ -131,17 +152,17 @@ class SixPackChallengeSelectionScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: ColorManager.surface,
-        title: const Text('Come back tomorrow!',
-            style: TextStyle(color: Colors.white)),
-        content: const Text(
+        title: Text('Come back tomorrow!',
+            style: TextStyle(color: ColorManager.textPrimary)),
+        content: Text(
           'You have already completed a workout today. Rest up and come back tomorrow to keep the streak alive!',
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: ColorManager.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child:
-                const Text('OK', style: TextStyle(color: ColorManager.primary)),
+                Text('OK', style: TextStyle(color: ColorManager.primary)),
           ),
         ],
       ),

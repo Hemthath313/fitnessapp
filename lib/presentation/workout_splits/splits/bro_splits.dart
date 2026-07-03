@@ -11,14 +11,14 @@ class BroSplitPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: ColorManager.black, // Updated color here
-          title: const Text(
+          backgroundColor: ColorManager.background, // Updated color here
+          title: Text(
             "View Exercises?",
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: ColorManager.textPrimary),
           ),
-          content: const Text(
+          content: Text(
             "Do you want to see the detailed exercises for this split?",
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: ColorManager.textSecondary),
           ),
           actions: [
             TextButton(
@@ -63,14 +63,14 @@ class BroSplitPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Bro Split Workout',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: ColorManager.textPrimary),
         ),
-        backgroundColor: ColorManager.darkGrey,
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: ColorManager.background,
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
       ),
       body: Container(
         padding: const EdgeInsets.all(16.0),
@@ -91,15 +91,15 @@ class BroSplitPage extends StatelessWidget {
                     child: ListTile(
                       title: Text(
                         '${split['day']} - ${split['title']}',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: ColorManager.textPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
                         ),
                       ),
                       subtitle: Text(
                         'Focus: ${split['focus']}',
-                        style: const TextStyle(color: Colors.white70),
+                        style: TextStyle(color: ColorManager.textSecondary),
                       ),
                     ),
                   );

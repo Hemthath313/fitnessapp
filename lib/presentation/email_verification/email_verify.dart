@@ -77,14 +77,14 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       appBar: AppBar(
-        backgroundColor: ColorManager.darkGrey,
+        backgroundColor: ColorManager.background,
         title: Padding(
           padding: const EdgeInsets.only(left: 20),
-          child: const Text(
+          child: Text(
             'Verify Your Email',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold),
           ),
         ),
       ),
@@ -96,10 +96,10 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
             Icon(Icons.email_outlined,
                 size: 80, color: ColorManager.limerGreen2),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Please check your email and verify your account.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white, fontSize: 18),
+              style: TextStyle(color: ColorManager.textPrimary, fontSize: 18),
             ),
             const SizedBox(height: 30),
             ElevatedButton.icon(
@@ -109,7 +109,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                 minimumSize: const Size(double.infinity, 50),
               ),
               onPressed: () => _checkEmailVerification(context),
-              icon: const Icon(Icons.verified, color: Colors.white),
+              icon: Icon(Icons.verified, color: ColorManager.textPrimary),
               label: const Text('I Verified My Email'),
             ),
             const SizedBox(height: 20),
@@ -124,12 +124,12 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
               onPressed: _isCooldownActive
                   ? null
                   : () => _resendVerificationEmail(context),
-              icon: const Icon(Icons.refresh, color: Colors.white),
+              icon: Icon(Icons.refresh, color: ColorManager.textPrimary),
               label: Text(
                 _isCooldownActive
                     ? 'Resend in $_cooldownSeconds s'
                     : 'Resend Verification Email',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: ColorManager.textPrimary),
               ),
             ),
           ],

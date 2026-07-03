@@ -148,7 +148,7 @@ class _LoginPageState extends State<LoginPage> {
     final isLoading = authProvider.isLoading;
 
     return Scaffold(
-      backgroundColor: ColorManager.background,
+      backgroundColor: ColorManager.backgroundDark, // Matches the bottom gradient shade
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -161,7 +161,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         child: SafeArea(
-          bottom: true,
+          bottom: false, // Allows background to flow edge-to-edge
           top: true,
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
@@ -171,13 +171,13 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SizedBox(height: 50.h),
+                  SizedBox(height: 40.h),
                   
                   // Logo/Header Section with attractive design
                   Column(
                     children: [
                       Container(
-                        padding: EdgeInsets.all(20.w),
+                        padding: EdgeInsets.all(16.w),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
@@ -191,21 +191,21 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         child: Icon(
                           Icons.fitness_center,
-                          size: 56.sp,
+                          size: 44.sp,
                           color: ColorManager.primary,
                         ),
                       ),
-                      SizedBox(height: 24.h),
+                      SizedBox(height: 16.h),
                       Text(
                         isLoginView ? 'Welcome Back!' : 'Create Account',
                         style: TextStyle(
                           color: ColorManager.textPrimary,
-                          fontSize: 32.sp,
+                          fontSize: 26.sp,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.5,
                         ),
                       ),
-                      SizedBox(height: 12.h),
+                      SizedBox(height: 8.h),
                       Text(
                         isLoginView
                             ? 'Sign in to continue your fitness journey'
@@ -220,7 +220,7 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ),
                 
-                SizedBox(height: 48.h),
+                SizedBox(height: 32.h),
                 
                 // Input Fields
                 LoginOrRegisterView(
@@ -230,11 +230,11 @@ class _LoginPageState extends State<LoginPage> {
                   repeatPasswordController: _repeatPasswordController,
                 ),
                 
-                SizedBox(height: 28.h),
+                SizedBox(height: 20.h),
                 
                 // Sign In/Up Button with gradient
                 Container(
-                  height: 56.h,
+                  height: 50.h,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -277,7 +277,7 @@ class _LoginPageState extends State<LoginPage> {
                                   fontSize: 17.sp,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 0.8,
-                                  color: Colors.black,
+                                  color: Colors.white,
                                 ),
                               ),
                       ),
@@ -285,7 +285,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 
-                SizedBox(height: 24.h),
+                SizedBox(height: 16.h),
                 
                 // Divider with better styling
                 Row(
@@ -330,7 +330,7 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
                 
-                SizedBox(height: 24.h),
+                SizedBox(height: 16.h),
                 
                 // Google Sign In Button
                 CustomGoogleSignInButton(
@@ -341,7 +341,7 @@ class _LoginPageState extends State<LoginPage> {
                         },
                 ),
                 
-                SizedBox(height: 24.h),
+                SizedBox(height: 16.h),
                 
                 // Switch Auth Mode
                 Row(
@@ -373,7 +373,7 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
                 
-                SizedBox(height: 32.h),
+                SizedBox(height: 24.h),
               ],
             ).animate().fadeIn(duration: 500.ms),
           ),

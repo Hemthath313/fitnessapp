@@ -13,111 +13,106 @@ class QuickActionsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final subProvider = Provider.of<SubscriptionProvider>(context);
+    final isPremium = subProvider.isPremium;
+
+    final List<Map<String, dynamic>> actions = [
+      {
+        'icon': Icons.water_drop_rounded,
+        'label': 'Water',
+        'color': Colors.blue,
+        'onTap': () => context.push(Routes.addWaterRoute),
+      },
+      {
+        'icon': Icons.fitness_center_rounded,
+        'label': 'Log Lift',
+        'color': Colors.orange,
+        'onTap': () => context.push(Routes.workoutLogRoute),
+      },
+      {
+        'icon': Icons.restaurant_menu_rounded,
+        'label': 'Diet Plans',
+        'color': Colors.green,
+        'onTap': () {
+          if (isPremium) {
+            context.push(Routes.dietRoute);
+          } else {
+            context.push(Routes.premiumScreen);
+          }
+        },
+      },
+      {
+        'icon': Icons.history_rounded,
+        'label': 'History',
+        'color': Colors.teal,
+        'onTap': () => context.push(Routes.workoutHistoryRoute),
+      },
+    ];
+
     return Padding(
-      padding: EdgeInsets.symmetric(
-          horizontal: SizeManager.s12.w, vertical: SizeManager.s8.h),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.only(
-                left: SizeManager.s8.w, bottom: SizeManager.s12.h),
+            padding: EdgeInsets.only(left: 4.w, bottom: 12.h),
             child: Text(
               'Quick Actions',
               style: TextStyle(
-                color: ColorManager.white,
-                fontSize: SizeManager.s18.sp,
+                color: ColorManager.textPrimary,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          Row(
-            children: [
-              Expanded(
-                child: _QuickActionCard(
-                  icon: Icons.water_drop,
-                  label: 'Log Water',
-                  color: Colors.blue,
-                  onTap: () {
-                    context.push(Routes.addWaterRoute);
-                  },
-                ),
-              ),
-              SizedBox(width: SizeManager.s12.w),
-              Expanded(
-                child: _QuickActionCard(
-                  icon: Icons.edit_calendar,
-                  label: 'Log Workout',
-                  color: Colors.orange,
-                  onTap: () {
-                    context.push(Routes.workoutLogRoute);
-                  },
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: SizeManager.s12.h),
-          Row(
-            children: [
-              Expanded(
-                child: _QuickActionCard(
-                  icon: Icons.fitness_center,
-                  label: 'Exercises',
-                  color: ColorManager.limerGreen2,
-                  onTap: () async {
-                    final sub = Provider.of<SubscriptionProvider>(context,
-                        listen: false);
-                    if (!sub.isPremium) {
-                      await InterstitialAdService.showStrengthWorkoutAd();
-                    }
-                    context.push(Routes.bodypartsPage);
-                  },
-                ),
-              ),
-              SizedBox(width: SizeManager.s12.w),
-              Expanded(
-                child: _QuickActionCard(
-                  icon: Icons.restaurant_menu,
-                  label: 'Diet Plans',
-                  color: Colors.purple,
-                  onTap: () {
-                    final sub = Provider.of<SubscriptionProvider>(context,
-                        listen: false);
-                    if (sub.isPremium) {
-                      context.push(Routes.dietRoute);
-                    } else {
-                      context.push(Routes.premiumScreen);
-                    }
-                  },
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: SizeManager.s12.h),
-          Row(
-            children: [
-              Expanded(
-                child: _QuickActionCard(
-                  icon: Icons.history,
-                  label: 'Workout History',
-                  color: Colors.teal,
-                  onTap: () {
-                    context.push(Routes.workoutHistoryRoute);
-                  },
-                ),
-              ),
-              // SizedBox(width: SizeManager.s12.w),
-              // Expanded(
-              //   child: _QuickActionCard(
-              //     icon: Icons.photo_camera,
-              //     label: 'Progress Photos',
-              //     color: Colors.pink,
-              //     onTap: () {
-              //       context.push(Routes.progressPhotosRoute);
-              //     },
-              //   ),
-              // ),
-            ],
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 10.w),
+            decoration: BoxDecoration(
+              color: ColorManager.surfaceLight,
+              borderRadius: BorderRadius.circular(20.r),
+              border: Border.all(color: ColorManager.divider),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: actions.map((act) {
+                final Color baseColor = act['color'] as Color;
+                return GestureDetector(
+                  onTap: act['onTap'] as VoidCallback,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Circular Icon wrapper
+                      Container(
+                        width: 52.w,
+                        height: 52.w,
+                        decoration: BoxDecoration(
+                          color: baseColor.withOpacity(0.12),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: baseColor.withOpacity(0.25),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Icon(
+                          act['icon'] as IconData,
+                          color: baseColor,
+                          size: 24.sp,
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        act['label'] as String,
+                        style: TextStyle(
+                          color: ColorManager.textSecondary,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
           ),
         ],
       ),

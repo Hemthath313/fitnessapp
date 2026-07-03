@@ -1,6 +1,7 @@
 import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
+import 'package:fitness_app/presentation/widgets/interactive_exercise_detail.dart';
 import 'package:flutter/material.dart';
 
 // Chest Exercises Page using centralized data
@@ -18,7 +19,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       body: CustomScrollView(
         slivers: [
           // Beautiful App Bar with gradient
@@ -26,12 +27,12 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
             expandedHeight: 200.0,
             floating: false,
             pinned: true,
-            backgroundColor: ColorManager.black,
+            backgroundColor: ColorManager.surface,
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
                 'Chest Workouts',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: ColorManager.textPrimary,
                   fontWeight: FontWeight.bold,
                   fontSize: 24,
                 ),
@@ -43,9 +44,9 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      ColorManager.black,
-                      ColorManager.darkGrey,
-                      ColorManager.black,
+                      ColorManager.surface,
+                      ColorManager.background,
+                      ColorManager.surface,
                     ],
                   ),
                 ),
@@ -58,7 +59,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
                 ),
               ),
             ),
-            iconTheme: IconThemeData(color: Colors.white),
+            iconTheme: IconThemeData(color: ColorManager.textPrimary),
           ),
 
           // Header Section
@@ -80,7 +81,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
                   Text(
                     '${chestExercises.length} premium video workouts',
                     style: TextStyle(
-                      color: Colors.white70,
+                      color: ColorManager.textSecondary,
                       fontSize: 16,
                     ),
                   ),
@@ -107,7 +108,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
                           child: Text(
                             'All exercises include detailed video demonstrations and step-by-step instructions.',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: ColorManager.textPrimary,
                               fontSize: 14,
                             ),
                           ),
@@ -163,7 +164,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
                 child: Container(
                   height: 220,
                   width: double.infinity,
-                  color: ColorManager.black,
+                  color: ColorManager.surface,
                   child: Stack(
                     children: [
                       ExerciseVideoPlayer(
@@ -199,8 +200,8 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
                           ),
                           child: Text(
                             exercise.difficulty,
-                            style: TextStyle(
-                              color: Colors.black,
+                            style: const TextStyle(
+                              color: Colors.white,
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                             ),
@@ -225,7 +226,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
                           child: Text(
                             exercise.name,
                             style: TextStyle(
-                              color: Colors.white,
+                              color: ColorManager.textPrimary,
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
                             ),
@@ -244,7 +245,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
                     Text(
                       exercise.description,
                       style: TextStyle(
-                        color: Colors.white70,
+                        color: ColorManager.textSecondary,
                         fontSize: 14,
                         height: 1.5,
                       ),
@@ -285,7 +286,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: ColorManager.black87,
+        color: ColorManager.surfaceDark,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: ColorManager.limerGreen2.withOpacity(0.2),
@@ -301,7 +302,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
             child: Text(
               text,
               style: TextStyle(
-                color: Colors.white70,
+                color: ColorManager.textSecondary,
                 fontSize: 12,
               ),
               overflow: TextOverflow.ellipsis,
@@ -317,219 +318,16 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.9,
-        decoration: BoxDecoration(
-          color: ColorManager.black,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-        ),
-        child: Column(
-          children: [
-            // Handle bar
-            Container(
-              margin: EdgeInsets.only(top: 12),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white30,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Video Player
-                    Container(
-                      height: 300,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: ColorManager.limerGreen2.withOpacity(0.3),
-                            blurRadius: 20,
-                            spreadRadius: 5,
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: ExerciseVideoPlayer(
-                          videoPath: exercise.videoPath,
-                          height: 300,
-                          autoPlay: true, // Auto-play in detail view
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 24),
-
-                    // Exercise Name
-                    Text(
-                      exercise.name,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-
-                    // Description
-                    Container(
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: ColorManager.surface,
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Text(
-                        exercise.description,
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 16,
-                          height: 1.6,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-
-                    // Info Cards
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildDetailCard(
-                            'Target',
-                            exercise.target,
-                            Icons.center_focus_strong,
-                          ),
-                        ),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: _buildDetailCard(
-                            'Equipment',
-                            exercise.equipment,
-                            Icons.sports_gymnastics,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildDetailCard(
-                            'Difficulty',
-                            exercise.difficulty,
-                            Icons.trending_up,
-                          ),
-                        ),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: _buildDetailCard(
-                            'Sets & Reps',
-                            exercise.setsReps,
-                            Icons.repeat,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 24),
-
-                    // Instructions
-                    Text(
-                      'How to Perform',
-                      style: TextStyle(
-                        color: ColorManager.limerGreen2,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    ...exercise.instructions.asMap().entries.map((entry) {
-                      return Container(
-                        margin: EdgeInsets.only(bottom: 12),
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: ColorManager.surface,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: ColorManager.limerGreen2.withOpacity(0.2),
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: ColorManager.limerGreen2,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '${entry.key + 1}',
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 16),
-                            Expanded(
-                              child: Text(
-                                entry.value,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                  height: 1.5,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
-                    SizedBox(height: 20),
-                  ],
-                ),
-              ),
-            ),
-
-            // Close Button
-            SafeArea(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: ColorManager.limerGreen2,
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      'Close',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+      builder: (context) => InteractiveExerciseDetailWidget(
+        name: exercise.name,
+        videoPath: exercise.videoPath,
+        description: exercise.description,
+        target: exercise.target,
+        equipment: exercise.equipment,
+        instructions: exercise.instructions,
+        difficulty: exercise.difficulty,
+        setsReps: exercise.setsReps,
+        category: 'Chest',
       ),
     );
   }
@@ -555,7 +353,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
               Text(
                 label,
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: ColorManager.textSecondary,
                   fontSize: 12,
                 ),
               ),
@@ -565,7 +363,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
           Text(
             value,
             style: TextStyle(
-              color: Colors.white,
+              color: ColorManager.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),

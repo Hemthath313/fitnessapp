@@ -299,7 +299,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: ColorManager.black,
+          backgroundColor: ColorManager.background,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -408,7 +408,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true, // Better for responsiveness with keyboard
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       builder: (context) {
         return Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -454,7 +454,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: ColorManager.darkGrey, // Consistent dark theme
+      backgroundColor: ColorManager.background, // Consistent dark theme
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -511,10 +511,10 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       appBar: AppBar(
           iconTheme:  IconThemeData(color: ColorManager.white),
-          backgroundColor: ColorManager.black,
+          backgroundColor: ColorManager.background,
           title:  Text(
             'Bulking Diet Plan',
             style: TextStyle(color: ColorManager.white),
@@ -541,7 +541,7 @@ class _BulkingDietScreenState extends State<BulkingDietScreen> {
       //   label: const Text(
       //     'Complete All Meals',
       //     style:
-      //         TextStyle(color: ColorManager.black, fontWeight: FontWeight.bold),
+      //         TextStyle(color: ColorManager.background, fontWeight: FontWeight.bold),
       //   ),
       // ),
     );

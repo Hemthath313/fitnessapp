@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/model/workout_model.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
+import 'package:fitness_app/services/review_service.dart';
+import 'package:fitness_app/presentation/widgets/rating_prompt_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -108,6 +110,78 @@ class WorkoutProvider with ChangeNotifier {
       rethrow;
     }
   }
+
+  Future<void> addNewWorkouts(List<WorkoutModel> newWorkouts) async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final batch = FirebaseFirestore.instance.batch();
+      final List<WorkoutModel> workoutsToAdd = [];
+      final List<WorkoutModel> allWorkoutsToAdd = [];
+
+      for (var workout in newWorkouts) {
+        final workoutDoc = FirebaseFirestore.instance
+            .collection('workouts')
+            .doc(user.uid)
+            .collection('workoutData')
+            .doc();
+        
+        final allWorkoutDoc = FirebaseFirestore.instance
+            .collection('allWorkouts')
+            .doc(user.uid)
+            .collection('allWorkoutsData')
+            .doc();
+
+        final workoutModel = WorkoutModel(
+          id: workoutDoc.id,
+          name: workout.name,
+          repNumber: workout.repNumber,
+          setNumber: workout.setNumber,
+          dateTime: workout.dateTime,
+        );
+
+        final allWorkoutModel = WorkoutModel(
+          id: allWorkoutDoc.id,
+          name: workout.name,
+          repNumber: workout.repNumber,
+          setNumber: workout.setNumber,
+          dateTime: workout.dateTime,
+        );
+
+        batch.set(workoutDoc, {
+          'name': workout.name,
+          'repNumber': workout.repNumber,
+          'setNumber': workout.setNumber,
+          'dateTime': workout.dateTime,
+        });
+
+        batch.set(allWorkoutDoc, {
+          'name': workout.name,
+          'repNumber': workout.repNumber,
+          'setNumber': workout.setNumber,
+          'dateTime': workout.dateTime,
+        });
+
+        workoutsToAdd.add(workoutModel);
+        allWorkoutsToAdd.add(allWorkoutModel);
+      }
+
+      await batch.commit();
+
+      // Update local state immediately
+      _workouts.addAll(workoutsToAdd);
+      _allWorkouts.addAll(allWorkoutsToAdd);
+      
+      // Sort to keep order correct
+      _workouts.sort((a, b) => b.dateTime.compareTo(a.dateTime));
+      
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 
   Future fetchAndSetWorkouts() async {
     User? user = FirebaseAuth.instance.currentUser;
@@ -303,12 +377,93 @@ class WorkoutProvider with ChangeNotifier {
     }
   }
 
+  Future<void> deleteWeeklyPlan() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final batch = FirebaseFirestore.instance.batch();
+
+      // Fetch from workouts subcollection
+      final workoutsSnapshot = await FirebaseFirestore.instance
+          .collection('workouts')
+          .doc(user.uid)
+          .collection('workoutData')
+          .get();
+
+      for (var doc in workoutsSnapshot.docs) {
+        final name = doc.data()['name'] as String? ?? '';
+        if (name.startsWith('[')) {
+          batch.delete(doc.reference);
+        }
+      }
+
+      // Fetch from allWorkouts subcollection
+      final allWorkoutsSnapshot = await FirebaseFirestore.instance
+          .collection('allWorkouts')
+          .doc(user.uid)
+          .collection('allWorkoutsData')
+          .get();
+
+      for (var doc in allWorkoutsSnapshot.docs) {
+        final name = doc.data()['name'] as String? ?? '';
+        if (name.startsWith('[')) {
+          batch.delete(doc.reference);
+        }
+      }
+
+      await batch.commit();
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteWorkoutByNameAndAllWorkoutId({
+    required String name,
+    required String allWorkoutId,
+  }) async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final batch = FirebaseFirestore.instance.batch();
+
+      // Delete from allWorkouts
+      final allWorkoutRef = FirebaseFirestore.instance
+          .collection('allWorkouts')
+          .doc(user.uid)
+          .collection('allWorkoutsData')
+          .doc(allWorkoutId);
+      batch.delete(allWorkoutRef);
+
+      // Query workouts collection to find matching document by name
+      final workoutsSnapshot = await FirebaseFirestore.instance
+          .collection('workouts')
+          .doc(user.uid)
+          .collection('workoutData')
+          .where('name', isEqualTo: name)
+          .get();
+
+      for (var doc in workoutsSnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      await batch.commit();
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
   Future<void> finishWorkout({
     required String workoutID,
     required String name,
     required int repNumber,
     required int setNumber,
     required DateTime dateTime,
+    BuildContext? context,
   }) async {
     try {
       User? user = FirebaseAuth.instance.currentUser;
@@ -325,6 +480,20 @@ class WorkoutProvider with ChangeNotifier {
         'dateTime': dateTime,
         'id': workoutID,
       });
+
+      // Increment review counter
+      try {
+        final bool isEligible = await ReviewService().incrementWorkoutsLogged();
+        if (isEligible && context != null && context.mounted) {
+          showDialog(
+            context: context,
+            barrierDismissible: true,
+            builder: (context) => const RatingPromptDialog(),
+          );
+        }
+      } catch (e) {
+        print('Error incrementing workouts count for review: $e');
+      }
 
       // Update streak and statistics
       // This needs to be called from the widget that has access to context

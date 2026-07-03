@@ -19,7 +19,7 @@ class NewMealPageAppBar extends StatelessWidget {
         StringsManager.addMealABtitle,
         style: StyleManager.abTitleTextStyle,
       ),
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       leading: Padding(
         padding: const EdgeInsets.only(left: PaddingManager.p12),
         child: Container(

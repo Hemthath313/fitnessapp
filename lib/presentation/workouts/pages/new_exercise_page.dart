@@ -58,7 +58,7 @@ class _NewExercisePageState extends State<NewExercisePage> {
         ),
         child: const NewExercisePageAppBar(),
       ),
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       body: SafeArea(
         bottom: true,
         child: SingleChildScrollView(

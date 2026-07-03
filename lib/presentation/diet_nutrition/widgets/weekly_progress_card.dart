@@ -25,7 +25,7 @@ class WeeklyProgressCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: ColorManager.surface,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: ColorManager.divider),
       ),
       child: Column(
         children: [
@@ -35,7 +35,7 @@ class WeeklyProgressCard extends StatelessWidget {
               Text(
                 "This Week's Consistency",
                 style: TextStyle(
-                  color: Colors.white,
+                  color: ColorManager.textPrimary,
                   fontWeight: FontWeight.bold,
                   fontSize: 14.sp,
                 ),

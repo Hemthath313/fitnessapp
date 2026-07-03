@@ -28,9 +28,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       appBar: AppBar(
-        backgroundColor: ColorManager.darkGrey,
+        backgroundColor: ColorManager.background,
         elevation: SizeManager.s0,
       ),
       body: SafeArea(

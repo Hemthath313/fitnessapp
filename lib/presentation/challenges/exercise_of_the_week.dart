@@ -15,11 +15,11 @@ class ExerciseOfTheWeekScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: AppBar(
-        title: const Text('Exercise of the Week',
-            style: TextStyle(color: Colors.white)),
+        title: Text('Exercise of the Week',
+            style: TextStyle(color: ColorManager.textPrimary)),
         backgroundColor: ColorManager.background,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -94,7 +94,7 @@ class ExerciseOfTheWeekScreen extends StatelessWidget {
         Text(
           exercise.name,
           style: TextStyle(
-            color: Colors.white,
+            color: ColorManager.textPrimary,
             fontSize: 28.sp,
             fontWeight: FontWeight.bold,
           ),
@@ -119,7 +119,7 @@ class ExerciseOfTheWeekScreen extends StatelessWidget {
         Text(
           'PRO TIPS',
           style: TextStyle(
-            color: Colors.white,
+            color: ColorManager.textPrimary,
             fontSize: 18.sp,
             fontWeight: FontWeight.bold,
           ),
@@ -160,7 +160,7 @@ class ExerciseOfTheWeekScreen extends StatelessWidget {
           SizedBox(height: 12.h),
           Text(
             '• Using momentum rather than core strength.\n• Arching the lower back excessively during the eccentric phase.',
-            style: TextStyle(color: Colors.white70, fontSize: 13.sp, height: 1.6),
+            style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp, height: 1.6),
           ),
         ],
       ),
@@ -178,7 +178,7 @@ class ExerciseOfTheWeekScreen extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: TextStyle(color: Colors.white70, fontSize: 14.sp),
+              style: TextStyle(color: ColorManager.textSecondary, fontSize: 14.sp),
             ),
           ),
         ],

@@ -79,7 +79,7 @@ class _DrinkPageState extends State<DrinkPage> {
           style: StyleManager.abTitleTextStyle,
         ),
         elevation: 0.0,
-        backgroundColor: ColorManager.darkGrey,
+        backgroundColor: ColorManager.background,
         leading: Padding(
           padding: const EdgeInsets.only(left: PaddingManager.p12),
           child: Container(
@@ -105,7 +105,7 @@ class _DrinkPageState extends State<DrinkPage> {
           ),
         ),
       ),
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       body: SafeArea(
         bottom: true,
         child: SingleChildScrollView(

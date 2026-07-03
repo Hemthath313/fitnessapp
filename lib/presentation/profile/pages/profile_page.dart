@@ -17,6 +17,7 @@ import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/profile/widgets/measurement_line_chart.dart';
+import 'package:fitness_app/presentation/profile/widgets/muscle_activation_chart.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -32,21 +33,24 @@ class _ProfilePageState extends State<ProfilePage> {
     final deviceWidth = MediaQuery.of(context).size.width;
     final profileProvider =
         Provider.of<ProfileProvider>(context, listen: false);
-    return Consumer<HomeProvider>(
-      builder: (context, homeProvider, _) => FutureBuilder<
-              Map<String, dynamic>>(
+    return Consumer3<HomeProvider, ProfileProvider, ThemeProvider>(
+      builder: (context, homeProvider, profileProvider, themeProvider, _) {
+        return FutureBuilder<Map<String, dynamic>>(
           future: homeProvider.fetchUserData(),
           builder: (context, snapshot) {
-            final String emailData = homeProvider.userData['email'];
-            final double chestData = homeProvider.userData['chest'];
-            final double shoulderData = homeProvider.userData['shoulders'];
-            final double bicepsData = homeProvider.userData['biceps'];
-            final double foreArmData = homeProvider.userData['foreArm'];
-            final double waistData = homeProvider.userData['waist'];
-            final double hipsData = homeProvider.userData['hips'];
-            final double thighData = homeProvider.userData['thigh'];
-            final double calfData = homeProvider.userData['calf'];
+            final userData = homeProvider.userData;
+            final String emailData = userData['email'] ?? '';
+            final double chestData = userData['chest'] ?? 0.0;
+            final double shoulderData = userData['shoulders'] ?? 0.0;
+            final double bicepsData = userData['biceps'] ?? 0.0;
+            final double foreArmData = userData['foreArm'] ?? 0.0;
+            final double waistData = userData['waist'] ?? 0.0;
+            final double hipsData = userData['hips'] ?? 0.0;
+            final double thighData = userData['thigh'] ?? 0.0;
+            final double calfData = userData['calf'] ?? 0.0;
+            
             profileProvider.fetchAndSetFlSpots();
+            
             return SafeArea(
               bottom: true,
               child: Column(
@@ -67,9 +71,12 @@ class _ProfilePageState extends State<ProfilePage> {
                               width: deviceWidth,
                               height: SizeManager.s60.h,
                               decoration: BoxDecoration(
-                                color: ColorManager.black87,
+                                color: ColorManager.surface,
                                 borderRadius: BorderRadius.circular(
                                   RadiusManager.r40.r,
+                                ),
+                                border: Border.all(
+                                  color: ColorManager.primary.withOpacity(0.2),
                                 ),
                               ),
                               child: Center(
@@ -114,7 +121,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 height: SizeManager.s600.h,
                                 width: deviceWidth,
                                 child: Image.asset(
-                                  homeProvider.userData['gender'] == 'Male'
+                                  userData['gender'] == 'Male'
                                       ? ImageManager.man
                                       : ImageManager.woman,
                                 ),
@@ -142,7 +149,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s150.w,
-                                      color: ColorManager.black87,
+                                      color: ColorManager.primary.withOpacity(0.5),
                                     )
                                   ],
                                 ),
@@ -170,7 +177,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s130.w,
-                                      color: ColorManager.black87,
+                                      color: ColorManager.primary.withOpacity(0.5),
                                     )
                                   ],
                                 ),
@@ -198,7 +205,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s110.w,
-                                      color: ColorManager.black87,
+                                      color: ColorManager.primary.withOpacity(0.5),
                                     )
                                   ],
                                 ),
@@ -226,7 +233,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s100.w,
-                                      color: ColorManager.black87,
+                                      color: ColorManager.primary.withOpacity(0.5),
                                     )
                                   ],
                                 ),
@@ -254,7 +261,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s140.w,
-                                      color: ColorManager.black87,
+                                      color: ColorManager.primary.withOpacity(0.5),
                                     )
                                   ],
                                 ),
@@ -282,7 +289,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s140.w,
-                                      color: ColorManager.black87,
+                                      color: ColorManager.primary.withOpacity(0.5),
                                     )
                                   ],
                                 ),
@@ -310,7 +317,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s150.w,
-                                      color: ColorManager.black87,
+                                      color: ColorManager.primary.withOpacity(0.5),
                                     )
                                   ],
                                 ),
@@ -338,7 +345,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s140.w,
-                                      color: ColorManager.black87,
+                                      color: ColorManager.primary.withOpacity(0.5),
                                     )
                                   ],
                                 ),
@@ -348,89 +355,78 @@ class _ProfilePageState extends State<ProfilePage> {
                           
                           // Theme Toggle Card
                           SizedBox(height: 16.h),
-                          Consumer<ThemeProvider>(
-                            builder: (context, themeProvider, child) {
-                              return Padding(
-                                padding: EdgeInsets.symmetric(horizontal: PaddingManager.p12),
-                                child: GestureDetector(
-                                  onTap: () => themeProvider.toggleTheme(),
-                                  child: Container(
-                                    width: deviceWidth,
-                                    padding: EdgeInsets.all(16.w),
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          ColorManager.surface,
-                                          ColorManager.surfaceLight,
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      borderRadius: BorderRadius.circular(16.r),
-                                      border: Border.all(
-                                        color: ColorManager.primary.withOpacity(0.3),
-                                        width: 1,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: ColorManager.primary.withOpacity(0.1),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          padding: EdgeInsets.all(12.w),
-                                          decoration: BoxDecoration(
-                                            color: ColorManager.primary.withOpacity(0.1),
-                                            borderRadius: BorderRadius.circular(12.r),
-                                          ),
-                                          child: Icon(
-                                            themeProvider.isDarkMode
-                                                ? Icons.dark_mode_rounded
-                                                : Icons.light_mode_rounded,
-                                            color: ColorManager.primary,
-                                            size: 28.sp,
-                                          ),
-                                        ),
-                                        SizedBox(width: 16.w),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                themeProvider.isDarkMode ? 'Dark Mode' : 'Light Mode',
-                                                style: TextStyle(
-                                                  color: ColorManager.textPrimary,
-                                                  fontSize: 16.sp,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              SizedBox(height: 4.h),
-                                              Text(
-                                                'Tap to switch theme',
-                                                style: TextStyle(
-                                                  color: ColorManager.textSecondary,
-                                                  fontSize: 12.sp,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Switch(
-                                          value: themeProvider.isDarkMode,
-                                          onChanged: (value) => themeProvider.toggleTheme(),
-                                          activeColor: ColorManager.primary,
-                                          activeTrackColor: ColorManager.primary.withOpacity(0.5),
-                                        ),
-                                      ],
-                                    ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: PaddingManager.p12),
+                            child: GestureDetector(
+                              onTap: () => themeProvider.toggleTheme(),
+                              child: Container(
+                                width: deviceWidth,
+                                padding: EdgeInsets.all(16.w),
+                                decoration: BoxDecoration(
+                                  color: ColorManager.surface,
+                                  borderRadius: BorderRadius.circular(16.r),
+                                  border: Border.all(
+                                    color: ColorManager.primary.withOpacity(0.3),
+                                    width: 1,
                                   ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: ColorManager.primary.withOpacity(0.1),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
                                 ),
-                              );
-                            },
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.all(12.w),
+                                      decoration: BoxDecoration(
+                                        color: ColorManager.primary.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(12.r),
+                                      ),
+                                      child: Icon(
+                                        themeProvider.isDarkMode
+                                            ? Icons.dark_mode_rounded
+                                            : Icons.light_mode_rounded,
+                                        color: ColorManager.primary,
+                                        size: 28.sp,
+                                      ),
+                                    ),
+                                    SizedBox(width: 16.w),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            themeProvider.isDarkMode ? 'Dark Mode' : 'Light Mode',
+                                            style: TextStyle(
+                                              color: ColorManager.textPrimary,
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          SizedBox(height: 4.h),
+                                          Text(
+                                            'Tap to switch theme',
+                                            style: TextStyle(
+                                              color: ColorManager.textSecondary,
+                                              fontSize: 12.sp,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Switch(
+                                      value: themeProvider.isDarkMode,
+                                      onChanged: (value) => themeProvider.toggleTheme(),
+                                      activeColor: ColorManager.primary,
+                                      activeTrackColor: ColorManager.primary.withOpacity(0.5),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
                           SizedBox(height: 16.h),
                           
@@ -439,6 +435,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                   context.push(Routes.changeWeightRoute)),
                           const WeightDataTextRowWidget(),
                           const WeightLineChart(),
+                          SizedBox(height: 16.h),
+                          const MuscleActivationChart(),
+                          SizedBox(height: 16.h),
                           
                           // Pro Features Section
                           _buildProAnalyticsSection(context),
@@ -454,7 +453,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 ],
               ),
             );
-          }),
+          },
+        );
+      },
     );
   }
 
@@ -472,7 +473,7 @@ class _ProfilePageState extends State<ProfilePage> {
               Text(
                 'Advanced Analytics',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: ColorManager.textPrimary,
                   fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
                 ),
@@ -495,7 +496,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Text(
                     'PRO',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: ColorManager.textPrimary,
                       fontSize: 10.sp,
                       fontWeight: FontWeight.bold,
                     ),
@@ -535,7 +536,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Text(
                         'Unlock Advanced Metrics',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: ColorManager.textPrimary,
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
                         ),

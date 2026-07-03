@@ -34,8 +34,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('Go Premium', style: TextStyle(color: Colors.white)),
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
+        title: Text('Go Premium', style: TextStyle(color: ColorManager.textPrimary)),
       ),
       body: subProvider.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -59,7 +59,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                       style: TextStyle(
                         fontSize: 24.sp,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: ColorManager.textPrimary,
                       ),
                     ),
                   ),
@@ -84,7 +84,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: ColorManager.textPrimary,
                       ),
                     ),
                   ),
@@ -101,9 +101,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
                         children: [
                           Icon(Icons.check_circle, color: ColorManager.primary),
                           SizedBox(width: SizeManager.s12.w),
-                          const Text(
+                          Text(
                             'You are already a Premium member!',
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -140,7 +140,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
+                        color: ColorManager.surface,
                         borderRadius: BorderRadius.circular(20.r),
                       ),
                       child: Row(
@@ -174,10 +174,16 @@ class _PremiumScreenState extends State<PremiumScreen> {
     return Column(
       children: [
         _buildFeatureItem(
+          Icons.smart_toy_rounded, 
+          'Personal Coach AI', 
+          'Get real-time feedback and dynamic adjustments from your AI Coach.',
+          Colors.purpleAccent,
+        ),
+        _buildFeatureItem(
           Icons.auto_awesome, 
           'AI Workout Generator', 
           'Build unlimited personalized weekly workout plans with AI.',
-          Colors.purpleAccent,
+          Colors.tealAccent,
         ),
         _buildFeatureItem(
           Icons.restaurant_menu, 
@@ -186,16 +192,10 @@ class _PremiumScreenState extends State<PremiumScreen> {
           Colors.orangeAccent,
         ),
         _buildFeatureItem(
-          Icons.fitness_center, 
-          'Unlimited Custom Workouts', 
-          'Create and save infinite custom routines.',
-          Colors.blueAccent,
-        ),
-        _buildFeatureItem(
-          Icons.analytics, 
-          'Elite Analytics', 
-          'Deep dive into your progress with interactive charts.',
-          Colors.pinkAccent,
+          Icons.star_purple500_sharp, 
+          'Future Premium Features', 
+          'Lock in access to all upcoming advanced features and updates.',
+          Colors.yellowAccent,
         ),
         _buildFeatureItem(
           Icons.ads_click, 
@@ -287,12 +287,12 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     ),
                     child: Text(
                       'BEST VALUE',
-                      style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.black),
+                      style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ),
                 Text(
                   product.title.split('(')[0].trim(),
-                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: ColorManager.textPrimary),
                 ),
                 Text(
                   product.description,
@@ -310,7 +310,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
             onPressed: () => provider.buyProduct(product),
             style: ElevatedButton.styleFrom(
               backgroundColor: isYearly ? ColorManager.primary : ColorManager.surfaceLight,
-              foregroundColor: isYearly ? Colors.black : ColorManager.textPrimary,
+              foregroundColor: isYearly ? Colors.white : ColorManager.textPrimary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
               elevation: 0,
             ),

@@ -48,9 +48,9 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: AppBar(
-        title: const Text('Compare Progress', style: TextStyle(color: Colors.white)),
+        title: Text('Compare Progress', style: TextStyle(color: ColorManager.textPrimary)),
         backgroundColor: ColorManager.background,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -84,7 +84,7 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
             Text(
               'Need More Photos',
               style: TextStyle(
-                color: Colors.white,
+                color: ColorManager.textPrimary,
                 fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
               ),
@@ -166,11 +166,11 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
                     selectedPhoto != null
                         ? DateFormat('MMM dd, yyyy').format(selectedPhoto.date)
                         : 'Select Photo',
-                    style: TextStyle(color: Colors.white, fontSize: 12.sp),
+                    style: TextStyle(color: ColorManager.textPrimary, fontSize: 12.sp),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Icon(Icons.arrow_drop_down, color: ColorManager.primary),
+                Icon(Icons.arrow_drop_down, color: ColorManager.primary),
               ],
             ),
           ),
@@ -185,7 +185,7 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: ColorManager.surface,
-        title: const Text('Select Photo', style: TextStyle(color: Colors.white)),
+        title: Text('Select Photo', style: TextStyle(color: ColorManager.textPrimary)),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
@@ -205,7 +205,7 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
                 ),
                 title: Text(
                   DateFormat('MMM dd, yyyy').format(photo.date),
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: ColorManager.textPrimary),
                 ),
                 subtitle: Text(
                   photo.categoryDisplay,
@@ -321,7 +321,7 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
                 Text(
                   'Progress Summary',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: ColorManager.textPrimary,
                     fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
                   ),
@@ -333,7 +333,7 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
             Text(
               'Unlock Detailed Analysis',
               style: TextStyle(
-                color: Colors.white,
+                color: ColorManager.textPrimary,
                 fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
               ),
@@ -383,7 +383,7 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
           Text(
             'Progress Summary',
             style: TextStyle(
-              color: Colors.white,
+              color: ColorManager.textPrimary,
               fontSize: 18.sp,
               fontWeight: FontWeight.bold,
             ),

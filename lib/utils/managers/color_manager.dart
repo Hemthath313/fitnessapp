@@ -1,95 +1,96 @@
 import 'package:flutter/material.dart';
 
-/// Modern Fitness App Color Palette
-/// Designed for energy, motivation, and excellent user experience
-/// Supports both Light and Dark themes
+/// Hevy-Inspired Color Palette
+/// Light Mode is the default (proven by 13M+ Hevy users).
+/// Dark Mode available as a toggle.
 class ColorManager {
-  // ========== PRIMARY COLORS (Theme Independent) ==========
-  /// Primary brand color - Vibrant green (energy, fitness, growth)
-  static const Color primary = Color(0xFF00D4AA); // Teal green
-  static const Color primaryDark = Color(0xFF00B894);
-  static const Color primaryLight = Color(0xFF26E6C7);
-  
-  // ========== SECONDARY COLORS (Theme Independent) ==========
-  /// Secondary accent - Orange (motivation, action, achievement)
-  static const Color secondary = Color(0xFFFF6B35); // Vibrant orange
-  static const Color secondaryDark = Color(0xFFE55A2B);
-  static const Color secondaryLight = Color(0xFFFF8C5A);
-  
-  // ========== DARK THEME COLORS ==========
-  /// Main background - Dark but not pure black (easier on eyes)
-  static const Color darkBackground = Color(0xFF0F1419); // Dark blue-grey
-  static const Color darkBackgroundDark = Color(0xFF0A0E12); // Darker variant
-  static const Color darkBackgroundLight = Color(0xFF1A1F26); // Lighter variant
-  
-  /// Card/Surface colors
-  static const Color darkSurface = Color(0xFF1E2329); // Card background
-  static const Color darkSurfaceDark = Color(0xFF171B21);
-  static const Color darkSurfaceLight = Color(0xFF252A32);
-  
-  /// Text colors for dark theme
-  static const Color darkTextPrimary = Colors.white;
-  static const Color darkTextSecondary = Color(0xFFB8BCC8); // Light grey
-  static const Color darkTextTertiary = Color(0xFF8A8D98); // Medium grey
-  static const Color darkTextDisabled = Color(0xFF5A5D66); // Dark grey
-  
-  // ========== LIGHT THEME COLORS ==========
-  /// Main background - Soft gradient-ready colors
-  static const Color lightBackground = Color(0xFFF5F7FA); // Soft blue-grey
-  static const Color lightBackgroundDark = Color(0xFFE8ECF1); // Slightly darker
-  static const Color lightBackgroundLight = Color(0xFFFFFFFF); // Pure white
-  
-  /// Card/Surface colors - Clean with subtle warmth
-  static const Color lightSurface = Color(0xFFFFFFFF); // White cards
-  static const Color lightSurfaceDark = Color(0xFFF0F4F8); // Light blue-grey
-  static const Color lightSurfaceLight = Color(0xFFFAFBFC); // Almost white with hint of blue
-  
-  /// Text colors for light theme - High contrast for readability
-  static const Color lightTextPrimary = Color(0xFF1A202C); // Deep charcoal (not pure black)
-  static const Color lightTextSecondary = Color(0xFF4A5568); // Medium grey
-  static const Color lightTextTertiary = Color(0xFF718096); // Light grey
-  static const Color lightTextDisabled = Color(0xFFA0AEC0); // Very light grey
-  
-  // ========== ACCENT COLORS (Theme Independent) ==========
-  /// Success/Positive actions
-  static const Color success = Color(0xFF4CAF50);
-  static const Color successLight = Color(0xFF81C784);
-  
-  /// Warning/Caution
-  static const Color warning = Color(0xFFFFB74D);
-  static const Color warningLight = Color(0xFFFFCC80);
-  
-  /// Error/Danger
-  static const Color error = Color(0xFFEF5350);
-  static const Color errorLight = Color(0xFFE57373);
-  
-  /// Info/Information
-  static const Color info = Color(0xFF42A5F5);
-  static const Color infoLight = Color(0xFF64B5F6);
-  
-  // ========== GRADIENT COLORS ==========
-  /// Gradient start (for backgrounds, buttons)
-  static const Color gradientStart = Color(0xFF00D4AA);
-  static const Color gradientEnd = Color(0xFF00A8CC);
-  
-  /// Secondary gradient
-  static const Color gradientSecondaryStart = Color(0xFFFF6B35);
-  static const Color gradientSecondaryEnd = Color(0xFFFF8E53);
-  
-  // ========== DYNAMIC THEME COLORS ==========
-  // These will be set based on current theme mode
-  static Color background = darkBackground;
-  static Color backgroundDark = darkBackgroundDark;
-  static Color backgroundLight = darkBackgroundLight;
-  static Color surface = darkSurface;
-  static Color surfaceDark = darkSurfaceDark;
-  static Color surfaceLight = darkSurfaceLight;
-  static Color textPrimary = darkTextPrimary;
-  static Color textSecondary = darkTextSecondary;
-  static Color textTertiary = darkTextTertiary;
-  static Color textDisabled = darkTextDisabled;
-  
-  /// Update colors based on theme mode
+  // ═══════════════════════════════════════
+  // PRIMARY BRAND COLORS (theme-independent)
+  // ═══════════════════════════════════════
+
+  /// Primary – Electric Blue (Hevy-style)
+  static const Color primary = Color(0xFF4F6FFF);
+  static const Color primaryDark = Color(0xFF3A56E8);
+  static const Color primaryLight = Color(0xFF6B84FF);
+
+  /// Gradient – Blue to Purple (for buttons, hero sections)
+  static const Color gradientStart = Color(0xFF4F6FFF);
+  static const Color gradientEnd = Color(0xFF7C3AED);
+
+  /// Accent – Coral Red (PRs, calories, alerts, streaks)
+  static const Color accent = Color(0xFFFF4757);
+  static const Color accentLight = Color(0xFFFF6B78);
+
+  /// Accent – Neon Volt Green (for high-energy actions, buttons, and badges)
+  static const Color neonVolt = Color(0xFFD4FF2A);
+
+  /// Success – Teal Green (completed sets, goals met)
+  static const Color success = Color(0xFF2ECC71);
+  static const Color successLight = Color(0xFF58D68D);
+
+  /// Warning
+  static const Color warning = Color(0xFFF39C12);
+  static const Color warningLight = Color(0xFFF5B942);
+
+  /// Error
+  static const Color error = Color(0xFFE74C3C);
+  static const Color errorLight = Color(0xFFEC7063);
+
+  /// Info
+  static const Color info = Color(0xFF3498DB);
+
+  // ═══════════════════════════════════════
+  // LIGHT THEME (default)
+  // ═══════════════════════════════════════
+  static const Color lightBackground = Color(0xFFEEF2FF);       // Soft lavender-white
+  static const Color lightBackgroundDark = Color(0xFFE3E8FF);   // Slightly deeper lavender
+  static const Color lightBackgroundLight = Color(0xFFFFFFFF);  // Pure white
+
+  static const Color lightSurface = Color(0xFFFFFFFF);          // White cards
+  static const Color lightSurfaceDark = Color(0xFFF0F4F8);      // Chip/tag backgrounds
+  static const Color lightSurfaceLight = Color(0xFFF8F9FE);     // Near-white sections
+
+  static const Color lightTextPrimary = Color(0xFF1E2140);      // Dark blue-charcoal
+  static const Color lightTextSecondary = Color(0xFF6B7280);    // Muted grey
+  static const Color lightTextTertiary = Color(0xFF9CA3AF);     // Light grey
+  static const Color lightTextDisabled = Color(0xFFD1D5DB);
+
+  static const Color lightDivider = Color(0xFFE5E7EB);
+
+  // ═══════════════════════════════════════
+  // DARK THEME (toggle)
+  // ═══════════════════════════════════════
+  static const Color darkBackground = Color(0xFF0F1117);        // Near-black navy
+  static const Color darkBackgroundDark = Color(0xFF090B10);    // Deeper variant
+  static const Color darkBackgroundLight = Color(0xFF161A26);   // Lighter variant
+
+  static const Color darkSurface = Color(0xFF1C1F2E);           // Dark navy card
+  static const Color darkSurfaceDark = Color(0xFF151828);
+  static const Color darkSurfaceLight = Color(0xFF222640);      // Elevated elements
+
+  static const Color darkTextPrimary = Color(0xFFFFFFFF);
+  static const Color darkTextSecondary = Color(0xFF9CA3AF);
+  static const Color darkTextTertiary = Color(0xFF6B7280);
+  static const Color darkTextDisabled = Color(0xFF374151);
+
+  static const Color darkDivider = Color(0xFF2D3158);
+
+  // ═══════════════════════════════════════
+  // DYNAMIC THEME COLORS (updated at runtime)
+  // ═══════════════════════════════════════
+  static Color background = lightBackground;
+  static Color backgroundDark = lightBackgroundDark;
+  static Color backgroundLight = lightBackgroundLight;
+  static Color surface = lightSurface;
+  static Color surfaceDark = lightSurfaceDark;
+  static Color surfaceLight = lightSurfaceLight;
+  static Color textPrimary = lightTextPrimary;
+  static Color textSecondary = lightTextSecondary;
+  static Color textTertiary = lightTextTertiary;
+  static Color textDisabled = lightTextDisabled;
+  static Color divider = lightDivider;
+
+  /// Call this whenever the theme mode changes
   static void updateTheme(bool isDarkMode) {
     if (isDarkMode) {
       background = darkBackground;
@@ -102,6 +103,7 @@ class ColorManager {
       textSecondary = darkTextSecondary;
       textTertiary = darkTextTertiary;
       textDisabled = darkTextDisabled;
+      divider = darkDivider;
     } else {
       background = lightBackground;
       backgroundDark = lightBackgroundDark;
@@ -113,37 +115,70 @@ class ColorManager {
       textSecondary = lightTextSecondary;
       textTertiary = lightTextTertiary;
       textDisabled = lightTextDisabled;
+      divider = lightDivider;
     }
+
+    // Sync legacy aliases
+    _syncLegacy(isDarkMode);
   }
-  
-  // ========== LEGACY COLORS (for backward compatibility) ==========
-  static Color black = darkBackground;
-  static Color black54 = const Color.fromARGB(138, 15, 20, 25);
-  static Color black87 = const Color.fromARGB(222, 15, 20, 25);
-  static Color white = darkTextPrimary;
-  static Color white70 = darkTextSecondary;
-  static Color white2 = darkTextTertiary;
-  static Color darkGrey = darkBackground;
-  static Color grey = darkTextTertiary;
-  static Color lighGrey = darkTextSecondary;
-  static Color grey3 = darkSurface;
+
+  static void _syncLegacy(bool isDarkMode) {
+    // 'black' = background color; 'white' = primary text color — both adapt to theme
+    black    = isDarkMode ? darkBackground  : lightBackground;
+    black54  = isDarkMode ? const Color.fromARGB(138, 13, 15, 26) : const Color.fromARGB(138, 238, 242, 255);
+    black87  = isDarkMode ? const Color.fromARGB(222, 13, 15, 26) : const Color.fromARGB(222, 238, 242, 255);
+    white    = isDarkMode ? darkTextPrimary  : lightTextPrimary;
+    white70  = isDarkMode ? darkTextSecondary : lightTextSecondary;
+    white2   = isDarkMode ? darkTextTertiary  : lightTextTertiary;
+    darkGrey = isDarkMode ? darkBackgroundLight : lightSurfaceDark;
+    grey     = isDarkMode ? darkTextTertiary    : lightTextTertiary;
+    lighGrey = isDarkMode ? darkTextSecondary   : lightTextSecondary;
+    grey3    = isDarkMode ? darkSurface  : lightSurface;
+    limerGreen2   = primary;
+    drinkDarkGrey = isDarkMode ? darkSurfaceDark : lightSurfaceDark;
+    grey2         = isDarkMode ? darkTextTertiary : lightTextTertiary;
+    brightThemeGrey = isDarkMode ? darkTextSecondary : lightTextSecondary;
+    secondary     = accent;
+    secondaryDark = accentLight;
+    secondaryLight = accentLight;
+  }
+
+  // ═══════════════════════════════════════
+  // LEGACY ALIASES (backward compatibility)
+  // ═══════════════════════════════════════
+  static Color black = lightBackground;
+  static Color black54 = const Color.fromARGB(138, 238, 242, 255);
+  static Color black87 = const Color.fromARGB(222, 238, 242, 255);
+  static Color white = lightTextPrimary;          // adapts: dark bg→white text, light bg→dark text
+  static Color white70 = lightTextSecondary;
+  static Color white2 = lightTextTertiary;
+  static Color darkGrey = lightSurfaceDark;
+  static Color grey = lightTextTertiary;
+  static Color lighGrey = lightTextSecondary;
+  static Color grey3 = lightSurface;
   static Color limerGreen2 = primary;
-  static Color drinkDarkGrey = darkSurfaceDark;
-  static Color grey2 = darkTextTertiary;
-  
-  // ========== UTILITY COLORS ==========
+  static Color drinkDarkGrey = lightSurfaceDark;
+  static Color grey2 = lightTextTertiary;
+  static Color brightThemeGrey = lightTextSecondary;
+  // secondary / secondaryDark kept for backward compat — mapped to accent
+  static Color secondary = accent;
+  static Color secondaryDark = accentLight;
+  static Color secondaryLight = accentLight;
+
+  // ═══════════════════════════════════════
+  // UTILITY ALIASES
+  // ═══════════════════════════════════════
   static const Color red = error;
   static const Color yellow = warning;
   static const Color blue = info;
-  static const Color orange = secondary;
-  static const Color orange2 = Color.fromARGB(67, 255, 107, 53);
+  static const Color orange = accent;
+  static const Color orange2 = Color.fromARGB(67, 255, 71, 87);
   static const Color limeGreen = primary;
-  static const Color limeGreenOp = Color.fromARGB(73, 0, 212, 170);
-  static Color brightThemeGrey = darkTextSecondary;
-  
-  // ========== OVERLAY COLORS ==========
-  static Color overlay = const Color.fromARGB(200, 0, 0, 0);
-  static Color overlayLight = const Color.fromARGB(150, 0, 0, 0);
+  static const Color limeGreenOp = Color.fromARGB(73, 79, 111, 255);
+
+  // Overlays
+  static Color overlay = const Color.fromARGB(160, 0, 0, 0);
+  static Color overlayLight = const Color.fromARGB(100, 0, 0, 0);
 }
 
 extension HexColor on Color {
@@ -156,52 +191,63 @@ extension HexColor on Color {
   }
 }
 
-/// App Theme Colors - Centralized theme configuration
+/// App Theme — centralized Material ColorScheme + Gradients
 class AppTheme {
-  /// Dark color scheme
-  static const ColorScheme darkColorScheme = ColorScheme.dark(
-    primary: ColorManager.primary,
-    onPrimary: Colors.black,
-    secondary: ColorManager.secondary,
-    onSecondary: Colors.white,
-    surface: ColorManager.darkSurface,
-    onSurface: ColorManager.darkTextPrimary,
-    background: ColorManager.darkBackground,
-    onBackground: ColorManager.darkTextPrimary,
-    error: ColorManager.error,
-    onError: Colors.white,
-    brightness: Brightness.dark,
-  );
-  
-  /// Light color scheme
+  // ── LIGHT COLOR SCHEME ──
   static const ColorScheme lightColorScheme = ColorScheme.light(
     primary: ColorManager.primary,
     onPrimary: Colors.white,
-    secondary: ColorManager.secondary,
+    secondary: ColorManager.accent,
     onSecondary: Colors.white,
     surface: ColorManager.lightSurface,
     onSurface: ColorManager.lightTextPrimary,
-    background: ColorManager.lightBackground,
-    onBackground: ColorManager.lightTextPrimary,
     error: ColorManager.error,
     onError: Colors.white,
     brightness: Brightness.light,
+    tertiary: ColorManager.success,
+    onTertiary: Colors.white,
   );
-  
-  /// Legacy - defaults to dark
-  static const ColorScheme colorScheme = darkColorScheme;
-  
-  /// Gradient for buttons and highlights
+
+  // ── DARK COLOR SCHEME ──
+  static const ColorScheme darkColorScheme = ColorScheme.dark(
+    primary: ColorManager.primaryLight,
+    onPrimary: Colors.black,
+    secondary: ColorManager.accent,
+    onSecondary: Colors.white,
+    surface: ColorManager.darkSurface,
+    onSurface: ColorManager.darkTextPrimary,
+    error: ColorManager.error,
+    onError: Colors.white,
+    brightness: Brightness.dark,
+    tertiary: ColorManager.success,
+    onTertiary: Colors.white,
+  );
+
+  /// Legacy default → now points to light
+  static const ColorScheme colorScheme = lightColorScheme;
+
+  // ── GRADIENTS ──
   static const LinearGradient primaryGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
     colors: [ColorManager.gradientStart, ColorManager.gradientEnd],
   );
-  
-  /// Secondary gradient
-  static const LinearGradient secondaryGradient = LinearGradient(
+
+  static const LinearGradient heroGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [ColorManager.gradientSecondaryStart, ColorManager.gradientSecondaryEnd],
+    colors: [Color(0xFF1E2140), ColorManager.primary],
+  );
+
+  static const LinearGradient secondaryGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [ColorManager.accent, ColorManager.accentLight],
+  );
+
+  static const LinearGradient successGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [ColorManager.success, ColorManager.successLight],
   );
 }

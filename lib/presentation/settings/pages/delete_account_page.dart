@@ -92,7 +92,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
               ),
               titleTextStyle: StyleManager.deleteAccPopUpTitleTextStyle,
               actionsAlignment: MainAxisAlignment.spaceEvenly,
-              backgroundColor: ColorManager.darkGrey,
+              backgroundColor: ColorManager.background,
               title: const Text(
                 StringsManager.uSure,
                 textAlign: TextAlign.center,
@@ -143,7 +143,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     }
 
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       appBar: PreferredSize(
         preferredSize: Size(
           double.infinity,

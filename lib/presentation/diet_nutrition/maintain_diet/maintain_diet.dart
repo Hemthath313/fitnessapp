@@ -293,7 +293,7 @@ class _MaintainDietScreenState extends State<MaintainDietScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: ColorManager.black,
+          backgroundColor: ColorManager.background,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -401,7 +401,7 @@ class _MaintainDietScreenState extends State<MaintainDietScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       builder: (context) {
         return Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -437,7 +437,7 @@ class _MaintainDietScreenState extends State<MaintainDietScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: ColorManager.darkGrey, // Consistent dark theme
+      backgroundColor: ColorManager.background, // Consistent dark theme
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -494,9 +494,9 @@ class _MaintainDietScreenState extends State<MaintainDietScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       appBar: AppBar(
-          backgroundColor: ColorManager.black,
+          backgroundColor: ColorManager.background,
           title:  Text(
             'Maintain Diet Plan',
             style: TextStyle(color: ColorManager.white),
@@ -523,7 +523,7 @@ class _MaintainDietScreenState extends State<MaintainDietScreen> {
       //   label: const Text(
       //     'Complete All Meals',
       //     style:
-      //         TextStyle(color: ColorManager.black, fontWeight: FontWeight.bold),
+      //         TextStyle(color: ColorManager.background, fontWeight: FontWeight.bold),
       //   ),
       // ),
     );

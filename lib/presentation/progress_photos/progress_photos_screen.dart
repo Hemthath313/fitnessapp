@@ -34,10 +34,10 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: AppBar(
-        title: const Text('Progress Photos',
-            style: TextStyle(color: Colors.white)),
+        title: Text('Progress Photos',
+            style: TextStyle(color: ColorManager.textPrimary)),
         backgroundColor: ColorManager.background,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
         actions: [
           if (provider.allPhotos.length >= 2)
             IconButton(
@@ -174,7 +174,7 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
                   Text(
                     DateFormat('MMM dd, yyyy').format(photo.date),
                     style: TextStyle(
-                      color: Colors.white,
+                      color: ColorManager.textPrimary,
                       fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
                     ),
@@ -225,7 +225,7 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
           Text(
             'No Progress Photos Yet',
             style: TextStyle(
-              color: Colors.white,
+              color: ColorManager.textPrimary,
               fontSize: 20.sp,
               fontWeight: FontWeight.bold,
             ),
@@ -271,7 +271,7 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
                   Text(
                     DateFormat('MMMM dd, yyyy').format(photo.date),
                     style: TextStyle(
-                        color: Colors.white,
+                        color: ColorManager.textPrimary,
                         fontSize: 16.sp,
                         fontWeight: FontWeight.bold),
                   ),
@@ -302,9 +302,9 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
                       ),
                       TextButton.icon(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close, color: Colors.white),
-                        label: const Text('Close',
-                            style: TextStyle(color: Colors.white)),
+                        icon: Icon(Icons.close, color: ColorManager.textPrimary),
+                        label: Text('Close',
+                            style: TextStyle(color: ColorManager.textPrimary)),
                       ),
                     ],
                   ),
@@ -322,8 +322,8 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: ColorManager.surface,
-        title: const Text('Delete Photo?',
-            style: TextStyle(color: Colors.white)),
+        title: Text('Delete Photo?',
+            style: TextStyle(color: ColorManager.textPrimary)),
         content: Text(
             'This action cannot be undone. The photo will be permanently deleted.',
             style: TextStyle(color: ColorManager.textSecondary)),
@@ -352,7 +352,7 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete', style: TextStyle(color: Colors.white)),
+            child: Text('Delete', style: TextStyle(color: ColorManager.textPrimary)),
           ),
         ],
       ),

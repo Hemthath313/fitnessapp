@@ -1,17 +1,15 @@
-import 'package:fitness_app/presentation/banner_ads/banner_ad_service.dart';
-import 'package:fitness_app/presentation/custom_workouts/day_workout_session_page.dart';
-import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
-import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
-import 'package:fitness_app/presentation/workouts/widgets/workout_timer_widget.dart';
+import 'package:fitness_app/model/workout_log.dart';
+import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
+import 'package:fitness_app/services/workout_log_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
-import 'package:fitness_app/data/exercise_data.dart';
-import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class CustomWorkoutsPage extends StatefulWidget {
   const CustomWorkoutsPage({super.key});
@@ -21,498 +19,301 @@ class CustomWorkoutsPage extends StatefulWidget {
 }
 
 class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
-  // Map to order days correctly
-  final Map<String, int> _dayOrder = {
-    'Monday': 1,
-    'Tuesday': 2,
-    'Wednesday': 3,
-    'Thursday': 4,
-    'Friday': 5,
-    'Saturday': 6,
-    'Sunday': 7,
-  };
+  late DateTime _focusedDay;
+  DateTime? _selectedDay;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final workoutProvider =
-          Provider.of<WorkoutProvider>(context, listen: false);
-      workoutProvider.fetchAndSetWorkouts();
-    });
+    _focusedDay = DateTime.now();
+    _selectedDay = _focusedDay;
   }
 
-  void _deleteWeeklyPlan(WorkoutProvider provider) async {
-    // Show confirmation
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        backgroundColor: ColorManager.background,
-        title: const Text('Reset Weekly Plan?', style: TextStyle(color: Colors.white)),
-        content: const Text(
-          'This will delete all AI-generated exercises from your schedule. Grouped workouts (e.g. [Monday]...) will be removed.',
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(c, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(c, true),
-            child: const Text('Reset', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
+  // Normalize date to ignore time for calendar comparisons
+  DateTime _normalizeDate(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
 
-    if (confirm == true) {
-      final aiWorkouts = provider.allWorkouts.where((w) => w.name.startsWith('[')).toList();
-      for (var w in aiWorkouts) {
-        // Assuming provider has a way to delete by ID, specifically for allWorkouts
-        // The current provider method deleteWorkout checks 'workouts' collection, may need verify
-        // But for now we stick to what we have or just recreate the logic if needed
-        // The provider has `deleteAllWorkout` for "allWorkouts" collection usage
-        await provider.deleteAllWorkout(allWorkoutID: w.id);
-      }
-      provider.fetchAndSetWorkouts();
-    }
+  void _showWorkoutDetails(BuildContext context, List<WorkoutLog> dailyLogs) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: ColorManager.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.all(20.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Workouts on ${DateFormat('MMM d, yyyy').format(dailyLogs.first.date)}',
+                style: TextStyle(
+                  color: ColorManager.white,
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 16.h),
+              if (dailyLogs.isEmpty)
+                Text('No workouts logged.', style: TextStyle(color: ColorManager.textSecondary))
+              else
+                ...dailyLogs.map((log) => Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8.h),
+                  child: Row(
+                    children: [
+                      Icon(Icons.check_circle, color: ColorManager.primary, size: 20.sp),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              log.exerciseName,
+                              style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold, fontSize: 16.sp),
+                            ),
+                            Text(
+                              '${log.sets.length} Sets',
+                              style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+              SizedBox(height: 16.h),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final stats = Provider.of<StatisticsProvider>(context);
+
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: ColorManager.background,
       body: SafeArea(
         bottom: true,
-        child: Column(
-          children: [
-            // Header
-            Padding(
-              padding: EdgeInsets.all(SizeManager.s16.w),
-              child: Consumer<WorkoutProvider>(
-                builder: (context, provider, _) {
-                  final hasWeeklyPlan = provider.allWorkouts.any((w) => w.name.startsWith('['));
-                  
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                       Column(
-                         crossAxisAlignment: CrossAxisAlignment.start,
-                         children: [
-                           Text(
-                            hasWeeklyPlan ? 'Weekly Schedule' : 'My Workouts',
-                            style: TextStyle(
-                              color: ColorManager.white,
-                              fontSize: SizeManager.s24.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          if (hasWeeklyPlan)
-                            Text(
-                              'AI Generated Plan',
-                              style: TextStyle(
-                                color: ColorManager.gradientStart,
-                                fontSize: 12.sp,
-                              ),
-                            ),
-                         ],
-                       ),
-                      if (hasWeeklyPlan)
-                        IconButton(
-                          onPressed: () => _deleteWeeklyPlan(provider),
-                          icon: const Icon(Icons.delete_forever, color: Colors.red),
-                          tooltip: 'Reset Plan',
-                        )
-                      else 
-                        ElevatedButton.icon(
-                          onPressed: () => context.push(Routes.workoutGeneratorRoute),
-                          icon: const Icon(Icons.auto_awesome, color: Colors.white),
-                          label: const Text('AI Build', style: TextStyle(color: Colors.white)),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-                        ),
-                    ],
-                  );
-                }
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(SizeManager.s16.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Text(
+                'My Progress',
+                style: TextStyle(color: ColorManager.white, fontSize: SizeManager.s24.sp, fontWeight: FontWeight.bold),
               ),
-            ),
+              SizedBox(height: SizeManager.s4.h),
+              Text(
+                'Track your journey and analyze your data',
+                style: TextStyle(color: ColorManager.textSecondary, fontSize: SizeManager.s14.sp),
+              ),
+              SizedBox(height: SizeManager.s24.h),
 
-            // Main Listing
-            Expanded(
-              child: Consumer<WorkoutProvider>(
-                builder: (context, workoutProvider, _) {
-                  if (workoutProvider.allWorkouts.isEmpty) {
-                    return _buildEmptyState(context);
-                  }
+              // High-level Stats Row
+              Row(
+                children: [
+                  Expanded(child: _buildStatCard('Total Workouts', '${stats.totalWorkouts}', Icons.fitness_center_rounded, Colors.blue)),
+                  SizedBox(width: 16.w),
+                  Expanded(child: _buildStatCard('Current Streak', '${stats.currentStreak} Days', Icons.local_fire_department_rounded, Colors.orange)),
+                ],
+              ),
+              SizedBox(height: SizeManager.s32.h),
 
-                  // Group by Day
-                  final Map<String, List<dynamic>> groupedMap = {};
-                  final List<dynamic> otherWorkouts = [];
-
-                  for (var w in workoutProvider.allWorkouts) {
-                    // Check for [Day] pattern
-                    final regex = RegExp(r'^\[(\w+)\]');
-                    final match = regex.firstMatch(w.name);
-                    if (match != null) {
-                      final day = match.group(1)!;
-                      if (!groupedMap.containsKey(day)) groupedMap[day] = [];
-                      groupedMap[day]!.add(w);
-                    } else {
-                      otherWorkouts.add(w);
+              // Calendar Section
+              Text('Activity Calendar', style: TextStyle(color: ColorManager.white, fontSize: SizeManager.s18.sp, fontWeight: FontWeight.bold)),
+              SizedBox(height: SizeManager.s16.h),
+              StreamBuilder<List<WorkoutLog>>(
+                stream: WorkoutLogService().getLogs(),
+                builder: (context, snapshot) {
+                  final logs = snapshot.data ?? [];
+                  
+                  // Group logs by Date
+                  final Map<DateTime, List<WorkoutLog>> logsByDate = {};
+                  for (var log in logs) {
+                    final normalized = _normalizeDate(log.date);
+                    if (logsByDate[normalized] == null) {
+                      logsByDate[normalized] = [];
                     }
+                    logsByDate[normalized]!.add(log);
                   }
 
-                  // If no groups, just show list
-                  if (groupedMap.isEmpty) {
-                    return ListView.builder(
-                      itemCount: otherWorkouts.length,
-                      itemBuilder: (context, index) => _buildWorkoutCard(
-                          workout: otherWorkouts[index],
-                          onStart: () => _showWorkoutTimerDialog(context, otherWorkouts[index]),
-                          onEdit: () {}, 
-                          isGrouped: false),
-                    );
-                  }
-
-                  // Sort Days
-                  final sortedDays = groupedMap.keys.toList()
-                    ..sort((a, b) => (_dayOrder[a] ?? 99).compareTo(_dayOrder[b] ?? 99));
-
-                  return ListView(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    children: [
-                      ...sortedDays.map((day) {
-                        final workouts = groupedMap[day]!;
-                        return Container(
-                          margin: EdgeInsets.only(bottom: 16.h),
-                          decoration: BoxDecoration(
-                            color: ColorManager.surface,
-                            borderRadius: BorderRadius.circular(12.r),
-                            border: Border.all(color: Colors.white10),
-                          ),
-                          child: Theme(
-                            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                            child: ExpansionTile(
-                              initiallyExpanded: true,
-                              title: Row(
-                                children: [
-                                  Text(
-                                    day,
-                                    style: TextStyle(
-                                      color: ColorManager.primary,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18.sp,
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  ElevatedButton.icon(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => 
-                                            DayWorkoutSessionPage(
-                                              dayName: day,
-                                              workouts: workouts,
-                                            ),
-                                        ),
-                                      );
-                                    },
-                                    icon: Icon(Icons.play_arrow, size: 16.sp, color: Colors.white),
-                                    label: Text(
-                                      'Start Day', 
-                                      style: TextStyle(fontSize: 12.sp, color: Colors.white, fontWeight: FontWeight.bold)
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: ColorManager.gradientStart,
-                                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                                      minimumSize: Size.zero,
-                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              subtitle: Text(
-                                '${workouts.length} Exercises',
-                                style: TextStyle(color: Colors.white54, fontSize: 12.sp),
-                              ),
-                              children: workouts.map((w) => _buildWorkoutCard(
-                                workout: w,
-                                onStart: () => _showWorkoutTimerDialog(context, w),
-                                onEdit: () {},
-                                isGrouped: true,
-                              )).toList(),
-                            ),
-                          ),
-                        );
-                      }),
-                      if (otherWorkouts.isNotEmpty) ...[
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                          child: const Text('Other Workouts', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: ColorManager.surface,
+                      borderRadius: BorderRadius.circular(16.r),
+                      border: Border.all(color: ColorManager.divider),
+                    ),
+                    padding: EdgeInsets.all(8.w),
+                    child: TableCalendar(
+                      firstDay: DateTime.utc(2020, 1, 1),
+                      lastDay: DateTime.utc(2030, 12, 31),
+                      focusedDay: _focusedDay,
+                      selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                      onDaySelected: (selectedDay, focusedDay) {
+                        setState(() {
+                          _selectedDay = selectedDay;
+                          _focusedDay = focusedDay;
+                        });
+                        
+                        final normalizedSelected = _normalizeDate(selectedDay);
+                        if (logsByDate.containsKey(normalizedSelected) && logsByDate[normalizedSelected]!.isNotEmpty) {
+                          _showWorkoutDetails(context, logsByDate[normalizedSelected]!);
+                        }
+                      },
+                      calendarFormat: CalendarFormat.month,
+                      headerStyle: HeaderStyle(
+                        formatButtonVisible: false,
+                        titleCentered: true,
+                        titleTextStyle: TextStyle(color: ColorManager.textPrimary, fontSize: 16.sp, fontWeight: FontWeight.bold),
+                        leftChevronIcon: Icon(Icons.chevron_left, color: ColorManager.textPrimary),
+                        rightChevronIcon: Icon(Icons.chevron_right, color: ColorManager.textPrimary),
+                      ),
+                      daysOfWeekStyle: DaysOfWeekStyle(
+                        weekdayStyle: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
+                        weekendStyle: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
+                      ),
+                      calendarStyle: CalendarStyle(
+                        defaultTextStyle: TextStyle(color: ColorManager.textPrimary),
+                        weekendTextStyle: TextStyle(color: ColorManager.textPrimary),
+                        outsideTextStyle: TextStyle(color: ColorManager.textTertiary),
+                        todayDecoration: BoxDecoration(
+                          color: ColorManager.primary.withValues(alpha: 0.3),
+                          shape: BoxShape.circle,
                         ),
-                        ...otherWorkouts.map((w) => _buildWorkoutCard(
-                          workout: w,
-                          onStart: () => _showWorkoutTimerDialog(context, w),
-                          onEdit: () {},
-                          isGrouped: false,
-                        )),
-                      ]
-                    ],
+                        selectedDecoration: BoxDecoration(
+                          color: ColorManager.primary,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      calendarBuilders: CalendarBuilders(
+                        markerBuilder: (context, date, events) {
+                          if (events.isNotEmpty) {
+                            return Positioned(
+                              bottom: 6.h,
+                              child: Container(
+                                width: 6.w,
+                                height: 6.w,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.greenAccent,
+                                ),
+                              ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                      eventLoader: (day) {
+                        final normalized = _normalizeDate(day);
+                        return logsByDate[normalized] ?? [];
+                      },
+                    ),
                   );
                 },
               ),
-            ),
-            
-            const PremiumAwareBannerAd(pageName: 'workout', bottomMargin: 60.0),
-          ],
+
+              SizedBox(height: SizeManager.s32.h),
+
+              Text('Analytics & Logs', style: TextStyle(color: ColorManager.white, fontSize: SizeManager.s18.sp, fontWeight: FontWeight.bold)),
+              SizedBox(height: SizeManager.s16.h),
+
+              // Deep Dive Cards
+              _buildDeepDiveCard(
+                context,
+                title: 'Workout History',
+                subtitle: 'Review past logs, sets, and weights lifted.',
+                icon: Icons.history_toggle_off_rounded,
+                color: Colors.teal,
+                route: Routes.workoutHistoryRoute,
+              ),
+              SizedBox(height: SizeManager.s16.h),
+              _buildDeepDiveCard(
+                context,
+                title: 'Strength Analytics',
+                subtitle: 'Visualize your PRs and muscle group volume.',
+                icon: Icons.bar_chart_rounded,
+                color: Colors.deepPurple,
+                route: Routes.strengthAnalyticsRoute,
+              ),
+              SizedBox(height: SizeManager.s16.h),
+              _buildDeepDiveCard(
+                context,
+                title: '30-Day Transformation',
+                subtitle: 'Compare progress photos over time.',
+                icon: Icons.auto_graph_rounded,
+                color: Colors.pink,
+                route: Routes.sixPackChallengeRoute,
+              ),
+              SizedBox(height: 80.h),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.calendar_month_rounded, size: 80.sp, color: Colors.purple.withOpacity(0.5)),
-          SizedBox(height: 20.h),
-          Text(
-            'No Weekly Plan',
-            style: TextStyle(color: Colors.white, fontSize: 20.sp, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 10.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 40.w),
-            child: const Text(
-              'Use AI to generate a full weekly schedule instantly.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white70),
-            ),
-          ),
-          SizedBox(height: 24.h),
-          ElevatedButton.icon(
-            onPressed: () => context.push(Routes.workoutGeneratorRoute),
-            icon: const Icon(Icons.auto_awesome, color: Colors.white),
-            label: const Text('Generate Plan', style: TextStyle(color: Colors.white)),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.purple,
-              padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 16.h),
-            ),
-          ),
-          TextButton.icon(
-             onPressed: () => context.push(Routes.addNewExerciseRoute),
-             icon: const Icon(Icons.add, color: Colors.grey),
-             label: const Text('Manual Entry', style: TextStyle(color: Colors.grey)),
-          )
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWorkoutCard({
-    required dynamic workout,
-    required VoidCallback onStart,
-    required VoidCallback onEdit,
-    required bool isGrouped,
-  }) {
-    // If grouped, remove the [Day] prefix from display name
-    String displayName = workout.name;
-    if (isGrouped) {
-      final regex = RegExp(r'^\[\w+\]\s*');
-      displayName = displayName.replaceAll(regex, '');
-    }
-
+  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
     return Container(
-      margin:
-          EdgeInsets.symmetric(vertical: 4.h, horizontal: isGrouped ? 0 : 0),
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-      decoration: isGrouped
-          ? null
-          : BoxDecoration(
-              color: ColorManager.black87,
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: Colors.white10),
-            ),
-      child: Row(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: ColorManager.surface,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: EdgeInsets.all(8.w),
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.fitness_center, color: Colors.blue, size: 16.sp),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  displayName,
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16.sp),
-                ),
-                Text(
-                  '${workout.setNumber} sets × ${workout.repNumber} reps',
-                  style: TextStyle(color: Colors.white54, fontSize: 12.sp),
-                ),
-              ],
-            ),
-          ),
-          // Actions: Play and Delete
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                onPressed: onStart,
-                icon: const Icon(Icons.play_circle_fill,
-                    color: ColorManager.gradientStart),
-                iconSize: 32.sp,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-              SizedBox(width: 12.w),
-              IconButton(
-                onPressed: () async {
-                   final confirm = await showDialog<bool>(
-                    context: context, // Use the page context, since this method is in the State
-                    builder: (c) => AlertDialog(
-                      backgroundColor: ColorManager.background,
-                      title: const Text('Delete Workout?', style: TextStyle(color: Colors.white)),
-                      content: Text('Delete "$displayName"?', style: const TextStyle(color: Colors.white70)),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(c, false),
-                          child: const Text('Cancel'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(c, true),
-                          child: const Text('Delete', style: TextStyle(color: Colors.red)),
-                        ),
-                      ],
-                    ),
-                  );
-                  
-                  if (confirm == true) {
-                    await Provider.of<WorkoutProvider>(context, listen: false)
-                        .deleteAllWorkout(allWorkoutID: workout.id);
-                        
-                    // Manually trigger fetch to update UI immediately
-                    if (context.mounted) {
-                      Provider.of<WorkoutProvider>(context, listen: false).fetchAndSetWorkouts();
-                    }
-                  }
-                },
-                icon: const Icon(Icons.delete_outline, color: Colors.grey),
-                iconSize: 20.sp,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ],
-          ),
+          Icon(icon, color: color, size: 24.sp),
+          SizedBox(height: 12.h),
+          Text(value, style: TextStyle(color: ColorManager.white, fontSize: 20.sp, fontWeight: FontWeight.bold)),
+          SizedBox(height: 4.h),
+          Text(title, style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),
         ],
       ),
     );
   }
 
-  void _showWorkoutTimerDialog(BuildContext context, dynamic workout) {
-     // Same implementation as before
-     showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        // Find exercise video logic
-        String displayName = workout.name;
-        final regex = RegExp(r'^\[\w+\]\s*');
-        displayName = displayName.replaceAll(regex, '');
-        final cleanName = displayName.trim();
-        
-        Exercise? foundExercise;
-        try {
-          final allExercises = [
-            ...ExerciseData.chest,
-            ...ExerciseData.back,
-            ...ExerciseData.shoulders,
-            ...ExerciseData.biceps,
-            ...ExerciseData.triceps,
-            ...ExerciseData.legs,
-            ...ExerciseData.abs,
-            ...ExerciseData.cardio,
-          ];
-          foundExercise = allExercises.firstWhere(
-            (e) => e.name.toLowerCase() == cleanName.toLowerCase(),
-          );
-        } catch (_) {}
-
-        return AlertDialog(
-          backgroundColor: ColorManager.darkGrey,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(SizeManager.s20.r),
-          ),
-          contentPadding: EdgeInsets.zero,
-          title: Row(
-            children: [
-              Icon(Icons.timer, color: ColorManager.limerGreen2),
-              SizedBox(width: SizeManager.s8.w),
-              Expanded(
-                child: Text(
-                  '${workout.name} Timer',
-                  style: TextStyle(
-                    color: ColorManager.white,
-                    fontSize: SizeManager.s20.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          content: Container(
-            width: SizeManager.s300.w,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (foundExercise != null && foundExercise.videoPath.isNotEmpty)
-                  ClipRRect(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(SizeManager.s20.r)),
-                    child: ExerciseVideoPlayer(
-                      videoPath: foundExercise.videoPath,
-                      height: 200.h,
-                      autoPlay: true,
-                    ),
-                  )
-                else 
-                   Padding(
-                     padding: EdgeInsets.symmetric(vertical: 20.h),
-                     child: Icon(Icons.fitness_center, size: 40.sp, color: ColorManager.primary),
-                   ),
-                
-                Padding(
-                  padding: EdgeInsets.all(16.w),
-                  child: WorkoutTimerWidget(
-                    isRestTimer: false,
-                    initialMinutes: 0, 
-                  ),
-                ),
-              ],
+  Widget _buildDeepDiveCard(BuildContext context, {required String title, required String subtitle, required IconData icon, required Color color, required String route}) {
+    return InkWell(
+      onTap: () => context.push(route),
+      borderRadius: BorderRadius.circular(16.r),
+      child: Container(
+        padding: EdgeInsets.all(20.w),
+        decoration: BoxDecoration(
+          color: ColorManager.surface,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
+              child: Icon(icon, color: color, size: 28.sp),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                'Close',
-                style: TextStyle(color: ColorManager.white70),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: TextStyle(color: ColorManager.white, fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 4.h),
+                  Text(subtitle, style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),
+                ],
               ),
             ),
+            Icon(Icons.chevron_right, color: ColorManager.textTertiary),
           ],
-        );
-      }
+        ),
+      ),
     );
-
   }
 }

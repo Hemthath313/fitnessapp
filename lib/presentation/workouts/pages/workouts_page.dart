@@ -109,6 +109,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                                   repNumber: workout.repNumber,
                                   setNumber: workout.setNumber,
                                   dateTime: workout.dateTime,
+                                  context: context,
                                 );
 
                                 workoutsProvider.deleteWorkout(
@@ -183,7 +184,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
         return Container(
           height: MediaQuery.of(context).size.height * 0.9,
           decoration: BoxDecoration(
-            color: ColorManager.black,
+            color: ColorManager.background,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
           ),
           child: Column(
@@ -193,7 +194,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white30,
+                  color: ColorManager.divider,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -251,7 +252,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
   Widget _buildTitle(String name) => Text(
         name,
         style: TextStyle(
-          color: Colors.white,
+          color: ColorManager.textPrimary,
           fontSize: 28.sp,
           fontWeight: FontWeight.bold,
         ),
@@ -266,7 +267,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
         child: Text(
           desc,
           style: TextStyle(
-            color: Colors.white70,
+            color: ColorManager.textSecondary,
             fontSize: 16.sp,
             height: 1.6,
           ),
@@ -352,14 +353,14 @@ class _WorkoutPageState extends State<WorkoutPage> {
               Icon(icon, color: ColorManager.primary, size: 20.sp),
               SizedBox(width: 8.w),
               Text(label,
-                  style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
+                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),
             ],
           ),
           SizedBox(height: 8.h),
           Text(
             value,
             style: TextStyle(
-              color: Colors.white,
+              color: ColorManager.textPrimary,
               fontSize: 16.sp,
               fontWeight: FontWeight.bold,
             ),

@@ -3,6 +3,7 @@ import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fitness_app/presentation/in_app_purchases/premimum_screen.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
+import 'package:fitness_app/model/workout_model.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter/material.dart';
@@ -190,6 +191,8 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
         builder: (c) => const Center(child: CircularProgressIndicator()),
       );
 
+      final List<WorkoutModel> workoutsToSave = [];
+
       for (var dayPlan in _generatedWeek) {
         final dayName = dayPlan['day'] ?? 'Day';
         final exercises = dayPlan['exercises'] as List<dynamic>? ?? [];
@@ -203,14 +206,21 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
           if (reps.isEmpty) reps = "10";
           if (reps.length > 2) reps = reps.substring(0,2); // handle "10-12" -> "10"
 
-          await provider.addNewWorkout(
-            name: savedName,
-            repNumber: int.tryParse(reps) ?? 10,
-            setNumber: int.tryParse(exercise['sets'].toString()) ?? 3,
-            dateTime: now,
+          workoutsToSave.add(
+            WorkoutModel(
+              id: '',
+              name: savedName,
+              repNumber: int.tryParse(reps) ?? 10,
+              setNumber: int.tryParse(exercise['sets'].toString()) ?? 3,
+              dateTime: now,
+            ),
           );
           count++;
         }
+      }
+
+      if (workoutsToSave.isNotEmpty) {
+        await provider.addNewWorkouts(workoutsToSave);
       }
 
       await provider.fetchAndSetWorkouts();
@@ -219,8 +229,20 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
         Navigator.pop(context); // Pop dialog
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Saved $count exercises to My Workouts!'),
-            backgroundColor: Colors.green,
+            content: Text(
+              'Saved $count exercises to My Workouts!',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            backgroundColor: ColorManager.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            margin: EdgeInsets.all(16.w),
           ),
         );
       }
@@ -228,7 +250,22 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving: $e')),
+          SnackBar(
+            content: Text(
+              'Error saving: $e',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            backgroundColor: ColorManager.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            margin: EdgeInsets.all(16.w),
+          ),
         );
       }
     } finally {
@@ -249,7 +286,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
           children: [
             Text(
               'Your Weekly Split',
-              style: TextStyle(color: Colors.white, fontSize: 20.sp, fontWeight: FontWeight.bold),
+              style: TextStyle(color: ColorManager.textPrimary, fontSize: 20.sp, fontWeight: FontWeight.bold),
             ),
             TextButton.icon(
               onPressed: _isSaving ? null : _saveAllWorkouts,
@@ -269,9 +306,9 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: AppBar(
-        title: const Text('AI Weekly Coach', style: TextStyle(color: Colors.white)),
+        title: Text('AI Weekly Coach', style: TextStyle(color: ColorManager.textPrimary)),
         backgroundColor: ColorManager.background,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(SizeManager.s16.w),
@@ -294,14 +331,14 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2),
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                     )
                   : Text(
                       'GENERATE WEEKLY PLAN',
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: Colors.white,
                       ),
                     ),
             ),
@@ -349,7 +386,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 12.w),
           decoration: BoxDecoration(
-            color: Colors.black26,
+            color: ColorManager.surfaceDark,
             borderRadius: BorderRadius.circular(8.r),
           ),
           child: DropdownButtonHideUnderline(
@@ -357,7 +394,8 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
               value: value,
               isExpanded: true,
               dropdownColor: ColorManager.surface,
-              style: TextStyle(color: Colors.white, fontSize: 16.sp),
+              iconEnabledColor: ColorManager.textPrimary,
+              style: TextStyle(color: ColorManager.textPrimary, fontSize: 16.sp),
               items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
               onChanged: onChanged,
             ),
@@ -373,7 +411,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
       child: ExpansionTile(
-        backgroundColor: Colors.white.withOpacity(0.05),
+        backgroundColor: ColorManager.surface,
         collapsedBackgroundColor: ColorManager.surface,
         collapsedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
@@ -383,7 +421,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
         ),
         subtitle: Text(
           dayPlan['focus'] ?? 'Workout',
-          style: TextStyle(color: Colors.white70, fontSize: 14.sp),
+          style: TextStyle(color: ColorManager.textSecondary, fontSize: 14.sp),
         ),
         children: exercises.map((e) => ListTile(
           dense: true,
@@ -391,13 +429,13 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
           leading: Icon(Icons.play_circle_fill, color: ColorManager.primary, size: 24.sp),
           title: Text(
             e['name'],
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold),
           ),
           subtitle: Text(
             e['description'] ?? '',
              maxLines: 1,
              overflow: TextOverflow.ellipsis,
-             style: TextStyle(color: Colors.white54, fontSize: 12.sp),
+             style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
           ),
           trailing: Text(
             '${e['sets']}x${e['reps']}',
@@ -430,7 +468,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.9,
         decoration: BoxDecoration(
-          color: ColorManager.black,
+          color: ColorManager.background,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
         ),
         child: Column(
@@ -441,7 +479,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white30,
+                color: ColorManager.divider,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -480,7 +518,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                     Text(
                       exercise.name,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: ColorManager.textPrimary,
                         fontSize: 28.sp,
                         fontWeight: FontWeight.bold,
                       ),
@@ -497,7 +535,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                       child: Text(
                         exercise.description,
                         style: TextStyle(
-                          color: Colors.white70,
+                          color: ColorManager.textSecondary,
                           fontSize: 16.sp,
                           height: 1.6,
                         ),
@@ -595,7 +633,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                               child: Text(
                                 entry.value,
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: ColorManager.textPrimary,
                                   fontSize: 15.sp,
                                   height: 1.5,
                                 ),
@@ -665,7 +703,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
               Text(
                 label,
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: ColorManager.textSecondary,
                   fontSize: 12.sp,
                 ),
               ),
@@ -675,7 +713,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
           Text(
             value,
             style: TextStyle(
-              color: Colors.white,
+              color: ColorManager.textPrimary,
               fontSize: 16.sp,
               fontWeight: FontWeight.bold,
             ),

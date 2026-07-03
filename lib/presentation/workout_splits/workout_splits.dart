@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fitness_app/model/workout_split.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart'; // For vibration
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class WorkoutSplitListPage extends StatelessWidget {
   final List<WorkoutSplit> workoutSplits;
@@ -36,12 +37,12 @@ class WorkoutSplitListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
+        title: Text(
           'Workout Splits',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: ColorManager.textPrimary),
         ),
-        backgroundColor: ColorManager.darkGrey,
+        backgroundColor: ColorManager.background,
       ),
       body: Column(
         children: [
@@ -51,7 +52,7 @@ class WorkoutSplitListPage extends StatelessWidget {
               '"Push yourself because no one else is going to do it for you."',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white,
+                color: ColorManager.textPrimary,
                 fontSize: 16,
                 fontStyle: FontStyle.italic,
               ),
@@ -63,60 +64,60 @@ class WorkoutSplitListPage extends StatelessWidget {
               itemBuilder: (context, index) {
                 final split = workoutSplits[index];
                 return Card(
-                  elevation: 6,
-                  margin: const EdgeInsets.all(10),
+                  elevation: 3,
+                  margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(16.r),
+                    side: BorderSide(color: ColorManager.divider),
                   ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.black87, Colors.black54],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                  color: ColorManager.surface,
+                  child: ListTile(
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                    leading: Container(
+                      padding: EdgeInsets.all(8.w),
+                      decoration: BoxDecoration(
+                        color: ColorManager.primary.withOpacity(0.1),
+                        shape: BoxShape.circle,
                       ),
-                      borderRadius: BorderRadius.circular(15),
+                      child: Icon(Icons.fitness_center_rounded, color: ColorManager.primary, size: 24.sp),
                     ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(15),
-                      leading: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        // child: Image.asset(
-                        //   split.imagePath,
-                        //   width: 50,
-                        //   height: 50,
-                        //   fit: BoxFit.cover,
-                        // ),
+                    title: Text(
+                      split.name,
+                      style: TextStyle(
+                        color: ColorManager.textPrimary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18.sp,
                       ),
-                      title: Text(
-                        split.name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      subtitle: Text(
+                    ),
+                    subtitle: Padding(
+                      padding: EdgeInsets.only(top: 4.h),
+                      child: Text(
                         split.description,
-                        style: const TextStyle(color: Colors.white70),
+                        style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp),
                       ),
-                      trailing: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // CircularProgressIndicator(
-                          //   value: split.progress / 100,
-                          //   backgroundColor: Colors.grey,
-                          //   color: Colors.greenAccent,
-                          // ),
-                          const SizedBox(height: 5),
-                          Text(
-                            '${split.recommendedDays} days/week',
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                        ],
-                      ),
-                      onTap: () => _navigateToPage(context, index),
                     ),
+                    trailing: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '${split.recommendedDays}',
+                          style: TextStyle(
+                            color: ColorManager.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18.sp,
+                          ),
+                        ),
+                        Text(
+                          'days/wk',
+                          style: TextStyle(
+                            color: ColorManager.textTertiary,
+                            fontSize: 10.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                    onTap: () => _navigateToPage(context, index),
                   ),
                 );
               },
@@ -124,7 +125,7 @@ class WorkoutSplitListPage extends StatelessWidget {
           ),
         ],
       ),
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
     );
   }
 }

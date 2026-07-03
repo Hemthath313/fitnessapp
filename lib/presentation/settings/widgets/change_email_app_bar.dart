@@ -13,7 +13,7 @@ class ChangeEmailPageAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: ColorManager.darkGrey,
+      backgroundColor: ColorManager.background,
       elevation: SizeManager.s0,
       leading: Padding(
         padding: const EdgeInsets.only(left: PaddingManager.p12),

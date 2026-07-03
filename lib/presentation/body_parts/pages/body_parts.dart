@@ -61,13 +61,13 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorManager.black,
+      backgroundColor: ColorManager.background,
       appBar: AppBar(
-        iconTheme: IconThemeData(color: ColorManager.white),
-        backgroundColor: ColorManager.black,
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
+        backgroundColor: ColorManager.background,
         title: Text(
           'Select a Body Part',
-          style: TextStyle(color: ColorManager.white),
+          style: TextStyle(color: ColorManager.textPrimary),
         ),
         centerTitle: true,
       ),

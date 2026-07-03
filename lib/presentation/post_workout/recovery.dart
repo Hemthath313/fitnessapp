@@ -13,9 +13,9 @@ class PostWorkoutRecoveryPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('Pain Relief & Mobility',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        iconTheme: IconThemeData(color: ColorManager.textPrimary),
+        title: Text('Pain Relief & Mobility',
+            style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -27,7 +27,7 @@ class PostWorkoutRecoveryPage extends StatelessWidget {
               child: Text(
                 'Where does it hurt?',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: ColorManager.textPrimary,
                   fontSize: 24.sp,
                   fontWeight: FontWeight.bold,
                 ),
@@ -81,7 +81,7 @@ class _PainZoneCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: ColorManager.surface,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: ColorManager.divider),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -98,14 +98,14 @@ class _PainZoneCard extends StatelessWidget {
           title: Text(
             title,
             style: TextStyle(
-              color: Colors.white,
+              color: ColorManager.textPrimary,
               fontSize: 18.sp,
               fontWeight: FontWeight.bold,
             ),
           ),
           subtitle: Text(
             subtitle,
-            style: TextStyle(color: Colors.white70, fontSize: 14.sp),
+            style: TextStyle(color: ColorManager.textSecondary, fontSize: 14.sp),
           ),
           children: routines.map((item) {
             return _StretchTile(name: item['name'], duration: item['duration']);
@@ -190,7 +190,7 @@ class _StretchTileState extends State<_StretchTile> {
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
       padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: ColorManager.surface,
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Row(
@@ -212,7 +212,7 @@ class _StretchTileState extends State<_StretchTile> {
                   child: Text(
                     _remainingTime != null ? '${_remainingTime}s' : '${widget.duration}s',
                     style: TextStyle(
-                      color: Colors.white, 
+                      color: ColorManager.textPrimary, 
                       fontSize: 12.sp, 
                       fontWeight: FontWeight.bold
                     ),
@@ -229,14 +229,14 @@ class _StretchTileState extends State<_StretchTile> {
                 Text(
                   widget.name,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: ColorManager.textPrimary,
                     fontWeight: FontWeight.w600,
                     fontSize: 16.sp,
                   ),
                 ),
                 Text(
                   'Duration: ${widget.duration}s',
-                  style: TextStyle(color: Colors.white54, fontSize: 12.sp),
+                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                 ),
               ],
             ),

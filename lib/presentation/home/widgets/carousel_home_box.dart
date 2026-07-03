@@ -35,7 +35,7 @@ class CarouselHomeBox extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: ColorManager.black,
+                    color: ColorManager.background,
                     blurRadius: 5,
                     spreadRadius: 1,
                     offset: Offset(4, 4),

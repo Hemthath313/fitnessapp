@@ -41,7 +41,7 @@ class MealWidget extends StatelessWidget {
       ),
       child: SwipeableTile(
         key: Key(id), // Unique key for the SwipeableTile
-        color: ColorManager.black87,
+        color: ColorManager.surfaceDark,
         swipeThreshold: 0.2,
         direction: SwipeDirection.endToStart, // Swipe left to delete
         onSwiped: (direction) {
@@ -74,7 +74,7 @@ class MealWidget extends StatelessWidget {
           width: deviceWidth,
           height: SizeManager.s150.h,
           decoration: BoxDecoration(
-            color: ColorManager.black87,
+            color: ColorManager.surfaceDark,
             border: Border(
               bottom: BorderSide(
                 color: ColorManager.limerGreen2,
