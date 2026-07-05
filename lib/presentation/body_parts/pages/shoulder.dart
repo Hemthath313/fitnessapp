@@ -270,6 +270,141 @@ class _ShoulderExercisesPageState extends State<ShoulderExercisesPage> {
         'Keep your core engaged and maintain good posture',
       ],
     ),
+    ShoulderExercise(
+      name: 'EZ Barbell Antigravity Press',
+      videoPath: 'assets/videos/shoulder/shoulder_Ez_barbell_antigravity_press.mp4',
+      description:
+          'Lie face down on a bench and press an EZ barbell overhead. Highly effective for isolating the shoulders and upper back without spinal load.',
+      target: 'Shoulders, Upper Back',
+      equipment: 'EZ Barbell, Bench',
+      difficulty: 'Advanced',
+      setsReps: '3 sets × 8-12 reps',
+      instructions: [
+        'Lie face down on a flat or incline bench.',
+        'Hold the EZ barbell overhand, elbows bent at 90 degrees.',
+        'Press the bar straight forward/overhead in line with your torso.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Resistance Band Standing Rear Delt Row',
+      videoPath: 'assets/videos/shoulder/shoulder_band_standing _rear_delt row.mp4',
+      description:
+          'Target your rear deltoids and upper back standing using a resistance band. Perfect for posture correction and rotator cuff health.',
+      target: 'Shoulders (Rear Delts), Upper Back',
+      equipment: 'Resistance Band',
+      difficulty: 'Beginner',
+      setsReps: '3 sets × 12-15 reps',
+      instructions: [
+        'Anchor band at chest height, stand holding band with arms extended.',
+        'Pull elbows back and out wide, squeezing rear delts.',
+        'Return slowly to starting stretch.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Barbell Wide Grip Upright Row',
+      videoPath: 'assets/videos/shoulder/shoulder_barbell_upright_row(wide-grip).mp4',
+      description:
+          'Upright rowing movement performed with a wide barbell grip to focus the load onto the lateral deltoids rather than the traps.',
+      target: 'Shoulders (Lateral Delts), Traps',
+      equipment: 'Barbell',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 10-12 reps',
+      instructions: [
+        'Stand holding barbell with a wide overhand grip.',
+        'Pull the bar straight up to chest height, keeping elbows high.',
+        'Lower slowly with control.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Cable Front Raise',
+      videoPath: 'assets/videos/shoulder/shoulder_cable_frontraise.mp4',
+      description:
+          'Provides constant tension throughout the entire movement to isolate the anterior (front) deltoids.',
+      target: 'Shoulders (Anterior Delts)',
+      equipment: 'Cable Machine',
+      difficulty: 'Beginner',
+      setsReps: '3 sets × 12-15 reps',
+      instructions: [
+        'Stand facing away from cable machine, grab handle between legs.',
+        'Raise arm forward until parallel to floor.',
+        'Lower under control, keeping tension.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Cable Lateral Raise',
+      videoPath: 'assets/videos/shoulder/shoulder_cable_lateral_raise.mp4',
+      description:
+          'Cable lateral raise targets the lateral deltoids with constant resistance from bottom to top, maximizing shoulder width.',
+      target: 'Shoulders (Lateral Delts)',
+      equipment: 'Cable Machine',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 12-15 reps',
+      instructions: [
+        'Stand next to cable machine, grab handle with opposite hand.',
+        'Raise arm out to the side in a smooth arc to shoulder level.',
+        'Lower slowly against cable tension.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Dumbbell Alternating Press',
+      videoPath: 'assets/videos/shoulder/shoulder_dumbell_alternative_press.mp4',
+      description:
+          'Alternating overhead press that allows you to focus on the stability and drive of each shoulder independently.',
+      target: 'Shoulders, Triceps',
+      equipment: 'Dumbbells',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 10 reps per arm',
+      instructions: [
+        'Hold dumbbells at shoulders.',
+        'Press one dumbbell overhead to full extension while keeping the other stationary.',
+        'Lower it and repeat with the other arm.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Dumbbell Lateral Raises (Alt)',
+      videoPath: 'assets/videos/shoulder/shoulder_dumbell_lateral_raises.mp4',
+      description:
+          'Alternative high-definition demonstration of the standing dumbbell lateral raise to build shoulder caps.',
+      target: 'Shoulders (Lateral Delts)',
+      equipment: 'Dumbbells',
+      difficulty: 'Beginner',
+      setsReps: '3 sets × 12-15 reps',
+      instructions: [
+        'Stand holding dumbbells at your sides.',
+        'Raise arms out to sides in an arc until parallel to floor.',
+        'Lower slowly with control.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Dumbbell Seated Front Raise (Alt)',
+      videoPath: 'assets/videos/shoulder/shoulder_dumbell_seated_frontraise.mp4',
+      description:
+          'Alternative high-definition demonstration of the seated dumbbell front raise, isolating the anterior delts.',
+      target: 'Shoulders (Anterior Delts)',
+      equipment: 'Dumbbells, Bench',
+      difficulty: 'Beginner',
+      setsReps: '3 sets × 12-15 reps',
+      instructions: [
+        'Sit flat on bench with dumbbells.',
+        'Raise weights forward to shoulder height with palms down.',
+        'Lower under control.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Lever Seated Reverse Fly',
+      videoPath: 'assets/videos/shoulder/shoulder_lever_seated_reverse_fly.mp4',
+      description:
+          'Machine reverse fly to fully isolate the posterior deltoids and upper back muscles safely and effectively.',
+      target: 'Shoulders (Rear Delts), Rhomboids',
+      equipment: 'Reverse Fly Machine',
+      difficulty: 'Beginner',
+      setsReps: '3 sets × 12-15 reps',
+      instructions: [
+        'Sit facing the pad, grip handles.',
+        'Pull arms straight back in a wide arc, squeezing rear delts.',
+        'Return slowly to starting point.',
+      ],
+    ),
   ];
 
   @override

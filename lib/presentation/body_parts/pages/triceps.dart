@@ -270,6 +270,126 @@ class _TricepsExercisesPageState extends State<TricepsExercisesPage> {
         'Return slowly to starting position',
       ],
     ),
+    TricepsExercise(
+      name: 'Bench Dips',
+      videoPath: 'assets/videos/triceps/triceps_bench_dips.mp4',
+      description:
+          'A classic bodyweight movement targeting the triceps, chest, and shoulders. Highly effective for building arms without equipment.',
+      target: 'Triceps, Front Delts',
+      equipment: 'Bench',
+      difficulty: 'Beginner',
+      setsReps: '3 sets × 12-15 reps',
+      instructions: [
+        'Place hands on the edge of the bench, feet extended forward.',
+        'Lower your hips by bending at the elbows until they form a 90-degree angle.',
+        'Press through your palms to return to the starting position.',
+      ],
+    ),
+    TricepsExercise(
+      name: 'Cable Rope Pushdown',
+      videoPath: 'assets/videos/triceps/triceps_cable_pushdown_rope.mp4',
+      description:
+          'A variation of the cable pushdown using a rope attachment to allow a greater range of motion and flare at the bottom for lateral head activation.',
+      target: 'Triceps (Lateral Head)',
+      equipment: 'Cable Machine, Rope',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 12-15 reps',
+      instructions: [
+        'Attach rope to high pulley, stand close, elbow pinned.',
+        'Push hands down and flare them outward at the bottom.',
+        'Return slowly to chest level.',
+      ],
+    ),
+    TricepsExercise(
+      name: 'Dumbbell Close Grip Press',
+      videoPath: 'assets/videos/triceps/triceps_dumbell_closegrip_press.mp4',
+      description:
+          'A close grip chest press using dumbbells pressed together. Shifts the load away from the chest directly onto the triceps.',
+      target: 'Triceps, Inner Chest',
+      equipment: 'Dumbbells, Flat Bench',
+      difficulty: 'Intermediate',
+      setsReps: '4 sets × 10-12 reps',
+      instructions: [
+        'Lie on flat bench, hold dumbbells pressed against each other over chest.',
+        'Lower dumbbells slowly until they touch your lower chest.',
+        'Press straight up explosively, maintaining pressure between dumbbells.',
+      ],
+    ),
+    TricepsExercise(
+      name: 'Dumbbell Lying Alternate Triceps Extension',
+      videoPath: 'assets/videos/triceps/triceps_dumbell_lying_alternate_extension.mp4',
+      description:
+          'Also known as alternating skull crushers. Allows you to focus on the extension and contraction of each tricep independently.',
+      target: 'Triceps',
+      equipment: 'Dumbbells, Flat Bench',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 10-12 reps per arm',
+      instructions: [
+        'Lie on bench holding dumbbells overhead.',
+        'Lower one weight to the side of your head by bending at the elbow.',
+        'Extend back up, then repeat with the opposite arm.',
+      ],
+    ),
+    TricepsExercise(
+      name: 'Dumbbell Lying Triceps Extension',
+      videoPath: 'assets/videos/triceps/triceps_dumbell_lying_extension.mp4',
+      description:
+          'Skull crushers performed with dumbbells. Isolates the triceps and provides a deep stretch at the bottom without elbow strain.',
+      target: 'Triceps',
+      equipment: 'Dumbbells, Flat Bench',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 12 reps',
+      instructions: [
+        'Lie flat on bench, hold dumbbells straight up.',
+        'Bend elbows to lower weights near your ears.',
+        'Extend arms straight up, squeezing triceps.',
+      ],
+    ),
+    TricepsExercise(
+      name: 'Dumbbell Pronate Triceps Extension',
+      videoPath: 'assets/videos/triceps/triceps_dumbell_pronate_triceps_extension.mp4',
+      description:
+          'Triceps extension performed with a pronated (overhand) grip, shifting emphasis to target the lateral head of the triceps.',
+      target: 'Triceps (Lateral Head)',
+      equipment: 'Dumbbells, Bench',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 10-12 reps',
+      instructions: [
+        'Hold dumbbells overhand (palms facing away).',
+        'Lower weights towards forehead.',
+        'Contract triceps to extend arms fully.',
+      ],
+    ),
+    TricepsExercise(
+      name: 'Barbell Close Grip Bench Press',
+      videoPath: 'assets/videos/triceps/tricpes_barbell_close_grip_bench_press.mp4',
+      description:
+          'A compound movement that targets the triceps with heavy resistance. Hands are positioned shoulder-width apart to focus load on the arms.',
+      target: 'Triceps, Chest, Shoulders',
+      equipment: 'Barbell, Flat Bench',
+      difficulty: 'Intermediate',
+      setsReps: '4 sets × 8-12 reps',
+      instructions: [
+        'Lie on bench, grip bar at shoulder-width.',
+        'Lower bar slowly to mid-chest, keeping elbows close to your sides.',
+        'Press bar up explosively.',
+      ],
+    ),
+    TricepsExercise(
+      name: 'Close Grip Pushups (Alt)',
+      videoPath: 'assets/videos/triceps/triceps_close_grip_pushups.mp4',
+      description:
+          'An alternative high-definition demonstration of the close grip bodyweight pushup to maximize triceps development.',
+      target: 'Triceps, Chest',
+      equipment: 'Bodyweight',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 10-15 reps',
+      instructions: [
+        'Place hands close together on floor under chest.',
+        'Lower body until chest is close to floor.',
+        'Push straight up focusing on triceps extension.',
+      ],
+    ),
   ];
 
   @override
