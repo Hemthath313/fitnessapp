@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 
 class DayWorkoutSessionPage extends StatefulWidget {
@@ -799,6 +801,22 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
       // Save all session logs to Firestore!
       for (var log in _sessionLogs) {
         await logService.addLog(log);
+      }
+      
+      // Log to finishedWorkouts so it shows up in general logs and calendars
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('finishedWorkouts')
+            .doc(user.uid)
+            .collection('finishedWorkoutsData')
+            .add({
+          'name': widget.dayName,
+          'repNumber': 0,
+          'setNumber': _sessionLogs.length,
+          'dateTime': DateTime.now(),
+          'id': 'custom_${widget.dayName}',
+        });
       }
       
       // Update streak statistics!

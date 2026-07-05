@@ -8,12 +8,14 @@ class StatisticsProvider with ChangeNotifier {
   DateTime? _lastWorkoutDate;
   int _totalWorkouts = 0;
   List<String> _unlockedAchievements = [];
+  List<DateTime> _completedWorkoutDates = [];
 
   int get currentStreak => _currentStreak;
   int get longestStreak => _longestStreak;
   DateTime? get lastWorkoutDate => _lastWorkoutDate;
   int get totalWorkouts => _totalWorkouts;
   List<String> get unlockedAchievements => [..._unlockedAchievements];
+  List<DateTime> get completedWorkoutDates => _completedWorkoutDates;
 
   Future<void> loadStreakData() async {
     try {
@@ -54,6 +56,7 @@ class StatisticsProvider with ChangeNotifier {
         }
       }
 
+      await fetchCompletedWorkoutDates();
       notifyListeners();
     } catch (e) {
       print('Error loading streak data: $e');
@@ -111,9 +114,40 @@ class StatisticsProvider with ChangeNotifier {
       // Check for new achievements
       await _checkAchievements();
 
+      await fetchCompletedWorkoutDates();
       notifyListeners();
     } catch (e) {
       print('Error updating streak: $e');
+    }
+  }
+
+  Future<void> fetchCompletedWorkoutDates() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final snapshot = await FirebaseFirestore.instance
+          .collection('finishedWorkouts')
+          .doc(user.uid)
+          .collection('finishedWorkoutsData')
+          .get();
+
+      final List<DateTime> dates = [];
+      for (var doc in snapshot.docs) {
+        if (doc.data()['dateTime'] != null) {
+          final date = (doc.data()['dateTime'] as Timestamp).toDate();
+          dates.add(DateTime(date.year, date.month, date.day));
+        }
+      }
+
+      if (_lastWorkoutDate != null) {
+        dates.add(DateTime(_lastWorkoutDate!.year, _lastWorkoutDate!.month, _lastWorkoutDate!.day));
+      }
+
+      _completedWorkoutDates = dates.toSet().toList();
+      notifyListeners();
+    } catch (e) {
+      print('Error fetching completed workout dates: $e');
     }
   }
 

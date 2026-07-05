@@ -279,10 +279,23 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
     });
 
     try {
+      // Log to finishedWorkouts so it shows up in general logs and calendars
+      await FirebaseFirestore.instance
+          .collection('finishedWorkouts')
+          .doc(userId)
+          .collection('finishedWorkoutsData')
+          .add({
+        'name': 'Six-Pack Challenge Day ${widget.day}',
+        'repNumber': 0,
+        'setNumber': 3,
+        'dateTime': DateTime.now(),
+        'id': 'challenge_day_${widget.day}',
+      });
+
       final statisticsProvider = Provider.of<StatisticsProvider>(context, listen: false);
       await statisticsProvider.updateStreak();
     } catch (e) {
-      print('Error updating streak: $e');
+      print('Error updating streak or logging challenge: $e');
     }
 
     widget.onComplete();
