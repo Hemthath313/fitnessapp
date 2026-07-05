@@ -61,7 +61,7 @@ class ExerciseData {
     ),
     Exercise(
       name: 'Dumbbell Hammer Press',
-      videoPath: 'assets/videos/chest/chest_dumbell_hammer_press.mp4',
+      videoPath: 'assets/videos/chest/chest_dumbell_lying_hamme_press.mp4',
       description: 'Neutral grip press, easier on shoulders.',
       target: 'Chest, Triceps',
       equipment: 'Dumbbells, Bench',
@@ -78,6 +78,118 @@ class ExerciseData {
       difficulty: 'Intermediate',
       setsReps: '3 sets × 12-15 reps',
       instructions: ['Stand between cables, pull handles together in arc.'],
+    ),
+    Exercise(
+      name: 'Deep Pushups',
+      videoPath: 'assets/videos/chest/Chest_deep_pushups.mp4',
+      description: 'Bodyweight pushups with an extended range of motion for chest stretching.',
+      target: 'Chest, Shoulders, Triceps',
+      equipment: 'Bodyweight',
+      difficulty: 'Beginner',
+      setsReps: '3 sets × 10-15 reps',
+      instructions: [
+        'Place hands slightly wider than shoulders.',
+        'Lower body until chest is close to the floor.',
+        'Push back up to starting position.'
+      ],
+    ),
+    Exercise(
+      name: 'Resistance Band High Fly',
+      videoPath: 'assets/videos/chest/chest_band_high_fly.mp4',
+      description: 'Targets upper chest and inner chest using a high anchor resistance band.',
+      target: 'Upper Chest, Inner Chest',
+      equipment: 'Resistance Band',
+      difficulty: 'Beginner',
+      setsReps: '3 sets × 12-15 reps',
+      instructions: [
+        'Anchor band high behind you.',
+        'Pull hands forward and down in an arc.',
+        'Squeeze the chest at the bottom.'
+      ],
+    ),
+    Exercise(
+      name: 'Dumbbell Decline Fly (45 Degree)',
+      videoPath: 'assets/videos/chest/chest_dumbell_decline_fly_(45degree).mp4',
+      description: 'Focuses on the lower pectorals with an arc fly movement.',
+      target: 'Lower Chest',
+      equipment: 'Dumbbells, Decline Bench',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 10-12 reps',
+      instructions: [
+        'Lie on decline bench, dumbbells up.',
+        'Lower weights in wide arc to chest level.',
+        'Bring them back together squeezing chest.'
+      ],
+    ),
+    Exercise(
+      name: 'Dumbbell Fly',
+      videoPath: 'assets/videos/chest/chest_dumbell_fly.mp4',
+      description: 'Isolation exercise targeting chest fibers without triceps activation.',
+      target: 'Chest',
+      equipment: 'Dumbbells, Bench',
+      difficulty: 'Beginner',
+      setsReps: '3 sets × 12 reps',
+      instructions: [
+        'Lie on bench, dumbbells over chest.',
+        'Open arms in wide arc, keeping elbows slightly bent.',
+        'Squeeze chest to return weights to top.'
+      ],
+    ),
+    Exercise(
+      name: 'Incline Dumbbell Fly',
+      videoPath: 'assets/videos/chest/chest_incline_dumbell_fly.mp4',
+      description: 'Isolation movement targeting the upper pectorals.',
+      target: 'Upper Chest',
+      equipment: 'Dumbbells, Incline Bench',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 10-12 reps',
+      instructions: [
+        'Set bench to 30-45 degree incline.',
+        'Lower dumbbells in wide arc to sides.',
+        'Squeeze upper chest to return to start.'
+      ],
+    ),
+    Exercise(
+      name: 'Incline Dumbbell Press',
+      videoPath: 'assets/videos/chest/chest_incline_dumbell_press.mp4',
+      description: 'Compound movement to build mass in upper chest and shoulders.',
+      target: 'Upper Chest, Front Delts, Triceps',
+      equipment: 'Dumbbells, Incline Bench',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 8-12 reps',
+      instructions: [
+        'Sit on incline bench, dumbbells at shoulders.',
+        'Press weights straight up until arms extend.',
+        'Lower slowly to upper chest.'
+      ],
+    ),
+    Exercise(
+      name: 'Lever Chest Press',
+      videoPath: 'assets/videos/chest/chest_lever_chest_press.mp4',
+      description: 'Machine press for safe and guided chest muscle isolation.',
+      target: 'Chest, Triceps',
+      equipment: 'Chest Press Machine',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 10-12 reps',
+      instructions: [
+        'Adjust seat so handles are at chest level.',
+        'Press handles forward to full extension.',
+        'Return under control to starting point.'
+      ],
+    ),
+    Exercise(
+      name: 'Lever Pec Dec Fly',
+      videoPath: 'assets/videos/chest/chest_lever_peck_dec_fly.mp4',
+      description: 'Machine fly for targeted inner chest isolation.',
+      target: 'Chest, Inner Chest',
+      equipment: 'Pec Dec Machine',
+      difficulty: 'Beginner',
+      setsReps: '3 sets × 12-15 reps',
+      instructions: [
+        'Sit with back flat on pad, grip handles.',
+        'Pull arms together in front of chest.',
+        'Slowly return to start, feeling stretch.'
+      ],
     ),
   ];
 

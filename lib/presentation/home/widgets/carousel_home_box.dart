@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
-import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fitness_app/utils/managers/style_manager.dart';
 
 class CarouselHomeBox extends StatelessWidget {
   const CarouselHomeBox({
@@ -22,92 +20,111 @@ class CarouselHomeBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(PaddingManager.p12),
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: ColorManager.grey3),
-                color: ColorManager.grey3,
-                borderRadius: BorderRadius.circular(
-                  RadiusManager.r15.r,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18.r),
+          child: SizedBox(
+            width: deviceWidth,
+            height: 165.h,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Background image
+                Image.asset(
+                  image,
+                  fit: BoxFit.cover,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: ColorManager.background,
-                    blurRadius: 5,
-                    spreadRadius: 1,
-                    offset: Offset(4, 4),
+                // Strong gradient overlay — bottom 60% fades to dark
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.black.withOpacity(0.75),
+                        Colors.black.withOpacity(0.3),
+                        Colors.transparent,
+                      ],
+                      stops: const [0.0, 0.5, 1.0],
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                    ),
                   ),
-                  BoxShadow(
-                    color: ColorManager.darkGrey,
-                    blurRadius: 5,
-                    spreadRadius: 1,
-                    offset: Offset(-4, -4),
-                  ),
-                ],
-              ),
-              width: deviceWidth,
-              height: SizeManager.s250.h,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(
-                  RadiusManager.r15.r,
                 ),
-                child: Stack(
-                  children: [
-                    Image.asset(
-                      image,
-                      fit: BoxFit.cover,
-                      width: deviceWidth,
-                      height: SizeManager.s250.h,
-                    ),
-                    // Gradient Overlay
-                    Container(
-                      width: deviceWidth,
-                      height: SizeManager.s250.h,
-                      decoration: BoxDecoration(
-                        borderRadius:
-                            BorderRadius.circular(RadiusManager.r15.r),
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.black.withOpacity(0.6),
-                            Colors.transparent,
-                          ],
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                        ),
-                      ),
-                    ),
-                    // Centered Text with Padding
-                    Positioned(
-                      bottom: 20.h, // Adjust positioning
-                      left: 20.w,
-                      right: 20.w,
-                      child: Text(
-                        title,
-                        textAlign: TextAlign.center,
-                        style: StyleManager.homePageCarouselTitle.copyWith(
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              blurRadius: 5.0,
-                              color: Colors.black.withOpacity(0.7),
-                              offset: Offset(2, 2),
+                // Content at bottom
+                Positioned(
+                  bottom: 14.h,
+                  left: 16.w,
+                  right: 16.w,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Small category label
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                              decoration: BoxDecoration(
+                                color: ColorManager.primary.withOpacity(0.85),
+                                borderRadius: BorderRadius.circular(20.r),
+                              ),
+                              child: Text(
+                                'Challenge',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 6.h),
+                            // Main title
+                            Text(
+                              title,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.bold,
+                                height: 1.2,
+                                shadows: [
+                                  Shadow(
+                                    blurRadius: 8,
+                                    color: Colors.black.withOpacity(0.8),
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                  ],
+                      // Tap arrow
+                      Container(
+                        width: 32.w,
+                        height: 32.w,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white30, width: 1),
+                        ),
+                        child: Icon(
+                          Icons.arrow_forward_rounded,
+                          color: Colors.white,
+                          size: 16.sp,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 }
+

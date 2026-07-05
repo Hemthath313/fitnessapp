@@ -44,7 +44,6 @@ class _HomePageState extends State<HomePage> {
 
             // Quick Actions
             const QuickActionsWidget(),
-            SizedBox(height: SizeManager.s16.h),
 
             const HomePageTextSpacerWidget(
               title: StringsManager.challenges,

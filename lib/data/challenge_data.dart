@@ -131,11 +131,76 @@ class ChallengeData {
     return curriculum;
   }
 
-  static const ChallengeExercise weeklyFeaturedExercise = ChallengeExercise(
-    name: 'Cable Kneeling Crunch',
-    target: 'Upper Abs',
-    equipment: 'Cable Machine',
-    videoPath: 'assets/videos/abs/abs_cable_kneeling_crunch.mp4',
-    setsReps: '4 sets x 12-15 reps',
-  );
+  /// A pool of featured exercises that rotate automatically every week.
+  /// Uses ISO week number so every Monday a new exercise appears.
+  static final List<ChallengeExercise> _weeklyPool = [
+    const ChallengeExercise(
+      name: 'Cable Kneeling Crunch',
+      target: 'Upper Abs',
+      equipment: 'Cable Machine',
+      videoPath: 'assets/videos/abs/abs_cable_kneeling_crunch.mp4',
+      setsReps: '4 sets x 12-15 reps',
+    ),
+    const ChallengeExercise(
+      name: 'V-Up',
+      target: 'Upper & Lower Abs',
+      equipment: 'None',
+      videoPath: 'assets/videos/abs/abs_v-up.mp4',
+      setsReps: '4 sets x 12 reps',
+    ),
+    const ChallengeExercise(
+      name: 'Russian Twist',
+      target: 'Obliques',
+      equipment: 'None',
+      videoPath: 'assets/videos/abs/abs_air_twist_crunch.mp4',
+      setsReps: '3 sets x 20 reps each side',
+    ),
+    const ChallengeExercise(
+      name: 'Hanging Leg Raise',
+      target: 'Lower Abs',
+      equipment: 'Pull-up Bar',
+      videoPath: 'assets/videos/abs/abs_vertical_leg_raise.mp4',
+      setsReps: '4 sets x 10 reps',
+    ),
+    const ChallengeExercise(
+      name: 'Plank',
+      target: 'Core Stability',
+      equipment: 'None',
+      videoPath: 'assets/videos/abs/abs_plank.mp4',
+      setsReps: '4 sets x 60 seconds',
+    ),
+    const ChallengeExercise(
+      name: 'Bicycle Crunch',
+      target: 'Obliques & Abs',
+      equipment: 'None',
+      videoPath: 'assets/videos/abs/abs_air_twist_crunch.mp4',
+      setsReps: '3 sets x 20 reps',
+    ),
+    const ChallengeExercise(
+      name: 'Twisting Crunch',
+      target: 'Upper Abs & Obliques',
+      equipment: 'None',
+      videoPath: 'assets/videos/abs/abs_twisting_crunch.mp4',
+      setsReps: '4 sets x 15 reps',
+    ),
+    const ChallengeExercise(
+      name: 'Leg Raise',
+      target: 'Lower Abs',
+      equipment: 'None',
+      videoPath: 'assets/videos/abs/abs_vertical_leg_raise.mp4',
+      setsReps: '4 sets x 15 reps',
+    ),
+  ];
+
+  /// Returns the exercise for the current ISO week number.
+  /// Rotates through the pool automatically every Monday.
+  static ChallengeExercise get weeklyFeaturedExercise {
+    final now = DateTime.now();
+    // ISO week number: Jan 4 is always in week 1
+    final dayOfYear = int.parse(
+        '${now.difference(DateTime(now.year, 1, 1)).inDays + 1}');
+    final weekNumber = ((dayOfYear - now.weekday + 10) ~/ 7);
+    final index = weekNumber % _weeklyPool.length;
+    return _weeklyPool[index];
+  }
 }
