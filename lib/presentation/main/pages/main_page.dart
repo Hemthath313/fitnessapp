@@ -1,4 +1,3 @@
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
@@ -246,33 +245,6 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> bottomNavItems = [
-      Icon(
-        Icons.home_outlined,
-        color: isHomePage ? Colors.white : ColorManager.textTertiary,
-        size: SizeManager.s28,
-      ),
-      Icon(
-        Icons.fitness_center_rounded,
-        color: isExplorePage ? Colors.white : ColorManager.textTertiary,
-        size: SizeManager.s28,
-      ),
-      Icon(
-        Icons.auto_awesome_rounded,
-        color: isJournalPage ? Colors.white : ColorManager.textTertiary,
-        size: SizeManager.s28,
-      ),
-      Icon(
-        Icons.insights_rounded,
-        color: isProgressPage ? Colors.white : ColorManager.textTertiary,
-        size: SizeManager.s28,
-      ),
-      Icon(
-        Icons.person_outline,
-        color: isMorePage ? Colors.white : ColorManager.textTertiary,
-        size: SizeManager.s28,
-      ),
-    ];
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: appBar() != null
@@ -284,22 +256,43 @@ class _MainPageState extends State<MainPage> {
               child: appBar()!,
             )
           : null,
-      bottomNavigationBar: Container(
-        color: ColorManager.surface,
-        child: SafeArea(
-          bottom: true,
-          top: false,
-          minimum: EdgeInsets.zero,
-          child: CurvedNavigationBar(
-            height: 60,
-            color: ColorManager.surface,
-            buttonBackgroundColor: ColorManager.primary,
-            backgroundColor: Colors.transparent,
-            onTap: ontap,
-            index: _currentIndex,
-            items: bottomNavItems,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: ontap,
+        backgroundColor: ColorManager.surface,
+        indicatorColor: ColorManager.primary.withOpacity(0.15),
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        elevation: 0,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        animationDuration: const Duration(milliseconds: 400),
+        destinations: [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined, color: ColorManager.textTertiary),
+            selectedIcon: Icon(Icons.home_rounded, color: ColorManager.primary),
+            label: 'Home',
           ),
-        ),
+          NavigationDestination(
+            icon: Icon(Icons.fitness_center_outlined, color: ColorManager.textTertiary),
+            selectedIcon: Icon(Icons.fitness_center_rounded, color: ColorManager.primary),
+            label: 'Workouts',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.psychology_outlined, color: ColorManager.textTertiary),
+            selectedIcon: Icon(Icons.psychology_rounded, color: ColorManager.primary),
+            label: 'AI Hub',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.insights_outlined, color: ColorManager.textTertiary),
+            selectedIcon: Icon(Icons.insights_rounded, color: ColorManager.primary),
+            label: 'Progress',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline_rounded, color: ColorManager.textTertiary),
+            selectedIcon: Icon(Icons.person_rounded, color: ColorManager.primary),
+            label: 'Profile',
+          ),
+        ],
       ),
       body: SafeArea(
         top: false,

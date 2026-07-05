@@ -78,7 +78,7 @@ class _LegExercisesPageState extends State<LegExercisesPage> {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    '${legExercises.length} premium video workouts',
+                    'Premium video workouts',
                     style: TextStyle(
                       color: ColorManager.textSecondary,
                       fontSize: 16,
@@ -137,15 +137,15 @@ class _LegExercisesPageState extends State<LegExercisesPage> {
 
   Widget _buildExerciseCard(Exercise exercise, int index) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: ColorManager.limerGreen2.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
+            color: ColorManager.limerGreen2.withOpacity(0.05),
+            blurRadius: 8,
+            spreadRadius: 1,
           ),
         ],
       ),
@@ -153,128 +153,87 @@ class _LegExercisesPageState extends State<LegExercisesPage> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () => _showExerciseDetails(context, exercise),
-          borderRadius: BorderRadius.circular(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Video Preview
-              ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                child: Container(
-                  height: 220,
-                  width: double.infinity,
-                  color: ColorManager.surface,
-                  child: Stack(
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Video/Thumbnail preview
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: SizedBox(
+                    width: 110,
+                    height: 85,
+                    child: ExerciseVideoPlayer(
+                      videoPath: exercise.videoPath,
+                      height: 85,
+                      width: 110,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Exercise details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ExerciseVideoPlayer(
-                        videoPath: exercise.videoPath,
-                        height: 220,
-                        width: double.infinity,
-                      ),
-                      // Play button overlay
-                      Center(
-                        child: Container(
-                          padding: EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.black54,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.play_arrow,
-                            color: ColorManager.limerGreen2,
-                            size: 40,
-                          ),
+                      Text(
+                        exercise.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: ColorManager.textPrimary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      // Difficulty badge
-                      Positioned(
-                        top: 12,
-                        right: 12,
-                        child: Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: ColorManager.limerGreen2.withOpacity(0.9),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            exercise.difficulty,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
+                      const SizedBox(height: 6),
+                      Text(
+                        exercise.setsReps,
+                        style: TextStyle(
+                          color: ColorManager.limerGreen2,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: ColorManager.limerGreen2.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              exercise.difficulty,
+                              style: TextStyle(
+                                color: ColorManager.limerGreen2,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              exercise.target,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: ColorManager.textSecondary,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-              ),
-
-              // Exercise Info
-              Padding(
-                padding: EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Exercise Name
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            exercise.name,
-                            style: TextStyle(
-                              color: ColorManager.textPrimary,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Icon(
-                          Icons.arrow_forward_ios,
-                          color: ColorManager.limerGreen2,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 12),
-
-                    // Description
-                    Text(
-                      exercise.description,
-                      style: TextStyle(
-                        color: ColorManager.textSecondary,
-                        fontSize: 14,
-                        height: 1.5,
-                      ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 16),
-
-                    // Target & Equipment
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildInfoChip(
-                            Icons.center_focus_strong,
-                            exercise.target,
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: _buildInfoChip(
-                            Icons.sports_gymnastics,
-                            exercise.equipment,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

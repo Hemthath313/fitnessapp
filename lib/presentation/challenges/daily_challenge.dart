@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/data/challenge_data.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:provider/provider.dart';
 
 class DailyExercisePage extends StatefulWidget {
@@ -276,6 +277,26 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
       'progress.sixPackChallenge.completionDate':
           DateTime.now().toIso8601String(),
     });
+
+    try {
+      // Log to finishedWorkouts so it shows up in general logs and calendars
+      await FirebaseFirestore.instance
+          .collection('finishedWorkouts')
+          .doc(userId)
+          .collection('finishedWorkoutsData')
+          .add({
+        'name': 'Six-Pack Challenge Day ${widget.day}',
+        'repNumber': 0,
+        'setNumber': 3,
+        'dateTime': DateTime.now(),
+        'id': 'challenge_day_${widget.day}',
+      });
+
+      final statisticsProvider = Provider.of<StatisticsProvider>(context, listen: false);
+      await statisticsProvider.updateStreak();
+    } catch (e) {
+      print('Error updating streak or logging challenge: $e');
+    }
 
     widget.onComplete();
 

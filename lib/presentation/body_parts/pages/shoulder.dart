@@ -270,6 +270,216 @@ class _ShoulderExercisesPageState extends State<ShoulderExercisesPage> {
         'Keep your core engaged and maintain good posture',
       ],
     ),
+    ShoulderExercise(
+      name: 'EZ Barbell Antigravity Press',
+      videoPath: 'assets/videos/shoulder/shoulder_Ez_barbell_antigravity_press.mp4',
+      description:
+          'Lie face down on a bench and press an EZ barbell overhead. Highly effective for isolating the shoulders and upper back without spinal load.',
+      target: 'Shoulders, Upper Back',
+      equipment: 'EZ Barbell, Bench',
+      difficulty: 'Advanced',
+      setsReps: '3 sets × 8-12 reps',
+      instructions: [
+        'Lie face down on a flat or incline bench.',
+        'Hold the EZ barbell overhand, elbows bent at 90 degrees.',
+        'Press the bar straight forward/overhead in line with your torso.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Resistance Band Standing Rear Delt Row',
+      videoPath: 'assets/videos/shoulder/shoulder_band_standing _rear_delt row.mp4',
+      description:
+          'Target your rear deltoids and upper back standing using a resistance band. Perfect for posture correction and rotator cuff health.',
+      target: 'Shoulders (Rear Delts), Upper Back',
+      equipment: 'Resistance Band',
+      difficulty: 'Beginner',
+      setsReps: '3 sets × 12-15 reps',
+      instructions: [
+        'Anchor band at chest height, stand holding band with arms extended.',
+        'Pull elbows back and out wide, squeezing rear delts.',
+        'Return slowly to starting stretch.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Barbell Wide Grip Upright Row',
+      videoPath: 'assets/videos/shoulder/shoulder_barbell_upright_row(wide-grip).mp4',
+      description:
+          'Upright rowing movement performed with a wide barbell grip to focus the load onto the lateral deltoids rather than the traps.',
+      target: 'Shoulders (Lateral Delts), Traps',
+      equipment: 'Barbell',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 10-12 reps',
+      instructions: [
+        'Stand holding barbell with a wide overhand grip.',
+        'Pull the bar straight up to chest height, keeping elbows high.',
+        'Lower slowly with control.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Cable Front Raise',
+      videoPath: 'assets/videos/shoulder/shoulder_cable_frontraise.mp4',
+      description:
+          'Provides constant tension throughout the entire movement to isolate the anterior (front) deltoids.',
+      target: 'Shoulders (Anterior Delts)',
+      equipment: 'Cable Machine',
+      difficulty: 'Beginner',
+      setsReps: '3 sets × 12-15 reps',
+      instructions: [
+        'Stand facing away from cable machine, grab handle between legs.',
+        'Raise arm forward until parallel to floor.',
+        'Lower under control, keeping tension.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Cable Lateral Raise',
+      videoPath: 'assets/videos/shoulder/shoulder_cable_lateral_raise.mp4',
+      description:
+          'Cable lateral raise targets the lateral deltoids with constant resistance from bottom to top, maximizing shoulder width.',
+      target: 'Shoulders (Lateral Delts)',
+      equipment: 'Cable Machine',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 12-15 reps',
+      instructions: [
+        'Stand next to cable machine, grab handle with opposite hand.',
+        'Raise arm out to the side in a smooth arc to shoulder level.',
+        'Lower slowly against cable tension.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Dumbbell Alternating Press',
+      videoPath: 'assets/videos/shoulder/shoulder_dumbell_alternative_press.mp4',
+      description:
+          'Alternating overhead press that allows you to focus on the stability and drive of each shoulder independently.',
+      target: 'Shoulders, Triceps',
+      equipment: 'Dumbbells',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 10 reps per arm',
+      instructions: [
+        'Hold dumbbells at shoulders.',
+        'Press one dumbbell overhead to full extension while keeping the other stationary.',
+        'Lower it and repeat with the other arm.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Dumbbell Lateral Raises (Alt)',
+      videoPath: 'assets/videos/shoulder/shoulder_dumbell_lateral_raises.mp4',
+      description:
+          'Alternative high-definition demonstration of the standing dumbbell lateral raise to build shoulder caps.',
+      target: 'Shoulders (Lateral Delts)',
+      equipment: 'Dumbbells',
+      difficulty: 'Beginner',
+      setsReps: '3 sets × 12-15 reps',
+      instructions: [
+        'Stand holding dumbbells at your sides.',
+        'Raise arms out to sides in an arc until parallel to floor.',
+        'Lower slowly with control.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Dumbbell Seated Front Raise (Alt)',
+      videoPath: 'assets/videos/shoulder/shoulder_dumbell_seated_frontraise.mp4',
+      description:
+          'Alternative high-definition demonstration of the seated dumbbell front raise, isolating the anterior delts.',
+      target: 'Shoulders (Anterior Delts)',
+      equipment: 'Dumbbells, Bench',
+      difficulty: 'Beginner',
+      setsReps: '3 sets × 12-15 reps',
+      instructions: [
+        'Sit flat on bench with dumbbells.',
+        'Raise weights forward to shoulder height with palms down.',
+        'Lower under control.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Lever Seated Reverse Fly',
+      videoPath: 'assets/videos/shoulder/shoulder_lever_seated_reverse_fly.mp4',
+      description:
+          'Machine reverse fly to fully isolate the posterior deltoids and upper back muscles safely and effectively.',
+      target: 'Shoulders (Rear Delts), Rhomboids',
+      equipment: 'Reverse Fly Machine',
+      difficulty: 'Beginner',
+      setsReps: '3 sets × 12-15 reps',
+      instructions: [
+        'Sit facing the pad, grip handles.',
+        'Pull arms straight back in a wide arc, squeezing rear delts.',
+        'Return slowly to starting point.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Barbell Rear Delt Raise',
+      videoPath: 'assets/videos/shoulder/shoulder_barbell_rear_delt_raise.mp4',
+      description:
+          'Standing or bent-over barbell raise targeting the rear delts and middle back.',
+      target: 'Shoulders (Rear Delts), Upper Back',
+      equipment: 'Barbell',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 10-12 reps',
+      instructions: [
+        'Bend at hips with flat back holding barbell.',
+        'Raise bar behind you/upwards keeping arms straight.',
+        'Contract rear delts at peak and lower with control.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Barbell Shrug',
+      videoPath: 'assets/videos/shoulder/shoulder_barbell_shrug.mp4',
+      description:
+          'Classic compound lift targeting the upper trapezius muscles to build shoulder width and neck thickness.',
+      target: 'Traps, Upper Back',
+      equipment: 'Barbell',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 12-15 reps',
+      instructions: [
+        'Stand upright holding barbell in front of thighs.',
+        'Elevate shoulders as high as possible, squeezing traps at top.',
+        'Lower bar slowly back to stretch.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Dumbbell Incline Shrug',
+      videoPath: 'assets/videos/shoulder/shoulder_dumbell_incline_shrug.mp4',
+      description:
+          'Performed lying face down on an incline bench, this variation shifts focus to the middle and lower traps.',
+      target: 'Traps (Middle & Lower)',
+      equipment: 'Dumbbells, Incline Bench',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 12-15 reps',
+      instructions: [
+        'Lie face down on an incline bench holding dumbbells.',
+        'Shrug shoulders upwards and backwards, squeezing shoulder blades.',
+        'Lower weights under control.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Dumbbell Shrug',
+      videoPath: 'assets/videos/shoulder/shoulder_dumbell_shrug.mp4',
+      description:
+          'A trap developer that allows a more natural range of motion than a barbell since the weights are held at your sides.',
+      target: 'Traps',
+      equipment: 'Dumbbells',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 12-15 reps',
+      instructions: [
+        'Hold dumbbells at your sides, stand upright.',
+        'Shrug shoulders straight up toward ears.',
+        'Lower slowly, feeling the stretch.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Lever Shrug',
+      videoPath: 'assets/videos/shoulder/shoulder_lever_shrug.mp4',
+      description:
+          'Machine shrug providing a guided path and maximum stability to isolate the trapezius muscles safely.',
+      target: 'Traps',
+      equipment: 'Shrug Machine',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 12-15 reps',
+      instructions: [
+        'Stand inside machine, grip handles.',
+        'Shrug shoulders upwards, holding squeeze at top.',
+        'Return under control to start.',
+      ],
+    ),
   ];
 
   @override
@@ -335,7 +545,7 @@ class _ShoulderExercisesPageState extends State<ShoulderExercisesPage> {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    '${shoulderExercises.length} premium video workouts',
+                    'Premium video workouts',
                     style: TextStyle(
                       color: ColorManager.textSecondary,
                       fontSize: 16,
@@ -394,15 +604,15 @@ class _ShoulderExercisesPageState extends State<ShoulderExercisesPage> {
 
   Widget _buildExerciseCard(ShoulderExercise exercise, int index) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: ColorManager.limerGreen2.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
+            color: ColorManager.limerGreen2.withOpacity(0.05),
+            blurRadius: 8,
+            spreadRadius: 1,
           ),
         ],
       ),
@@ -410,128 +620,87 @@ class _ShoulderExercisesPageState extends State<ShoulderExercisesPage> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () => _showExerciseDetails(context, exercise),
-          borderRadius: BorderRadius.circular(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Video Preview
-              ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                child: Container(
-                  height: 220,
-                  width: double.infinity,
-                  color: ColorManager.surface,
-                  child: Stack(
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Video/Thumbnail preview
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: SizedBox(
+                    width: 110,
+                    height: 85,
+                    child: ExerciseVideoPlayer(
+                      videoPath: exercise.videoPath,
+                      height: 85,
+                      width: 110,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Exercise details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ExerciseVideoPlayer(
-                        videoPath: exercise.videoPath,
-                        height: 220,
-                        width: double.infinity,
-                      ),
-                      // Play button overlay
-                      Center(
-                        child: Container(
-                          padding: EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.black54,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.play_arrow,
-                            color: ColorManager.limerGreen2,
-                            size: 40,
-                          ),
+                      Text(
+                        exercise.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: ColorManager.textPrimary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      // Difficulty badge
-                      Positioned(
-                        top: 12,
-                        right: 12,
-                        child: Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: ColorManager.limerGreen2.withOpacity(0.9),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            exercise.difficulty,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
+                      const SizedBox(height: 6),
+                      Text(
+                        exercise.setsReps,
+                        style: TextStyle(
+                          color: ColorManager.limerGreen2,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: ColorManager.limerGreen2.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              exercise.difficulty,
+                              style: TextStyle(
+                                color: ColorManager.limerGreen2,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              exercise.target,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: ColorManager.textSecondary,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-              ),
-
-              // Exercise Info
-              Padding(
-                padding: EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Exercise Name
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            exercise.name,
-                            style: TextStyle(
-                              color: ColorManager.textPrimary,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Icon(
-                          Icons.arrow_forward_ios,
-                          color: ColorManager.limerGreen2,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 12),
-
-                    // Description
-                    Text(
-                      exercise.description,
-                      style: TextStyle(
-                        color: ColorManager.textSecondary,
-                        fontSize: 14,
-                        height: 1.5,
-                      ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 16),
-
-                    // Target & Equipment
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildInfoChip(
-                            Icons.center_focus_strong,
-                            exercise.target,
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: _buildInfoChip(
-                            Icons.sports_gymnastics,
-                            exercise.equipment,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -270,6 +270,70 @@ class _BicepsExercisesPageState extends State<BicepsExercisesPage> {
         'Lower slowly and maintain constant tension',
       ],
     ),
+    BicepsExercise(
+      name: 'Dumbbell Incline Curl',
+      videoPath: 'assets/videos/biceps/biceps_dumbell_incline_curl.mp4',
+      description:
+          'Sit on an incline bench to place the biceps under a deep stretch at the bottom of the movement. Excellent for building the long head of the biceps.',
+      target: 'Biceps (Long Head)',
+      equipment: 'Dumbbells, Incline Bench',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 10-12 reps',
+      instructions: [
+        'Set incline bench to 45 degrees.',
+        'Sit back, arms hanging straight down.',
+        'Curl dumbbells up, keeping elbows stationary.',
+        'Squeeze biceps at the top and lower slowly.',
+      ],
+    ),
+    BicepsExercise(
+      name: 'Dumbbell Incline Hammer Curl',
+      videoPath: 'assets/videos/biceps/biceps_dumbell_incline_hammer_curl.mp4',
+      description:
+          'Incline bench variation with a neutral hammer grip. Targets the brachialis and brachioradialis from a stretched position to build upper arm thickness.',
+      target: 'Brachialis, Brachioradialis, Biceps',
+      equipment: 'Dumbbells, Incline Bench',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 10-12 reps',
+      instructions: [
+        'Sit back on a 45-degree incline bench with dumbbells.',
+        'Hold weights with a neutral grip (palms facing each other).',
+        'Curl dumbbells up, maintaining the neutral grip.',
+        'Slowly lower to full stretch.',
+      ],
+    ),
+    BicepsExercise(
+      name: 'Dumbbell One Arm Zottman Preacher Curl',
+      videoPath: 'assets/videos/biceps/biceps_dumbell_one_zottman_preacher_curl.mp4',
+      description:
+          'Combines the strict isolation of the preacher bench with the forearm-building rotation of the Zottman curl. Perform one arm at a time for complete focus.',
+      target: 'Biceps, Forearms',
+      equipment: 'Dumbbell, Preacher Bench',
+      difficulty: 'Advanced',
+      setsReps: '3 sets × 10-12 reps per arm',
+      instructions: [
+        'Rest arm on preacher pad, holding dumbbell underhand.',
+        'Curl weight up to shoulder level.',
+        'At the top, rotate wrist so palm faces forward (overhand).',
+        'Lower slowly in overhand grip, then rotate back to underhand at the bottom.',
+      ],
+    ),
+    BicepsExercise(
+      name: 'Dumbbell Lying Supine Curl',
+      videoPath: 'assets/videos/biceps/biceps_lying_supine_dumbell_curl.mp4',
+      description:
+          'Performed lying flat on a bench, this movement completely isolates the biceps by eliminating legs and lower back assist, targeting overall arm mass.',
+      target: 'Biceps',
+      equipment: 'Dumbbells, Flat Bench',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 12 reps',
+      instructions: [
+        'Lie flat on your back on a bench, holding dumbbells.',
+        'Extend arms straight down toward the floor, palms up.',
+        'Curl dumbbells up toward shoulders, keeping upper arms vertical.',
+        'Lower with control back to the starting stretch.',
+      ],
+    ),
   ];
 
   @override
@@ -335,7 +399,7 @@ class _BicepsExercisesPageState extends State<BicepsExercisesPage> {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    '${bicepsExercises.length} premium video workouts',
+                    'Premium video workouts',
                     style: TextStyle(
                       color: ColorManager.textSecondary,
                       fontSize: 16,
@@ -394,15 +458,15 @@ class _BicepsExercisesPageState extends State<BicepsExercisesPage> {
 
   Widget _buildExerciseCard(BicepsExercise exercise, int index) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: ColorManager.limerGreen2.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
+            color: ColorManager.limerGreen2.withOpacity(0.05),
+            blurRadius: 8,
+            spreadRadius: 1,
           ),
         ],
       ),
@@ -410,128 +474,87 @@ class _BicepsExercisesPageState extends State<BicepsExercisesPage> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () => _showExerciseDetails(context, exercise),
-          borderRadius: BorderRadius.circular(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Video Preview
-              ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                child: Container(
-                  height: 220,
-                  width: double.infinity,
-                  color: ColorManager.surface,
-                  child: Stack(
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Video/Thumbnail preview
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: SizedBox(
+                    width: 110,
+                    height: 85,
+                    child: ExerciseVideoPlayer(
+                      videoPath: exercise.videoPath,
+                      height: 85,
+                      width: 110,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Exercise details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ExerciseVideoPlayer(
-                        videoPath: exercise.videoPath,
-                        height: 220,
-                        width: double.infinity,
-                      ),
-                      // Play button overlay
-                      Center(
-                        child: Container(
-                          padding: EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.black54,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.play_arrow,
-                            color: ColorManager.limerGreen2,
-                            size: 40,
-                          ),
+                      Text(
+                        exercise.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: ColorManager.textPrimary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      // Difficulty badge
-                      Positioned(
-                        top: 12,
-                        right: 12,
-                        child: Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: ColorManager.limerGreen2.withOpacity(0.9),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            exercise.difficulty,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
+                      const SizedBox(height: 6),
+                      Text(
+                        exercise.setsReps,
+                        style: TextStyle(
+                          color: ColorManager.limerGreen2,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: ColorManager.limerGreen2.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              exercise.difficulty,
+                              style: TextStyle(
+                                color: ColorManager.limerGreen2,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              exercise.target,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: ColorManager.textSecondary,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-              ),
-
-              // Exercise Info
-              Padding(
-                padding: EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Exercise Name
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            exercise.name,
-                            style: TextStyle(
-                              color: ColorManager.textPrimary,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Icon(
-                          Icons.arrow_forward_ios,
-                          color: ColorManager.limerGreen2,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 12),
-
-                    // Description
-                    Text(
-                      exercise.description,
-                      style: TextStyle(
-                        color: ColorManager.textSecondary,
-                        fontSize: 14,
-                        height: 1.5,
-                      ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 16),
-
-                    // Target & Equipment
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildInfoChip(
-                            Icons.center_focus_strong,
-                            exercise.target,
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: _buildInfoChip(
-                            Icons.sports_gymnastics,
-                            exercise.equipment,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

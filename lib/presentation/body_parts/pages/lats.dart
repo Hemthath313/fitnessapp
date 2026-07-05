@@ -252,6 +252,126 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
         'Keep your back straight throughout',
       ],
     ),
+    BackExercise(
+      name: 'Cable One Arm Twisting Seated Row',
+      videoPath: 'assets/videos/back/back_cable_one_arm_twisting_seated_row.mp4',
+      description:
+          'A unilateral seated row variation using cables. Adding a twist to the wrist rotation engages the lats from multiple angles and increases muscle contraction.',
+      target: 'Lats, Rhomboids, Obliques',
+      equipment: 'Cable Machine',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 10-12 reps per arm',
+      instructions: [
+        'Sit upright facing the cable, grab handle with one hand and arm fully extended.',
+        'Pull the cable handle to your hip while twisting your wrist to an underhand grip.',
+        'Squeeze the lat and slowly return with rotation.',
+      ],
+    ),
+    BackExercise(
+      name: 'Cable Straight Back Seated High Row (Reverse Grip)',
+      videoPath: 'assets/videos/back/back_cable_straight_back_seated_high_row_reverse_grip.mp4',
+      description:
+          'High cable row performed sitting upright with a reverse (underhand) grip. Excellent for focusing on the lower lats and biceps.',
+      target: 'Lower Lats, Rhomboids, Biceps',
+      equipment: 'Cable Machine',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 10-12 reps',
+      instructions: [
+        'Sit tall in front of the high cable with an underhand grip.',
+        'Pull the handle down and back towards your upper chest.',
+        'Squeeze the lats and lower traps, then return slowly.',
+      ],
+    ),
+    BackExercise(
+      name: 'Cable Straight Arm Pulldown',
+      videoPath: 'assets/videos/back/back_cable_striaight_arm_pulldown.mp4',
+      description:
+          'Isolation exercise targeting the lats by sweeping the arms down with elbows locked, removing biceps involvement.',
+      target: 'Lats, Triceps (Long Head)',
+      equipment: 'Cable Machine, Straight Bar',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 12-15 reps',
+      instructions: [
+        'Stand facing cable, grip bar overhand with arms straight overhead.',
+        'Keep elbows slightly bent but fixed, pull bar down to thighs.',
+        'Return slowly, feeling the stretch in the lats.',
+      ],
+    ),
+    BackExercise(
+      name: 'Cambered Bar Lying Row',
+      videoPath: 'assets/videos/back/back_cambered_bar_lying_row.mp4',
+      description:
+          'Lying face down on an elevated bench and rowing a cambered barbell. The curved bar allows for a greater range of motion and deeper contraction.',
+      target: 'Upper Back, Rhomboids, Lats',
+      equipment: 'Cambered Barbell, Elevated Bench',
+      difficulty: 'Intermediate',
+      setsReps: '4 sets × 8-12 reps',
+      instructions: [
+        'Lie face down on elevated bench holding cambered bar below.',
+        'Pull bar up towards bench, allowing cambered section to pass bench height.',
+        'Squeeze shoulder blades together, lower under control.',
+      ],
+    ),
+    BackExercise(
+      name: 'Commando Pull-up',
+      videoPath: 'assets/videos/back/back_commando_pullup.mp4',
+      description:
+          'A pull-up variation performed standing sideways to the bar with a close staggered grip. Heavily recruits lats, obliques, and brachialis.',
+      target: 'Lats, Arms, Core',
+      equipment: 'Pull-up Bar',
+      difficulty: 'Advanced',
+      setsReps: '3 sets × max reps',
+      instructions: [
+        'Stand sideways to pull-up bar, grab bar with staggered hands.',
+        'Pull body up, shifting head to one side of the bar.',
+        'Lower slowly and repeat, alternating sides.',
+      ],
+    ),
+    BackExercise(
+      name: 'Dumbbell Bent Over Row',
+      videoPath: 'assets/videos/back/back_dumbell_bent_row.mp4',
+      description:
+          'Classic compound dumbbell row targeting the entire back, allowing for independent movement of each arm.',
+      target: 'Lats, Rhomboids, Upper Back',
+      equipment: 'Dumbbells',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 10-12 reps',
+      instructions: [
+        'Bend at hips with flat back holding dumbbells.',
+        'Pull dumbbells to your sides, keeping elbows tucked close.',
+        'Lower under control to full extension.',
+      ],
+    ),
+    BackExercise(
+      name: 'Dumbbell Reverse Grip Row',
+      videoPath: 'assets/videos/back/back_dumbell_reverse_grip_row.mp4',
+      description:
+          'A bent-over dumbbell row holding weights with palms facing forward to recruit more lower lat fibers and biceps.',
+      target: 'Lower Lats, Biceps',
+      equipment: 'Dumbbells',
+      difficulty: 'Beginner',
+      setsReps: '3 sets × 10-12 reps',
+      instructions: [
+        'Hinge at hips, hold dumbbells with underhand grip.',
+        'Pull weights towards lower waist, keeping elbows tight to torso.',
+        'Lower slowly.',
+      ],
+    ),
+    BackExercise(
+      name: 'Lever High Row',
+      videoPath: 'assets/videos/back/back_lever_high_row.mp4',
+      description:
+          'Machine-based high row pulling at a downward angle to isolate the lats and lower trapezius with guided safety.',
+      target: 'Lats, Lower Traps',
+      equipment: 'High Row Machine',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 10-12 reps',
+      instructions: [
+        'Adjust seat, grab handles overhead.',
+        'Pull handles down and back towards chest, chest pressed to pad.',
+        'Squeeze back and return slowly.',
+      ],
+    ),
   ];
 
   @override
@@ -317,7 +437,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    '${backExercises.length} premium video workouts',
+                    'Premium video workouts',
                     style: TextStyle(
                       color: ColorManager.textSecondary,
                       fontSize: 16,
@@ -376,15 +496,15 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
 
   Widget _buildExerciseCard(BackExercise exercise, int index) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: ColorManager.limerGreen2.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
+            color: ColorManager.limerGreen2.withOpacity(0.05),
+            blurRadius: 8,
+            spreadRadius: 1,
           ),
         ],
       ),
@@ -392,128 +512,87 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () => _showExerciseDetails(context, exercise),
-          borderRadius: BorderRadius.circular(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Video Preview
-              ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                child: Container(
-                  height: 220,
-                  width: double.infinity,
-                  color: ColorManager.surface,
-                  child: Stack(
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Video/Thumbnail preview
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: SizedBox(
+                    width: 110,
+                    height: 85,
+                    child: ExerciseVideoPlayer(
+                      videoPath: exercise.videoPath,
+                      height: 85,
+                      width: 110,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Exercise details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ExerciseVideoPlayer(
-                        videoPath: exercise.videoPath,
-                        height: 220,
-                        width: double.infinity,
-                      ),
-                      // Play button overlay
-                      Center(
-                        child: Container(
-                          padding: EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.black54,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.play_arrow,
-                            color: ColorManager.limerGreen2,
-                            size: 40,
-                          ),
+                      Text(
+                        exercise.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: ColorManager.textPrimary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      // Difficulty badge
-                      Positioned(
-                        top: 12,
-                        right: 12,
-                        child: Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: ColorManager.limerGreen2.withOpacity(0.9),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            exercise.difficulty,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
+                      const SizedBox(height: 6),
+                      Text(
+                        exercise.setsReps,
+                        style: TextStyle(
+                          color: ColorManager.limerGreen2,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: ColorManager.limerGreen2.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              exercise.difficulty,
+                              style: TextStyle(
+                                color: ColorManager.limerGreen2,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              exercise.target,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: ColorManager.textSecondary,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-              ),
-
-              // Exercise Info
-              Padding(
-                padding: EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Exercise Name
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            exercise.name,
-                            style: TextStyle(
-                              color: ColorManager.textPrimary,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Icon(
-                          Icons.arrow_forward_ios,
-                          color: ColorManager.limerGreen2,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 12),
-
-                    // Description
-                    Text(
-                      exercise.description,
-                      style: TextStyle(
-                        color: ColorManager.textSecondary,
-                        fontSize: 14,
-                        height: 1.5,
-                      ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 16),
-
-                    // Target & Equipment
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildInfoChip(
-                            Icons.center_focus_strong,
-                            exercise.target,
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: _buildInfoChip(
-                            Icons.sports_gymnastics,
-                            exercise.equipment,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

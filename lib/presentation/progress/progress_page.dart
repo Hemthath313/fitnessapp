@@ -242,7 +242,7 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                     borderRadius: BorderRadius.circular(22.r),
                   ),
                   indicatorSize: TabBarIndicatorSize.tab,
-                  labelColor: Colors.black,
+                  labelColor: Colors.white,
                   unselectedLabelColor: ColorManager.textSecondary,
                   labelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
                   unselectedLabelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),

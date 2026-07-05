@@ -8,14 +8,14 @@ class ColorManager {
   // PRIMARY BRAND COLORS (theme-independent)
   // ═══════════════════════════════════════
 
-  /// Primary – Electric Blue (Hevy-style)
-  static const Color primary = Color(0xFF4F6FFF);
-  static const Color primaryDark = Color(0xFF3A56E8);
-  static const Color primaryLight = Color(0xFF6B84FF);
+  /// Primary – Premium Blue
+  static const Color primary = Color(0xFF2F6BFF);
+  static const Color primaryDark = Color(0xFF1E56D4);
+  static const Color primaryLight = Color(0xFF4A7DFF);
 
-  /// Gradient – Blue to Purple (for buttons, hero sections)
-  static const Color gradientStart = Color(0xFF4F6FFF);
-  static const Color gradientEnd = Color(0xFF7C3AED);
+  /// Gradient – Premium Blue Gradient
+  static const Color gradientStart = Color(0xFF1B55E2);
+  static const Color gradientEnd = Color(0xFF3972F6);
 
   /// Accent – Coral Red (PRs, calories, alerts, streaks)
   static const Color accent = Color(0xFFFF4757);

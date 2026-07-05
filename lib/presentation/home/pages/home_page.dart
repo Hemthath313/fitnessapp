@@ -26,7 +26,8 @@ class _HomePageState extends State<HomePage> {
         .getConsumedCalories();
     // Water data is loaded in MainPage after reset check
     // Load weekly stats
-    Provider.of<StatisticsProvider>(context, listen: false).getWeeklyStats();
+    final statsProvider = Provider.of<StatisticsProvider>(context, listen: false);
+    statsProvider.getWeeklyStats();
   }
 
   @override
@@ -44,7 +45,6 @@ class _HomePageState extends State<HomePage> {
 
             // Quick Actions
             const QuickActionsWidget(),
-            SizedBox(height: SizeManager.s16.h),
 
             const HomePageTextSpacerWidget(
               title: StringsManager.challenges,
