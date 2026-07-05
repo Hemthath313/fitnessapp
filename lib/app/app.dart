@@ -423,32 +423,32 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(
-          value: AuthProvider(),
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(),
         ),
-        ChangeNotifierProvider.value(
-          value: SettingsProvider(),
+        ChangeNotifierProvider(
+          create: (_) => SettingsProvider(),
         ),
-        ChangeNotifierProvider.value(
-          value: HomeProvider(),
+        ChangeNotifierProvider(
+          create: (_) => HomeProvider(),
         ),
-        ChangeNotifierProvider.value(
-          value: WorkoutProvider(),
+        ChangeNotifierProvider(
+          create: (_) => WorkoutProvider(),
         ),
-        ChangeNotifierProvider.value(
-          value: ConsumptionProvider(),
+        ChangeNotifierProvider(
+          create: (_) => ConsumptionProvider(),
         ),
-        ChangeNotifierProvider.value(
-          value: ProfileProvider(),
+        ChangeNotifierProvider(
+          create: (_) => ProfileProvider(),
         ),
-        ChangeNotifierProvider.value(
-          value: SubscriptionProvider(),
+        ChangeNotifierProvider(
+          create: (_) => SubscriptionProvider(),
         ),
-        ChangeNotifierProvider.value(
-          value: StatisticsProvider(),
+        ChangeNotifierProvider(
+          create: (_) => StatisticsProvider(),
         ),
-        ChangeNotifierProvider.value(
-          value: ProgressPhotoProvider(),
+        ChangeNotifierProvider(
+          create: (_) => ProgressPhotoProvider(),
         ),
         ChangeNotifierProvider(
           create: (_) => ThemeProvider(),

@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/data/challenge_data.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:provider/provider.dart';
 
 class DailyExercisePage extends StatefulWidget {
@@ -276,6 +277,13 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
       'progress.sixPackChallenge.completionDate':
           DateTime.now().toIso8601String(),
     });
+
+    try {
+      final statisticsProvider = Provider.of<StatisticsProvider>(context, listen: false);
+      await statisticsProvider.updateStreak();
+    } catch (e) {
+      print('Error updating streak: $e');
+    }
 
     widget.onComplete();
 

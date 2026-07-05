@@ -405,6 +405,81 @@ class _ShoulderExercisesPageState extends State<ShoulderExercisesPage> {
         'Return slowly to starting point.',
       ],
     ),
+    ShoulderExercise(
+      name: 'Barbell Rear Delt Raise',
+      videoPath: 'assets/videos/shoulder/shoulder_barbell_rear_delt_raise.mp4',
+      description:
+          'Standing or bent-over barbell raise targeting the rear delts and middle back.',
+      target: 'Shoulders (Rear Delts), Upper Back',
+      equipment: 'Barbell',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 10-12 reps',
+      instructions: [
+        'Bend at hips with flat back holding barbell.',
+        'Raise bar behind you/upwards keeping arms straight.',
+        'Contract rear delts at peak and lower with control.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Barbell Shrug',
+      videoPath: 'assets/videos/shoulder/shoulder_barbell_shrug.mp4',
+      description:
+          'Classic compound lift targeting the upper trapezius muscles to build shoulder width and neck thickness.',
+      target: 'Traps, Upper Back',
+      equipment: 'Barbell',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 12-15 reps',
+      instructions: [
+        'Stand upright holding barbell in front of thighs.',
+        'Elevate shoulders as high as possible, squeezing traps at top.',
+        'Lower bar slowly back to stretch.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Dumbbell Incline Shrug',
+      videoPath: 'assets/videos/shoulder/shoulder_dumbell_incline_shrug.mp4',
+      description:
+          'Performed lying face down on an incline bench, this variation shifts focus to the middle and lower traps.',
+      target: 'Traps (Middle & Lower)',
+      equipment: 'Dumbbells, Incline Bench',
+      difficulty: 'Intermediate',
+      setsReps: '3 sets × 12-15 reps',
+      instructions: [
+        'Lie face down on an incline bench holding dumbbells.',
+        'Shrug shoulders upwards and backwards, squeezing shoulder blades.',
+        'Lower weights under control.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Dumbbell Shrug',
+      videoPath: 'assets/videos/shoulder/shoulder_dumbell_shrug.mp4',
+      description:
+          'A trap developer that allows a more natural range of motion than a barbell since the weights are held at your sides.',
+      target: 'Traps',
+      equipment: 'Dumbbells',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 12-15 reps',
+      instructions: [
+        'Hold dumbbells at your sides, stand upright.',
+        'Shrug shoulders straight up toward ears.',
+        'Lower slowly, feeling the stretch.',
+      ],
+    ),
+    ShoulderExercise(
+      name: 'Lever Shrug',
+      videoPath: 'assets/videos/shoulder/shoulder_lever_shrug.mp4',
+      description:
+          'Machine shrug providing a guided path and maximum stability to isolate the trapezius muscles safely.',
+      target: 'Traps',
+      equipment: 'Shrug Machine',
+      difficulty: 'Beginner',
+      setsReps: '4 sets × 12-15 reps',
+      instructions: [
+        'Stand inside machine, grip handles.',
+        'Shrug shoulders upwards, holding squeeze at top.',
+        'Return under control to start.',
+      ],
+    ),
   ];
 
   @override

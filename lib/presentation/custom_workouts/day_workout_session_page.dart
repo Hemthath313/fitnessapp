@@ -8,6 +8,7 @@ import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
+import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:provider/provider.dart';
 
 class DayWorkoutSessionPage extends StatefulWidget {
@@ -799,8 +800,14 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
       for (var log in _sessionLogs) {
         await logService.addLog(log);
       }
+      
+      // Update streak statistics!
+      if (mounted) {
+        final statisticsProvider = Provider.of<StatisticsProvider>(context, listen: false);
+        await statisticsProvider.updateStreak();
+      }
     } catch (e) {
-      print('Error saving workout logs: $e');
+      print('Error saving workout logs or updating streak: $e');
     }
     
     setState(() {

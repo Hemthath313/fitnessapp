@@ -35,6 +35,22 @@ class StatisticsProvider with ChangeNotifier {
         if (doc.data()?['lastWorkoutDate'] != null) {
           _lastWorkoutDate =
               (doc.data()!['lastWorkoutDate'] as Timestamp).toDate();
+
+          // Check if streak is broken (more than 1 day since last workout)
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+          final lastDate = DateTime(_lastWorkoutDate!.year,
+              _lastWorkoutDate!.month, _lastWorkoutDate!.day);
+          final diffDays = today.difference(lastDate).inDays;
+
+          if (diffDays > 1) {
+            _currentStreak = 0;
+            // Persist reset to Firestore
+            await FirebaseFirestore.instance
+                .collection('statistics')
+                .doc(user.uid)
+                .update({'currentStreak': 0});
+          }
         }
       }
 
