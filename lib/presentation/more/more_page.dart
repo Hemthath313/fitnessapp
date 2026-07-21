@@ -20,7 +20,7 @@ class MorePage extends StatelessWidget {
     return Consumer2<HomeProvider, ThemeProvider>(
       builder: (context, homeProvider, themeProvider, _) {
         return SafeArea(
-          bottom: true,
+          bottom: false,
           child: SingleChildScrollView(
             padding: EdgeInsets.all(SizeManager.s16.w),
             child: Column(

@@ -75,3 +75,8 @@
 # Keep Google Sign In
 -keep class com.google.android.gms.auth.** { *; }
 -keep class com.google.android.gms.common.** { *; }
+
+# Ignore missing Play Core classes referenced by the Flutter Engine (deferred components)
+-dontwarn com.google.android.play.core.**
+-dontwarn io.flutter.embedding.engine.deferredcomponents.**
+-dontwarn io.flutter.embedding.android.FlutterPlayStoreSplitApplication

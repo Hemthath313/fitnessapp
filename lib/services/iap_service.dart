@@ -11,7 +11,10 @@ class IAPService {
   final _purchaseController = StreamController<PurchaseDetails>.broadcast();
   Stream<PurchaseDetails> get purchaseStream => _purchaseController.stream;
 
-  final List<String> _productIds = ['premium_monthly', 'premium_yearly'];
+  final List<String> _productIds = [
+    'gymbuddy_premium_monthly',
+    'premium_yearly',
+  ];
   List<ProductDetails> _products = [];
   List<ProductDetails> get products => _products;
 
@@ -47,7 +50,9 @@ class IAPService {
     final purchaseParam = PurchaseParam(productDetails: product);
     try {
       // Subscriptions + non-consumables use buyNonConsumable in this plugin.
-      if (product.id.contains('monthly') || product.id.contains('yearly')) {
+      if (product.id.contains('monthly') || 
+          product.id.contains('yearly') || 
+          product.id.contains('gymbuddy')) {
         await _iap.buyNonConsumable(purchaseParam: purchaseParam);
       } else {
         await _iap.buyConsumable(purchaseParam: purchaseParam);

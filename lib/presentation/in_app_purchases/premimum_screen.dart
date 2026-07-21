@@ -133,7 +133,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                       ),
                       SizedBox(height: SizeManager.s12.h),
                     ],
-                    ...subProvider.products.map((product) => _buildProductCard(product, subProvider)),
+                    ...subProvider.plans.map((plan) => _buildProductCard(plan, subProvider)),
                   ],
                   SizedBox(height: SizeManager.s12.h),
                   Center(
@@ -250,8 +250,13 @@ class _PremiumScreenState extends State<PremiumScreen> {
     );
   }
 
-  Widget _buildProductCard(ProductDetails product, SubscriptionProvider provider) {
-    final isYearly = product.id.contains('yearly');
+  Widget _buildProductCard(SubscriptionPlan plan, SubscriptionProvider provider) {
+    final isYearly = plan.isYearly;
+    final isLifetime = plan.isLifetime;
+    final highlightColor = isLifetime 
+        ? ColorManager.secondary 
+        : (isYearly ? ColorManager.primary : ColorManager.surfaceLight);
+
     return Container(
       margin: EdgeInsets.only(bottom: SizeManager.s16.h),
       padding: EdgeInsets.all(SizeManager.s16.w),
@@ -259,13 +264,13 @@ class _PremiumScreenState extends State<PremiumScreen> {
         color: ColorManager.surface,
         borderRadius: BorderRadius.circular(SizeManager.s16.r),
         border: Border.all(
-          color: isYearly ? ColorManager.primary : ColorManager.surfaceLight,
+          color: highlightColor,
           width: 2,
         ),
         boxShadow: [
-          if (isYearly)
+          if (isYearly || isLifetime)
             BoxShadow(
-              color: ColorManager.primary.withOpacity(0.2),
+              color: highlightColor.withOpacity(0.2),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -277,7 +282,20 @@ class _PremiumScreenState extends State<PremiumScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (isYearly)
+                if (isLifetime)
+                  Container(
+                    margin: EdgeInsets.only(bottom: 4.h),
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                    decoration: BoxDecoration(
+                      color: ColorManager.secondary,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                    child: const Text(
+                      'LIFETIME ACCESS',
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black),
+                    ),
+                  )
+                else if (isYearly)
                   Container(
                     margin: EdgeInsets.only(bottom: 4.h),
                     padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
@@ -291,26 +309,28 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     ),
                   ),
                 Text(
-                  product.title.split('(')[0].trim(),
+                  plan.title,
                   style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: ColorManager.textPrimary),
                 ),
                 Text(
-                  product.description,
+                  plan.description,
                   style: TextStyle(fontSize: 12.sp, color: ColorManager.textSecondary),
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  product.price,
+                  plan.price,
                   style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: ColorManager.secondary),
                 ),
               ],
             ),
           ),
           ElevatedButton(
-            onPressed: () => provider.buyProduct(product),
+            onPressed: () => provider.buyPlan(plan),
             style: ElevatedButton.styleFrom(
-              backgroundColor: isYearly ? ColorManager.primary : ColorManager.surfaceLight,
-              foregroundColor: isYearly ? Colors.white : ColorManager.textPrimary,
+              backgroundColor: (isYearly || isLifetime) ? highlightColor : ColorManager.surfaceLight,
+              foregroundColor: (isYearly || isLifetime) 
+                  ? (isLifetime ? Colors.black : Colors.white) 
+                  : ColorManager.textPrimary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
               elevation: 0,
             ),

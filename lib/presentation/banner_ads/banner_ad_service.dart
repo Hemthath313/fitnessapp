@@ -12,8 +12,13 @@ class BannerAdService {
 
 class BannerAdWidget extends StatefulWidget {
   final String? pageName; // Optional page name to use specific ad unit
+  final double bottomMargin;
 
-  const BannerAdWidget({super.key, this.pageName});
+  const BannerAdWidget({
+    super.key,
+    this.pageName,
+    this.bottomMargin = 0.0,
+  });
 
   @override
   _BannerAdWidgetState createState() => _BannerAdWidgetState();
@@ -93,11 +98,23 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
     final double displayHeight = _adSize?.height.toDouble() ?? 50.0;
 
-    return SizedBox(
+    Widget adWidget = SizedBox(
       width: double.infinity,
       height: displayHeight,
       child: AdWidget(ad: _bannerAd!),
     );
+
+    if (widget.bottomMargin > 0.0) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          adWidget,
+          SizedBox(height: widget.bottomMargin),
+        ],
+      );
+    }
+
+    return adWidget;
   }
 
   @override
@@ -123,17 +140,10 @@ class PremiumAwareBannerAd extends StatelessWidget {
       builder: (context, subProvider, _) {
         if (subProvider.isPremium) return const SizedBox.shrink();
         
-        Widget adWidget = BannerAdWidget(pageName: pageName);
-        if (bottomMargin > 0.0) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              adWidget,
-              SizedBox(height: bottomMargin),
-            ],
-          );
-        }
-        return adWidget;
+        return BannerAdWidget(
+          pageName: pageName,
+          bottomMargin: bottomMargin,
+        );
       },
     );
   }

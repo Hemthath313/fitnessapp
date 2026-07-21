@@ -23,7 +23,7 @@ class _JournalPageState extends State<JournalPage> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      bottom: true,
+      bottom: false,
       child: SingleChildScrollView(
         padding: EdgeInsets.all(SizeManager.s16.w),
         child: Column(
@@ -84,7 +84,7 @@ class _JournalPageState extends State<JournalPage> {
             ),
             
             SizedBox(height: SizeManager.s40.h),
-            const PremiumAwareBannerAd(pageName: 'journal', bottomMargin: 60.0),
+            const PremiumAwareBannerAd(pageName: 'journal'),
             SizedBox(height: SizeManager.s16.h),
           ],
         ),

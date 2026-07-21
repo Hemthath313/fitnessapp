@@ -52,7 +52,7 @@ class _ProfilePageState extends State<ProfilePage> {
             profileProvider.fetchAndSetFlSpots();
             
             return SafeArea(
-              bottom: true,
+              bottom: false,
               child: Column(
                 children: [
                   Expanded(

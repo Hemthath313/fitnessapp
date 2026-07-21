@@ -202,7 +202,7 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
     return Scaffold(
       backgroundColor: ColorManager.background,
       body: SafeArea(
-        bottom: true,
+        bottom: false,
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
           child: Column(

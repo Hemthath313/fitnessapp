@@ -33,7 +33,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      bottom: true,
+      bottom: false,
       child: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
             ),
             const CarouselSliderHomeWidget(),
 
-            const PremiumAwareBannerAd(pageName: 'home', bottomMargin: 60.0),
+            const PremiumAwareBannerAd(pageName: 'home'),
             SizedBox(height: SizeManager.s16.h),
           ],
         ),

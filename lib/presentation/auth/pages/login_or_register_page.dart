@@ -54,6 +54,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _showSnackBar(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(

@@ -97,7 +97,7 @@ class _ExploreWidgetState extends State<ExploreWidget>
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      bottom: true,
+      bottom: false,
       child: Column(
         children: [
           Expanded(
@@ -117,7 +117,7 @@ class _ExploreWidgetState extends State<ExploreWidget>
               },
             ),
           ),
-          const PremiumAwareBannerAd(pageName: 'explore', bottomMargin: 60.0),
+          const PremiumAwareBannerAd(pageName: 'explore'),
         ],
       ),
     );
