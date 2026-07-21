@@ -5,6 +5,7 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:fitness_app/app/app.dart';
 import 'package:fitness_app/utils/ad_config.dart';
+import 'package:fitness_app/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart'; // For kDebugMode
@@ -55,6 +56,10 @@ void main() {
       if (!kDebugMode) {
         await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
       }
+      
+      // Initialize Local Notifications
+      final notificationService = NotificationService();
+      await notificationService.initializeLocalNotifications();
 
       runApp(const MyApp());
     },

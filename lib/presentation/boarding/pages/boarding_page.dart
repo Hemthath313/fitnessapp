@@ -27,9 +27,7 @@ class _BoardingPageState extends State<BoardingPage> {
     ImageManager.splashBG1WP,
     ImageManager.splashBG2WP,
     ImageManager.splashBG3WP,
-    ImageManager.chestWorkout,
     ImageManager.splashBG5WP,
-    ImageManager.bicepsWorkout,
     ImageManager.splashBG7WP,
   ];
 
@@ -37,9 +35,7 @@ class _BoardingPageState extends State<BoardingPage> {
     "Welcome to Gym Buddy — Your Ultimate Fitness Companion!",
     "Track your daily calories and personalized diet plans.",
     "Achieve your fitness goals with personalized plans.",
-    "Stay motivated with monthly challenges and tips.",
     "Access multiple workout splits tailored to your fitness goals!",
-    "Track your monthly weight progress with ease using intuitive charts!",
     "Let's get started on your fitness journey today!",
   ];
 

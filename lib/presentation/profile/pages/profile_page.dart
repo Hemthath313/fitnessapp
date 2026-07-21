@@ -18,6 +18,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/profile/widgets/measurement_line_chart.dart';
 import 'package:fitness_app/presentation/profile/widgets/muscle_activation_chart.dart';
+import 'package:fitness_app/presentation/profile/widgets/gym_alarm_setting_widget.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -427,6 +428,13 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                               ),
                             ),
+                          ),
+                          SizedBox(height: 16.h),
+                          
+                          // Gym Alarm Setting Card
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: PaddingManager.p12),
+                            child: const GymAlarmSettingWidget(),
                           ),
                           SizedBox(height: 16.h),
                           

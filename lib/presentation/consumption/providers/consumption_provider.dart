@@ -5,6 +5,8 @@ import 'package:fitness_app/model/meal_model.dart';
 import 'package:fitness_app/model/water_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:fitness_app/services/notification_service.dart';
+import 'package:home_widget/home_widget.dart';
 
 class ConsumptionProvider with ChangeNotifier {
   final List<MealModel> _meals = [];
@@ -171,6 +173,14 @@ class ConsumptionProvider with ChangeNotifier {
 
       // Immediately fetch and update water data
       await fetchAndSetWater();
+      
+      // Handle daily water notification logic (assuming 2500ml is the goal)
+      if (waterADay >= 2500) {
+        await NotificationService().cancelWaterReminder();
+      } else {
+        await NotificationService().scheduleWaterReminder();
+      }
+
       notifyListeners();
     } catch (e) {
       rethrow;
@@ -252,6 +262,11 @@ class ConsumptionProvider with ChangeNotifier {
     for (var water in _water) {
       waterADay += water.amount;
     }
+    
+    // Update Home Screen Widget
+    await HomeWidget.saveWidgetData<double>('water', waterADay);
+    await HomeWidget.updateWidget(androidName: 'FitnessWidgetProvider');
+    
     notifyListeners();
   }
 

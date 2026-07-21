@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fitness_app/services/notification_service.dart';
+import 'package:home_widget/home_widget.dart';
 
 class StatisticsProvider with ChangeNotifier {
   int _currentStreak = 0;
@@ -113,6 +115,16 @@ class StatisticsProvider with ChangeNotifier {
 
       // Check for new achievements
       await _checkAchievements();
+
+      // Schedule notification reminder to maintain streak
+      await NotificationService().scheduleStreakReminder();
+      
+      // Reset re-engagement timers (3, 7, 14 days)
+      await NotificationService().scheduleReEngagementNotifications();
+
+      // Update Home Screen Widget
+      await HomeWidget.saveWidgetData<int>('streak', _currentStreak);
+      await HomeWidget.updateWidget(androidName: 'FitnessWidgetProvider');
 
       await fetchCompletedWorkoutDates();
       notifyListeners();
