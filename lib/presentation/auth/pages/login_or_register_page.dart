@@ -2,11 +2,13 @@ import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
 import 'package:fitness_app/presentation/auth/widgets/login_or_register_view.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
+import 'package:fitness_app/utils/router/router.dart';
 import 'package:fitness_app/utils/widgets/custom_google_button.dart';
 import 'package:fitness_app/utils/widgets/loading_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 enum AuthMode { signUp, signIn }
@@ -230,6 +232,26 @@ class _LoginPageState extends State<LoginPage> {
                   isRegisterView: isRegisterView,
                   repeatPasswordController: _repeatPasswordController,
                 ),
+                
+                if (isLoginView) ...[
+                  SizedBox(height: 12.h),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: GestureDetector(
+                      onTap: () {
+                        context.push(Routes.forgotPasswordRoute);
+                      },
+                      child: Text(
+                        'Forgot Password?',
+                        style: TextStyle(
+                          color: ColorManager.primary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
                 
                 SizedBox(height: 20.h),
                 

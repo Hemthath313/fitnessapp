@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Provider for managing app theme (Light/Dark mode)
 class ThemeProvider extends ChangeNotifier {
   static const String _themeKey = 'theme_mode';
-  bool _isDarkMode = false; // Default to light mode (Hevy-style)
+  bool _isDarkMode = true; // Default to dark mode
   
   ThemeProvider() {
     _loadThemePreference();
@@ -50,7 +50,7 @@ class ThemeProvider extends ChangeNotifier {
   Future<void> _loadThemePreference() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      _isDarkMode = prefs.getBool(_themeKey) ?? false; // Default to light
+      _isDarkMode = prefs.getBool(_themeKey) ?? true; // Default to dark
       ColorManager.updateTheme(_isDarkMode);
       notifyListeners();
     } catch (e) {

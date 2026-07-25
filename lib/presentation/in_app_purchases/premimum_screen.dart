@@ -325,7 +325,21 @@ class _PremiumScreenState extends State<PremiumScreen> {
             ),
           ),
           ElevatedButton(
-            onPressed: () => provider.buyPlan(plan),
+            onPressed: () async {
+              try {
+                await provider.buyPlan(plan);
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Could not complete purchase: ${e.toString().replaceAll('Exception:', '').trim()}'),
+                      backgroundColor: Colors.redAccent,
+                      duration: const Duration(seconds: 4),
+                    ),
+                  );
+                }
+              }
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: (isYearly || isLifetime) ? highlightColor : ColorManager.surfaceLight,
               foregroundColor: (isYearly || isLifetime) 

@@ -50,12 +50,7 @@ class _ExploreWidgetState extends State<ExploreWidget>
         'title': StringsManager.diet,
         'description': 'Nutritional guidance for better performance.',
         'onTap': () {
-          final sub = Provider.of<SubscriptionProvider>(context, listen: false);
-          if (sub.isPremium) {
-            context.push(Routes.dietRoute);
-          } else {
-            context.push(Routes.premiumScreen);
-          }
+          context.push(Routes.dietRoute);
         },
       },
       {

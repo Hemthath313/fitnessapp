@@ -34,11 +34,7 @@ class QuickActionsWidget extends StatelessWidget {
         'label': 'Diet Plans',
         'color': Colors.green,
         'onTap': () {
-          if (isPremium) {
-            context.push(Routes.dietRoute);
-          } else {
-            context.push(Routes.premiumScreen);
-          }
+          context.push(Routes.dietRoute);
         },
       },
       {

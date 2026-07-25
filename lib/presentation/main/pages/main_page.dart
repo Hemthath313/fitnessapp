@@ -183,48 +183,75 @@ class _MainPageState extends State<MainPage> {
   }
 
   void _showPaywallDialog() {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      barrierDismissible: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        return AlertDialog(
-          backgroundColor: ColorManager.surface,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-          title: Row(
-            children: [
-              Icon(Icons.star_rounded, color: Colors.amber, size: 28.sp),
-              SizedBox(width: 8.w),
-              Text('Unlock Premium', style: TextStyle(color: ColorManager.white, fontSize: 20.sp, fontWeight: FontWeight.bold)),
+        return Container(
+          padding: EdgeInsets.all(24.w),
+          decoration: BoxDecoration(
+            color: ColorManager.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 10,
+                spreadRadius: 2,
+              )
             ],
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Take your fitness to the next level with:', style: TextStyle(color: ColorManager.textSecondary, fontSize: 14.sp)),
-              SizedBox(height: 16.h),
-              _buildDialogFeaturePoint(Icons.smart_toy_rounded, 'Personal Coach AI', Colors.purpleAccent),
-              _buildDialogFeaturePoint(Icons.auto_awesome, 'Unlimited AI Workouts', Colors.tealAccent),
-              _buildDialogFeaturePoint(Icons.star_purple500_sharp, 'Future Premium Features', Colors.yellowAccent),
-            ],
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40.w,
+                    height: 4.h,
+                    margin: EdgeInsets.only(bottom: 24.h),
+                    decoration: BoxDecoration(
+                      color: ColorManager.textTertiary.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(2.r),
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.star_rounded, color: Colors.amber, size: 32.sp),
+                    SizedBox(width: 8.w),
+                    Text('Unlock Premium', style: TextStyle(color: ColorManager.textPrimary, fontSize: 24.sp, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                SizedBox(height: 16.h),
+                Text('Take your fitness to the next level with:', textAlign: TextAlign.center, style: TextStyle(color: ColorManager.textSecondary, fontSize: 16.sp)),
+                SizedBox(height: 24.h),
+                _buildDialogFeaturePoint(Icons.smart_toy_rounded, 'Personal Coach AI', Colors.purpleAccent),
+                _buildDialogFeaturePoint(Icons.auto_awesome, 'Unlimited AI Workouts', Colors.tealAccent),
+                _buildDialogFeaturePoint(Icons.star_purple500_sharp, 'Future Premium Features', Colors.amber),
+                SizedBox(height: 32.h),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColorManager.primary,
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    context.push(Routes.premiumScreen);
+                  },
+                  child: Text('View Premium Options', style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                ),
+                SizedBox(height: 12.h),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Maybe Later', style: TextStyle(color: ColorManager.textTertiary, fontSize: 14.sp)),
+                ),
+              ],
+            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Maybe Later', style: TextStyle(color: ColorManager.textTertiary)),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColorManager.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-              ),
-              onPressed: () {
-                Navigator.pop(context); // Close dialog
-                context.push(Routes.premiumScreen); // Route to premium screen
-              },
-              child: const Text('View Premium', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-            ),
-          ],
         );
       },
     );
