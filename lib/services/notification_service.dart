@@ -27,6 +27,9 @@ class NotificationService {
 
   Future<void> initialize() async {
     try {
+      // 0. Initialize local notifications first (needed for scheduled reminders)
+      await initializeLocalNotifications();
+
       // 1. Request Permission (essential for iOS and Android 13+)
       NotificationSettings settings = await _messaging.requestPermission(
         alert: true,

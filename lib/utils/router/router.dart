@@ -398,26 +398,21 @@ final GoRouter router = GoRouter(
           return PageTransitions.buildPageWithSlideTransition(
               state.pageKey, ExerciseTrackerPage(exerciseName: exerciseName));
         }),
-    // GoRoute(
-    //     path: Routes.progressPhotosRoute,
-    //     pageBuilder: (context, state) =>
-    //         PageTransitions.buildPageWithSlideTransition(
-    //             state.pageKey, const ProgressPhotosScreen())),
-    // GoRoute(
-    //     path: Routes.addProgressPhotoRoute,
-    //     pageBuilder: (context, state) =>
-    //         PageTransitions.buildPageWithSlideTransition(
-    //             state.pageKey, const AddProgressPhotoScreen())),
-    // GoRoute(
-    //     path: Routes.photoComparisonRoute,
-    //     pageBuilder: (context, state) =>
-    //         PageTransitions.buildPageWithSlideTransition(
-    //             state.pageKey, const PhotoComparisonScreen())),
-    // GoRoute(
-    //     path: Routes.plateauAnalysisRoute,
-    //     pageBuilder: (context, state) =>
-    //         PageTransitions.buildPageWithSlideTransition(
-    //             state.pageKey, const PlateauAnalysisScreen())),
+    GoRoute(
+        path: Routes.progressPhotosRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const ProgressPhotosScreen())),
+    GoRoute(
+        path: Routes.addProgressPhotoRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const AddProgressPhotoScreen())),
+    GoRoute(
+        path: Routes.photoComparisonRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const PhotoComparisonScreen())),
     GoRoute(
         path: Routes.aiChatRoute,
         pageBuilder: (context, state) =>

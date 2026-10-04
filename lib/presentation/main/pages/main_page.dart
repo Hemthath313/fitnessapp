@@ -305,9 +305,9 @@ class _MainPageState extends State<MainPage> {
             label: 'Workouts',
           ),
           NavigationDestination(
-            icon: Icon(Icons.psychology_outlined, color: ColorManager.textTertiary),
-            selectedIcon: Icon(Icons.psychology_rounded, color: ColorManager.primary),
-            label: 'AI Hub',
+            icon: Icon(Icons.menu_book_outlined, color: ColorManager.textTertiary),
+            selectedIcon: Icon(Icons.menu_book_rounded, color: ColorManager.primary),
+            label: 'Journal',
           ),
           NavigationDestination(
             icon: Icon(Icons.insights_outlined, color: ColorManager.textTertiary),

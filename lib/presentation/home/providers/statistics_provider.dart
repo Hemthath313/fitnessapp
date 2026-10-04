@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_app/services/notification_service.dart';
+import 'package:fitness_app/services/review_service.dart';
 import 'package:home_widget/home_widget.dart';
 
 class StatisticsProvider with ChangeNotifier {
@@ -12,12 +13,22 @@ class StatisticsProvider with ChangeNotifier {
   List<String> _unlockedAchievements = [];
   List<DateTime> _completedWorkoutDates = [];
 
+  /// Holds newly unlocked achievement IDs since last read (for showing celebration dialog)
+  List<String> _newlyUnlockedAchievements = [];
+
   int get currentStreak => _currentStreak;
   int get longestStreak => _longestStreak;
   DateTime? get lastWorkoutDate => _lastWorkoutDate;
   int get totalWorkouts => _totalWorkouts;
   List<String> get unlockedAchievements => [..._unlockedAchievements];
   List<DateTime> get completedWorkoutDates => _completedWorkoutDates;
+
+  /// Returns and clears newly unlocked achievements (consume once to show dialog)
+  List<String> consumeNewlyUnlocked() {
+    final result = [..._newlyUnlockedAchievements];
+    _newlyUnlockedAchievements.clear();
+    return result;
+  }
 
   Future<void> loadStreakData() async {
     try {
@@ -118,13 +129,27 @@ class StatisticsProvider with ChangeNotifier {
 
       // Schedule notification reminder to maintain streak
       await NotificationService().scheduleStreakReminder();
-      
+
+      // Schedule water reminder for 6 PM
+      await NotificationService().scheduleWaterReminder();
+
       // Reset re-engagement timers (3, 7, 14 days)
       await NotificationService().scheduleReEngagementNotifications();
 
       // Update Home Screen Widget
       await HomeWidget.saveWidgetData<int>('streak', _currentStreak);
       await HomeWidget.updateWidget(androidName: 'FitnessWidgetProvider');
+
+      // Trigger in-app review at key milestones
+      try {
+        final shouldReview = await ReviewService().incrementWorkoutsLogged();
+        if (shouldReview) {
+          await ReviewService().requestNativeReview();
+          await ReviewService().markAsPrompted();
+        }
+      } catch (e) {
+        print('Error with review service: $e');
+      }
 
       await fetchCompletedWorkoutDates();
       notifyListeners();
@@ -197,6 +222,7 @@ class StatisticsProvider with ChangeNotifier {
 
     if (newAchievements.isNotEmpty) {
       _unlockedAchievements.addAll(newAchievements);
+      _newlyUnlockedAchievements.addAll(newAchievements); // expose to UI
       notifyListeners();
       // Store updated achievements
       try {

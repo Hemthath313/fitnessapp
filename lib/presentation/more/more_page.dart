@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
+import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
+import 'package:fitness_app/presentation/home/widgets/achievements_widget.dart';
 import 'package:fitness_app/presentation/theme/providers/theme_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
@@ -17,8 +19,8 @@ class MorePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<HomeProvider, ThemeProvider>(
-      builder: (context, homeProvider, themeProvider, _) {
+    return Consumer3<HomeProvider, ThemeProvider, StatisticsProvider>(
+      builder: (context, homeProvider, themeProvider, statsProvider, _) {
         return SafeArea(
           bottom: false,
           child: SingleChildScrollView(
@@ -51,13 +53,17 @@ class MorePage extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
+                          // Avatar with initials instead of generic icon
                           CircleAvatar(
                             radius: SizeManager.s40.r,
-                            backgroundColor: ColorManager.primary.withOpacity(0.2),
-                            child: Icon(
-                              Icons.person,
-                              size: SizeManager.s40.sp,
-                              color: ColorManager.primary,
+                            backgroundColor: ColorManager.primary.withOpacity(0.25),
+                            child: Text(
+                              _getInitials(firstName, surname),
+                              style: TextStyle(
+                                color: ColorManager.primary,
+                                fontSize: SizeManager.s24.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                           SizedBox(width: SizeManager.s16.w),
@@ -89,6 +95,34 @@ class MorePage extends StatelessWidget {
                     );
                   },
                 ),
+                SizedBox(height: SizeManager.s24.h),
+
+                // My Stats & Progress shortcuts
+                _buildSectionTitle('My Activity'),
+                SizedBox(height: SizeManager.s12.h),
+                _buildMenuCard(
+                  context,
+                  icon: Icons.photo_camera_rounded,
+                  title: 'Progress Photos',
+                  subtitle: 'Track your physical transformation',
+                  color: Colors.pink,
+                  onTap: () => context.push(Routes.progressPhotosRoute),
+                ),
+                SizedBox(height: SizeManager.s12.h),
+                _buildMenuCard(
+                  context,
+                  icon: Icons.history_rounded,
+                  title: 'Workout History',
+                  subtitle: 'View all your past workouts',
+                  color: Colors.teal,
+                  onTap: () => context.push(Routes.workoutHistoryRoute),
+                ),
+                SizedBox(height: SizeManager.s24.h),
+
+                // Achievements Showcase
+                _buildSectionTitle('Achievements'),
+                SizedBox(height: SizeManager.s12.h),
+                _buildAchievementsSection(statsProvider),
                 SizedBox(height: SizeManager.s24.h),
 
                 // Premium Section
@@ -316,7 +350,7 @@ class MorePage extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Fitness App',
+                        'Gym Buddy',
                         style: TextStyle(
                           color: ColorManager.textSecondary,
                           fontSize: SizeManager.s14.sp,
@@ -325,7 +359,7 @@ class MorePage extends StatelessWidget {
                       Text(
                         'Version 1.0.0',
                         style: TextStyle(
-                          color: ColorManager.textSecondary,
+                          color: ColorManager.textTertiary,
                           fontSize: SizeManager.s12.sp,
                         ),
                       ),
@@ -337,6 +371,82 @@ class MorePage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  String _getInitials(String firstName, String surname) {
+    final first = firstName.isNotEmpty ? firstName[0].toUpperCase() : '';
+    final last = surname.isNotEmpty ? surname[0].toUpperCase() : '';
+    return '$first$last'.isEmpty ? '?' : '$first$last';
+  }
+
+  Widget _buildAchievementsSection(StatisticsProvider statsProvider) {
+    final unlocked = statsProvider.unlockedAchievements;
+    return SizedBox(
+      height: 90.h,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: allAchievements.length,
+        separatorBuilder: (_, __) => SizedBox(width: 10.w),
+        itemBuilder: (context, i) {
+          final def = allAchievements[i];
+          final isUnlocked = unlocked.contains(def.id);
+          return Tooltip(
+            message: isUnlocked ? def.desc : 'Locked: ${def.desc}',
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 400),
+              width: 72.w,
+              padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 6.w),
+              decoration: BoxDecoration(
+                color: isUnlocked
+                    ? def.color.withOpacity(0.12)
+                    : ColorManager.surfaceLight,
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(
+                  color: isUnlocked
+                      ? def.color.withOpacity(0.4)
+                      : ColorManager.divider,
+                  width: 1.5,
+                ),
+                boxShadow: isUnlocked
+                    ? [
+                        BoxShadow(
+                          color: def.color.withOpacity(0.2),
+                          blurRadius: 8,
+                        )
+                      ]
+                    : null,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    isUnlocked ? def.emoji : '🔒',
+                    style: TextStyle(fontSize: 24.sp),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    def.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: isUnlocked
+                          ? ColorManager.textPrimary
+                          : ColorManager.textTertiary,
+                      fontSize: 9.sp,
+                      fontWeight: isUnlocked
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 

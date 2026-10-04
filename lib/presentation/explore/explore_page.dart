@@ -31,6 +31,7 @@ class _ExploreWidgetState extends State<ExploreWidget>
         'image': ImageManager.strengthWorkout,
         'title': StringsManager.strengh,
         'description': 'Build strength and endurance with tailored workouts.',
+        'isPremiumRequired': false,
         'onTap': () async {
           final sub = Provider.of<SubscriptionProvider>(context, listen: false);
           if (!sub.isPremium) {
@@ -43,12 +44,14 @@ class _ExploreWidgetState extends State<ExploreWidget>
         'image': ImageManager.postWorkout,
         'title': 'Pain Relief & Mobility',
         'description': 'Targeted exercises to reduce pain and improve flexibility.',
+        'isPremiumRequired': false,
         'onTap': () => context.push(Routes.recoveryRoute),
       },
       {
         'image': ImageManager.dietAndNutrition,
         'title': StringsManager.diet,
         'description': 'Nutritional guidance for better performance.',
+        'isPremiumRequired': false,
         'onTap': () {
           context.push(Routes.dietRoute);
         },
@@ -57,7 +60,22 @@ class _ExploreWidgetState extends State<ExploreWidget>
         'image': ImageManager.cardioWorkout,
         'title': StringsManager.cardio,
         'description': 'Improve heart health with effective cardio routines.',
+        'isPremiumRequired': false,
         'onTap': () => context.push(Routes.cardioRoute),
+      },
+      {
+        'image': ImageManager.dumbels,
+        'title': 'Workout Splits',
+        'description': 'PPL, Bro Split, Upper/Lower — structured for real gains.',
+        'isPremiumRequired': true,
+        'onTap': () {
+          final sub = Provider.of<SubscriptionProvider>(context, listen: false);
+          if (!sub.isPremium) {
+            context.push(Routes.premiumScreen);
+          } else {
+            context.push(Routes.workoutSplitsRoute);
+          }
+        },
       },
     ];
 
@@ -100,14 +118,21 @@ class _ExploreWidgetState extends State<ExploreWidget>
               padding: const EdgeInsets.only(left: 12.0, right: 12.0, top: 12.0, bottom: 80.0),
               itemCount: cards.length,
               itemBuilder: (context, index) {
-                return RepaintBoundary(
-                  child: ExploreCard(
-                    animation: animations[index],
-                    image: cards[index]['image'],
-                    title: cards[index]['title'],
-                    description: cards[index]['description'],
-                    onTap: cards[index]['onTap'],
-                  ),
+                final isPremiumRequired = cards[index]['isPremiumRequired'] as bool? ?? false;
+                return Consumer<SubscriptionProvider>(
+                  builder: (context, subProvider, _) {
+                    final isLocked = isPremiumRequired && !subProvider.isPremium;
+                    return RepaintBoundary(
+                      child: ExploreCard(
+                        animation: animations[index],
+                        image: cards[index]['image'],
+                        title: cards[index]['title'],
+                        description: cards[index]['description'],
+                        isPremiumLocked: isLocked,
+                        onTap: cards[index]['onTap'],
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -124,6 +149,7 @@ class ExploreCard extends StatelessWidget {
   final String image;
   final String title;
   final String description;
+  final bool isPremiumLocked;
   final VoidCallback onTap;
 
   const ExploreCard({
@@ -133,6 +159,7 @@ class ExploreCard extends StatelessWidget {
     required this.title,
     required this.description,
     required this.onTap,
+    this.isPremiumLocked = false,
   });
 
   @override
@@ -164,11 +191,19 @@ class ExploreCard extends StatelessWidget {
               onTap: onTap,
               child: Stack(
                 children: [
-                  Image.asset(
-                    image,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: 210,
+                  // Background image with dimming when locked
+                  ColorFiltered(
+                    colorFilter: isPremiumLocked
+                        ? const ColorFilter.mode(
+                            Colors.black45, BlendMode.darken)
+                        : const ColorFilter.mode(
+                            Colors.transparent, BlendMode.multiply),
+                    child: Image.asset(
+                      image,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: 210,
+                    ),
                   ),
                   Container(
                     height: 210,
@@ -185,6 +220,55 @@ class ExploreCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  // 👑 Premium badge — top right corner
+                  if (isPremiumLocked)
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade700,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.amber.withOpacity(0.4),
+                              blurRadius: 8,
+                              spreadRadius: 0,
+                            )
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(Icons.workspace_premium_rounded,
+                                color: Colors.white, size: 14),
+                            SizedBox(width: 4),
+                            Text(
+                              'PREMIUM',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  // Lock icon overlay in center when premium locked
+                  if (isPremiumLocked)
+                    Positioned.fill(
+                      child: Center(
+                        child: Icon(
+                          Icons.lock_rounded,
+                          color: Colors.white.withOpacity(0.7),
+                          size: 36,
+                        ),
+                      ),
+                    ),
                   Positioned(
                     bottom: 16,
                     left: 16,
@@ -208,7 +292,9 @@ class ExploreCard extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                description,
+                                isPremiumLocked
+                                    ? 'Unlock with Premium to access'
+                                    : description,
                                 style: TextStyle(
                                   color: Colors.white.withOpacity(0.75),
                                   fontSize: 13.0,
@@ -222,11 +308,15 @@ class ExploreCard extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: ColorManager.primary.withOpacity(0.85),
+                            color: isPremiumLocked
+                                ? Colors.amber.shade700
+                                : ColorManager.primary.withOpacity(0.85),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
-                            Icons.arrow_forward_ios_rounded,
+                          child: Icon(
+                            isPremiumLocked
+                                ? Icons.workspace_premium_rounded
+                                : Icons.arrow_forward_ios_rounded,
                             color: Colors.white,
                             size: 11,
                           ),

@@ -43,6 +43,12 @@ class QuickActionsWidget extends StatelessWidget {
         'color': Colors.teal,
         'onTap': () => context.push(Routes.workoutHistoryRoute),
       },
+      {
+        'icon': Icons.photo_camera_rounded,
+        'label': 'Progress',
+        'color': Colors.pink,
+        'onTap': () => context.push(Routes.progressPhotosRoute),
+      },
     ];
 
     return Padding(

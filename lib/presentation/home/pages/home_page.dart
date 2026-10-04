@@ -3,6 +3,7 @@ import 'package:fitness_app/presentation/home/widgets/carousel_slider_home_widge
 import 'package:fitness_app/presentation/home/widgets/fitness_data_widget.dart';
 import 'package:fitness_app/presentation/home/widgets/home_page_text_spacer_widget.dart';
 import 'package:fitness_app/presentation/home/widgets/quick_actions_widget.dart';
+import 'package:fitness_app/presentation/home/widgets/achievements_widget.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:flutter/material.dart';
@@ -24,34 +25,52 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     Provider.of<ConsumptionProvider>(context, listen: false)
         .getConsumedCalories();
-    // Water data is loaded in MainPage after reset check
-    // Load weekly stats
-    final statsProvider = Provider.of<StatisticsProvider>(context, listen: false);
-    statsProvider.getWeeklyStats();
+    Provider.of<StatisticsProvider>(context, listen: false).getWeeklyStats();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkForNewAchievements();
+    });
+  }
+
+  void _checkForNewAchievements() {
+    final stats = Provider.of<StatisticsProvider>(context, listen: false);
+    final newlyUnlocked = stats.consumeNewlyUnlocked();
+    for (final id in newlyUnlocked) {
+      try {
+        final def = allAchievements.firstWhere((a) => a.id == id);
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) showAchievementUnlockDialog(context, def);
+        });
+      } catch (_) {}
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      bottom: false,
+      bottom: true,
       child: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Today's Progress - Shows BMI, Calories, Water
+            SizedBox(height: SizeManager.s8.h),
+
+            // Quick Actions — first thing a user sees, immediate utility
+            const QuickActionsWidget(),
+            SizedBox(height: SizeManager.s16.h),
+
+            // Today's Progress — Calories, Water, BMI
             FitnessDataWidget(),
             SizedBox(height: SizeManager.s16.h),
 
-            // Quick Actions
-            const QuickActionsWidget(),
-
+            // Challenges Carousel
             const HomePageTextSpacerWidget(
               title: StringsManager.challenges,
             ),
             const CarouselSliderHomeWidget(),
 
-            const PremiumAwareBannerAd(pageName: 'home'),
+            const PremiumAwareBannerAd(pageName: 'home', bottomMargin: 60.0),
             SizedBox(height: SizeManager.s16.h),
           ],
         ),
