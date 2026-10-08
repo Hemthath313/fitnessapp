@@ -17,11 +17,11 @@ class _PremiumScreenState extends State<PremiumScreen> {
   @override
   void initState() {
     super.initState();
-    // Trigger a one-time auto-restore attempt when opening the paywall.
-    // This helps when the store already owns the subscription but user changed app login email.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final sub = Provider.of<SubscriptionProvider>(context, listen: false);
-      // sub.autoRestoreIfNeeded();
+      if (!sub.isPremium) {
+        sub.restorePurchases();
+      }
     });
   }
 
@@ -174,34 +174,40 @@ class _PremiumScreenState extends State<PremiumScreen> {
     return Column(
       children: [
         _buildFeatureItem(
-          Icons.smart_toy_rounded, 
-          'Personal Coach AI', 
-          'Get real-time feedback and dynamic adjustments from your AI Coach.',
-          Colors.purpleAccent,
-        ),
-        _buildFeatureItem(
           Icons.auto_awesome, 
           'AI Workout Generator', 
-          'Build unlimited personalized weekly workout plans with AI.',
+          'Build, customize & save unlimited personalized weekly workout splits.',
           Colors.tealAccent,
         ),
         _buildFeatureItem(
-          Icons.restaurant_menu, 
-          'Advanced Diet & Macros', 
-          'Track calories, macros, and access premium nutritional plans.',
-          Colors.orangeAccent,
+          Icons.file_download_outlined, 
+          'Full History & CSV Export', 
+          'Unlimited workout logs, calendar activity tracking, and Excel/CSV export.',
+          Colors.blueAccent,
         ),
         _buildFeatureItem(
-          Icons.star_purple500_sharp, 
-          'Future Premium Features', 
-          'Lock in access to all upcoming advanced features and updates.',
-          Colors.yellowAccent,
+          Icons.restaurant_menu, 
+          'Advanced Diet & Nutrition', 
+          'Access structured bulking, cutting, and maintenance meal plans.',
+          Colors.orangeAccent,
         ),
         _buildFeatureItem(
           Icons.ads_click, 
           'Ad-Free Experience', 
           'Remove all ads and focus entirely on your training.',
           Colors.greenAccent,
+        ),
+        _buildFeatureItem(
+          Icons.fitness_center_rounded, 
+          'Barbell Plate Math & Visualizer', 
+          'Instant 2D Olympic plate math per side for all barbell lifts (kg & lbs).',
+          Colors.amberAccent,
+        ),
+        _buildFeatureItem(
+          Icons.star_purple500_sharp, 
+          'Future Premium Features', 
+          'Lock in access to all upcoming advanced training features and updates.',
+          Colors.yellowAccent,
         ),
       ],
     );

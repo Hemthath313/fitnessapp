@@ -21,12 +21,14 @@ class CustomWorkoutsPage extends StatefulWidget {
 class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
   late DateTime _focusedDay;
   DateTime? _selectedDay;
+  late final Stream<List<WorkoutLog>> _logsStream;
 
   @override
   void initState() {
     super.initState();
     _focusedDay = DateTime.now();
     _selectedDay = _focusedDay;
+    _logsStream = WorkoutLogService().getLogs();
   }
 
   // Normalize date to ignore time for calendar comparisons
@@ -35,57 +37,66 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
   }
 
   void _showWorkoutDetails(BuildContext context, List<WorkoutLog> dailyLogs) {
+    if (dailyLogs.isEmpty) return;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: ColorManager.surface,
+      isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.all(20.w),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Workouts on ${DateFormat('MMM d, yyyy').format(dailyLogs.first.date)}',
-                style: TextStyle(
-                  color: ColorManager.white,
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 16.h),
-              if (dailyLogs.isEmpty)
-                Text('No workouts logged.', style: TextStyle(color: ColorManager.textSecondary))
-              else
-                ...dailyLogs.map((log) => Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8.h),
-                  child: Row(
-                    children: [
-                      Icon(Icons.check_circle, color: ColorManager.primary, size: 20.sp),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              log.exerciseName,
-                              style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold, fontSize: 16.sp),
-                            ),
-                            Text(
-                              '${log.sets.length} Sets',
-                              style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.7,
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(20.w),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Workouts on ${DateFormat('MMM d, yyyy').format(dailyLogs.first.date)}',
+                    style: TextStyle(
+                      color: ColorManager.white,
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                )),
-              SizedBox(height: 16.h),
-            ],
+                  SizedBox(height: 16.h),
+                  ...dailyLogs.map(
+                    (log) => Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.h),
+                      child: Row(
+                        children: [
+                          Icon(Icons.check_circle, color: ColorManager.primary, size: 20.sp),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  log.exerciseName,
+                                  style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold, fontSize: 16.sp),
+                                ),
+                                Text(
+                                  '${log.sets.length} Sets',
+                                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                ],
+              ),
+            ),
           ),
         );
       },
@@ -131,7 +142,7 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
               Text('Activity Calendar', style: TextStyle(color: ColorManager.white, fontSize: SizeManager.s18.sp, fontWeight: FontWeight.bold)),
               SizedBox(height: SizeManager.s16.h),
               StreamBuilder<List<WorkoutLog>>(
-                stream: WorkoutLogService().getLogs(),
+                stream: _logsStream,
                 builder: (context, snapshot) {
                   final logs = snapshot.data ?? [];
                   

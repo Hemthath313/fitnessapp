@@ -67,7 +67,7 @@ class _WorkoutTabPageState extends State<WorkoutTabPage> {
                     ],
                   ),
                   GestureDetector(
-                    onTap: () => context.push(Routes.aiChatRoute),
+                    onTap: () => context.push(Routes.workoutGeneratorRoute),
                     child: Container(
                       padding: EdgeInsets.all(10.w),
                       decoration: BoxDecoration(
@@ -80,14 +80,18 @@ class _WorkoutTabPageState extends State<WorkoutTabPage> {
                   ),
                 ],
               ),
+              SizedBox(height: 24.h),
+
+              // AI Weekly Schedule Section (Prominently at the Top)
+              const WeeklyScheduleWidget(),
               SizedBox(height: 28.h),
 
-              // Categories Grid
+              // Exercise Library Categories
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Categories',
+                    'Exercise Library',
                     style: TextStyle(
                       color: ColorManager.white,
                       fontSize: 18.sp,
@@ -153,10 +157,6 @@ class _WorkoutTabPageState extends State<WorkoutTabPage> {
                   );
                 },
               ),
-              SizedBox(height: 28.h),
-
-              // AI Weekly Schedule Section
-              const WeeklyScheduleWidget(),
               SizedBox(height: 80.h), // Safe spacing for bottom navigation
             ],
           ),

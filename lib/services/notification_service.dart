@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:fitness_app/utils/router/router.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -67,7 +68,6 @@ class NotificationService {
           if (kDebugMode) {
             print('Message also contained a notification: ${message.notification?.title}');
           }
-          // In the future, we could trigger custom alerts or banners here.
         }
       });
 
@@ -76,6 +76,7 @@ class NotificationService {
         if (kDebugMode) {
           print('A new onMessageOpenedApp event was published!');
         }
+        _handleNotificationRoute(message.data);
       });
 
       // 7. Check if app was opened from terminated state via a notification
@@ -84,6 +85,7 @@ class NotificationService {
         if (kDebugMode) {
           print('App opened from terminated state via notification: ${initialMessage.messageId}');
         }
+        _handleNotificationRoute(initialMessage.data);
       }
     } catch (e) {
       if (kDebugMode) {
@@ -92,16 +94,48 @@ class NotificationService {
     }
   }
 
+  void _handleNotificationRoute(Map<String, dynamic> data) {
+    try {
+      final route = data['route'] as String?;
+      if (route != null && route.isNotEmpty) {
+        router.push(route);
+      }
+    } catch (e) {
+      if (kDebugMode) print('Error routing notification: $e');
+    }
+  }
+
   Future<void> initializeLocalNotifications() async {
     tz.initializeTimeZones();
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/launcher_icon');
     
-    // For iOS, you might need DarwinInitializationSettings
-    const InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
+    const DarwinInitializationSettings initializationSettingsDarwin =
+        DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
 
-    await _localNotificationsPlugin.initialize(settings: initializationSettings);
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsDarwin,
+    );
+
+    await _localNotificationsPlugin.initialize(
+      settings: initializationSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse response) {
+        final payload = response.payload;
+        if (payload != null && payload.isNotEmpty) {
+          try {
+            router.push(payload);
+          } catch (e) {
+            if (kDebugMode) print('Error navigating from local notification payload: $e');
+          }
+        }
+      },
+    );
 
     // Request permissions for Android 13+
     _localNotificationsPlugin.resolvePlatformSpecificImplementation<
@@ -132,6 +166,7 @@ class NotificationService {
           body: 'You are about to lose your streak. Log a glass of water or a quick workout to keep it alive!',
           scheduledDate: scheduledDate,
           notificationDetails: platformChannelSpecifics,
+          payload: Routes.workoutLogRoute,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle);
               
       if (kDebugMode) print('Scheduled streak reminder for $scheduledDate');
@@ -167,6 +202,7 @@ class NotificationService {
           body: 'It is 6 PM! Have you reached your water goal for today?',
           scheduledDate: scheduledDate,
           notificationDetails: platformChannelSpecifics,
+          payload: Routes.addWaterRoute,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
           matchDateTimeComponents: DateTimeComponents.time);
               

@@ -11,6 +11,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 
 class SetLogInput {
   final TextEditingController weightController;
@@ -277,6 +279,9 @@ class _InteractiveExerciseDetailWidgetState
 
     try {
       await _logService.addLog(log);
+      if (mounted) {
+        Provider.of<StatisticsProvider>(context, listen: false).updateStreak();
+      }
 
       // Stop/Cancel the rest timer since the workout session is finished and saved!
       _restTimer?.cancel();

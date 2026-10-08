@@ -27,6 +27,34 @@ class WorkoutProvider with ChangeNotifier {
     return [..._allWorkouts];
   }
 
+  bool isDayWorkoutCompletedToday(String dayName) {
+    final now = DateTime.now();
+    return _finishedWorkouts.any((w) {
+      final isSameDay = w.dateTime.year == now.year &&
+          w.dateTime.month == now.month &&
+          w.dateTime.day == now.day;
+      if (!isSameDay) return false;
+      return w.name == dayName ||
+          w.name == 'custom_$dayName' ||
+          w.name.contains(dayName);
+    });
+  }
+
+  void markWorkoutDayCompleted(String dayName) {
+    final now = DateTime.now();
+    // Avoid duplicate additions in the same session
+    if (!isDayWorkoutCompletedToday(dayName)) {
+      _finishedWorkouts.add(WorkoutModel(
+        id: 'custom_${dayName}_${now.millisecondsSinceEpoch}',
+        name: dayName,
+        repNumber: 0,
+        setNumber: 1,
+        dateTime: now,
+      ));
+    }
+    notifyListeners();
+  }
+
   void clearAllWorkouts() {
     _workouts.clear();
     _allWorkouts.clear();
@@ -286,46 +314,29 @@ class WorkoutProvider with ChangeNotifier {
     if (isLastDateTimeDifferent(now, lastDateTime)) {
       try {
         User? user = FirebaseAuth.instance.currentUser;
+        if (user == null) return;
 
+        // Clean ONLY ad-hoc, ephemeral one-off workouts from the daily queue.
+        // DO NOT delete AI weekly plan workouts [Monday], [Wednesday], etc.!
         await FirebaseFirestore.instance
             .collection('workouts')
-            .doc(user!.uid)
+            .doc(user.uid)
             .collection('workoutData')
             .get()
             .then((workoutSnapshot) {
           for (var doc in workoutSnapshot.docs) {
+            final name = doc.data()['name'] as String? ?? '';
+            // Protect recurring AI weekly plan items
+            if (name.startsWith('[')) continue;
             DateTime workoutDateTime = (doc['dateTime'] as Timestamp).toDate();
             if (isWorkoutDateDifferent(now, workoutDateTime)) {
               doc.reference.delete();
             }
           }
         });
-        await FirebaseFirestore.instance
-            .collection('finishedWorkouts')
-            .doc(user.uid)
-            .collection('finishedWorkoutsData')
-            .get()
-            .then((finishedWorkoutSnapshot) {
-          for (var doc in finishedWorkoutSnapshot.docs) {
-            DateTime workoutDateTime = (doc['dateTime'] as Timestamp).toDate();
-            if (isWorkoutDateDifferent(now, workoutDateTime)) {
-              doc.reference.delete();
-            }
-          }
-        });
-        await FirebaseFirestore.instance
-            .collection('allWorkouts')
-            .doc(user.uid)
-            .collection('allWorkoutsData')
-            .get()
-            .then((finishedWorkoutSnapshot) {
-          for (var doc in finishedWorkoutSnapshot.docs) {
-            DateTime workoutDateTime = (doc['dateTime'] as Timestamp).toDate();
-            if (isWorkoutDateDifferent(now, workoutDateTime)) {
-              doc.reference.delete();
-            }
-          }
-        });
+
+        // NOTE: finishedWorkouts MUST NEVER be deleted! It is the user's permanent completed workout history and streak source!
+        // NOTE: allWorkouts MUST NEVER be deleted! It holds the user's weekly split routines and workout templates!
       } catch (e) {
         rethrow;
       }
@@ -413,9 +424,66 @@ class WorkoutProvider with ChangeNotifier {
       }
 
       await batch.commit();
+
+      // Clean local memory lists immediately
+      _workouts.removeWhere((w) => w.name.startsWith('['));
+      _allWorkouts.removeWhere((w) => w.name.startsWith('['));
       notifyListeners();
     } catch (e) {
       rethrow;
+    }
+  }
+
+  /// Restores or ensures a complete 3-Day Split (Monday, Wednesday, Friday)
+  /// Used if past bugs wiped Monday or Friday, giving the user a complete routine.
+  Future<void> restoreDefaultThreeDaySplit() async {
+    final now = DateTime.now();
+    final List<WorkoutModel> workoutsToAdd = [];
+
+    final existingDays = <String>{};
+    for (var w in _allWorkouts) {
+      final match = RegExp(r'^\[(\w+)\]').firstMatch(w.name);
+      if (match != null) {
+        existingDays.add(match.group(1)!);
+      }
+    }
+
+    // Default Monday Plan (Full Body A)
+    if (!existingDays.contains('Monday')) {
+      workoutsToAdd.addAll([
+        WorkoutModel(id: '', name: '[Monday] Barbell Bench Press', repNumber: 10, setNumber: 4, dateTime: now),
+        WorkoutModel(id: '', name: '[Monday] Barbell Bent Over Row', repNumber: 10, setNumber: 4, dateTime: now),
+        WorkoutModel(id: '', name: '[Monday] Classic Barbell Squat', repNumber: 10, setNumber: 4, dateTime: now),
+        WorkoutModel(id: '', name: '[Monday] Standing Military Press', repNumber: 10, setNumber: 3, dateTime: now),
+        WorkoutModel(id: '', name: '[Monday] Barbell Curl', repNumber: 12, setNumber: 3, dateTime: now),
+      ]);
+    }
+
+    // Default Wednesday Plan (Full Body B)
+    if (!existingDays.contains('Wednesday')) {
+      workoutsToAdd.addAll([
+        WorkoutModel(id: '', name: '[Wednesday] Incline Dumbbell Press', repNumber: 10, setNumber: 4, dateTime: now),
+        WorkoutModel(id: '', name: '[Wednesday] Lat Pulldown', repNumber: 10, setNumber: 4, dateTime: now),
+        WorkoutModel(id: '', name: '[Wednesday] Leg Press', repNumber: 12, setNumber: 4, dateTime: now),
+        WorkoutModel(id: '', name: '[Wednesday] Dumbbell Lateral Raise', repNumber: 15, setNumber: 3, dateTime: now),
+        WorkoutModel(id: '', name: '[Wednesday] Tricep Pushdown', repNumber: 12, setNumber: 3, dateTime: now),
+      ]);
+    }
+
+    // Default Friday Plan (Full Body C)
+    if (!existingDays.contains('Friday')) {
+      workoutsToAdd.addAll([
+        WorkoutModel(id: '', name: '[Friday] Chest Dips', repNumber: 12, setNumber: 3, dateTime: now),
+        WorkoutModel(id: '', name: '[Friday] Seated Cable Row', repNumber: 10, setNumber: 4, dateTime: now),
+        WorkoutModel(id: '', name: '[Friday] Barbell Lunge', repNumber: 10, setNumber: 3, dateTime: now),
+        WorkoutModel(id: '', name: '[Friday] Arnold Press', repNumber: 10, setNumber: 3, dateTime: now),
+        WorkoutModel(id: '', name: '[Friday] Dumbbell Curl', repNumber: 12, setNumber: 3, dateTime: now),
+      ]);
+    }
+
+    if (workoutsToAdd.isNotEmpty) {
+      await addNewWorkouts(workoutsToAdd);
+      await fetchAndSetWorkouts();
     }
   }
 

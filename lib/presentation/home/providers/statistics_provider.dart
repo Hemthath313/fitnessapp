@@ -23,6 +23,19 @@ class StatisticsProvider with ChangeNotifier {
   List<String> get unlockedAchievements => [..._unlockedAchievements];
   List<DateTime> get completedWorkoutDates => _completedWorkoutDates;
 
+  bool get hasWorkoutToday {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    if (_completedWorkoutDates.any((d) =>
+        d.year == today.year && d.month == today.month && d.day == today.day)) {
+      return true;
+    }
+    if (_lastWorkoutDate == null) return false;
+    return _lastWorkoutDate!.year == now.year &&
+        _lastWorkoutDate!.month == now.month &&
+        _lastWorkoutDate!.day == now.day;
+  }
+
   /// Returns and clears newly unlocked achievements (consume once to show dialog)
   List<String> consumeNewlyUnlocked() {
     final result = [..._newlyUnlockedAchievements];
@@ -30,11 +43,64 @@ class StatisticsProvider with ChangeNotifier {
     return result;
   }
 
+  /// Helper: calculate consecutive streak days directly from unique workout dates
+  int _calculateCurrentStreak(Set<DateTime> normalizedDates) {
+    if (normalizedDates.isEmpty) return 0;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = DateTime(today.year, today.month, today.day - 1);
+
+    // If user worked out today, streak is anchored at today.
+    // If not worked out today but worked out yesterday, streak is still active (anchored at yesterday).
+    // If neither, streak is 0.
+    DateTime currentCheck;
+    if (normalizedDates.contains(today)) {
+      currentCheck = today;
+    } else if (normalizedDates.contains(yesterday)) {
+      currentCheck = yesterday;
+    } else {
+      return 0;
+    }
+
+    int streak = 0;
+    while (normalizedDates.contains(currentCheck)) {
+      streak++;
+      currentCheck = DateTime(currentCheck.year, currentCheck.month, currentCheck.day - 1);
+    }
+    return streak;
+  }
+
+  /// Helper: calculate maximum consecutive streak ever achieved
+  int _calculateLongestStreak(Set<DateTime> normalizedDates) {
+    if (normalizedDates.isEmpty) return 0;
+    final sortedList = normalizedDates.toList()..sort();
+    int maxStreak = 1;
+    int currentRun = 1;
+    for (int i = 1; i < sortedList.length; i++) {
+      final prev = sortedList[i - 1];
+      final curr = sortedList[i];
+      final expectedNext = DateTime(prev.year, prev.month, prev.day + 1);
+      if (curr.year == expectedNext.year &&
+          curr.month == expectedNext.month &&
+          curr.day == expectedNext.day) {
+        currentRun++;
+        if (currentRun > maxStreak) {
+          maxStreak = currentRun;
+        }
+      } else {
+        currentRun = 1;
+      }
+    }
+    return maxStreak;
+  }
+
   Future<void> loadStreakData() async {
     try {
       User? user = FirebaseAuth.instance.currentUser;
       if (user == null) return;
 
+      // 1. Read existing doc to get achievements and historical longest streak
       final doc = await FirebaseFirestore.instance
           .collection('statistics')
           .doc(user.uid)
@@ -50,26 +116,54 @@ class StatisticsProvider with ChangeNotifier {
         if (doc.data()?['lastWorkoutDate'] != null) {
           _lastWorkoutDate =
               (doc.data()!['lastWorkoutDate'] as Timestamp).toDate();
-
-          // Check if streak is broken (more than 1 day since last workout)
-          final now = DateTime.now();
-          final today = DateTime(now.year, now.month, now.day);
-          final lastDate = DateTime(_lastWorkoutDate!.year,
-              _lastWorkoutDate!.month, _lastWorkoutDate!.day);
-          final diffDays = today.difference(lastDate).inDays;
-
-          if (diffDays > 1) {
-            _currentStreak = 0;
-            // Persist reset to Firestore
-            await FirebaseFirestore.instance
-                .collection('statistics')
-                .doc(user.uid)
-                .update({'currentStreak': 0});
-          }
         }
       }
 
+      // 2. Fetch all actual workout dates from BOTH finishedWorkouts and workout_logs
       await fetchCompletedWorkoutDates();
+
+      // 3. Recalculate streak dynamically from the aggregated dates (self-healing)
+      final normalizedDates = _completedWorkoutDates.toSet();
+      if (normalizedDates.isNotEmpty) {
+        final calculatedStreak = _calculateCurrentStreak(normalizedDates);
+        final calculatedLongest = _calculateLongestStreak(normalizedDates);
+
+        _currentStreak = calculatedStreak;
+        if (calculatedLongest > _longestStreak) {
+          _longestStreak = calculatedLongest;
+        }
+        if (_currentStreak > _longestStreak) {
+          _longestStreak = _currentStreak;
+        }
+
+        final sortedDates = normalizedDates.toList()..sort();
+        if (sortedDates.isNotEmpty) {
+          _lastWorkoutDate = sortedDates.last;
+        }
+        _totalWorkouts = [
+          _totalWorkouts,
+          normalizedDates.length
+        ].reduce((a, b) => a > b ? a : b);
+
+        // Sync reconciled statistics back to Firestore
+        await FirebaseFirestore.instance
+            .collection('statistics')
+            .doc(user.uid)
+            .set({
+          'currentStreak': _currentStreak,
+          'longestStreak': _longestStreak,
+          'lastWorkoutDate': _lastWorkoutDate != null
+              ? Timestamp.fromDate(_lastWorkoutDate!)
+              : null,
+          'totalWorkouts': _totalWorkouts,
+          'achievements': _unlockedAchievements,
+        }, SetOptions(merge: true));
+      }
+
+      // 4. Update home widget
+      await HomeWidget.saveWidgetData<int>('streak', _currentStreak);
+      await HomeWidget.updateWidget(androidName: 'FitnessWidgetProvider');
+
       notifyListeners();
     } catch (e) {
       print('Error loading streak data: $e');
@@ -82,35 +176,27 @@ class StatisticsProvider with ChangeNotifier {
       if (user == null) return;
 
       final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
+      final todayDate = DateTime(now.year, now.month, now.day);
 
-      // Check if user worked out today or yesterday
-      if (_lastWorkoutDate != null) {
-        final lastDate = DateTime(_lastWorkoutDate!.year,
-            _lastWorkoutDate!.month, _lastWorkoutDate!.day);
-        final diffDays = today.difference(lastDate).inDays;
+      // Re-fetch all dates from both sources and ensure today is included
+      await fetchCompletedWorkoutDates();
+      final normalizedDates = _completedWorkoutDates.toSet()..add(todayDate);
+      _completedWorkoutDates = normalizedDates.toList();
 
-        if (diffDays == 0) {
-          // Same day, don't increase streak
-          return;
-        } else if (diffDays == 1) {
-          // Yesterday, increment streak
-          _currentStreak++;
-          if (_currentStreak > _longestStreak) {
-            _longestStreak = _currentStreak;
-          }
-        } else {
-          // Streak broken
-          _currentStreak = 1;
-        }
-      } else {
-        // First workout
-        _currentStreak = 1;
-        _longestStreak = 1;
+      _currentStreak = _calculateCurrentStreak(normalizedDates);
+      final calculatedLongest = _calculateLongestStreak(normalizedDates);
+      if (calculatedLongest > _longestStreak) {
+        _longestStreak = calculatedLongest;
+      }
+      if (_currentStreak > _longestStreak) {
+        _longestStreak = _currentStreak;
       }
 
       _lastWorkoutDate = now;
-      _totalWorkouts++;
+      _totalWorkouts = [
+        _totalWorkouts + 1,
+        normalizedDates.length
+      ].reduce((a, b) => a > b ? a : b);
 
       // Save to Firestore
       await FirebaseFirestore.instance
@@ -148,10 +234,9 @@ class StatisticsProvider with ChangeNotifier {
           await ReviewService().markAsPrompted();
         }
       } catch (e) {
-        print('Error with review service: $e');
+        print('Error handling review prompt in StatisticsProvider: $e');
       }
 
-      await fetchCompletedWorkoutDates();
       notifyListeners();
     } catch (e) {
       print('Error updating streak: $e');
@@ -163,25 +248,49 @@ class StatisticsProvider with ChangeNotifier {
       User? user = FirebaseAuth.instance.currentUser;
       if (user == null) return;
 
-      final snapshot = await FirebaseFirestore.instance
-          .collection('finishedWorkouts')
-          .doc(user.uid)
-          .collection('finishedWorkoutsData')
-          .get();
+      final Set<DateTime> dates = {};
 
-      final List<DateTime> dates = [];
-      for (var doc in snapshot.docs) {
-        if (doc.data()['dateTime'] != null) {
-          final date = (doc.data()['dateTime'] as Timestamp).toDate();
-          dates.add(DateTime(date.year, date.month, date.day));
+      // 1. Fetch from finishedWorkouts (AI routines & custom session workouts)
+      try {
+        final finishedSnap = await FirebaseFirestore.instance
+            .collection('finishedWorkouts')
+            .doc(user.uid)
+            .collection('finishedWorkoutsData')
+            .get();
+
+        for (var doc in finishedSnap.docs) {
+          if (doc.data()['dateTime'] != null) {
+            final date = (doc.data()['dateTime'] as Timestamp).toDate();
+            dates.add(DateTime(date.year, date.month, date.day));
+          }
         }
+      } catch (e) {
+        print('Error fetching finishedWorkouts dates: $e');
+      }
+
+      // 2. Fetch from users/{uid}/workout_logs (manual lifts & exercise trackers)
+      try {
+        final logsSnap = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('workout_logs')
+            .get();
+
+        for (var doc in logsSnap.docs) {
+          if (doc.data()['date'] != null) {
+            final date = (doc.data()['date'] as Timestamp).toDate();
+            dates.add(DateTime(date.year, date.month, date.day));
+          }
+        }
+      } catch (e) {
+        print('Error fetching workout_logs dates: $e');
       }
 
       if (_lastWorkoutDate != null) {
         dates.add(DateTime(_lastWorkoutDate!.year, _lastWorkoutDate!.month, _lastWorkoutDate!.day));
       }
 
-      _completedWorkoutDates = dates.toSet().toList();
+      _completedWorkoutDates = dates.toList();
       notifyListeners();
     } catch (e) {
       print('Error fetching completed workout dates: $e');

@@ -100,15 +100,7 @@ class MorePage extends StatelessWidget {
                 // My Stats & Progress shortcuts
                 _buildSectionTitle('My Activity'),
                 SizedBox(height: SizeManager.s12.h),
-                _buildMenuCard(
-                  context,
-                  icon: Icons.photo_camera_rounded,
-                  title: 'Progress Photos',
-                  subtitle: 'Track your physical transformation',
-                  color: Colors.pink,
-                  onTap: () => context.push(Routes.progressPhotosRoute),
-                ),
-                SizedBox(height: SizeManager.s12.h),
+
                 _buildMenuCard(
                   context,
                   icon: Icons.history_rounded,

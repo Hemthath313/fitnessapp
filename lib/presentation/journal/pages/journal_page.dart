@@ -1,6 +1,4 @@
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
-import 'package:fitness_app/presentation/workout_logs/workout_history_screen.dart';
-import 'package:fitness_app/services/workout_log_service.dart';
 import 'package:fitness_app/presentation/banner_ads/banner_ad_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
@@ -47,10 +45,11 @@ class _JournalPageState extends State<JournalPage> {
             ),
             SizedBox(height: SizeManager.s24.h),
 
-            if (!Provider.of<SubscriptionProvider>(context).isPremium)
+            if (!Provider.of<SubscriptionProvider>(context).isPremium) ...[
               _buildPremiumUpgradeCard(),
+              SizedBox(height: SizeManager.s20.h),
+            ],
 
-            SizedBox(height: SizeManager.s20.h),
             _buildAICoachCard(),
             SizedBox(height: SizeManager.s20.h),
             const WeeklyScheduleWidget(),
@@ -66,7 +65,11 @@ class _JournalPageState extends State<JournalPage> {
                     icon: Icons.flatware_rounded,
                     color: Colors.orange,
                     isLocked: true,
-                    onTap: null,
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Meal Planner is coming in an upcoming update! 🚀')),
+                      );
+                    },
                   ),
                 ),
                 SizedBox(width: SizeManager.s12.w),
@@ -77,7 +80,11 @@ class _JournalPageState extends State<JournalPage> {
                     icon: Icons.qr_code_scanner_rounded,
                     color: Colors.green,
                     isLocked: true,
-                    onTap: null,
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('AI Scanner is coming in an upcoming update! 🚀')),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -91,8 +98,6 @@ class _JournalPageState extends State<JournalPage> {
       ),
     );
   }
-
-  // ... (keep previous methods like _buildPremiumUpgradeCard, _buildAIInsightCard, _buildNutritionAnalysisCard)
 
 
   Widget _buildPremiumUpgradeCard() {
@@ -126,7 +131,7 @@ class _JournalPageState extends State<JournalPage> {
                 ),
                 SizedBox(height: SizeManager.s4.h),
                 Text(
-                  'Ads-free, AI Coach, Pro Tools & More.',
+                  'Ads-free, AI Workouts, Pro Tools & More.',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: SizeManager.s12.sp,
@@ -283,7 +288,7 @@ class _JournalPageState extends State<JournalPage> {
                   color: ColorManager.primary),
               SizedBox(width: SizeManager.s8.w),
               Text(
-                'AI Personal Coach',
+                'AI Workout Generator',
                 style: TextStyle(
                   color: ColorManager.textPrimary,
                   fontSize: SizeManager.s18.sp,
@@ -311,8 +316,8 @@ class _JournalPageState extends State<JournalPage> {
           SizedBox(height: SizeManager.s8.h),
           Text(
             isPremium
-                ? 'Your coach is ready! Ask for meal ideas, exercise tips, and more.'
-                : 'Unlock your AI Coach for 24/7 fitness and nutrition guidance.',
+                ? 'Generate customized weekly workout routines tailored to your goals.'
+                : 'Unlock personalized weekly workout splits powered by AI.',
             style: TextStyle(
                 color: ColorManager.white70, fontSize: SizeManager.s12.sp),
           ),
@@ -321,11 +326,7 @@ class _JournalPageState extends State<JournalPage> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                if (isPremium) {
-                  context.push(Routes.aiChatRoute);
-                } else {
-                  context.push(Routes.premiumScreen);
-                }
+                context.push(Routes.workoutGeneratorRoute);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.primary,
@@ -333,7 +334,7 @@ class _JournalPageState extends State<JournalPage> {
                     borderRadius: BorderRadius.circular(SizeManager.s12.r)),
               ),
               child: Text(
-                isPremium ? 'Chat Now' : 'Unlock Now',
+                'Generate Workout',
                 style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold),

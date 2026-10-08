@@ -32,11 +32,28 @@ class _AIChatScreenState extends State<AIChatScreen> {
     "⚡ Motivation",
   ];
 
-  void _sendMessage(String text) {
-    if (text.trim().isEmpty || _isTyping) return;
+  static const Map<String, String> _promptMap = {
+    "🍎 Meal Idea": "Suggest a delicious, high-protein meal or post-workout snack with approximate macros.",
+    "💪 Form Tip": "What are 3 critical form cues to avoid injury and maximize hypertrophy on compound lifts?",
+    "🔄 Swap Lift": "What are the top dumbbell or bodyweight substitutes if the squat rack or barbell bench is taken?",
+    "⚡ Motivation": "Give me a short, powerful motivational message to get me fired up for my workout today!",
+  };
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _sendMessage(String text, {String? displayLabel}) {
+    final messageText = text.trim();
+    if (messageText.isEmpty || _isTyping) return;
+
+    final displayText = displayLabel ?? messageText;
 
     setState(() {
-      _messages.add(ChatModel(text: text, isUser: true));
+      _messages.add(ChatModel(text: displayText, isUser: true));
       _messageController.clear();
       _isTyping = true;
     });
@@ -45,13 +62,17 @@ class _AIChatScreenState extends State<AIChatScreen> {
 
     ChatModel? aiMessageModel;
 
+    final systemPrompt =
+        "You are an encouraging and knowledgeable AI Fitness Coach in the Gym Buddy app. "
+        "Provide direct, concise, and scientifically accurate workout and nutrition advice. "
+        "Keep answers practical and focused.\n\nUser Question: $messageText";
+
     try {
-      gemini.streamGenerateContent(text).listen(
+      gemini.streamGenerateContent(systemPrompt).listen(
         (value) {
           final chunk = value.output ?? "";
           if (chunk.isNotEmpty) {
             setState(() {
-              _isTyping = false;
               if (aiMessageModel == null) {
                 aiMessageModel = ChatModel(text: chunk, isUser: false);
                 _messages.add(aiMessageModel!);
@@ -60,6 +81,13 @@ class _AIChatScreenState extends State<AIChatScreen> {
               }
             });
             _scrollToBottom();
+          }
+        },
+        onDone: () {
+          if (mounted) {
+            setState(() {
+              _isTyping = false;
+            });
           }
         },
         onError: (e) {
@@ -73,24 +101,28 @@ class _AIChatScreenState extends State<AIChatScreen> {
             userFriendlyMessage = "API Key error or access denied. Please check your credentials.";
           }
 
-          setState(() {
-            _isTyping = false;
-            if (aiMessageModel == null) {
-              _messages.add(ChatModel(
-                text: userFriendlyMessage,
-                isUser: false,
-              ));
-            } else {
-              aiMessageModel!.text = userFriendlyMessage;
-            }
-          });
-          _scrollToBottom();
+          if (mounted) {
+            setState(() {
+              _isTyping = false;
+              if (aiMessageModel == null) {
+                _messages.add(ChatModel(
+                  text: userFriendlyMessage,
+                  isUser: false,
+                ));
+              } else {
+                aiMessageModel!.text = userFriendlyMessage;
+              }
+            });
+            _scrollToBottom();
+          }
         },
       );
     } catch (e) {
-      setState(() {
-        _isTyping = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isTyping = false;
+        });
+      }
     }
   }
 
@@ -170,7 +202,10 @@ class _AIChatScreenState extends State<AIChatScreen> {
                 borderRadius: BorderRadius.circular(20.r),
                 side: BorderSide(color: ColorManager.primary.withOpacity(0.3)),
               ),
-              onPressed: () => _sendMessage(_quickPrompts[index]),
+              onPressed: () => _sendMessage(
+                _promptMap[_quickPrompts[index]] ?? _quickPrompts[index],
+                displayLabel: _quickPrompts[index],
+              ),
             ),
           );
         },

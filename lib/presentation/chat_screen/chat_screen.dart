@@ -202,72 +202,85 @@ class _ChatScreenState extends State<ChatScreen> {
     ChatMessage? aiMessage;
     String targetContent = "";
     Timer? typingTimer;
+    int retryCount = 0;
     bool streamCompleted = false;
-
     try {
-      final stream = gemini!.streamGenerateContent(prompt);
-      
-      await for (final value in stream) {
-        final chunk = value.output ?? "";
-        if (chunk.isNotEmpty) {
-          targetContent += chunk;
+      while (retryCount < 2) {
+        try {
+          final stream = gemini!.streamGenerateContent(prompt);
+          
+          await for (final value in stream) {
+            final chunk = value.output ?? "";
+            if (chunk.isNotEmpty) {
+              targetContent += chunk;
+
+              if (mounted) {
+                setState(() {
+                  if (aiMessage == null) {
+                    aiMessage = ChatMessage(message: "", isUser: false);
+                    _messages.add(aiMessage!);
+                    isThinking = false;
+                    
+                    // Start typing timer
+                    int currentIndex = 0;
+                    typingTimer = Timer.periodic(const Duration(milliseconds: 15), (timer) {
+                      if (!mounted) {
+                        timer.cancel();
+                        return;
+                      }
+                      
+                      if (currentIndex < targetContent.length) {
+                        setState(() {
+                          // Catch up if far behind
+                          final diff = targetContent.length - currentIndex;
+                          final charsToAdd = diff > 40 ? 12 : (diff > 15 ? 4 : 1);
+                          aiMessage!.message += targetContent.substring(currentIndex, currentIndex + charsToAdd);
+                          currentIndex += charsToAdd;
+                        });
+                        _scrollToBottom();
+                      } else if (streamCompleted) {
+                        timer.cancel();
+                      }
+                    });
+                  }
+                });
+              }
+            }
+          }
+          streamCompleted = true;
+          break; // Successfully received response, exit retry loop
+        } catch (e) {
+          final errStr = e.toString().toLowerCase();
+          // If 503 (high demand spike), wait 1.5 seconds and retry once
+          if ((errStr.contains('503') || errStr.contains('demand') || errStr.contains('unavailable')) && retryCount == 0) {
+            retryCount++;
+            await Future.delayed(const Duration(milliseconds: 1500));
+            continue;
+          }
+
+          streamCompleted = true;
+          typingTimer?.cancel();
+          String userFriendlyMessage = "Sorry, I'm having trouble connecting to the AI. Please try again.";
+          if (errStr.contains('503') || errStr.contains('demand') || errStr.contains('busy') || errStr.contains('unavailable')) {
+            userFriendlyMessage = "The AI is currently experiencing high demand. Please try again in a few moments!";
+          } else if (errStr.contains('quota') || errStr.contains('limit')) {
+            userFriendlyMessage = "AI limit reached or API quota exceeded. Please try again later.";
+          } else if (errStr.contains('403') || errStr.contains('suspended') || errStr.contains('permission')) {
+            userFriendlyMessage = "API Key error or access denied. Please check your credentials.";
+          }
 
           if (mounted) {
             setState(() {
               if (aiMessage == null) {
-                aiMessage = ChatMessage(message: "", isUser: false);
-                _messages.add(aiMessage!);
-                isThinking = false;
-                
-                // Start typing timer
-                int currentIndex = 0;
-                typingTimer = Timer.periodic(const Duration(milliseconds: 15), (timer) {
-                  if (!mounted) {
-                    timer.cancel();
-                    return;
-                  }
-                  
-                  if (currentIndex < targetContent.length) {
-                    setState(() {
-                      // Catch up if far behind
-                      final diff = targetContent.length - currentIndex;
-                      final charsToAdd = diff > 40 ? 12 : (diff > 15 ? 4 : 1);
-                      aiMessage!.message += targetContent.substring(currentIndex, currentIndex + charsToAdd);
-                      currentIndex += charsToAdd;
-                    });
-                    _scrollToBottom();
-                  } else if (streamCompleted) {
-                    timer.cancel();
-                  }
-                });
+                _messages.add(ChatMessage(message: userFriendlyMessage, isUser: false));
+              } else {
+                aiMessage!.message = userFriendlyMessage;
               }
             });
+            _scrollToBottom();
           }
+          break;
         }
-      }
-      streamCompleted = true;
-    } catch (e) {
-      streamCompleted = true;
-      typingTimer?.cancel();
-      String userFriendlyMessage = "Sorry, I'm having trouble connecting to the AI. Please try again.";
-      final errStr = e.toString().toLowerCase();
-      if (errStr.contains('503') || errStr.contains('demand') || errStr.contains('busy') || errStr.contains('unavailable')) {
-        userFriendlyMessage = "The AI is currently experiencing high demand. Please try again in a few moments!";
-      } else if (errStr.contains('quota') || errStr.contains('limit')) {
-        userFriendlyMessage = "AI limit reached or API quota exceeded. Please try again later.";
-      } else if (errStr.contains('403') || errStr.contains('suspended') || errStr.contains('permission')) {
-        userFriendlyMessage = "API Key error or access denied. Please check your credentials.";
-      }
-
-      if (mounted) {
-        setState(() {
-          if (aiMessage == null) {
-            _messages.add(ChatMessage(message: userFriendlyMessage, isUser: false));
-          } else {
-            aiMessage!.message = userFriendlyMessage;
-          }
-        });
-        _scrollToBottom();
       }
     } finally {
       if (mounted) {

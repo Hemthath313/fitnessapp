@@ -19,8 +19,7 @@ import 'package:fitness_app/services/update_service.dart';
 import 'package:fitness_app/services/review_service.dart';
 import 'package:fitness_app/presentation/widgets/update_dialog.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
-import 'package:fitness_app/presentation/journal/pages/journal_page.dart';
-import 'package:fitness_app/presentation/main/widgets/appbar_journal.dart';
+import 'package:fitness_app/presentation/workout_logs/workout_log_history_page.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:fitness_app/utils/widgets/error_boundary.dart';
@@ -48,7 +47,7 @@ class _MainPageState extends State<MainPage> {
   List<Widget> pages = const [
     HomePage(),
     ExploreWidget(),
-    JournalPage(),
+    WorkoutLogHistoryPage(),
     ProgressPage(),
     MorePage(),
   ];
@@ -66,7 +65,7 @@ class _MainPageState extends State<MainPage> {
 
   bool get isMorePage => _currentIndex == 4;
   bool get isProgressPage => _currentIndex == 3;
-  bool get isJournalPage => _currentIndex == 2;
+  bool get isHistoryPage => _currentIndex == 2;
   bool get isExplorePage => _currentIndex == 1;
   bool get isHomePage => _currentIndex == 0;
 
@@ -228,9 +227,10 @@ class _MainPageState extends State<MainPage> {
                 SizedBox(height: 16.h),
                 Text('Take your fitness to the next level with:', textAlign: TextAlign.center, style: TextStyle(color: ColorManager.textSecondary, fontSize: 16.sp)),
                 SizedBox(height: 24.h),
-                _buildDialogFeaturePoint(Icons.smart_toy_rounded, 'Personal Coach AI', Colors.purpleAccent),
-                _buildDialogFeaturePoint(Icons.auto_awesome, 'Unlimited AI Workouts', Colors.tealAccent),
-                _buildDialogFeaturePoint(Icons.star_purple500_sharp, 'Future Premium Features', Colors.amber),
+                _buildDialogFeaturePoint(Icons.auto_awesome, 'Unlimited AI Workouts & Splits', Colors.tealAccent),
+                _buildDialogFeaturePoint(Icons.fitness_center_rounded, 'Barbell Plate Math & Visualizer', Colors.amberAccent),
+                _buildDialogFeaturePoint(Icons.file_download_outlined, 'Workout History & CSV Export', Colors.blueAccent),
+                _buildDialogFeaturePoint(Icons.ads_click, 'Ad-Free Training Experience', Colors.greenAccent),
                 SizedBox(height: 32.h),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -305,9 +305,9 @@ class _MainPageState extends State<MainPage> {
             label: 'Workouts',
           ),
           NavigationDestination(
-            icon: Icon(Icons.menu_book_outlined, color: ColorManager.textTertiary),
-            selectedIcon: Icon(Icons.menu_book_rounded, color: ColorManager.primary),
-            label: 'Journal',
+            icon: Icon(Icons.calendar_month_outlined, color: ColorManager.textTertiary),
+            selectedIcon: Icon(Icons.calendar_month_rounded, color: ColorManager.primary),
+            label: 'History',
           ),
           NavigationDestination(
             icon: Icon(Icons.insights_outlined, color: ColorManager.textTertiary),

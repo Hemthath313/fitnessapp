@@ -32,14 +32,17 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
   }
 
   Future<Map<String, dynamic>> _fetchProgress() async {
-    final userId = FirebaseAuth.instance.currentUser!.uid;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return {};
     final snapshot =
-        await FirebaseFirestore.instance.collection('users').doc(userId).get();
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
     return snapshot.data()?['progress']?['sixPackChallenge'] ?? {};
   }
 
   @override
   Widget build(BuildContext context) {
+    final sub = Provider.of<SubscriptionProvider>(context);
+
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: AppBar(
@@ -51,6 +54,10 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
       body: FutureBuilder<Map<String, dynamic>>(
         future: _progressFuture,
         builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
           final progress = snapshot.data ?? {};
           final lastDay = progress['lastCompletedDay'] ?? 0;
           final completionDateStr = progress['completionDate'] ?? '';
@@ -77,8 +84,6 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
               final day = index + 1;
               final isCompleted = day <= lastDay;
               final isLocked = day > currentDay || (day == currentDay && isCompletedToday);
-              
-              final sub = Provider.of<SubscriptionProvider>(context);
               final isPremiumLocked = day > 3 && !sub.isPremium;
 
               return _buildDayTile(

@@ -62,15 +62,19 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            ndk {
+                debugSymbolLevel 'NONE'
+            }
         }
         debug {
             signingConfig signingConfigs.debug
         }
     }
 
-    packagingOptions {
-        // Prevent stripping failures when NDK strip tool is unavailable
-        doNotStrip '**/*.so'
+    packaging {
+        jniLibs {
+            keepDebugSymbols += ['**/*.so']
+        }
     }
 }
 

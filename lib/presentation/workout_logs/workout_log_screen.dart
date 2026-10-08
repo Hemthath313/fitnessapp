@@ -1,9 +1,13 @@
+import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/model/workout_log.dart';
+import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
+import 'package:fitness_app/presentation/workout_tools/plate_calculator_sheet.dart';
 import 'package:fitness_app/services/workout_log_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 class WorkoutLogScreen extends StatefulWidget {
   const WorkoutLogScreen({super.key});
@@ -21,6 +25,24 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
   
   String _category = 'Strength';
   final _logService = WorkoutLogService();
+  bool _isSaving = false;
+
+  static final List<String> _suggestedExercises = [
+    ...ExerciseData.chest.map((e) => e.name),
+    ...ExerciseData.back.map((e) => e.name),
+    ...ExerciseData.legs.map((e) => e.name),
+    ...ExerciseData.shoulders.map((e) => e.name),
+    ...ExerciseData.arms.map((e) => e.name),
+  ].toSet().toList();
+
+  static const List<String> _popularQuickChips = [
+    'Barbell Bench Press',
+    'Barbell Squat',
+    'Deadlift',
+    'Overhead Press',
+    'Barbell Row',
+    'Pull-Ups',
+  ];
 
   @override
   void dispose() {
@@ -56,7 +78,9 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
   }
 
   Future<void> _saveLog() async {
-    if (_exerciseController.text.isEmpty) {
+    if (_isSaving) return;
+
+    if (_exerciseController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter an exercise name')),
       );
@@ -64,28 +88,45 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
     }
 
     final List<WorkoutSet> finalSets = [];
+    bool hasValidSet = false;
     for (int i = 0; i < _sets.length; i++) {
-      final weight = double.tryParse(_weightControllers[i].text) ?? 0.0;
-      final reps = int.tryParse(_repControllers[i].text) ?? 0;
+      final weight = double.tryParse(_weightControllers[i].text.trim()) ?? 0.0;
+      final reps = int.tryParse(_repControllers[i].text.trim()) ?? 0;
+      if (reps > 0) hasValidSet = true;
       finalSets.add(WorkoutSet(weight: weight, reps: reps));
     }
+
+    if (!hasValidSet) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter at least 1 rep for your sets')),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
 
     final log = WorkoutLog(
       id: '',
       exerciseName: _exerciseController.text.trim(),
       date: DateTime.now(),
       sets: finalSets,
-      notes: _notesController.text,
+      notes: _notesController.text.trim(),
       category: _category,
     );
 
     try {
       await _logService.addLog(log);
       if (mounted) {
+        // Trigger streak recalculation immediately
+        Provider.of<StatisticsProvider>(context, listen: false).updateStreak();
         Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Workout saved & streak updated!')),
+        );
       }
     } catch (e) {
       if (mounted) {
+        setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error saving log: $e')),
         );
@@ -107,20 +148,118 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              controller: _exerciseController,
-              style: TextStyle(color: ColorManager.textPrimary),
-              decoration: InputDecoration(
-                labelText: 'Exercise Name',
-                labelStyle: TextStyle(color: ColorManager.textSecondary),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: const BorderSide(color: ColorManager.primary, width: 2),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: ColorManager.divider),
-                ),
+            Autocomplete<String>(
+              initialValue: TextEditingValue(text: _exerciseController.text),
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                if (textEditingValue.text.isEmpty) {
+                  return const Iterable<String>.empty();
+                }
+                return _suggestedExercises.where((String option) {
+                  return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                });
+              },
+              onSelected: (String selection) {
+                setState(() {
+                  _exerciseController.text = selection;
+                });
+              },
+              fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                controller.addListener(() {
+                  _exerciseController.text = controller.text;
+                });
+                return TextField(
+                  controller: controller,
+                  focusNode: focusNode,
+                  style: TextStyle(color: ColorManager.textPrimary),
+                  decoration: InputDecoration(
+                    labelText: 'Exercise Name',
+                    hintText: 'e.g. Barbell Bench Press...',
+                    hintStyle: TextStyle(color: ColorManager.textTertiary, fontSize: 13.sp),
+                    labelStyle: TextStyle(color: ColorManager.textSecondary),
+                    prefixIcon: const Icon(Icons.fitness_center_rounded, color: ColorManager.primary),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      borderSide: const BorderSide(color: ColorManager.primary, width: 2),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      borderSide: BorderSide(color: ColorManager.divider),
+                    ),
+                  ),
+                );
+              },
+              optionsViewBuilder: (context, onSelected, options) {
+                return Align(
+                  alignment: Alignment.topLeft,
+                  child: Material(
+                    elevation: 8,
+                    borderRadius: BorderRadius.circular(12.r),
+                    color: ColorManager.surface,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: 200.h,
+                        maxWidth: MediaQuery.of(context).size.width - 32.w,
+                      ),
+                      child: ListView.separated(
+                        padding: EdgeInsets.symmetric(vertical: 4.h),
+                        shrinkWrap: true,
+                        itemCount: options.length,
+                        separatorBuilder: (context, _) => Divider(color: ColorManager.divider.withOpacity(0.3), height: 1),
+                        itemBuilder: (BuildContext context, int index) {
+                          final String option = options.elementAt(index);
+                          return InkWell(
+                            onTap: () => onSelected(option),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.sports_gymnastics_rounded, size: 16.sp, color: ColorManager.primary),
+                                  SizedBox(width: 10.w),
+                                  Expanded(
+                                    child: Text(
+                                      option,
+                                      style: TextStyle(
+                                        color: ColorManager.textPrimary,
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            SizedBox(height: 10.h),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: _popularQuickChips.map((chip) {
+                  return Padding(
+                    padding: EdgeInsets.only(right: 8.w),
+                    child: ActionChip(
+                      label: Text(chip),
+                      labelStyle: TextStyle(
+                        color: _exerciseController.text == chip ? Colors.black : ColorManager.textSecondary,
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      backgroundColor: _exerciseController.text == chip ? ColorManager.primary : ColorManager.surface,
+                      side: BorderSide(color: ColorManager.divider.withOpacity(0.5)),
+                      onPressed: () {
+                        setState(() {
+                          _exerciseController.text = chip;
+                        });
+                      },
+                    ),
+                  );
+                }).toList(),
               ),
             ),
             SizedBox(height: 20.h),
@@ -139,8 +278,36 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 20.h),
-            Text('Sets', style: TextStyle(color: ColorManager.textPrimary, fontSize: 18.sp, fontWeight: FontWeight.bold)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Sets', style: TextStyle(color: ColorManager.textPrimary, fontSize: 18.sp, fontWeight: FontWeight.bold)),
+                TextButton.icon(
+                  onPressed: () {
+                    final firstWeight = double.tryParse(_weightControllers.first.text) ?? 60.0;
+                    PlateCalculatorSheet.show(
+                      context,
+                      initialWeight: firstWeight > 0 ? firstWeight : 60.0,
+                      onWeightApplied: (w) {
+                        final formatted = w % 1 == 0 ? w.toInt().toString() : w.toStringAsFixed(1);
+                        setState(() {
+                          for (var c in _weightControllers) {
+                            if (c.text.isEmpty || c.text == '0') {
+                              c.text = formatted;
+                            }
+                          }
+                          if (_weightControllers.isNotEmpty) {
+                            _weightControllers.first.text = formatted;
+                          }
+                        });
+                      },
+                    );
+                  },
+                  icon: const Icon(Icons.fitness_center_rounded, size: 16, color: ColorManager.primary),
+                  label: Text('Plate Math', style: TextStyle(color: ColorManager.primary, fontSize: 13.sp, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
             SizedBox(height: 8.h),
             
             // Sets Table (Weight, Reps Input Form matching workout execution)
@@ -280,15 +447,25 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _saveLog,
+                onPressed: _isSaving ? null : _saveLog,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorManager.primary,
                   foregroundColor: Colors.white,
+                  disabledBackgroundColor: ColorManager.primary.withOpacity(0.6),
                   padding: EdgeInsets.symmetric(vertical: 15.h),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                   elevation: 4,
                 ),
-                child: const Text('Save Workout', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                child: _isSaving
+                    ? SizedBox(
+                        height: 20.h,
+                        width: 20.h,
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('Save Workout', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               ),
             ),
           ],

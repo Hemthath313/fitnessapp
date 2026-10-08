@@ -11,7 +11,9 @@ import 'package:fitness_app/presentation/workouts/providers/workout_provider.dar
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DayWorkoutSessionPage extends StatefulWidget {
   final String dayName;
@@ -717,7 +719,9 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                  width: double.infinity,
                  child: ElevatedButton(
                    onPressed: () {
+                     Provider.of<WorkoutProvider>(context, listen: false).markWorkoutDayCompleted(widget.dayName);
                      Provider.of<WorkoutProvider>(context, listen: false).fetchAndSetWorkouts();
+                     Provider.of<StatisticsProvider>(context, listen: false).loadStreakData();
                      Navigator.of(context).pop();
                    },
                    style: ElevatedButton.styleFrom(
@@ -823,6 +827,16 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
       if (mounted) {
         final statisticsProvider = Provider.of<StatisticsProvider>(context, listen: false);
         await statisticsProvider.updateStreak();
+      }
+
+      // Save routine completion to SharedPreferences!
+      final prefs = await SharedPreferences.getInstance();
+      final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      await prefs.setBool('completed_routine_${widget.dayName}_$todayKey', true);
+      await prefs.setBool('completed_any_routine_$todayKey', true);
+
+      if (mounted) {
+        Provider.of<WorkoutProvider>(context, listen: false).markWorkoutDayCompleted(widget.dayName);
       }
     } catch (e) {
       print('Error saving workout logs or updating streak: $e');

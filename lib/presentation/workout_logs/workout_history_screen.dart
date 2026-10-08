@@ -10,12 +10,20 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class WorkoutHistoryScreen extends StatelessWidget {
+import 'package:flutter/services.dart';
+
+class WorkoutHistoryScreen extends StatefulWidget {
   const WorkoutHistoryScreen({super.key});
 
   @override
+  State<WorkoutHistoryScreen> createState() => _WorkoutHistoryScreenState();
+}
+
+class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
+  final _logService = WorkoutLogService();
+
+  @override
   Widget build(BuildContext context) {
-    final logService = WorkoutLogService();
     final subProvider = Provider.of<SubscriptionProvider>(context);
 
     return Scaffold(
@@ -29,7 +37,7 @@ class WorkoutHistoryScreen extends StatelessWidget {
             icon: Icon(Icons.file_download, color: ColorManager.primary),
             onPressed: () {
               if (subProvider.isPremium) {
-                _exportLogs(context, logService);
+                _exportLogs(context);
               } else {
                 _showProFeatureDialog(context);
               }
@@ -38,10 +46,23 @@ class WorkoutHistoryScreen extends StatelessWidget {
         ],
       ),
       body: StreamBuilder<List<WorkoutLog>>(
-        stream: logService.getLogs(),
+        stream: _logService.getLogs(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64.sp, color: Colors.redAccent),
+                  SizedBox(height: 16.h),
+                  Text('Failed to load workout logs',
+                      style: TextStyle(color: ColorManager.textSecondary, fontSize: 16.sp)),
+                ],
+              ),
+            );
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
@@ -63,7 +84,7 @@ class WorkoutHistoryScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               return WorkoutHistoryCard(
                 log: logs[index],
-                logService: logService,
+                logService: _logService,
               );
             },
           );
@@ -77,21 +98,79 @@ class WorkoutHistoryScreen extends StatelessWidget {
     );
   }
 
-  void _exportLogs(BuildContext context, WorkoutLogService logService) async {
-    final logs = await logService.getLogs().first;
+  void _exportLogs(BuildContext context) async {
+    final logs = await _logService.getLogs().first;
+    if (logs.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No workout logs to export!')),
+        );
+      }
+      return;
+    }
     final csv = WorkoutExportService.generateCSV(logs);
     
-    if (context.mounted) {
+    if (mounted) {
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (dialogCtx) => AlertDialog(
           backgroundColor: ColorManager.surface,
-          title: Text('Export Complete', style: TextStyle(color: ColorManager.textPrimary)),
-          content: Text('CSV successfully generated with ${logs.length} entries.', style: TextStyle(color: ColorManager.textSecondary)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+          title: Row(
+            children: [
+              Icon(Icons.download_done_rounded, color: ColorManager.primary, size: 24.sp),
+              SizedBox(width: 8.w),
+              Text('Export CSV', style: TextStyle(color: ColorManager.textPrimary)),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'CSV generated with ${logs.length} workouts. You can copy it to clipboard to paste into Google Sheets or Excel.',
+                style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp),
+              ),
+              SizedBox(height: 12.h),
+              Container(
+                height: 120.h,
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  color: ColorManager.surfaceDark,
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(color: ColorManager.divider),
+                ),
+                child: SingleChildScrollView(
+                  child: Text(
+                    csv,
+                    style: TextStyle(
+                      color: ColorManager.textSecondary,
+                      fontFamily: 'monospace',
+                      fontSize: 10.sp,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: Text('Close', style: TextStyle(color: ColorManager.textTertiary)),
+            ),
+            ElevatedButton.icon(
+              onPressed: () async {
+                await Clipboard.setData(ClipboardData(text: csv));
+                if (mounted) {
+                  Navigator.pop(dialogCtx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('CSV copied to clipboard!')),
+                  );
+                }
+              },
+              icon: const Icon(Icons.copy, size: 16),
+              label: const Text('Copy CSV'),
+              style: ElevatedButton.styleFrom(backgroundColor: ColorManager.primary),
             ),
           ],
         ),

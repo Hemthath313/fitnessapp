@@ -232,64 +232,6 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
               const WeeklySummaryWidget(),
               SizedBox(height: 20.h),
 
-              // Progress Photos quick-access card
-              GestureDetector(
-                onTap: () => context.push(Routes.progressPhotosRoute),
-                child: Container(
-                  padding: EdgeInsets.all(16.w),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.pink.withOpacity(0.15),
-                        Colors.pink.withOpacity(0.05),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(20.r),
-                    border: Border.all(
-                        color: Colors.pink.withOpacity(0.3), width: 1.5),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(12.w),
-                        decoration: BoxDecoration(
-                          color: Colors.pink.withOpacity(0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.photo_camera_rounded,
-                            color: Colors.pink, size: 24.sp),
-                      ),
-                      SizedBox(width: 16.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Progress Photos',
-                              style: TextStyle(
-                                color: ColorManager.textPrimary,
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 2.h),
-                            Text(
-                              'Track your physical transformation visually',
-                              style: TextStyle(
-                                color: ColorManager.textSecondary,
-                                fontSize: 12.sp,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(Icons.arrow_forward_ios_rounded,
-                          color: Colors.pink, size: 16.sp),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 28.h),
 
               // Timeframe Tabs selector
               Container(

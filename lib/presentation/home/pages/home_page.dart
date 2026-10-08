@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
+import 'package:fitness_app/presentation/home/widgets/home_ai_routine_card.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 
 class HomePage extends StatefulWidget {
@@ -58,6 +59,10 @@ class _HomePageState extends State<HomePage> {
 
             // Quick Actions — first thing a user sees, immediate utility
             const QuickActionsWidget(),
+            SizedBox(height: SizeManager.s12.h),
+
+            // AI Routine Hero Banner
+            const HomeAiRoutineCard(),
             SizedBox(height: SizeManager.s16.h),
 
             // Today's Progress — Calories, Water, BMI

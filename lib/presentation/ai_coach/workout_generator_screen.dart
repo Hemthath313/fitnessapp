@@ -1,11 +1,12 @@
 import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
-import 'package:fitness_app/presentation/in_app_purchases/premimum_screen.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/model/workout_model.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
+import 'package:fitness_app/utils/router/router.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -44,26 +45,14 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
   ];
   final List<int> _daysOptions = [3, 4, 5, 6];
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
-
   Future<void> _generateWorkout() async {
-    final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
-    if (!subscriptionProvider.isPremium) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const PremiumScreen()));
-      return;
-    }
-
     setState(() {
       _isLoading = true;
       _generatedWeek = [];
     });
 
     // Simulate "Thinking" delay for UX
-    await Future.delayed(const Duration(milliseconds: 1500));
+    await Future.delayed(const Duration(milliseconds: 1200));
 
     List<Map<String, dynamic>> plan = [];
 
@@ -111,28 +100,72 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
   }
 
   Map<String, dynamic> _createDayPlan(String day, String focus, List<Exercise> exercises) {
+    int defaultSets = 3;
+    String defaultReps = '10-12 reps';
+    if (_target == 'Strength') {
+      defaultSets = 4;
+      defaultReps = '5 reps';
+    } else if (_target == 'Fat Loss') {
+      defaultSets = 3;
+      defaultReps = '15 reps';
+    } else if (_target == 'Muscle Build (Hypertrophy)') {
+      defaultSets = 4;
+      defaultReps = '8-12 reps';
+    }
+
     return {
       'day': day,
       'focus': focus,
-      'exercises': exercises.map((e) => {
-        'name': e.name,
-        'sets': 3, // Default sets
-        'reps': e.setsReps.contains('x') ? e.setsReps.split('x').last.trim() : '10-12 reps',
-        'videoPath': e.videoPath,
-        'description': e.description,
-        'target': e.target,
-        'equipment': e.equipment,
-        'difficulty': e.difficulty,
-        'instructions': e.instructions,
-        'setsReps': e.setsReps,
+      'exercises': exercises.map((e) {
+        String reps = defaultReps;
+        if (e.setsReps.contains('x') || e.setsReps.contains('×')) {
+          final parts = e.setsReps.split(RegExp(r'[x×]'));
+          if (parts.length > 1) {
+            reps = parts.last.trim();
+          }
+        }
+        return {
+          'name': e.name,
+          'sets': defaultSets,
+          'reps': reps,
+          'videoPath': e.videoPath,
+          'description': e.description,
+          'target': e.target,
+          'equipment': e.equipment,
+          'difficulty': e.difficulty,
+          'instructions': e.instructions,
+          'setsReps': e.setsReps,
+        };
       }).toList(),
     };
   }
 
-  // Helper Randomizers
+  // Helper Randomizers with equipment and level awareness
   List<Exercise> _getRandomExercises(List<Exercise> source, int count) {
     if (source.isEmpty) return [];
-    var list = List<Exercise>.from(source)..shuffle();
+
+    List<Exercise> filtered = source;
+    if (_equipment == 'Home (Dumbbells)') {
+      final homeExercises = source.where((e) {
+        final eq = e.equipment.toLowerCase();
+        return eq.contains('dumbbell') ||
+            eq.contains('bodyweight') ||
+            eq.contains('mat') ||
+            eq.contains('none');
+      }).toList();
+      if (homeExercises.isNotEmpty) {
+        filtered = homeExercises;
+      }
+    }
+
+    final levelExercises = filtered.where((e) {
+      return e.difficulty.toLowerCase() == _level.toLowerCase();
+    }).toList();
+    if (levelExercises.length >= count) {
+      filtered = levelExercises;
+    }
+
+    var list = List<Exercise>.from(filtered)..shuffle();
     return list.take(min(count, list.length)).toList();
   }
 
@@ -173,8 +206,56 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
 
   bool _isSaving = false;
 
+  void _showUpgradeToSaveDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: ColorManager.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        title: Row(
+          children: [
+            Icon(Icons.star_rounded, color: Colors.amber, size: 24.sp),
+            SizedBox(width: 8.w),
+            Text(
+              'Unlock Weekly Routine',
+              style: TextStyle(
+                color: ColorManager.textPrimary,
+                fontWeight: FontWeight.bold,
+                fontSize: 16.sp,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Saving and activating your custom AI Workout Plan is a Premium feature. Upgrade to Pro to track your schedule with built-in rest timers and animated video guides!',
+          style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text('Maybe Later', style: TextStyle(color: ColorManager.textTertiary)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              context.push(Routes.premiumScreen);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: ColorManager.primary),
+            child: const Text('Go Premium', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _saveAllWorkouts() async {
     if (_isSaving) return;
+
+    final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
+    if (!subscriptionProvider.isPremium) {
+      _showUpgradeToSaveDialog(context);
+      return;
+    }
 
     setState(() {
       _isSaving = true;
@@ -191,28 +272,35 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
         builder: (c) => const Center(child: CircularProgressIndicator()),
       );
 
+      // Clear previous weekly plan to cleanly apply the new split
+      await provider.deleteWeeklyPlan();
+
       final List<WorkoutModel> workoutsToSave = [];
 
-      for (var dayPlan in _generatedWeek) {
+      for (int dayIndex = 0; dayIndex < _generatedWeek.length; dayIndex++) {
+        final dayPlan = _generatedWeek[dayIndex];
         final dayName = dayPlan['day'] ?? 'Day';
         final exercises = dayPlan['exercises'] as List<dynamic>? ?? [];
+        final scheduledDate = now;
 
         for (var exercise in exercises) {
           final rawName = exercise['name'] ?? 'Exercise';
           final savedName = '[$dayName] $rawName'; 
 
-          // Try to parse reps
-          String reps = exercise['reps'].toString().replaceAll(RegExp(r'[^0-9]'), '');
-          if (reps.isEmpty) reps = "10";
-          if (reps.length > 2) reps = reps.substring(0,2); // handle "10-12" -> "10"
+          // Safe rep parsing
+          int repCount = 10;
+          final match = RegExp(r'(\d+)').firstMatch(exercise['reps'].toString());
+          if (match != null) {
+            repCount = int.tryParse(match.group(1) ?? '10') ?? 10;
+          }
 
           workoutsToSave.add(
             WorkoutModel(
               id: '',
               name: savedName,
-              repNumber: int.tryParse(reps) ?? 10,
+              repNumber: repCount,
               setNumber: int.tryParse(exercise['sets'].toString()) ?? 3,
-              dateTime: now,
+              dateTime: scheduledDate,
             ),
           );
           count++;
@@ -278,6 +366,8 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
   }
 
   Widget _buildResultsSection() {
+    final isPremium = Provider.of<SubscriptionProvider>(context).isPremium;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -286,12 +376,24 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
           children: [
             Text(
               'Your Weekly Split',
-              style: TextStyle(color: ColorManager.textPrimary, fontSize: 20.sp, fontWeight: FontWeight.bold),
+              style: TextStyle(color: ColorManager.textPrimary, fontSize: 18.sp, fontWeight: FontWeight.bold),
             ),
-            TextButton.icon(
+            ElevatedButton.icon(
               onPressed: _isSaving ? null : _saveAllWorkouts,
-              icon: Icon(Icons.save_alt, color: _isSaving ? Colors.grey : ColorManager.gradientStart),
-              label: Text('Save Plan', style: TextStyle(color: _isSaving ? Colors.grey : ColorManager.limerGreen2)),
+              icon: Icon(
+                isPremium ? Icons.bookmark_add_rounded : Icons.lock_outline_rounded,
+                size: 16.sp,
+                color: Colors.white,
+              ),
+              label: Text(
+                isPremium ? 'Save to Schedule' : 'Save (Pro)',
+                style: TextStyle(color: Colors.white, fontSize: 12.sp, fontWeight: FontWeight.bold),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isPremium ? ColorManager.primary : Colors.amber.shade700,
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+              ),
             ),
           ],
         ),
@@ -306,7 +408,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: AppBar(
-        title: Text('AI Weekly Coach', style: TextStyle(color: ColorManager.textPrimary)),
+        title: Text('AI Workout Generator', style: TextStyle(color: ColorManager.textPrimary)),
         backgroundColor: ColorManager.background,
         iconTheme: IconThemeData(color: ColorManager.textPrimary),
       ),
