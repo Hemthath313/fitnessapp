@@ -1,8 +1,5 @@
-import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
-import 'package:fitness_app/presentation/interstitial_ads/interstitial_ad_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:provider/provider.dart';
-import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -10,14 +7,238 @@ import 'package:fitness_app/utils/router/router.dart';
 
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
+import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
+import 'package:fitness_app/presentation/custom_workouts/day_workout_session_page.dart';
+import 'package:intl/intl.dart';
 
 class QuickActionsWidget extends StatelessWidget {
   const QuickActionsWidget({super.key});
 
+  void _handleLogLift(BuildContext context) {
+    final workoutProvider =
+        Provider.of<WorkoutProvider>(context, listen: false);
+    final grouped = workoutProvider.groupedSplitWorkouts;
+    final todayName = DateFormat('EEEE').format(DateTime.now());
+
+    if (grouped.isNotEmpty) {
+      if (grouped.containsKey(todayName)) {
+        // Today is an active split day — launch canonical adaptive session directly!
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DayWorkoutSessionPage(
+              dayName: todayName,
+              workouts: grouped[todayName]!,
+            ),
+          ),
+        );
+      } else {
+        // Today is a rest day — find next scheduled day or offer to start next session early
+        const weekDays = [
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday',
+          'Sunday',
+        ];
+        final currentIndex = weekDays.indexOf(todayName);
+        String nextWorkoutDay = '';
+        if (currentIndex != -1) {
+          for (int i = 1; i <= 6; i++) {
+            final next = weekDays[(currentIndex + i) % 7];
+            if (grouped.containsKey(next)) {
+              nextWorkoutDay = next;
+              break;
+            }
+          }
+        }
+
+        if (nextWorkoutDay.isNotEmpty && grouped.containsKey(nextWorkoutDay)) {
+          showModalBottomSheet(
+            context: context,
+            backgroundColor: ColorManager.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+            ),
+            builder: (ctx) => SafeArea(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 18.h),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.bedtime_rounded,
+                            color: Colors.blueAccent, size: 22.sp),
+                        SizedBox(width: 8.w),
+                        Text(
+                          'Today is a Rest Day ($todayName)',
+                          style: TextStyle(
+                            color: ColorManager.textPrimary,
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      'Your next scheduled workout is $nextWorkoutDay (${grouped[nextWorkoutDay]!.length} exercises). You can start it early or log a custom single lift.',
+                      style: TextStyle(
+                        color: ColorManager.textSecondary,
+                        fontSize: 13.sp,
+                        height: 1.4,
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ColorManager.primary,
+                          foregroundColor: Colors.black,
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DayWorkoutSessionPage(
+                                dayName: nextWorkoutDay,
+                                workouts: grouped[nextWorkoutDay]!,
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.play_arrow_rounded,
+                            color: Colors.black),
+                        label: Text(
+                          'Start $nextWorkoutDay Workout Early',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextButton.icon(
+                        style: TextButton.styleFrom(
+                          foregroundColor: ColorManager.textSecondary,
+                          padding: EdgeInsets.symmetric(vertical: 10.h),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          context.push(Routes.workoutLogRoute);
+                        },
+                        icon: const Icon(Icons.add_rounded, size: 18),
+                        label: const Text('Log a Single Ad-Hoc Lift'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        } else {
+          context.push(Routes.workoutLogRoute);
+        }
+      }
+    } else {
+      // No active split yet -> prompt user to build plan or log single lift
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: ColorManager.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+        ),
+        builder: (ctx) => SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 18.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.fitness_center_rounded,
+                        color: ColorManager.primary, size: 22.sp),
+                    SizedBox(width: 8.w),
+                    Text(
+                      'Ready to Train?',
+                      style: TextStyle(
+                        color: ColorManager.textPrimary,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  'Build an Adaptive AI Split with previous weights and automatic progression, or log a single custom exercise.',
+                  style: TextStyle(
+                    color: ColorManager.textSecondary,
+                    fontSize: 13.sp,
+                    height: 1.4,
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorManager.primary,
+                      foregroundColor: Colors.black,
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      context.push(Routes.workoutGeneratorRoute);
+                    },
+                    icon: const Icon(Icons.auto_awesome_rounded,
+                        color: Colors.black),
+                    label: const Text(
+                      'Build My Adaptive Plan',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: ColorManager.textSecondary,
+                      padding: EdgeInsets.symmetric(vertical: 10.h),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      context.push(Routes.workoutLogRoute);
+                    },
+                    icon: const Icon(Icons.add_rounded, size: 18),
+                    label: const Text('Log a Single Exercise Manually'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final subProvider = Provider.of<SubscriptionProvider>(context);
-    final isPremium = subProvider.isPremium;
     final consumption = Provider.of<ConsumptionProvider>(context);
     final stats = Provider.of<StatisticsProvider>(context);
 
@@ -37,7 +258,7 @@ class QuickActionsWidget extends StatelessWidget {
         'label': 'Log Lift',
         'color': Colors.orange,
         'isCompleted': workoutDoneToday,
-        'onTap': () => context.push(Routes.workoutLogRoute),
+        'onTap': () => _handleLogLift(context),
       },
       {
         'icon': Icons.restaurant_menu_rounded,
@@ -150,59 +371,6 @@ class QuickActionsWidget extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _QuickActionCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _QuickActionCard({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(SizeManager.s16.r),
-      child: Container(
-        padding: EdgeInsets.all(SizeManager.s16.w),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(SizeManager.s16.r),
-          border: Border.all(
-            color: color.withOpacity(0.3),
-            width: 1.5,
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: color,
-              size: SizeManager.s28.sp,
-            ),
-            SizedBox(height: SizeManager.s8.h),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: ColorManager.white,
-                fontSize: SizeManager.s14.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

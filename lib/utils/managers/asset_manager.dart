@@ -28,6 +28,17 @@ class ImageManager {
   static const shoulderWorkout = '$imagePath/shoulder_workout.webp';
   static const tricepsWorkout = '$imagePath/triceps_workout-unsplash.webp';
   static const bicepsWorkout = '$imagePath/biceps_workout.webp';
+
+  // Exact Muscle Anatomy Category Illustrations (Hevy/MuscleWiki style)
+  static const anatomyChest = '$imagePath/anatomy/anatomy_chest.png';
+  static const anatomyBack = '$imagePath/anatomy/anatomy_back.png';
+  static const anatomyLegs = '$imagePath/anatomy/anatomy_legs.png';
+  static const anatomyShoulders = '$imagePath/anatomy/anatomy_shoulders.png';
+  static const anatomyBiceps = '$imagePath/anatomy/anatomy_biceps.png';
+  static const anatomyTriceps = '$imagePath/anatomy/anatomy_triceps.png';
+  static const anatomyAbs = '$imagePath/anatomy/anatomy_abs.png';
+  static const anatomyCardio = '$imagePath/anatomy/anatomy_cardio.png';
+
   static const dietAndNutrition = '$imagePath/diet.jpeg';
   static const cardioWorkout = '$imagePath/cardio.jpeg';
   static const strengthWorkout = '$imagePath/strength.jpeg';

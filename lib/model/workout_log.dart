@@ -43,23 +43,59 @@ class WorkoutLog {
   }
 }
 
+enum SetType { normal, warmup, drop, failure }
+
 class WorkoutSet {
   final double weight;
   final int reps;
+  final SetType type;
+  final int? rpe;
+  final bool isCompleted;
 
-  WorkoutSet({required this.weight, required this.reps});
+  WorkoutSet({
+    required this.weight,
+    required this.reps,
+    this.type = SetType.normal,
+    this.rpe,
+    this.isCompleted = false,
+  });
 
   Map<String, dynamic> toMap() {
     return {
       'weight': weight,
       'reps': reps,
+      'type': type.name,
+      if (rpe != null) 'rpe': rpe,
+      'isCompleted': isCompleted,
     };
   }
 
   factory WorkoutSet.fromMap(Map<String, dynamic> map) {
     return WorkoutSet(
-      weight: (map['weight'] as num).toDouble(),
-      reps: map['reps'] as int,
+      weight: (map['weight'] as num?)?.toDouble() ?? 0.0,
+      reps: (map['reps'] as num?)?.toInt() ?? 0,
+      type: SetType.values.firstWhere(
+        (e) => e.name == map['type'],
+        orElse: () => SetType.normal,
+      ),
+      rpe: (map['rpe'] as num?)?.toInt(),
+      isCompleted: map['isCompleted'] as bool? ?? true,
+    );
+  }
+
+  WorkoutSet copyWith({
+    double? weight,
+    int? reps,
+    SetType? type,
+    int? rpe,
+    bool? isCompleted,
+  }) {
+    return WorkoutSet(
+      weight: weight ?? this.weight,
+      reps: reps ?? this.reps,
+      type: type ?? this.type,
+      rpe: rpe ?? this.rpe,
+      isCompleted: isCompleted ?? this.isCompleted,
     );
   }
 }

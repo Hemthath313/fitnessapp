@@ -1,9 +1,10 @@
-import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/model/workout_model.dart';
 import 'package:fitness_app/presentation/custom_workouts/day_workout_session_page.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
-import 'package:fitness_app/presentation/widgets/interactive_exercise_detail.dart';
+import 'package:fitness_app/presentation/home/providers/home_provider.dart';
+import 'package:fitness_app/presentation/workout_tools/plate_calculator_sheet.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
+import 'package:fitness_app/services/notification_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
@@ -21,8 +22,9 @@ class HomeAiRoutineCard extends StatefulWidget {
 }
 
 class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
-  bool _isLocalCompletedToday = false;
-  bool _hasAttemptedAutoHeal = false;
+  final PageController _pageController = PageController(viewportFraction: 0.92);
+  int _currentPageIndex = 0;
+  Set<String> _localCompletedRoutineDaysToday = <String>{};
 
   static const List<String> _weekDays = [
     'Monday',
@@ -40,54 +42,77 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
     _checkLocalCompletion();
   }
 
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
   Future<void> _checkLocalCompletion() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
-      final todayName = DateFormat('EEEE').format(DateTime.now());
+      DateTime now = DateTime.now();
+      if (mounted) {
+        final wp = Provider.of<WorkoutProvider?>(context, listen: false);
+        if (wp != null) {
+          now = wp.currentNow;
+        }
+      }
+      final todayKey = DateFormat('yyyy-MM-dd').format(now);
+      final completedDays = <String>{};
+      for (final day in _weekDays) {
+        if (prefs.getBool('completed_routine_${day}_$todayKey') == true) {
+          completedDays.add(day.toLowerCase());
+        }
+      }
 
-      final completedRoutine = prefs.getBool('completed_routine_${todayName}_$todayKey') ?? false;
-      final completedAny = prefs.getBool('completed_any_routine_$todayKey') ?? false;
-
-      if (mounted && (completedRoutine || completedAny) != _isLocalCompletedToday) {
+      if (mounted &&
+          (completedDays.length != _localCompletedRoutineDaysToday.length ||
+              !completedDays.containsAll(_localCompletedRoutineDaysToday))) {
         setState(() {
-          _isLocalCompletedToday = completedRoutine || completedAny;
+          _localCompletedRoutineDaysToday = completedDays;
         });
       }
     } catch (_) {}
-  }
-
-  void _triggerAutoHealIfNeeded(Map<String, List<WorkoutModel>> grouped, WorkoutProvider wp) {
-    if (_hasAttemptedAutoHeal) return;
-    // If user's plan only has Wednesday (truncated by previous midnight deletion bug),
-    // automatically restore Monday and Friday so their 3-day split is intact.
-    if (grouped.length == 1 && grouped.containsKey('Wednesday')) {
-      _hasAttemptedAutoHeal = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        try {
-          await wp.restoreDefaultThreeDaySplit();
-          if (mounted) setState(() {});
-        } catch (_) {}
-      });
-    }
   }
 
   String _getNextWorkoutDay(String currentDay, Map<String, List<WorkoutModel>> grouped) {
     final currentIndex = _weekDays.indexOf(currentDay);
     if (currentIndex == -1) return '';
 
-    // Search ahead in the week (1 to 6 days ahead)
     for (int i = 1; i <= 6; i++) {
       final next = _weekDays[(currentIndex + i) % 7];
       if (grouped.containsKey(next)) {
         return next;
       }
     }
-
     return '';
   }
 
-  void _confirmResetPlan(BuildContext context, WorkoutProvider workoutProvider) async {
+  String? _findMissedWorkoutDay(
+    String todayName,
+    Map<String, List<WorkoutModel>> grouped,
+    WorkoutProvider wp,
+  ) {
+    final todayIndex = _weekDays.indexOf(todayName);
+    if (todayIndex <= 0) return null; // Monday is the start of the week
+
+    // Check earlier scheduled days this week (from Monday up to yesterday)
+    for (int i = 0; i < todayIndex; i++) {
+      final prevDay = _weekDays[i];
+      if (grouped.containsKey(prevDay)) {
+        final completed = wp.isDayWorkoutCompletedThisWeek(prevDay) ||
+            _localCompletedRoutineDaysToday.contains(prevDay.toLowerCase());
+        if (!completed) {
+          return prevDay;
+        }
+      }
+    }
+    return null;
+  }
+
+  Future<void> _confirmResetPlan(
+      BuildContext context, WorkoutProvider workoutProvider) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
@@ -115,15 +140,129 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
     if (confirm == true) {
       await workoutProvider.deleteWeeklyPlan();
       await workoutProvider.fetchAndSetWorkouts();
+      if (context.mounted) {
+        final statsProvider =
+            Provider.of<StatisticsProvider>(context, listen: false);
+        await statsProvider.clearScheduledDays();
+        await statsProvider.resetWeeklyTarget();
+      }
+      _localCompletedRoutineDaysToday = <String>{};
+      try {
+        await NotificationService().cancelWorkoutDayReminders();
+        await NotificationService().cancelRestDayReminders();
+      } catch (_) {}
       if (mounted) setState(() {});
     }
   }
 
+  void _showOneRepMaxDialog(BuildContext context) {
+    final weightController = TextEditingController(text: '80');
+    final repsController = TextEditingController(text: '8');
+    double estimatedMax = 80.0 * (1.0 + 8.0 / 30.0);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return AlertDialog(
+            backgroundColor: ColorManager.surface,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+            title: Row(
+              children: [
+                Icon(Icons.speed_rounded, color: ColorManager.primary, size: 24.sp),
+                SizedBox(width: 8.w),
+                Text('1-Rep Max Estimator', style: TextStyle(color: ColorManager.textPrimary, fontSize: 16.sp, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Calculate your maximum single-rep strength using the Epley formula.',
+                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
+                ),
+                SizedBox(height: 16.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: weightController,
+                        keyboardType: TextInputType.number,
+                        style: TextStyle(color: ColorManager.textPrimary),
+                        decoration: InputDecoration(
+                          labelText: 'Weight (kg)',
+                          labelStyle: TextStyle(color: ColorManager.textTertiary),
+                          filled: true,
+                          fillColor: ColorManager.surfaceDark,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.r), borderSide: BorderSide.none),
+                        ),
+                        onChanged: (_) {
+                          final w = double.tryParse(weightController.text) ?? 0;
+                          final r = double.tryParse(repsController.text) ?? 1;
+                          setModalState(() {
+                            estimatedMax = w * (1.0 + r / 30.0);
+                          });
+                        },
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: TextField(
+                        controller: repsController,
+                        keyboardType: TextInputType.number,
+                        style: TextStyle(color: ColorManager.textPrimary),
+                        decoration: InputDecoration(
+                          labelText: 'Reps Completed',
+                          labelStyle: TextStyle(color: ColorManager.textTertiary),
+                          filled: true,
+                          fillColor: ColorManager.surfaceDark,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.r), borderSide: BorderSide.none),
+                        ),
+                        onChanged: (_) {
+                          final w = double.tryParse(weightController.text) ?? 0;
+                          final r = double.tryParse(repsController.text) ?? 1;
+                          setModalState(() {
+                            estimatedMax = w * (1.0 + r / 30.0);
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 18.h),
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+                  decoration: BoxDecoration(
+                    color: ColorManager.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
+                  ),
+                  child: Column(
+                    children: [
+                      Text('ESTIMATED 1-REP MAX', style: TextStyle(color: ColorManager.primary, fontSize: 11.sp, fontWeight: FontWeight.bold, letterSpacing: 0.6)),
+                      SizedBox(height: 4.h),
+                      Text('${estimatedMax.toStringAsFixed(1)} kg', style: TextStyle(color: ColorManager.white, fontSize: 24.sp, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text('Done', style: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final stats = Provider.of<StatisticsProvider>(context);
-    final bool isCompletedToday = _isLocalCompletedToday || stats.hasWorkoutToday;
-
     return Consumer<WorkoutProvider>(
       builder: (context, workoutProvider, _) {
         final planWorkouts = workoutProvider.allWorkouts
@@ -139,14 +278,19 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
           }
         }
 
-        // Auto-heal incomplete split in the background
-        _triggerAutoHealIfNeeded(grouped, workoutProvider);
-
         if (grouped.isEmpty) {
           return _buildNoPlanCard(context);
         }
 
-        return _buildWeeklyScheduleCard(
+        final todayName =
+            DateFormat('EEEE').format(workoutProvider.currentNow);
+        final bool isCompletedToday = grouped.containsKey(todayName) &&
+            (_localCompletedRoutineDaysToday
+                    .contains(todayName.toLowerCase()) ||
+                workoutProvider.isDayWorkoutCompletedToday(todayName) ||
+                workoutProvider.isDayWorkoutCompletedThisWeek(todayName));
+
+        return _buildHorizontalScrollerHub(
           context: context,
           grouped: grouped,
           isCompletedToday: isCompletedToday,
@@ -156,8 +300,24 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
     );
   }
 
-  /// Empty State: No Plan Active -> Invite user to generate one
+  /// Empty State: No Plan Active -> Invite user to review and activate their personalized plan
   Widget _buildNoPlanCard(BuildContext context) {
+    final homeProvider = Provider.of<HomeProvider?>(context);
+    final stats = Provider.of<StatisticsProvider?>(context);
+    final userGoal = homeProvider?.userData['goal']?.toString();
+    final bool hasOnboardingGoal = userGoal != null && userGoal.isNotEmpty;
+    final bool hasExistingSchedule = stats != null && stats.hasActiveSchedule;
+
+    final String title = hasOnboardingGoal
+        ? 'Activate Your $userGoal Plan'
+        : 'Build Your AI Workout Plan';
+    final String subtitle = hasOnboardingGoal
+        ? 'We prepared an adaptive starter split tailored to your goal ($userGoal). Review your schedule and tap to activate.'
+        : 'Choose 3 to 6 days per week with smart exercises, rest timers, and video guides.';
+    final String buttonLabel = hasOnboardingGoal
+        ? 'Review & Activate Plan'
+        : 'Build My Plan with AI';
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Container(
@@ -182,40 +342,50 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: ColorManager.primary.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(20.r),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.auto_awesome, color: ColorManager.primary, size: 13.sp),
-                      SizedBox(width: 5.w),
-                      Text(
-                        'AI WORKOUT ROUTINE',
-                        style: TextStyle(
-                          color: ColorManager.primary,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.6,
+                Flexible(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    decoration: BoxDecoration(
+                      color: ColorManager.primary.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20.r),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.auto_awesome, color: ColorManager.primary, size: 13.sp),
+                        SizedBox(width: 5.w),
+                        Flexible(
+                          child: Text(
+                            hasOnboardingGoal
+                                ? 'PERSONALIZED FOR YOU'
+                                : 'AI WORKOUT ROUTINE',
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: ColorManager.primary,
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.6,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-                const Spacer(),
+                SizedBox(width: 8.w),
                 Text(
-                  '3-6 Day Splits',
+                  hasExistingSchedule
+                      ? '${stats.scheduledDayNames.length}-Day Schedule'
+                      : '3-6 Day Splits',
                   style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
                 ),
               ],
             ),
             SizedBox(height: 12.h),
             Text(
-              'Build Your AI Workout Plan',
+              title,
               style: TextStyle(
                 color: ColorManager.white,
                 fontSize: 18.sp,
@@ -224,7 +394,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
             ),
             SizedBox(height: 6.h),
             Text(
-              'Choose 3 to 6 days per week with smart exercises, rest timers, and video guides.',
+              subtitle,
               style: TextStyle(
                 color: ColorManager.textSecondary,
                 fontSize: 12.sp,
@@ -238,7 +408,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                 onPressed: () => context.push(Routes.workoutGeneratorRoute),
                 icon: Icon(Icons.flash_on_rounded, size: 18.sp, color: Colors.black),
                 label: Text(
-                  'Build My Plan with AI',
+                  buttonLabel,
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 14.sp,
@@ -259,515 +429,888 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
     );
   }
 
-  /// The Hero AI Weekly Schedule on Home (Matching the original AI Hub clarity!)
-  Widget _buildWeeklyScheduleCard({
+  /// Compact Horizontal Scroller Hub (Nike/Hevy/Apple Fitness inspired)
+  Widget _buildHorizontalScrollerHub({
     required BuildContext context,
     required Map<String, List<WorkoutModel>> grouped,
     required bool isCompletedToday,
     required WorkoutProvider workoutProvider,
   }) {
-    final todayName = DateFormat('EEEE').format(DateTime.now());
+    final todayName = DateFormat('EEEE').format(workoutProvider.currentNow);
     final bool isTodayWorkoutDay = grouped.containsKey(todayName);
     final String nextWorkoutDay = _getNextWorkoutDay(todayName, grouped);
 
     final sortedDays = grouped.keys.toList()
       ..sort((a, b) => _weekDays.indexOf(a).compareTo(_weekDays.indexOf(b)));
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: ColorManager.surface,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(
-            color: ColorManager.divider,
-            width: 1,
-          ),
-        ),
-        padding: EdgeInsets.all(18.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top Section Header: Title, Split Type, Re-plan & Reset
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.auto_awesome, color: ColorManager.primary, size: 16.sp),
-                          SizedBox(width: 6.w),
-                          Text(
+    // Prepare Cards List for the Horizontal Scroller Deck
+    final List<Widget> scrollerCards = [];
+    final Map<String, int> dayToCardIndex = {};
+
+    final String? missedDayName =
+        _findMissedWorkoutDay(todayName, grouped, workoutProvider);
+    final List<WorkoutModel>? missedWorkouts =
+        missedDayName != null ? grouped[missedDayName] : null;
+
+    // Card 1: Active Focus Card (Today if scheduled, or Next Up if today is rest)
+    if (isTodayWorkoutDay) {
+      dayToCardIndex[todayName] = scrollerCards.length;
+      scrollerCards.add(_buildActiveDayCard(
+        context: context,
+        dayName: todayName,
+        workouts: grouped[todayName]!,
+        isToday: true,
+        isCompleted: isCompletedToday,
+        isNextUp: false,
+        missedDayName: missedDayName,
+        missedWorkouts: missedWorkouts,
+      ));
+    } else {
+      // Today is Rest Day -> Focus Card is Next Scheduled Day (e.g. Friday)
+      if (nextWorkoutDay.isNotEmpty && grouped.containsKey(nextWorkoutDay)) {
+        dayToCardIndex[nextWorkoutDay] = scrollerCards.length;
+        scrollerCards.add(_buildActiveDayCard(
+          context: context,
+          dayName: nextWorkoutDay,
+          workouts: grouped[nextWorkoutDay]!,
+          isToday: false,
+          isCompleted: false,
+          isNextUp: true,
+          restDayName: todayName,
+          missedDayName: missedDayName,
+          missedWorkouts: missedWorkouts,
+        ));
+      }
+    }
+
+    // Add remaining days in the split (e.g. Wednesday completed, Monday upcoming)
+    for (var day in sortedDays) {
+      if (dayToCardIndex.containsKey(day)) continue; // Already added as focus card
+      dayToCardIndex[day] = scrollerCards.length;
+      final bool isDayDone = (day == todayName && isCompletedToday) ||
+          _localCompletedRoutineDaysToday.contains(day.toLowerCase()) ||
+          workoutProvider.isDayWorkoutCompletedThisWeek(day);
+
+      scrollerCards.add(_buildStandardSplitCard(
+        context: context,
+        dayName: day,
+        workouts: grouped[day]!,
+        isDone: isDayDone,
+      ));
+    }
+
+    // Card: AI Split Customizer & Quick Modifier
+    scrollerCards.add(_buildAiCustomizerCard(context, sortedDays));
+
+    // Card: Pro Workout Toolkit (Plate Math + 1RM)
+    scrollerCards.add(_buildProToolkitCard(context));
+
+    // Card: Adaptive Strength Partner & PR Vault
+    scrollerCards.add(_buildStrengthPartnerCard(context));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 1. Header Bar: Title, Split Subtitle & Quick Re-plan
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.auto_awesome, color: ColorManager.primary, size: 16.sp),
+                        SizedBox(width: 6.w),
+                        Flexible(
+                          child: Text(
                             'AI Workout Schedule',
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: ColorManager.white,
                               fontSize: 18.sp,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ],
-                      ),
-                      SizedBox(height: 2.h),
-                      Text(
-                        '${sortedDays.length}-Day Split (${sortedDays.join(' · ')})',
-                        style: TextStyle(
-                          color: ColorManager.textSecondary,
-                          fontSize: 12.sp,
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => context.push(Routes.workoutGeneratorRoute),
-                  icon: Icon(Icons.refresh_rounded, size: 14.sp, color: Colors.black),
-                  label: Text(
-                    'Re-plan',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.bold,
+                      ],
                     ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorManager.primary,
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                    SizedBox(height: 2.h),
+                    Text(
+                      '${sortedDays.length}-Day Split (${sortedDays.join(' · ')})',
+                      style: TextStyle(
+                        color: ColorManager.textSecondary,
+                        fontSize: 12.sp,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () => context.push(Routes.workoutGeneratorRoute),
+                icon: Icon(Icons.refresh_rounded, size: 13.sp, color: Colors.black),
+                label: Text(
+                  'Re-plan',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(width: 4.w),
-                IconButton(
-                  onPressed: () => _confirmResetPlan(context, workoutProvider),
-                  icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
-                  iconSize: 20.sp,
-                  tooltip: 'Reset Schedule',
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ColorManager.primary,
+                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
                 ),
-              ],
-            ),
-            SizedBox(height: 14.h),
+              ),
+              SizedBox(width: 4.w),
+              IconButton(
+                onPressed: () => _confirmResetPlan(context, workoutProvider),
+                icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
+                iconSize: 18.sp,
+                tooltip: 'Reset Schedule',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 10.h),
 
-            // Today's Status Banner (Smart & Truthful)
-            _buildTodayStatusBanner(
-              todayName: todayName,
-              isTodayWorkoutDay: isTodayWorkoutDay,
-              isCompletedToday: isCompletedToday,
-              nextWorkoutDay: nextWorkoutDay,
-              grouped: grouped,
-            ),
-            SizedBox(height: 14.h),
+        // 2. Interactive 7-Day Anchor Strip (Mon to Sun)
+        _buildSevenDayAnchorStrip(
+          todayName: todayName,
+          nextWorkoutDay: nextWorkoutDay,
+          grouped: grouped,
+          dayToCardIndex: dayToCardIndex,
+          isCompletedToday: isCompletedToday,
+          workoutProvider: workoutProvider,
+        ),
+        SizedBox(height: 12.h),
 
-            // The Split Days List (Monday, Wednesday, Friday)
-            ...sortedDays.map((day) {
-              final workouts = grouped[day]!;
-              final bool isToday = day == todayName;
-              final bool isNextUp = day == nextWorkoutDay;
-              final bool isDoneToday = isToday && isCompletedToday;
-
-              return _buildDayCard(
-                context: context,
-                day: day,
-                workouts: workouts,
-                isToday: isToday,
-                isNextUp: isNextUp,
-                isDoneToday: isDoneToday,
+        // 3. Compact Horizontal Scroller Deck (~204.h)
+        SizedBox(
+          height: 204.h,
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: scrollerCards.length,
+            onPageChanged: (idx) {
+              setState(() {
+                _currentPageIndex = idx;
+              });
+            },
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: EdgeInsets.symmetric(horizontal: 5.w),
+                child: scrollerCards[index],
               );
-            }),
-          ],
+            },
+          ),
+        ),
+        SizedBox(height: 8.h),
+
+        // 4. Dot Page Indicator
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(scrollerCards.length, (idx) {
+            final bool isSelected = idx == _currentPageIndex;
+            return Container(
+              margin: EdgeInsets.symmetric(horizontal: 3.w),
+              width: isSelected ? 16.w : 6.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: isSelected ? ColorManager.primary : ColorManager.divider,
+                borderRadius: BorderRadius.circular(4.r),
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  /// Interactive 7-Day Anchor Strip: Tapping any scheduled day animates directly to that card!
+  Widget _buildSevenDayAnchorStrip({
+    required String todayName,
+    required String nextWorkoutDay,
+    required Map<String, List<WorkoutModel>> grouped,
+    required Map<String, int> dayToCardIndex,
+    required bool isCompletedToday,
+    required WorkoutProvider workoutProvider,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
+        decoration: BoxDecoration(
+          color: ColorManager.surfaceDark,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: ColorManager.divider),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: _weekDays.map((day) {
+            final isToday = day == todayName;
+            final hasWorkout = grouped.containsKey(day);
+            final isNext = day == nextWorkoutDay;
+            final isDayDone = (isToday && isCompletedToday) ||
+                _localCompletedRoutineDaysToday.contains(day.toLowerCase()) ||
+                workoutProvider.isDayWorkoutCompletedThisWeek(day);
+            final dayShort = day.substring(0, 3);
+
+            Color bgColor = Colors.transparent;
+            Color textColor = ColorManager.textTertiary;
+            Border? border;
+
+            if (isToday) {
+              bgColor = hasWorkout && isCompletedToday
+                  ? const Color(0xFF1E4331)
+                  : Colors.blueAccent.withValues(alpha: 0.18);
+              textColor = hasWorkout && isCompletedToday
+                  ? const Color(0xFF81C784)
+                  : Colors.blueAccent;
+              border = Border.all(
+                color: hasWorkout && isCompletedToday ? const Color(0xFF4CAF50) : Colors.blueAccent,
+                width: 1,
+              );
+            } else if (isDayDone) {
+              bgColor = const Color(0xFF1E4331).withValues(alpha: 0.5);
+              textColor = const Color(0xFF81C784);
+              border = Border.all(color: const Color(0xFF4CAF50).withValues(alpha: 0.6), width: 1);
+            } else if (isNext) {
+              bgColor = ColorManager.primary.withValues(alpha: 0.15);
+              textColor = ColorManager.primary;
+              border = Border.all(color: ColorManager.primary.withValues(alpha: 0.6), width: 1);
+            } else if (hasWorkout) {
+              textColor = ColorManager.textPrimary;
+            }
+
+            return InkWell(
+              onTap: () {
+                if (dayToCardIndex.containsKey(day)) {
+                  _pageController.animateToPage(
+                    dayToCardIndex[day]!,
+                    duration: const Duration(milliseconds: 320),
+                    curve: Curves.easeInOut,
+                  );
+                }
+              },
+              borderRadius: BorderRadius.circular(8.r),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: border,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      dayShort,
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 10.sp,
+                        fontWeight: isToday || isNext || hasWorkout || isDayDone ? FontWeight.bold : FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    if (isToday && !hasWorkout)
+                      Text('REST', style: TextStyle(color: Colors.blueAccent, fontSize: 8.sp, fontWeight: FontWeight.bold))
+                    else if (isDayDone)
+                      Text('DONE', style: TextStyle(color: const Color(0xFF81C784), fontSize: 8.sp, fontWeight: FontWeight.bold))
+                    else if (isNext)
+                      Text('NEXT', style: TextStyle(color: ColorManager.primary, fontSize: 8.sp, fontWeight: FontWeight.bold))
+                    else if (hasWorkout)
+                      Text('${grouped[day]!.length}ex', style: TextStyle(color: ColorManager.textTertiary, fontSize: 8.sp))
+                    else
+                      Text('—', style: TextStyle(color: Colors.white24, fontSize: 8.sp)),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
   }
 
-  /// Compact status strip indicating where the user stands today
-  Widget _buildTodayStatusBanner({
-    required String todayName,
-    required bool isTodayWorkoutDay,
-    required bool isCompletedToday,
-    required String nextWorkoutDay,
-    required Map<String, List<WorkoutModel>> grouped,
-  }) {
-    if (isTodayWorkoutDay) {
-      if (isCompletedToday) {
-        return Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1E4331),
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: const Color(0xFF4CAF50).withValues(alpha: 0.5)),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.check_circle_rounded, color: const Color(0xFF4CAF50), size: 18.sp),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: Text(
-                  '$todayName Workout Crushed! 🔥 Great job today.',
-                  style: TextStyle(
-                    color: const Color(0xFFE8F5E9),
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              if (nextWorkoutDay.isNotEmpty)
-                Text(
-                  'Next: $nextWorkoutDay',
-                  style: TextStyle(color: const Color(0xFF81C784), fontSize: 11.sp),
-                ),
-            ],
-          ),
-        );
-      } else {
-        return Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-          decoration: BoxDecoration(
-            color: ColorManager.primary.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: ColorManager.primary.withValues(alpha: 0.4)),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.fitness_center_rounded, color: ColorManager.primary, size: 18.sp),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: Text(
-                  'Today ($todayName) is Workout Day! ${grouped[todayName]!.length} exercises scheduled.',
-                  style: TextStyle(
-                    color: ColorManager.white,
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      }
-    } else {
-      // Today is a Rest Day (e.g. Thursday)
-      final tomorrowIndex = (_weekDays.indexOf(todayName) + 1) % 7;
-      final tomorrowName = _weekDays[tomorrowIndex];
-      final bool isTomorrowNext = nextWorkoutDay == tomorrowName;
-
-      return Container(
-        width: double.infinity,
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-        decoration: BoxDecoration(
-          color: Colors.blueAccent.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3)),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.bedtime_rounded, color: Colors.blueAccent, size: 18.sp),
-            SizedBox(width: 8.w),
-            Expanded(
-              child: Text(
-                'Today ($todayName) is Rest & Recovery.',
-                style: TextStyle(
-                  color: Colors.blueAccent.shade100,
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            if (nextWorkoutDay.isNotEmpty)
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-                decoration: BoxDecoration(
-                  color: ColorManager.primary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-                child: Text(
-                  isTomorrowNext ? 'Tomorrow: $nextWorkoutDay' : 'Next: $nextWorkoutDay',
-                  style: TextStyle(
-                    color: ColorManager.primary,
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      );
-    }
-  }
-
-  /// Individual Day Card (Monday, Wednesday, Friday) with [Start Day] button and exercises
-  Widget _buildDayCard({
+  /// Card 1: Active Focus Card (Immediate Next Session or Completed Today)
+  Widget _buildActiveDayCard({
     required BuildContext context,
-    required String day,
+    required String dayName,
     required List<WorkoutModel> workouts,
     required bool isToday,
+    required bool isCompleted,
     required bool isNextUp,
-    required bool isDoneToday,
+    String? restDayName,
+    String? missedDayName,
+    List<WorkoutModel>? missedWorkouts,
   }) {
-    Color borderColor = ColorManager.divider;
-    Color dayColor = ColorManager.textPrimary;
-    Widget? badge;
-
-    if (isDoneToday) {
-      borderColor = const Color(0xFF4CAF50).withValues(alpha: 0.5);
-      dayColor = const Color(0xFF81C784);
-      badge = Container(
-        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1E4331),
-          borderRadius: BorderRadius.circular(6.r),
-          border: Border.all(color: const Color(0xFF4CAF50).withValues(alpha: 0.4)),
-        ),
-        child: Text(
-          'COMPLETED ✓',
-          style: TextStyle(color: const Color(0xFF81C784), fontSize: 9.sp, fontWeight: FontWeight.bold),
-        ),
-      );
-    } else if (isNextUp) {
-      borderColor = ColorManager.primary.withValues(alpha: 0.6);
-      dayColor = ColorManager.primary;
-      badge = Container(
-        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-        decoration: BoxDecoration(
-          color: ColorManager.primary.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(6.r),
-          border: Border.all(color: ColorManager.primary.withValues(alpha: 0.4)),
-        ),
-        child: Text(
-          'NEXT UP',
-          style: TextStyle(color: ColorManager.primary, fontSize: 9.sp, fontWeight: FontWeight.bold),
-        ),
-      );
-    } else if (isToday) {
-      borderColor = ColorManager.primary;
-      dayColor = ColorManager.primary;
-      badge = Container(
-        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-        decoration: BoxDecoration(
-          color: ColorManager.primary.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(6.r),
-        ),
-        child: Text(
-          'TODAY',
-          style: TextStyle(color: ColorManager.primary, fontSize: 9.sp, fontWeight: FontWeight.bold),
-        ),
-      );
-    }
-
     final exerciseNames = workouts
         .map((w) => w.name.replaceAll(RegExp(r'^\[\w+\]\s*'), '').trim())
         .toList();
 
     return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
       decoration: BoxDecoration(
-        color: ColorManager.surfaceDark,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: borderColor, width: isNextUp || isToday ? 1.4 : 1),
-      ),
-      child: ExpansionTile(
-        initiallyExpanded: isToday || isNextUp,
-        shape: const RoundedRectangleBorder(side: BorderSide.none),
-        collapsedShape: const RoundedRectangleBorder(side: BorderSide.none),
-        tilePadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
-        title: Row(
-          children: [
-            Text(
-              day,
-              style: TextStyle(
-                color: dayColor,
-                fontSize: 16.sp,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            if (badge != null) ...[
-              SizedBox(width: 8.w),
-              badge,
-            ],
-          ],
+        color: ColorManager.surface,
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(
+          color: isCompleted
+              ? const Color(0xFF4CAF50).withValues(alpha: 0.6)
+              : ColorManager.primary.withValues(alpha: 0.6),
+          width: 1.4,
         ),
-        subtitle: Text(
-          '${workouts.length} Exercises',
-          style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
-        ),
-        trailing: ElevatedButton.icon(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DayWorkoutSessionPage(
-                  dayName: day,
-                  workouts: workouts,
-                ),
-              ),
-            ).then((_) {
-              _checkLocalCompletion();
-              if (mounted) setState(() {});
-            });
-          },
-          icon: Icon(
-            isDoneToday ? Icons.refresh_rounded : Icons.play_arrow_rounded,
-            size: 16.sp,
-            color: Colors.white,
-          ),
-          label: Text(
-            isDoneToday ? 'Repeat' : 'Start Day',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 12.sp,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: isDoneToday ? const Color(0xFF2E7D32) : ColorManager.primary,
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-            minimumSize: Size.zero,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
-          ),
-        ),
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
-            child: Column(
-              children: [
-                Divider(color: ColorManager.divider, height: 16.h),
-                ...workouts.asMap().entries.map((entry) {
-                  final idx = entry.key;
-                  final w = entry.value;
-                  final name = exerciseNames[idx];
-
-                  return _buildExerciseRow(
-                    context: context,
-                    workout: w,
-                    displayName: name,
-                    isDone: isDoneToday,
-                  );
-                }),
-              ],
-            ),
+        boxShadow: [
+          BoxShadow(
+            color: (isCompleted ? const Color(0xFF4CAF50) : ColorManager.primary).withValues(alpha: 0.08),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-    );
-  }
-
-  /// Row for each exercise within a day
-  Widget _buildExerciseRow({
-    required BuildContext context,
-    required WorkoutModel workout,
-    required String displayName,
-    required bool isDone,
-  }) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 5.h),
-      child: Row(
+      padding: EdgeInsets.all(14.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            padding: EdgeInsets.all(5.w),
-            decoration: BoxDecoration(
-              color: isDone ? const Color(0xFF1E4331) : ColorManager.surface,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              isDone ? Icons.check_rounded : Icons.fitness_center_rounded,
-              size: 13.sp,
-              color: isDone ? const Color(0xFF4CAF50) : ColorManager.primary,
-            ),
-          ),
-          SizedBox(width: 10.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  displayName,
-                  style: TextStyle(
-                    color: isDone ? const Color(0xFFE8F5E9) : ColorManager.textPrimary,
-                    fontSize: 13.sp,
-                    fontWeight: isDone ? FontWeight.w500 : FontWeight.w600,
+          // Top Row: Status Chip + Estimated Meta
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                  decoration: BoxDecoration(
+                    color: isCompleted
+                        ? const Color(0xFF1E4331)
+                        : ColorManager.primary.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6.r),
+                    border: Border.all(
+                      color: isCompleted
+                          ? const Color(0xFF4CAF50).withValues(alpha: 0.4)
+                          : ColorManager.primary.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isCompleted ? Icons.check_circle_rounded : Icons.flash_on_rounded,
+                        size: 11.sp,
+                        color: isCompleted ? const Color(0xFF4CAF50) : ColorManager.primary,
+                      ),
+                      SizedBox(width: 4.w),
+                      Flexible(
+                        child: Text(
+                          isCompleted
+                              ? 'COMPLETED TODAY ✓'
+                              : (isNextUp ? 'NEXT UP (TOMORROW)' : 'TODAY\'S TARGET'),
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: isCompleted ? const Color(0xFF81C784) : ColorManager.primary,
+                            fontSize: 9.sp,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  '${workout.setNumber} sets × ${workout.repNumber} reps',
-                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+              ),
+              SizedBox(width: 6.w),
+              if (restDayName != null)
+                Flexible(
+                  child: Text(
+                    'Today: $restDayName Rest',
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: Colors.blueAccent.shade100, fontSize: 10.sp, fontWeight: FontWeight.w600),
+                  ),
+                )
+              else
+                Flexible(
+                  child: Text(
+                    '${workouts.length} Exercises · ~45 min',
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp),
+                  ),
                 ),
-              ],
-            ),
+            ],
           ),
-          IconButton(
-            onPressed: () => _showExerciseDetailModal(context, displayName, workout),
-            icon: Icon(Icons.info_outline_rounded, color: ColorManager.textTertiary, size: 18.sp),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            tooltip: 'View Guide',
+
+          // Title & Focus
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$dayName Routine',
+                style: TextStyle(color: ColorManager.white, fontSize: 17.sp, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 2.h),
+              Text(
+                isCompleted
+                    ? 'All ${workouts.length} exercises logged. Streak extended! 🔥'
+                    : 'Scheduled full session with animated rest timers & set logs.',
+                style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+
+          // Exercise Pills Horizontal Wrap / Preview
+          Wrap(
+            spacing: 5.w,
+            runSpacing: 4.h,
+            children: [
+              ...exerciseNames.take(3).map((name) => Container(
+                padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
+                decoration: BoxDecoration(
+                  color: isCompleted ? const Color(0xFF1E4331) : ColorManager.surfaceDark,
+                  borderRadius: BorderRadius.circular(6.r),
+                  border: Border.all(color: ColorManager.divider),
+                ),
+                child: Text(
+                  name,
+                  style: TextStyle(
+                    color: isCompleted ? const Color(0xFFE8F5E9) : ColorManager.textSecondary,
+                    fontSize: 10.sp,
+                  ),
+                ),
+              )),
+              if (exerciseNames.length > 3)
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
+                  decoration: BoxDecoration(
+                    color: ColorManager.surfaceDark,
+                    borderRadius: BorderRadius.circular(6.r),
+                  ),
+                  child: Text(
+                    '+${exerciseNames.length - 3} more',
+                    style: TextStyle(color: ColorManager.primary, fontSize: 10.sp, fontWeight: FontWeight.bold),
+                  ),
+                ),
+            ],
+          ),
+
+          // Missed Workout Catch-Up Action (Non-destructive, opt-in)
+          if (missedDayName != null &&
+              missedWorkouts != null &&
+              missedWorkouts.isNotEmpty &&
+              !isCompleted &&
+              missedDayName != dayName)
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DayWorkoutSessionPage(
+                      dayName: missedDayName,
+                      workouts: missedWorkouts,
+                    ),
+                  ),
+                ).then((_) {
+                  _checkLocalCompletion();
+                  if (mounted) setState(() {});
+                });
+              },
+              borderRadius: BorderRadius.circular(8.r),
+              child: Container(
+                margin: EdgeInsets.only(bottom: 6.h),
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 5.h),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(color: Colors.amber.withValues(alpha: 0.4)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.history_toggle_off_rounded,
+                        color: Colors.amber, size: 14.sp),
+                    SizedBox(width: 5.w),
+                    Expanded(
+                      child: Text(
+                        'Missed $missedDayName? Tap to resume missed workout',
+                        style: TextStyle(
+                          color: Colors.amber.shade200,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Icon(Icons.chevron_right_rounded,
+                        color: Colors.amber, size: 14.sp),
+                  ],
+                ),
+              ),
+            ),
+
+          // Bottom Action Button
+          SizedBox(
+            width: double.infinity,
+            height: 38.h,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DayWorkoutSessionPage(
+                      dayName: dayName,
+                      workouts: workouts,
+                    ),
+                  ),
+                ).then((_) {
+                  _checkLocalCompletion();
+                  if (mounted) setState(() {});
+                });
+              },
+              icon: Icon(
+                isCompleted ? Icons.refresh_rounded : Icons.play_arrow_rounded,
+                size: 16.sp,
+                color: isCompleted ? Colors.white : Colors.black,
+              ),
+              label: Text(
+                isCompleted
+                    ? 'Repeat $dayName Workout'
+                    : (isNextUp ? 'Start $dayName Workout Early' : 'Start Workout Session'),
+                style: TextStyle(
+                  color: isCompleted ? Colors.white : Colors.black,
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isCompleted ? const Color(0xFF2E7D32) : ColorManager.primary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                padding: EdgeInsets.zero,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _showExerciseDetailModal(BuildContext context, String cleanName, WorkoutModel workout) {
-    Exercise? foundExercise;
-    try {
-      final allExercises = [
-        ...ExerciseData.chest,
-        ...ExerciseData.back,
-        ...ExerciseData.shoulders,
-        ...ExerciseData.arms,
-        ...ExerciseData.legs,
-      ];
-      foundExercise = allExercises.firstWhere((e) => e.name.toLowerCase() == cleanName.toLowerCase());
-    } catch (_) {}
+  /// Card 2: Standard Split Day Card (e.g. Wednesday or Monday)
+  Widget _buildStandardSplitCard({
+    required BuildContext context,
+    required String dayName,
+    required List<WorkoutModel> workouts,
+    required bool isDone,
+  }) {
+    final exerciseNames = workouts
+        .map((w) => w.name.replaceAll(RegExp(r'^\[\w+\]\s*'), '').trim())
+        .toList();
 
-    String category = 'Chest';
-    if (foundExercise != null) {
-      if (ExerciseData.chest.any((e) => e.name == foundExercise!.name)) {
-        category = 'Chest';
-      } else if (ExerciseData.arms.any((e) => e.name == foundExercise!.name)) {
-        category = 'Arms';
-      } else if (ExerciseData.back.any((e) => e.name == foundExercise!.name)) {
-        category = 'Back';
-      } else if (ExerciseData.legs.any((e) => e.name == foundExercise!.name)) {
-        category = 'Legs';
-      } else if (ExerciseData.shoulders.any((e) => e.name == foundExercise!.name)) {
-        category = 'Shoulders';
-      }
-    }
-
-    final exerciseToUse = foundExercise ?? Exercise(
-      name: cleanName,
-      videoPath: '',
-      description: 'Custom exercise routine.',
-      target: 'General',
-      equipment: 'Gym / Dumbbells',
-      instructions: const ['Perform the scheduled sets with proper form.'],
-      difficulty: 'All Levels',
-      setsReps: '${workout.setNumber} sets × ${workout.repNumber} reps',
-    );
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => InteractiveExerciseDetailWidget(
-        name: exerciseToUse.name,
-        videoPath: exerciseToUse.videoPath,
-        description: exerciseToUse.description,
-        target: exerciseToUse.target,
-        equipment: exerciseToUse.equipment,
-        instructions: exerciseToUse.instructions,
-        difficulty: exerciseToUse.difficulty,
-        setsReps: exerciseToUse.setsReps,
-        category: category,
+    return Container(
+      decoration: BoxDecoration(
+        color: ColorManager.surface,
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: isDone ? const Color(0xFF4CAF50).withValues(alpha: 0.4) : ColorManager.divider),
       ),
+      padding: EdgeInsets.all(14.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
+                decoration: BoxDecoration(
+                  color: isDone ? const Color(0xFF1E4331) : ColorManager.surfaceDark,
+                  borderRadius: BorderRadius.circular(6.r),
+                ),
+                child: Text(
+                  isDone ? 'COMPLETED ✓' : 'SCHEDULED',
+                  style: TextStyle(
+                    color: isDone ? const Color(0xFF81C784) : ColorManager.textTertiary,
+                    fontSize: 9.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              Text('${workouts.length} Exercises', style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp)),
+            ],
+          ),
+
+          Text(
+            '$dayName Routine',
+            style: TextStyle(color: ColorManager.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
+          ),
+
+          Wrap(
+            spacing: 5.w,
+            runSpacing: 4.h,
+            children: [
+              ...exerciseNames.take(3).map((name) => Container(
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                decoration: BoxDecoration(
+                  color: ColorManager.surfaceDark,
+                  borderRadius: BorderRadius.circular(6.r),
+                ),
+                child: Text(name, style: TextStyle(color: ColorManager.textSecondary, fontSize: 10.sp)),
+              )),
+              if (exerciseNames.length > 3)
+                Text('+${exerciseNames.length - 3} more', style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp)),
+            ],
+          ),
+
+          SizedBox(
+            width: double.infinity,
+            height: 36.h,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DayWorkoutSessionPage(
+                      dayName: dayName,
+                      workouts: workouts,
+                    ),
+                  ),
+                ).then((_) {
+                  _checkLocalCompletion();
+                  if (mounted) setState(() {});
+                });
+              },
+              icon: Icon(Icons.play_arrow_rounded, size: 14.sp, color: ColorManager.textPrimary),
+              label: Text(
+                isDone ? 'Repeat Session' : 'Start $dayName Session',
+                style: TextStyle(color: ColorManager.textPrimary, fontSize: 11.sp, fontWeight: FontWeight.bold),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: ColorManager.divider),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                padding: EdgeInsets.zero,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Card 3: AI Split Customizer & Re-plan Card
+  Widget _buildAiCustomizerCard(BuildContext context, List<String> activeDays) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            ColorManager.surfaceDark,
+            ColorManager.surface,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
+      ),
+      padding: EdgeInsets.all(14.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.auto_awesome, color: ColorManager.primary, size: 16.sp),
+              SizedBox(width: 6.w),
+              Text(
+                'AI Routine Customizer',
+                style: TextStyle(color: ColorManager.primary, fontSize: 13.sp, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          Text(
+            'Change frequency, target goal, or equipment in seconds.',
+            style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+          ),
+          Wrap(
+            spacing: 6.w,
+            children: [
+              _buildFeatureBadge('${activeDays.length} Days Active'),
+              _buildFeatureBadge('Full Equipment'),
+              _buildFeatureBadge('Hypertrophy'),
+            ],
+          ),
+          SizedBox(
+            width: double.infinity,
+            height: 36.h,
+            child: ElevatedButton.icon(
+              onPressed: () => context.push(Routes.workoutGeneratorRoute),
+              icon: Icon(Icons.flash_on_rounded, size: 14.sp, color: Colors.black),
+              label: Text('Re-generate Split with AI', style: TextStyle(color: Colors.black, fontSize: 11.sp, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorManager.primary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                padding: EdgeInsets.zero,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Card 4: Pro Lifting Tools Card (Plate Calculator + 1RM Estimator)
+  Widget _buildProToolkitCard(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: ColorManager.surface,
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.4)),
+      ),
+      padding: EdgeInsets.all(14.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.star_rounded, color: Colors.amber, size: 18.sp),
+              SizedBox(width: 6.w),
+              Text(
+                'Lifting Tools & Calculators',
+                style: TextStyle(color: Colors.amber, fontSize: 13.sp, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          Text(
+            'Avoid gym math. Visual barbell loading and 1-rep max calculator.',
+            style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: () => PlateCalculatorSheet.show(context),
+                  borderRadius: BorderRadius.circular(10.r),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 8.w),
+                    decoration: BoxDecoration(
+                      color: ColorManager.surfaceDark,
+                      borderRadius: BorderRadius.circular(10.r),
+                      border: Border.all(color: ColorManager.divider),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(Icons.fitness_center_rounded, color: ColorManager.primary, size: 16.sp),
+                        SizedBox(height: 3.h),
+                        Text('Plate Math', style: TextStyle(color: ColorManager.white, fontSize: 10.sp, fontWeight: FontWeight.bold)),
+                        Text('Olympic Bar', style: TextStyle(color: ColorManager.textTertiary, fontSize: 8.sp)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: InkWell(
+                  onTap: () => _showOneRepMaxDialog(context),
+                  borderRadius: BorderRadius.circular(10.r),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 8.w),
+                    decoration: BoxDecoration(
+                      color: ColorManager.surfaceDark,
+                      borderRadius: BorderRadius.circular(10.r),
+                      border: Border.all(color: ColorManager.divider),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(Icons.speed_rounded, color: Colors.amber, size: 16.sp),
+                        SizedBox(height: 3.h),
+                        Text('1RM Calc', style: TextStyle(color: ColorManager.white, fontSize: 10.sp, fontWeight: FontWeight.bold)),
+                        Text('Max Strength', style: TextStyle(color: ColorManager.textTertiary, fontSize: 8.sp)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Card 5: Strength & PR Vault Partner
+  Widget _buildStrengthPartnerCard(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: ColorManager.surface,
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: ColorManager.primary.withOpacity(0.35)),
+      ),
+      padding: EdgeInsets.all(14.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.emoji_events_rounded, color: Colors.amber, size: 18.sp),
+                  SizedBox(width: 6.w),
+                  Text(
+                    'Strength Partner & PRs',
+                    style: TextStyle(color: ColorManager.white, fontSize: 13.sp, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              Icon(Icons.arrow_forward_ios_rounded, color: ColorManager.textTertiary, size: 12.sp),
+            ],
+          ),
+          Text(
+            'Track your Estimated 1RMs, progressive overload benchmarks, and PR vault.',
+            style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+          ),
+          InkWell(
+            onTap: () => context.push(Routes.strengthAnalyticsRoute),
+            borderRadius: BorderRadius.circular(10.r),
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
+              decoration: BoxDecoration(
+                color: ColorManager.primary.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(10.r),
+                border: Border.all(color: ColorManager.primary.withOpacity(0.3)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.analytics_outlined, color: ColorManager.primary, size: 14.sp),
+                  SizedBox(width: 6.w),
+                  Text(
+                    'Open PR Vault & Analytics',
+                    style: TextStyle(color: ColorManager.primary, fontSize: 11.sp, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureBadge(String text) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
+      decoration: BoxDecoration(
+        color: ColorManager.surfaceDark,
+        borderRadius: BorderRadius.circular(6.r),
+        border: Border.all(color: ColorManager.divider),
+      ),
+      child: Text(text, style: TextStyle(color: ColorManager.textSecondary, fontSize: 9.sp)),
     );
   }
 }

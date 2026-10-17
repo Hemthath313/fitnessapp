@@ -61,6 +61,7 @@ class ExerciseOfTheWeekScreen extends StatelessWidget {
       child: ExerciseVideoPlayer(
         videoPath: exercise.videoPath,
         height: 350.h,
+        fit: BoxFit.contain,
         autoPlay: true,
       ),
     );

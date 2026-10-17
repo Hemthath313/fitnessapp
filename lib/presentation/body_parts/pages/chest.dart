@@ -13,18 +13,50 @@ class ChestExercisesPage extends StatefulWidget {
 }
 
 class _ChestExercisesPageState extends State<ChestExercisesPage> {
-  // Use centralized data
   final List<Exercise> chestExercises = ExerciseData.chest;
+  final TextEditingController _searchController = TextEditingController();
+
+  // Applied filters — drive the visible exercise list
+  String _searchQuery = '';
+  String _appliedDifficulty = 'All';
+  String _appliedEquipment = 'All';
+
+  List<Exercise> get _filteredExercises => ExerciseData.filterExercises(
+        chestExercises,
+        query: _searchQuery,
+        difficulty: _appliedDifficulty,
+        equipment: _appliedEquipment,
+      );
+
+  bool get _hasActiveFilters =>
+      _searchQuery.trim().isNotEmpty ||
+      _appliedDifficulty != 'All' ||
+      _appliedEquipment != 'All';
+
+  void _resetFilters() {
+    setState(() {
+      _searchController.clear();
+      _searchQuery = '';
+      _appliedDifficulty = 'All';
+      _appliedEquipment = 'All';
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final filteredExercises = _filteredExercises;
     return Scaffold(
       backgroundColor: ColorManager.background,
       body: CustomScrollView(
         slivers: [
-          // Beautiful App Bar with gradient
           SliverAppBar(
-            expandedHeight: 200.0,
+            expandedHeight: 120.0,
             floating: false,
             pinned: true,
             backgroundColor: ColorManager.surface,
@@ -34,7 +66,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
                 style: TextStyle(
                   color: ColorManager.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 24,
+                  fontSize: 20,
                 ),
               ),
               centerTitle: true,
@@ -53,7 +85,7 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
                 child: Center(
                   child: Icon(
                     Icons.fitness_center,
-                    size: 80,
+                    size: 64,
                     color: ColorManager.limerGreen2.withOpacity(0.3),
                   ),
                 ),
@@ -62,10 +94,10 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
             iconTheme: IconThemeData(color: ColorManager.textPrimary),
           ),
 
-          // Header Section
+          // Header + Search & Filter row
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.all(20.0),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -73,62 +105,438 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
                     'Build a Powerful Chest',
                     style: TextStyle(
                       color: ColorManager.limerGreen2,
-                      fontSize: 28,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 6),
                   Text(
                     'Premium video workouts',
                     style: TextStyle(
                       color: ColorManager.textSecondary,
-                      fontSize: 16,
+                      fontSize: 14,
                     ),
                   ),
-                  SizedBox(height: 20),
-                  Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: ColorManager.surface,
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                        color: ColorManager.limerGreen2.withOpacity(0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          color: ColorManager.limerGreen2,
-                          size: 24,
-                        ),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'All exercises include detailed video demonstrations and step-by-step instructions.',
-                            style: TextStyle(
-                              color: ColorManager.textPrimary,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  const SizedBox(height: 14),
+                  _buildSearchAndFilters(filteredExercises.length),
                 ],
               ),
             ),
           ),
 
-          // Exercises List
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final exercise = chestExercises[index];
-                return _buildExerciseCard(exercise, index);
-              },
-              childCount: chestExercises.length,
+          // List or empty state
+          if (filteredExercises.isEmpty)
+            SliverToBoxAdapter(child: _buildEmptyState())
+          else
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) =>
+                    _buildExerciseCard(filteredExercises[index], index),
+                childCount: filteredExercises.length,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchAndFilters(int resultCount) {
+    final bool hasFilterSelected =
+        _appliedDifficulty != 'All' || _appliedEquipment != 'All';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                key: const Key('exercise_search_field'),
+                controller: _searchController,
+                onChanged: (value) => setState(() => _searchQuery = value),
+                style:
+                    TextStyle(color: ColorManager.textPrimary, fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: 'Search exercises by name...',
+                  hintStyle: TextStyle(
+                    color: ColorManager.textSecondary,
+                    fontSize: 14,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    color: ColorManager.primary,
+                    size: 20,
+                  ),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          key: const Key('clear_exercise_search_button'),
+                          icon: Icon(
+                            Icons.close_rounded,
+                            color: ColorManager.textSecondary,
+                            size: 18,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _searchController.clear();
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: ColorManager.surface,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: ColorManager.divider),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: ColorManager.divider),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(
+                      color: ColorManager.primary,
+                      width: 1.5,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Container(
+              decoration: BoxDecoration(
+                color: hasFilterSelected
+                    ? ColorManager.primary.withValues(alpha: 0.15)
+                    : ColorManager.surface,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: hasFilterSelected
+                      ? ColorManager.primary
+                      : ColorManager.divider,
+                  width: hasFilterSelected ? 1.5 : 1,
+                ),
+              ),
+              child: IconButton(
+                key: const Key('exercise_filter_button'),
+                icon: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Icon(
+                      Icons.tune_rounded,
+                      color: hasFilterSelected
+                          ? ColorManager.primary
+                          : ColorManager.textSecondary,
+                      size: 20,
+                    ),
+                    if (hasFilterSelected)
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          width: 7,
+                          height: 7,
+                          decoration: const BoxDecoration(
+                            color: ColorManager.primary,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                tooltip: 'Filter exercises',
+                onPressed: () => _showFilterBottomSheet(context),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Text(
+                'Showing $resultCount of ${chestExercises.length} exercises',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: ColorManager.textSecondary,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            if (_hasActiveFilters)
+              TextButton(
+                key: const Key('clear_all_filters_button'),
+                onPressed: _resetFilters,
+                style: TextButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  'Clear filters',
+                  style: TextStyle(
+                    color: ColorManager.primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _showFilterBottomSheet(BuildContext context) {
+    // Initialise draft from currently applied filters
+    String draftDifficulty = _appliedDifficulty;
+    String draftEquipment = _appliedEquipment;
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: ColorManager.surface,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (bottomSheetContext) {
+        return StatefulBuilder(
+          builder: (_, setModalState) {
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Drag handle
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[700],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Title row + Reset (draft only)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Filter Exercises',
+                          style: TextStyle(
+                            color: ColorManager.textPrimary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextButton(
+                          key: const Key('reset_sheet_filters_button'),
+                          onPressed: () {
+                            setModalState(() {
+                              draftDifficulty = 'All';
+                              draftEquipment = 'All';
+                            });
+                          },
+                          child: Text(
+                            'Reset',
+                            style: TextStyle(
+                              color: ColorManager.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    // Difficulty chips
+                    Text(
+                      'DIFFICULTY',
+                      style: TextStyle(
+                        color: ColorManager.textSecondary,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children:
+                          ExerciseData.difficultyFilterOptions.map((option) {
+                        final isSelected = draftDifficulty == option;
+                        return ChoiceChip(
+                          key: Key('difficulty_filter_$option'),
+                          label: Text(option),
+                          selected: isSelected,
+                          onSelected: (_) =>
+                              setModalState(() => draftDifficulty = option),
+                          selectedColor:
+                              ColorManager.primary.withValues(alpha: 0.2),
+                          backgroundColor: ColorManager.surfaceDark,
+                          visualDensity: VisualDensity.compact,
+                          labelStyle: TextStyle(
+                            color: isSelected
+                                ? ColorManager.primary
+                                : ColorManager.textSecondary,
+                            fontSize: 12,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.w500,
+                          ),
+                          side: BorderSide(
+                            color: isSelected
+                                ? ColorManager.primary
+                                : ColorManager.divider,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          showCheckmark: false,
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+                    // Equipment chips
+                    Text(
+                      'EQUIPMENT',
+                      style: TextStyle(
+                        color: ColorManager.textSecondary,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children:
+                          ExerciseData.equipmentFilterOptions.map((option) {
+                        final isSelected = draftEquipment == option;
+                        return ChoiceChip(
+                          key: Key('equipment_filter_$option'),
+                          label: Text(option),
+                          selected: isSelected,
+                          onSelected: (_) =>
+                              setModalState(() => draftEquipment = option),
+                          selectedColor:
+                              ColorManager.primary.withValues(alpha: 0.2),
+                          backgroundColor: ColorManager.surfaceDark,
+                          visualDensity: VisualDensity.compact,
+                          labelStyle: TextStyle(
+                            color: isSelected
+                                ? ColorManager.primary
+                                : ColorManager.textSecondary,
+                            fontSize: 12,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.w500,
+                          ),
+                          side: BorderSide(
+                            color: isSelected
+                                ? ColorManager.primary
+                                : ColorManager.divider,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          showCheckmark: false,
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 20),
+                    // Apply button — copies draft → applied then closes
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        key: const Key('apply_exercise_filters_button'),
+                        onPressed: () {
+                          setState(() {
+                            _appliedDifficulty = draftDifficulty;
+                            _appliedEquipment = draftEquipment;
+                          });
+                          Navigator.pop(bottomSheetContext);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ColorManager.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          'Apply Filters',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      key: const Key('exercise_empty_state'),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: ColorManager.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: ColorManager.divider),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.search_off_rounded,
+            size: 44,
+            color: ColorManager.textSecondary,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'No exercises match your search or filters.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: ColorManager.textPrimary,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextButton.icon(
+            key: const Key('reset_exercise_filters_button'),
+            onPressed: _resetFilters,
+            icon: Icon(Icons.refresh_rounded,
+                color: ColorManager.limerGreen2, size: 18),
+            label: Text(
+              'Reset Filters',
+              style: TextStyle(
+                color: ColorManager.limerGreen2,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -137,7 +545,9 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
   }
 
   Widget _buildExerciseCard(Exercise exercise, int index) {
+    final hasEquipment = exercise.equipment.trim().isNotEmpty;
     return Container(
+      key: ValueKey('exercise_card_${exercise.name}'),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: ColorManager.surface,
@@ -160,63 +570,98 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Video/Thumbnail preview
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: SizedBox(
                     width: 110,
-                    height: 85,
+                    height: 92,
                     child: ExerciseVideoPlayer(
                       videoPath: exercise.videoPath,
-                      height: 85,
+                      height: 92,
                       width: 110,
+                      showThumbnailOnly: true,
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
-                // Exercise details
+                const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         exercise.name,
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: ColorManager.textPrimary,
-                          fontSize: 16,
+                          fontSize: 15.5,
                           fontWeight: FontWeight.bold,
+                          height: 1.25,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         exercise.setsReps,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: ColorManager.limerGreen2,
-                          fontSize: 13,
+                          fontSize: 12.5,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
+                      if (hasEquipment) ...[
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.fitness_center_rounded,
+                              size: 13,
+                              color: ColorManager.textSecondary,
+                            ),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Text(
+                                exercise.equipment,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color:
+                                      ColorManager.textPrimary.withOpacity(0.85),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: ColorManager.limerGreen2.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              exercise.difficulty,
-                              style: TextStyle(
-                                color: ColorManager.limerGreen2,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 3),
+                              decoration: BoxDecoration(
+                                color:
+                                    ColorManager.limerGreen2.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                exercise.difficulty,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: ColorManager.limerGreen2,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
                           Expanded(
                             child: Text(
                               exercise.target,
@@ -241,37 +686,6 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
     );
   }
 
-  Widget _buildInfoChip(IconData icon, String text) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: ColorManager.surfaceDark,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: ColorManager.limerGreen2.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: ColorManager.limerGreen2, size: 16),
-          SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              text,
-              style: TextStyle(
-                color: ColorManager.textSecondary,
-                fontSize: 12,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showExerciseDetails(BuildContext context, Exercise exercise) {
     showModalBottomSheet(
       context: context,
@@ -287,47 +701,6 @@ class _ChestExercisesPageState extends State<ChestExercisesPage> {
         difficulty: exercise.difficulty,
         setsReps: exercise.setsReps,
         category: 'Chest',
-      ),
-    );
-  }
-
-  Widget _buildDetailCard(String label, String value, IconData icon) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(
-          color: ColorManager.limerGreen2.withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: ColorManager.limerGreen2, size: 20),
-              SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  color: ColorManager.textSecondary,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              color: ColorManager.textPrimary,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
       ),
     );
   }

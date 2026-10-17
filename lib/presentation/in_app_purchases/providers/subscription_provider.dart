@@ -1,11 +1,12 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/services/iap_service.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
-import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Manages premium subscription status.
 /// Reads/writes isPremium in Firestore users/{uid}.
@@ -15,86 +16,301 @@ class SubscriptionProvider with ChangeNotifier {
   bool _isLifetime = false;
   bool _isLoading = true;
   String? _error;
-  
-  final IAPService _iapService = IAPService();
+  bool _isOfflineFallback = false;
+  bool _isServerConfirmed = false;
+  int _loadRequestId = 0;
+
+  @visibleForTesting
+  String? userIdOverrideForTesting;
+
+  @visibleForTesting
+  Future<Map<String, dynamic>?> Function(String uid)?
+      remoteUserDocFetcherForTesting;
+
+  IAPService? _iapService;
+  IAPService get iapService => _iapService ??= IAPService();
+
   List<ProductDetails> _products = [];
   List<SubscriptionPlan> _plans = [];
   StreamSubscription<PurchaseDetails>? _purchaseSubscription;
   StreamSubscription<User?>? _authSubscription;
-  bool _didAttemptAutoRestore = false;
 
   bool get isPremium => _isPremium;
   bool get isLifetime => _isLifetime;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  bool get isOfflineFallback => _isOfflineFallback;
+  bool get isServerConfirmed => _isServerConfirmed;
   List<ProductDetails> get products => _products;
   List<SubscriptionPlan> get plans => _plans;
 
-  SubscriptionProvider() {
-    _init();
+  User? get _currentUser {
+    try {
+      return FirebaseAuth.instance.currentUser;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String? get currentUserId {
+    if (userIdOverrideForTesting != null) {
+      return userIdOverrideForTesting;
+    }
+    return _currentUser?.uid;
+  }
+
+  SubscriptionProvider({
+    bool autoInitialize = true,
+    IAPService? iapService,
+  }) : _iapService = iapService {
+    if (autoInitialize) {
+      _init();
+    }
+  }
+
+  static const String _cachedSubscriptionPrefix = 'cached_subscription_state_';
+
+  static String getCacheKey(String uid) => '$_cachedSubscriptionPrefix$uid';
+
+  /// Persists the last confirmed subscription state to SharedPreferences
+  Future<void> saveEntitlementsToCache(
+    String uid, {
+    required bool isPremium,
+    required bool isLifetime,
+    DateTime? expirationDate,
+  }) async {
+    if (uid.isEmpty) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final map = <String, dynamic>{
+        'isPremium': isPremium,
+        'isLifetime': isLifetime,
+        'cachedAt': DateTime.now().toIso8601String(),
+        if (expirationDate != null)
+          'expirationDate': expirationDate.toIso8601String(),
+      };
+      await prefs.setString(getCacheKey(uid), jsonEncode(map));
+    } catch (e) {
+      debugPrint('SubscriptionProvider: Failed to cache entitlements: $e');
+    }
+  }
+
+  /// Restores confirmed subscription state from local SharedPreferences
+  Future<bool> restoreCachedEntitlements(String? uid) async {
+    if (uid == null || uid.isEmpty) {
+      _isPremium = false;
+      _isLifetime = false;
+      _isOfflineFallback = false;
+      _isServerConfirmed = false;
+      return false;
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cachedJson = prefs.getString(getCacheKey(uid));
+      if (cachedJson == null || cachedJson.trim().isEmpty) {
+        return false;
+      }
+
+      final dynamic decoded = jsonDecode(cachedJson);
+      if (decoded is Map<String, dynamic> || decoded is Map) {
+        final map = Map<String, dynamic>.from(decoded);
+        final cachedPremium = map['isPremium'] == true;
+        final cachedLifetime = map['isLifetime'] == true;
+
+        // Verify expiration if not a lifetime license
+        if (cachedPremium && !cachedLifetime && map['expirationDate'] != null) {
+          final exp = DateTime.tryParse(map['expirationDate'].toString());
+          if (exp != null && DateTime.now().isAfter(exp)) {
+            _isPremium = false;
+            _isLifetime = false;
+            _isOfflineFallback = false;
+            return false;
+          }
+        }
+
+        _isPremium = cachedPremium;
+        _isLifetime = cachedLifetime;
+        _isOfflineFallback = true;
+        _isServerConfirmed = false;
+        notifyListeners();
+        return true;
+      }
+    } catch (e) {
+      debugPrint(
+          'SubscriptionProvider: Failed to restore cached entitlements: $e');
+    }
+    return false;
+  }
+
+  /// Clears cached subscription state for the specified user
+  Future<void> clearCachedEntitlements(String? uid) async {
+    if (uid == null || uid.isEmpty) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(getCacheKey(uid));
+    } catch (e) {
+      debugPrint(
+          'SubscriptionProvider: Failed to clear cached entitlements: $e');
+    }
   }
 
   Future<void> _init() async {
+    final uid = currentUserId;
+    if (uid != null && uid.isNotEmpty) {
+      await restoreCachedEntitlements(uid);
+    }
     await loadPremiumStatus();
-    await _iapService.initialize();
-    _products = _iapService.products;
-    _updatePlans();
-    
-    _purchaseSubscription = _iapService.purchaseStream.listen(_handlePurchaseUpdate);
 
-    _authSubscription = FirebaseAuth.instance.authStateChanges().listen((User? user) async {
-      if (user == null) {
-        _isPremium = false;
-        _isLifetime = false;
-        notifyListeners();
-      } else {
-        await loadPremiumStatus();
-      }
-    });
+    try {
+      final iap = iapService;
+      await iap.initialize();
+      _products = iap.products;
+      _updatePlans();
+      _purchaseSubscription =
+          iap.purchaseStream.listen(_handlePurchaseUpdate);
+    } catch (e) {
+      debugPrint('SubscriptionProvider: IAP init error: $e');
+    }
 
-    // Firebase-only production-friendly behavior:
-    // If user logs in with a *new* Firebase account but the Store account already owns
-    // the subscription, purchasing again will show "already owned".
-    // Auto-restore lets us re-attach the entitlement to the new uid by writing isPremium=true.
-    await verifySubscriptionStatus();
-    
+    try {
+      _authSubscription =
+          FirebaseAuth.instance.authStateChanges().listen((User? user) async {
+        if (user == null) {
+          _isPremium = false;
+          _isLifetime = false;
+          _isServerConfirmed = false;
+          _isOfflineFallback = false;
+          notifyListeners();
+        } else {
+          await loadPremiumStatus();
+        }
+      });
+    } catch (_) {
+      // Firebase not initialized in test environments
+    }
+
+    try {
+      await verifySubscriptionStatus();
+    } catch (e) {
+      debugPrint('SubscriptionProvider: verifySubscriptionStatus error: $e');
+    }
+
     _isLoading = false;
     notifyListeners();
   }
 
-  /// Load premium status from Firestore
+  /// Load premium status from Firestore or fallback to cache on network failure
   Future<void> loadPremiumStatus() async {
+    final requestId = ++_loadRequestId;
     _isLoading = true;
     _error = null;
     notifyListeners();
 
+    final uid = currentUserId;
+
+    if (uid == null || uid.isEmpty) {
+      _isPremium = false;
+      _isLifetime = false;
+      _isServerConfirmed = false;
+      _isOfflineFallback = false;
+      _isLoading = false;
+      _error = null;
+      notifyListeners();
+      return;
+    }
+
+    // Fast-path / offline availability: load from cache first
+    await restoreCachedEntitlements(uid);
+
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        _isPremium = false;
-        _isLoading = false;
-        notifyListeners();
+      Map<String, dynamic>? data;
+
+      if (remoteUserDocFetcherForTesting != null) {
+        data = await remoteUserDocFetcherForTesting!(uid);
+      } else {
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .get();
+        data = doc.data();
+      }
+
+      // If user switched or request is stale, abandon updating
+      if (requestId != _loadRequestId || currentUserId != uid) {
         return;
       }
 
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
+      final serverPremium = data?['isPremium'] == true;
+      final serverLifetime = data?['isLifetime'] == true;
+      DateTime? expirationDate;
+      final expVal = data?['premiumExpiresAt'] ?? data?['expiresAt'];
+      if (expVal != null) {
+        if (expVal is Timestamp) {
+          expirationDate = expVal.toDate();
+        } else if (expVal is String) {
+          expirationDate = DateTime.tryParse(expVal);
+        }
+      }
 
-      _isPremium = doc.data()?['isPremium'] == true;
-      _isLifetime = doc.data()?['isLifetime'] == true;
-      _isLoading = false;
+      // Check if authoritative expiration is past
+      if (serverPremium && !serverLifetime && expirationDate != null) {
+        if (DateTime.now().isAfter(expirationDate)) {
+          _isPremium = false;
+          _isLifetime = false;
+          _isServerConfirmed = true;
+          _isOfflineFallback = false;
+          _error = null;
+          await saveEntitlementsToCache(
+            uid,
+            isPremium: false,
+            isLifetime: false,
+            expirationDate: expirationDate,
+          );
+          return;
+        }
+      }
+
+      _isPremium = serverPremium;
+      _isLifetime = serverLifetime;
+      _isServerConfirmed = true;
+      _isOfflineFallback = false;
       _error = null;
+
+      // Update cache with authoritative response
+      await saveEntitlementsToCache(
+        uid,
+        isPremium: serverPremium,
+        isLifetime: serverLifetime,
+        expirationDate: expirationDate,
+      );
     } catch (e) {
+      // If user switched or request is stale
+      if (requestId != _loadRequestId || currentUserId != uid) {
+        return;
+      }
+
       _error = e.toString();
+
+      // If remote failed (offline / network error):
+      // Do not treat failed network request as authoritative proof that subscription expired!
+      // If we restored cached entitlements earlier, they are retained as offline fallback.
+      if (!_isLifetime && !_isPremium) {
+        await restoreCachedEntitlements(uid);
+      }
+    } finally {
+      if (requestId == _loadRequestId) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
-    notifyListeners();
   }
 
   void _handlePurchaseUpdate(PurchaseDetails purchase) async {
-    if (purchase.status == PurchaseStatus.purchased || purchase.status == PurchaseStatus.restored) {
-      if (purchase.productID == 'premium_monthly' || purchase.productID == 'premium_yearly') {
+    if (purchase.status == PurchaseStatus.purchased ||
+        purchase.status == PurchaseStatus.restored) {
+      if (purchase.productID == 'premium_monthly' ||
+          purchase.productID == 'premium_yearly') {
         await setPremiumStatus(true, isLifetime: true);
       } else if (purchase.productID == 'gymbuddy_premium_monthly') {
         await setPremiumStatus(true);
@@ -107,7 +323,7 @@ class SubscriptionProvider with ChangeNotifier {
 
   Future<void> buyProduct(ProductDetails product) async {
     try {
-      await _iapService.buyProduct(product);
+      await iapService.buyProduct(product);
     } catch (e) {
       // If the store says the item is already owned, we should restore instead.
       final msg = e.toString().toLowerCase();
@@ -122,14 +338,15 @@ class SubscriptionProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      await _iapService.restorePurchases();
+      await iapService.restorePurchases();
       // purchase stream handler will set premium if entitlement exists
       await loadPremiumStatus();
     } catch (e) {
       _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-    _isLoading = false;
-    notifyListeners();
   }
 
   /// Strictly verify subscription status on startup.
@@ -146,7 +363,7 @@ class SubscriptionProvider with ChangeNotifier {
 
     // 1. Android Strict Check
     if (defaultTargetPlatform == TargetPlatform.android) {
-      final pastPurchases = await _iapService.getAndroidPastPurchases();
+      final pastPurchases = await iapService.getAndroidPastPurchases();
       if (pastPurchases != null) {
         // If they own legacy or lifetime one-time products, upgrade them to lifetime in Firestore.
         bool ownsLegacyOrLifetime = pastPurchases.any((purchase) =>
@@ -181,7 +398,7 @@ class SubscriptionProvider with ChangeNotifier {
     // If they are NOT premium, we don't bother (to avoid prompts).
     if (_isPremium) {
        try {
-         await _iapService.restorePurchases();
+         await iapService.restorePurchases();
        } catch (e) {
          // Ignore errors here
        }
@@ -191,26 +408,40 @@ class SubscriptionProvider with ChangeNotifier {
   /// Set premium status in Firestore (called after successful purchase)
   Future<void> setPremiumStatus(bool value, {bool isLifetime = false}) async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
+      final user = _currentUser;
+      final uid = currentUserId;
+      if (uid == null || uid.isEmpty) return;
 
-      final data = {
+      final data = <String, dynamic>{
         'isPremium': value,
       };
       if (isLifetime) {
         data['isLifetime'] = true;
       }
 
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .set(data, SetOptions(merge: true));
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .set(data, SetOptions(merge: true));
+      }
 
       _isPremium = value;
       if (isLifetime) {
         _isLifetime = true;
+      } else if (!value) {
+        _isLifetime = false;
       }
+      _isServerConfirmed = true;
+      _isOfflineFallback = false;
       _error = null;
+
+      await saveEntitlementsToCache(
+        uid,
+        isPremium: value,
+        isLifetime: _isLifetime,
+      );
+
       notifyListeners();
     } catch (e) {
       _error = e.toString();
@@ -289,7 +520,7 @@ class SubscriptionProvider with ChangeNotifier {
 
   Future<void> buyPlan(SubscriptionPlan plan) async {
     try {
-      await _iapService.buyProduct(plan.productDetails);
+      await iapService.buyProduct(plan.productDetails);
     } catch (e) {
       // If the store says the item is already owned, we should restore instead.
       final msg = e.toString().toLowerCase();
@@ -304,7 +535,7 @@ class SubscriptionProvider with ChangeNotifier {
   void dispose() {
     _purchaseSubscription?.cancel();
     _authSubscription?.cancel();
-    _iapService.dispose();
+    _iapService?.dispose();
     super.dispose();
   }
 }

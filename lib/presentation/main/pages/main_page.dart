@@ -1,14 +1,10 @@
 import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
-import 'package:fitness_app/presentation/explore/explore_page.dart';
 import 'package:fitness_app/presentation/home/pages/home_page.dart';
-import 'package:fitness_app/presentation/main/widgets/appbar_consumption.dart';
 import 'package:fitness_app/presentation/main/widgets/appbar_home.dart';
-import 'package:fitness_app/presentation/main/widgets/appbar_custom_workouts.dart';
 import 'package:fitness_app/presentation/main/widgets/appbar_more.dart';
 import 'package:fitness_app/presentation/more/more_page.dart';
-import 'package:fitness_app/presentation/custom_workouts/custom_workouts_page.dart';
 import 'package:fitness_app/presentation/progress/progress_page.dart';
 import 'package:fitness_app/presentation/workouts/pages/workout_tab_page.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
@@ -46,7 +42,7 @@ class _MainPageState extends State<MainPage> {
 
   List<Widget> pages = const [
     HomePage(),
-    ExploreWidget(),
+    WorkoutTabPage(),
     WorkoutLogHistoryPage(),
     ProgressPage(),
     MorePage(),
@@ -55,8 +51,6 @@ class _MainPageState extends State<MainPage> {
   appBar() {
     if (isHomePage) {
       return const HomePageAppBarWidget();
-    } else if (isExplorePage) {
-      return const ConsumptionPageAppBarWidget();
     } else if (isMorePage) {
       return const MorePageAppBarWidget();
     }
@@ -66,7 +60,7 @@ class _MainPageState extends State<MainPage> {
   bool get isMorePage => _currentIndex == 4;
   bool get isProgressPage => _currentIndex == 3;
   bool get isHistoryPage => _currentIndex == 2;
-  bool get isExplorePage => _currentIndex == 1;
+  bool get isWorkoutsPage => _currentIndex == 1;
   bool get isHomePage => _currentIndex == 0;
 
   @override
@@ -83,7 +77,10 @@ class _MainPageState extends State<MainPage> {
       NetworkService.initialize();
       Provider.of<SubscriptionProvider>(context, listen: false).refresh();
 
-      // Initialize Push Notifications
+      // Defer any cold-start notification deep-link navigation until required workout/streak state is loaded
+      NotificationService().deferNavigationUntilReady();
+
+      // Initialize Push & Local Notifications
       try {
         await NotificationService().initialize();
       } catch (e) {
@@ -136,17 +133,25 @@ class _MainPageState extends State<MainPage> {
         await consumptionProvider.fetchAndSetWater();
         await workoutsProvider.fetchAndSetWorkouts();
         await workoutsProvider.getProgressPercent();
+
+        // Dynamically sync scheduled workout days with active workout split without erasing free-user schedules
+        final splitDays = workoutsProvider.groupedSplitWorkouts.keys;
+        statisticsProvider.syncSplitSchedule(splitDays);
       } catch (e) {
         // Handle errors gracefully - don't crash the app
         print('Error loading initial data: $e');
+      } finally {
+        if (mounted) {
+          NotificationService().markAppReady();
+        }
       }
 
       final workouts = workoutsProvider.workouts;
       final meals = consumptionProvider.meals;
       bool isNewDay(DateTime now, DateTime lastDate) {
-        return now.year > lastDate.year ||
-            now.month > lastDate.month ||
-            now.day > lastDate.day;
+        final today = DateTime(now.year, now.month, now.day);
+        final lastDay = DateTime(lastDate.year, lastDate.month, lastDate.day);
+        return today.isAfter(lastDay);
       }
 
       if (meals.isNotEmpty) {
@@ -160,9 +165,7 @@ class _MainPageState extends State<MainPage> {
       if (workouts.isNotEmpty) {
         final lastWorkoutDateTime = workouts.last.dateTime;
         final now = DateTime.now();
-        if (now.year > lastWorkoutDateTime.year ||
-            now.month > lastWorkoutDateTime.month ||
-            now.day > lastWorkoutDateTime.day) {
+        if (isNewDay(now, lastWorkoutDateTime)) {
           await workoutsProvider.clearWorkoutsIfDayChanges(lastWorkoutDateTime);
           await workoutsProvider.fetchAndSetWorkouts();
         }

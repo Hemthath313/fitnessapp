@@ -1,5 +1,5 @@
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
-import 'package:fitness_app/presentation/home/widgets/weekly_summary_widget.dart';
+import 'package:fitness_app/presentation/progress/widgets/adaptive_strength_summary_card.dart';
 import 'package:fitness_app/presentation/profile/providers/profile_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 
 class ProgressPage extends StatefulWidget {
   const ProgressPage({super.key});
@@ -228,8 +227,8 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
               ),
               SizedBox(height: 24.h),
 
-              // Weekly Summary — this week's stats
-              const WeeklySummaryWidget(),
+              // 5-Second Rule: Adaptive Strength Snapshot (What did I do? Am I getting stronger? What should I do next?)
+              const AdaptiveStrengthSummaryCard(),
               SizedBox(height: 20.h),
 
 

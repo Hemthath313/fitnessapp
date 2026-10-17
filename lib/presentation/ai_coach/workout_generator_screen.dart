@@ -2,7 +2,10 @@ import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
+import 'package:fitness_app/presentation/home/providers/home_provider.dart';
+import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/model/workout_model.dart';
+import 'package:fitness_app/services/notification_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
@@ -10,10 +13,12 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'dart:math';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WorkoutGeneratorScreen extends StatefulWidget {
   const WorkoutGeneratorScreen({super.key});
+
+  static List<Exercise> get availableCatalog => ExerciseData.all;
 
   @override
   State<WorkoutGeneratorScreen> createState() => _WorkoutGeneratorScreenState();
@@ -32,6 +37,18 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
   String _equipment = 'Gym (Full Equipment)';
   int _daysPerWeek = 3;
 
+  static const List<String> _allWeekDays = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
+
+  List<String> _selectedDays = ['Monday', 'Wednesday', 'Friday'];
+
   final List<String> _targets = [
     'Full Body',
     'Muscle Build (Hypertrophy)',
@@ -45,6 +62,101 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
   ];
   final List<int> _daysOptions = [3, 4, 5, 6];
 
+  @override
+  void initState() {
+    super.initState();
+    _initGoalFromProfile();
+  }
+
+  void _initGoalFromProfile() {
+    try {
+      final homeProvider = Provider.of<HomeProvider?>(context, listen: false);
+      final profileGoal =
+          homeProvider?.userData['goal']?.toString().toLowerCase() ?? '';
+      if (profileGoal.contains('lose') || profileGoal.contains('fat')) {
+        _target = 'Fat Loss';
+      } else if (profileGoal.contains('gain') ||
+          profileGoal.contains('muscle') ||
+          profileGoal.contains('hypertrophy') ||
+          profileGoal.contains('build')) {
+        _target = 'Muscle Build (Hypertrophy)';
+      } else if (profileGoal.contains('strength')) {
+        _target = 'Strength';
+      } else if (profileGoal.contains('maintain')) {
+        _target = 'Full Body';
+      }
+    } catch (_) {}
+
+    try {
+      final statsProvider =
+          Provider.of<StatisticsProvider?>(context, listen: false);
+      final existingDays = statsProvider?.scheduledDayNames ?? const <String>[];
+      if (existingDays.length >= 3 && existingDays.length <= 6) {
+        _selectedDays = List<String>.from(existingDays);
+        _daysPerWeek = _selectedDays.length;
+      }
+    } catch (_) {}
+  }
+
+  void _onDaysCountChanged(int count) {
+    setState(() {
+      _daysPerWeek = count;
+      if (count == 3) {
+        _selectedDays = ['Monday', 'Wednesday', 'Friday'];
+      } else if (count == 4) {
+        _selectedDays = ['Monday', 'Tuesday', 'Thursday', 'Friday'];
+      } else if (count == 5) {
+        _selectedDays = [
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday'
+        ];
+      } else if (count == 6) {
+        _selectedDays = [
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday'
+        ];
+      }
+    });
+  }
+
+  void _toggleDay(String day) {
+    setState(() {
+      if (_selectedDays.contains(day)) {
+        if (_selectedDays.length <= 3) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('At least 3 training days are required for an effective split.'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          return;
+        }
+        _selectedDays.remove(day);
+      } else {
+        if (_selectedDays.length >= 6) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('At least 1 rest day is required per week for muscle recovery.'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          return;
+        }
+        _selectedDays.add(day);
+        _selectedDays.sort((a, b) =>
+            _allWeekDays.indexOf(a).compareTo(_allWeekDays.indexOf(b)));
+      }
+      _daysPerWeek = _selectedDays.length;
+    });
+  }
+
   Future<void> _generateWorkout() async {
     setState(() {
       _isLoading = true;
@@ -54,45 +166,51 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
     // Simulate "Thinking" delay for UX
     await Future.delayed(const Duration(milliseconds: 1200));
 
+    // Ensure selected days list is non-empty and sorted
+    if (_selectedDays.isEmpty) {
+      _selectedDays = ['Monday', 'Wednesday', 'Friday'];
+    }
+
     List<Map<String, dynamic>> plan = [];
 
-    // Generation Logic
-    if (_daysPerWeek == 3) {
-      // 3 Day Full Body Split
+    // Generation Logic with Structured Movement Slots mapped to user-selected days
+    if (_selectedDays.length == 3) {
+      // 3 Day Full Body Split (A / B / C)
       plan = [
-        _createDayPlan('Monday', 'Full Body A', _mixAllGroups(5)),
-        _createDayPlan('Wednesday', 'Full Body B', _mixAllGroups(5)),
-        _createDayPlan('Friday', 'Full Body C', _mixAllGroups(5)),
+        _createDayPlan(_selectedDays[0], 'Full Body A (Chest & Quad Focus)', _buildFullBodyA()),
+        _createDayPlan(_selectedDays[1], 'Full Body B (Back & Hinge Focus)', _buildFullBodyB()),
+        _createDayPlan(_selectedDays[2], 'Full Body C (Hypertrophy & Core)', _buildFullBodyC()),
       ];
-    } else if (_daysPerWeek == 4) {
+    } else if (_selectedDays.length == 4) {
       // 4 Day Upper / Lower
       plan = [
-        _createDayPlan('Monday', 'Upper Body', _getUpperBody(6)),
-        _createDayPlan('Tuesday', 'Lower Body', _getRandomExercises(ExerciseData.legs, 5)),
-        _createDayPlan('Thursday', 'Upper Body', _getUpperBody(6)),
-        _createDayPlan('Friday', 'Lower Body', _getRandomExercises(ExerciseData.legs, 5)),
+        _createDayPlan(_selectedDays[0], 'Upper Body A', _buildUpperBodyA()),
+        _createDayPlan(_selectedDays[1], 'Lower Body A & Core', _buildLowerBodyA()),
+        _createDayPlan(_selectedDays[2], 'Upper Body B', _buildUpperBodyB()),
+        _createDayPlan(_selectedDays[3], 'Lower Body B & Core', _buildLowerBodyB()),
       ];
-    } else if (_daysPerWeek == 5) {
+    } else if (_selectedDays.length == 5) {
       // 5 Day Bro Split
       plan = [
-        _createDayPlan('Monday', 'Chest', _getRandomExercises(ExerciseData.chest, 4)),
-        _createDayPlan('Tuesday', 'Back', _getRandomExercises(ExerciseData.back, 4)),
-        _createDayPlan('Wednesday', 'Legs', _getRandomExercises(ExerciseData.legs, 5)),
-        _createDayPlan('Thursday', 'Shoulders', _getRandomExercises(ExerciseData.shoulders, 4)),
-        _createDayPlan('Friday', 'Arms', _getRandomExercises(ExerciseData.arms, 4)),
+        _createDayPlan(_selectedDays[0], 'Chest Day', _buildChestRoutine()),
+        _createDayPlan(_selectedDays[1], 'Back Day', _buildBackRoutine()),
+        _createDayPlan(_selectedDays[2], 'Legs & Abs Day', _buildLegRoutine()),
+        _createDayPlan(_selectedDays[3], 'Shoulder Day', _buildShoulderRoutine()),
+        _createDayPlan(_selectedDays[4], 'Arms Day (Biceps & Triceps)', _buildArmRoutine()),
       ];
     } else {
-      // 6 Day PPL
+      // 6 Day Push / Pull / Legs
       plan = [
-        _createDayPlan('Monday', 'Push', _getPush(5)),
-        _createDayPlan('Tuesday', 'Pull', _getPull(5)),
-        _createDayPlan('Wednesday', 'Legs', _getRandomExercises(ExerciseData.legs, 5)),
-        _createDayPlan('Thursday', 'Push', _getPush(5)),
-        _createDayPlan('Friday', 'Pull', _getPull(5)),
-        _createDayPlan('Saturday', 'Legs', _getRandomExercises(ExerciseData.legs, 5)),
+        _createDayPlan(_selectedDays[0], 'Push Day A', _buildPushRoutine()),
+        _createDayPlan(_selectedDays[1], 'Pull Day A', _buildPullRoutine()),
+        _createDayPlan(_selectedDays[2], 'Legs & Core A', _buildLegRoutine()),
+        _createDayPlan(_selectedDays[3], 'Push Day B', _buildPushRoutine()),
+        _createDayPlan(_selectedDays[4], 'Pull Day B', _buildPullRoutine()),
+        _createDayPlan(_selectedDays[5], 'Legs & Core B', _buildLowerBodyB()),
       ];
     }
 
+    if (!mounted) return;
     setState(() {
       _generatedWeek = plan;
       _isLoading = false;
@@ -100,6 +218,16 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
   }
 
   Map<String, dynamic> _createDayPlan(String day, String focus, List<Exercise> exercises) {
+    final List<Exercise> dayExercises = List<Exercise>.from(exercises);
+    if (_target == 'Fat Loss') {
+      final cardioOptions = _filterEquipment(ExerciseData.cardio)
+          .where((c) => !dayExercises.any((e) => e.name == c.name))
+          .toList();
+      if (cardioOptions.isNotEmpty) {
+        dayExercises.add(cardioOptions.first);
+      }
+    }
+
     int defaultSets = 3;
     String defaultReps = '10-12 reps';
     if (_target == 'Strength') {
@@ -116,7 +244,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
     return {
       'day': day,
       'focus': focus,
-      'exercises': exercises.map((e) {
+      'exercises': dayExercises.map((e) {
         String reps = defaultReps;
         if (e.setsReps.contains('x') || e.setsReps.contains('×')) {
           final parts = e.setsReps.split(RegExp(r'[x×]'));
@@ -140,69 +268,180 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
     };
   }
 
-  // Helper Randomizers with equipment and level awareness
-  List<Exercise> _getRandomExercises(List<Exercise> source, int count) {
+  // Strict Equipment Filtering
+  List<Exercise> _filterEquipment(List<Exercise> source) {
     if (source.isEmpty) return [];
 
-    List<Exercise> filtered = source;
     if (_equipment == 'Home (Dumbbells)') {
-      final homeExercises = source.where((e) {
+      final filtered = source.where((e) {
         final eq = e.equipment.toLowerCase();
-        return eq.contains('dumbbell') ||
+        final isHomeFriendly = eq.contains('dumbbell') ||
             eq.contains('bodyweight') ||
             eq.contains('mat') ||
-            eq.contains('none');
+            eq.contains('none') ||
+            eq.contains('band');
+        final isNotGymOnly = !eq.contains('barbell') &&
+            !eq.contains('cable') &&
+            !eq.contains('machine');
+        return isHomeFriendly && isNotGymOnly;
       }).toList();
-      if (homeExercises.isNotEmpty) {
-        filtered = homeExercises;
+
+      if (filtered.isNotEmpty) return filtered;
+    }
+    return source;
+  }
+
+  Exercise _pickBest(List<Exercise> source, {bool preferCompound = true, Set<String>? excludedNames}) {
+    final available = _filterEquipment(source).where((e) => excludedNames == null || !excludedNames.contains(e.name)).toList();
+    if (available.isEmpty) {
+      return source.isNotEmpty ? source.first : ExerciseData.chest.first;
+    }
+
+    if (preferCompound) {
+      final compounds = available.where((e) {
+        final n = e.name.toLowerCase();
+        return n.contains('bench press') ||
+            n.contains('squat') ||
+            n.contains('deadlift') ||
+            n.contains('overhead press') ||
+            n.contains('military press') ||
+            n.contains('row') ||
+            n.contains('dips') ||
+            n.contains('lunge');
+      }).toList();
+      if (compounds.isNotEmpty) {
+        return compounds.first;
       }
     }
 
-    final levelExercises = filtered.where((e) {
-      return e.difficulty.toLowerCase() == _level.toLowerCase();
-    }).toList();
-    if (levelExercises.length >= count) {
-      filtered = levelExercises;
-    }
-
-    var list = List<Exercise>.from(filtered)..shuffle();
-    return list.take(min(count, list.length)).toList();
+    return available.first;
   }
 
-  List<Exercise> _mixAllGroups(int countPerGroup) {
-    // Full Body: 1 chest, 1 back, 1 legs, 1 shoulder, 1 arms
-    return [
-      ..._getRandomExercises(ExerciseData.chest, 1),
-      ..._getRandomExercises(ExerciseData.back, 1),
-      ..._getRandomExercises(ExerciseData.legs, 1),
-      ..._getRandomExercises(ExerciseData.shoulders, 1),
-      ..._getRandomExercises(ExerciseData.arms, 1),
-    ];
+  List<Exercise> _buildFullBodyA() {
+    final Set<String> used = {};
+    final e1 = _pickBest(ExerciseData.chest, preferCompound: true, excludedNames: used);
+    used.add(e1.name);
+    final e2 = _pickBest(ExerciseData.legs, preferCompound: true, excludedNames: used);
+    used.add(e2.name);
+    final e3 = _pickBest(ExerciseData.back, preferCompound: true, excludedNames: used);
+    used.add(e3.name);
+    final e4 = _pickBest(ExerciseData.shoulders, preferCompound: true, excludedNames: used);
+    used.add(e4.name);
+    final e5 = _pickBest(ExerciseData.biceps, preferCompound: false, excludedNames: used);
+    return [e1, e2, e3, e4, e5];
   }
 
-  List<Exercise> _getUpperBody(int count) {
-    return [
-      ..._getRandomExercises(ExerciseData.chest, 2),
-      ..._getRandomExercises(ExerciseData.back, 2),
-      ..._getRandomExercises(ExerciseData.shoulders, 1),
-      ..._getRandomExercises(ExerciseData.arms, 1),
-    ];
-  }
-  
-  List<Exercise> _getPush(int count) {
-    return [
-      ..._getRandomExercises(ExerciseData.chest, 2),
-      ..._getRandomExercises(ExerciseData.shoulders, 2),
-      ..._getRandomExercises(ExerciseData.arms.where((e) => e.target.contains('Triceps')).toList(), 1),
-    ];
+  List<Exercise> _buildFullBodyB() {
+    final Set<String> used = {};
+    // Deadlift / Hinge focus + Incline + Vertical Pull
+    final backExercises = _filterEquipment(ExerciseData.back);
+    final e1 = backExercises.isNotEmpty ? backExercises.last : ExerciseData.back.first;
+    used.add(e1.name);
+    final e2 = _pickBest(ExerciseData.chest, preferCompound: true, excludedNames: used);
+    used.add(e2.name);
+    final e3 = _pickBest(ExerciseData.legs, preferCompound: true, excludedNames: used);
+    used.add(e3.name);
+    final e4 = _pickBest(ExerciseData.shoulders, preferCompound: false, excludedNames: used);
+    used.add(e4.name);
+    final e5 = _pickBest(ExerciseData.triceps, preferCompound: false, excludedNames: used);
+    return [e1, e2, e3, e4, e5];
   }
 
-  List<Exercise> _getPull(int count) {
-    return [
-      ..._getRandomExercises(ExerciseData.back, 3),
-      ..._getRandomExercises(ExerciseData.arms.where((e) => e.target.contains('Biceps')).toList(), 2),
-    ];
+  List<Exercise> _buildFullBodyC() {
+    final Set<String> used = {};
+    final legExercises = _filterEquipment(ExerciseData.legs);
+    final e1 = legExercises.length > 1 ? legExercises[1] : ExerciseData.legs.first;
+    used.add(e1.name);
+    final e2 = _pickBest(ExerciseData.chest, preferCompound: false, excludedNames: used);
+    used.add(e2.name);
+    final e3 = _pickBest(ExerciseData.back, preferCompound: false, excludedNames: used);
+    used.add(e3.name);
+    final e4 = _pickBest(ExerciseData.shoulders, preferCompound: false, excludedNames: used);
+    used.add(e4.name);
+    final e5 = _pickBest(ExerciseData.abs, preferCompound: false, excludedNames: used);
+    return [e1, e2, e3, e4, e5];
   }
+
+  List<Exercise> _buildUpperBodyA() {
+    final Set<String> used = {};
+    final e1 = _pickBest(ExerciseData.chest, preferCompound: true, excludedNames: used);
+    used.add(e1.name);
+    final e2 = _pickBest(ExerciseData.back, preferCompound: true, excludedNames: used);
+    used.add(e2.name);
+    final e3 = _pickBest(ExerciseData.shoulders, preferCompound: true, excludedNames: used);
+    used.add(e3.name);
+    final e4 = _pickBest(ExerciseData.chest, preferCompound: false, excludedNames: used);
+    used.add(e4.name);
+    final e5 = _pickBest(ExerciseData.biceps, preferCompound: false, excludedNames: used);
+    return [e1, e2, e3, e4, e5];
+  }
+
+  List<Exercise> _buildUpperBodyB() {
+    final Set<String> used = {};
+    final e1 = _pickBest(ExerciseData.back, preferCompound: true, excludedNames: used);
+    used.add(e1.name);
+    final e2 = _pickBest(ExerciseData.chest, preferCompound: true, excludedNames: used);
+    used.add(e2.name);
+    final e3 = _pickBest(ExerciseData.shoulders, preferCompound: false, excludedNames: used);
+    used.add(e3.name);
+    final e4 = _pickBest(ExerciseData.back, preferCompound: false, excludedNames: used);
+    used.add(e4.name);
+    final e5 = _pickBest(ExerciseData.triceps, preferCompound: false, excludedNames: used);
+    return [e1, e2, e3, e4, e5];
+  }
+
+  List<Exercise> _buildLowerBodyA() {
+    final legExercises = _filterEquipment(ExerciseData.legs).take(4).toList();
+    final absExercises = _filterEquipment(ExerciseData.abs).take(1).toList();
+    return [...legExercises, ...absExercises];
+  }
+
+  List<Exercise> _buildLowerBodyB() {
+    final legExercises = _filterEquipment(ExerciseData.legs);
+    final selectedLegs = legExercises.length > 2
+        ? legExercises.reversed.take(4).toList()
+        : legExercises.take(4).toList();
+    final absExercises = _filterEquipment(ExerciseData.abs).reversed.take(1).toList();
+    return [...selectedLegs, ...absExercises];
+  }
+
+  List<Exercise> _buildChestRoutine() {
+    return _filterEquipment(ExerciseData.chest).take(4).toList();
+  }
+
+  List<Exercise> _buildBackRoutine() {
+    return _filterEquipment(ExerciseData.back).take(4).toList();
+  }
+
+  List<Exercise> _buildLegRoutine() {
+    final legs = _filterEquipment(ExerciseData.legs).take(4).toList();
+    final abs = _filterEquipment(ExerciseData.abs).take(1).toList();
+    return [...legs, ...abs];
+  }
+
+  List<Exercise> _buildShoulderRoutine() {
+    return _filterEquipment(ExerciseData.shoulders).take(4).toList();
+  }
+
+  List<Exercise> _buildArmRoutine() {
+    final biceps = _filterEquipment(ExerciseData.biceps).take(2).toList();
+    final triceps = _filterEquipment(ExerciseData.triceps).take(2).toList();
+    return [...biceps, ...triceps];
+  }
+
+  List<Exercise> _buildPushRoutine() {
+    final chest = _filterEquipment(ExerciseData.chest).take(2).toList();
+    final shoulders = _filterEquipment(ExerciseData.shoulders).take(2).toList();
+    final triceps = _filterEquipment(ExerciseData.triceps).take(1).toList();
+    return [...chest, ...shoulders, ...triceps];
+  }
+
+  List<Exercise> _buildPullRoutine() {
+    final back = _filterEquipment(ExerciseData.back).take(3).toList();
+    final biceps = _filterEquipment(ExerciseData.biceps).take(1).toList();
+    return [...back, ...biceps];
+  }
+
 
   bool _isSaving = false;
 
@@ -216,12 +455,15 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
           children: [
             Icon(Icons.star_rounded, color: Colors.amber, size: 24.sp),
             SizedBox(width: 8.w),
-            Text(
-              'Unlock Weekly Routine',
-              style: TextStyle(
-                color: ColorManager.textPrimary,
-                fontWeight: FontWeight.bold,
-                fontSize: 16.sp,
+            Flexible(
+              child: Text(
+                'Unlock Weekly Routine',
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: ColorManager.textPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16.sp,
+                ),
               ),
             ),
           ],
@@ -251,8 +493,15 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
   Future<void> _saveAllWorkouts() async {
     if (_isSaving) return;
 
-    final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
-    if (!subscriptionProvider.isPremium) {
+    final subscriptionProvider =
+        Provider.of<SubscriptionProvider>(context, listen: false);
+    final provider = Provider.of<WorkoutProvider>(context, listen: false);
+    final bool isFirstTimeStarterActivation =
+        provider.groupedSplitWorkouts.isEmpty;
+    final bool canSave =
+        subscriptionProvider.isPremium || isFirstTimeStarterActivation;
+
+    if (!canSave) {
       _showUpgradeToSaveDialog(context);
       return;
     }
@@ -261,8 +510,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
       _isSaving = true;
     });
 
-    final provider = Provider.of<WorkoutProvider>(context, listen: false);
-    final now = DateTime.now();
+    final now = provider.currentNow;
     int count = 0;
 
     try {
@@ -271,9 +519,6 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
         barrierDismissible: false,
         builder: (c) => const Center(child: CircularProgressIndicator()),
       );
-
-      // Clear previous weekly plan to cleanly apply the new split
-      await provider.deleteWeeklyPlan();
 
       final List<WorkoutModel> workoutsToSave = [];
 
@@ -285,11 +530,12 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
 
         for (var exercise in exercises) {
           final rawName = exercise['name'] ?? 'Exercise';
-          final savedName = '[$dayName] $rawName'; 
+          final savedName = '[$dayName] $rawName';
 
           // Safe rep parsing
           int repCount = 10;
-          final match = RegExp(r'(\d+)').firstMatch(exercise['reps'].toString());
+          final match =
+              RegExp(r'(\d+)').firstMatch(exercise['reps'].toString());
           if (match != null) {
             repCount = int.tryParse(match.group(1) ?? '10') ?? 10;
           }
@@ -308,31 +554,71 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
       }
 
       if (workoutsToSave.isNotEmpty) {
-        await provider.addNewWorkouts(workoutsToSave);
+        // Atomically replace weekly plan with rollback if saving fails
+        await provider.replaceWeeklyPlan(workoutsToSave);
       }
 
       await provider.fetchAndSetWorkouts();
 
       if (mounted) {
-        Navigator.pop(context); // Pop dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Saved $count exercises to My Workouts!',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
+        try {
+          final newDays =
+              _generatedWeek.map((d) => d['day'].toString()).toList();
+          final statsProvider =
+              Provider.of<StatisticsProvider>(context, listen: false);
+          await statsProvider.updateScheduledDays(newDays);
+
+          final prefs = await SharedPreferences.getInstance();
+          if (prefs.getBool('notif_workout_reminders_enabled') ?? false) {
+            final workoutHour = prefs.getInt('notif_workout_hour') ?? 8;
+            final workoutMin = prefs.getInt('notif_workout_minute') ?? 0;
+            await NotificationService().scheduleWorkoutDayReminders(
+              scheduledDays: newDays,
+              time: TimeOfDay(hour: workoutHour, minute: workoutMin),
+            );
+          }
+          if (prefs.getBool('notif_recovery_reminders_enabled') ?? false) {
+            const weekDays = [
+              'Monday',
+              'Tuesday',
+              'Wednesday',
+              'Thursday',
+              'Friday',
+              'Saturday',
+              'Sunday',
+            ];
+            final newDaysSet =
+                _generatedWeek.map((d) => d['day'].toString()).toSet();
+            final restDays =
+                weekDays.where((d) => !newDaysSet.contains(d)).toList();
+            if (restDays.isNotEmpty) {
+              await NotificationService()
+                  .scheduleRestDayReminders(restDays: restDays);
+            }
+          }
+        } catch (_) {}
+
+        if (mounted) {
+          Navigator.pop(context); // Pop dialog
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Saved $count exercises to My Workouts!',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
+              backgroundColor: ColorManager.success,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              margin: EdgeInsets.all(16.w),
             ),
-            backgroundColor: ColorManager.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-            margin: EdgeInsets.all(16.w),
-          ),
-        );
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -367,6 +653,9 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
 
   Widget _buildResultsSection() {
     final isPremium = Provider.of<SubscriptionProvider>(context).isPremium;
+    final workoutProvider = Provider.of<WorkoutProvider>(context);
+    final bool canSave =
+        isPremium || workoutProvider.groupedSplitWorkouts.isEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -374,23 +663,27 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Your Weekly Split',
-              style: TextStyle(color: ColorManager.textPrimary, fontSize: 18.sp, fontWeight: FontWeight.bold),
+            Flexible(
+              child: Text(
+                'Your Weekly Split',
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: ColorManager.textPrimary, fontSize: 18.sp, fontWeight: FontWeight.bold),
+              ),
             ),
+            SizedBox(width: 8.w),
             ElevatedButton.icon(
               onPressed: _isSaving ? null : _saveAllWorkouts,
               icon: Icon(
-                isPremium ? Icons.bookmark_add_rounded : Icons.lock_outline_rounded,
+                canSave ? Icons.bookmark_add_rounded : Icons.lock_outline_rounded,
                 size: 16.sp,
                 color: Colors.white,
               ),
               label: Text(
-                isPremium ? 'Save to Schedule' : 'Save (Pro)',
+                canSave ? 'Save to Schedule' : 'Save (Pro)',
                 style: TextStyle(color: Colors.white, fontSize: 12.sp, fontWeight: FontWeight.bold),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: isPremium ? ColorManager.primary : Colors.amber.shade700,
+                backgroundColor: canSave ? ColorManager.primary : Colors.amber.shade700,
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
               ),
@@ -464,7 +757,66 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
       child: Column(
         children: [
            _buildDropdown('Days per Week', '$_daysPerWeek Days', _daysOptions.map((e) => '$e Days').toList(), 
-            (val) => setState(() => _daysPerWeek = int.parse(val!.split(' ')[0]))),
+            (val) => _onDaysCountChanged(int.parse(val!.split(' ')[0]))),
+           SizedBox(height: 12.h),
+
+           // Interactive Day Selection Chips
+           Align(
+             alignment: Alignment.centerLeft,
+             child: Text(
+               'Active Training Days (${_selectedDays.length} selected):',
+               style: TextStyle(
+                 color: ColorManager.textSecondary,
+                 fontSize: 13.sp,
+                 fontWeight: FontWeight.w500,
+               ),
+             ),
+           ),
+           SizedBox(height: 8.h),
+           Row(
+             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+             children: _allWeekDays.map((day) {
+               final isSelected = _selectedDays.contains(day);
+               final shortName = day.substring(0, 3);
+               return Expanded(
+                 child: Padding(
+                   padding: EdgeInsets.symmetric(horizontal: 2.w),
+                   child: InkWell(
+                     onTap: () => _toggleDay(day),
+                     borderRadius: BorderRadius.circular(8.r),
+                     child: AnimatedContainer(
+                       duration: const Duration(milliseconds: 200),
+                       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 7.h),
+                       alignment: Alignment.center,
+                       decoration: BoxDecoration(
+                         color: isSelected
+                             ? ColorManager.primary
+                             : ColorManager.surfaceDark,
+                         borderRadius: BorderRadius.circular(8.r),
+                         border: Border.all(
+                           color: isSelected
+                               ? ColorManager.primary
+                               : ColorManager.divider,
+                           width: 1,
+                         ),
+                       ),
+                       child: FittedBox(
+                         fit: BoxFit.scaleDown,
+                         child: Text(
+                           shortName,
+                           style: TextStyle(
+                             color: isSelected ? Colors.black : ColorManager.textTertiary,
+                             fontSize: 11.sp,
+                             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                           ),
+                         ),
+                       ),
+                     ),
+                   ),
+                 ),
+               );
+             }).toList(),
+           ),
            SizedBox(height: 16.h),
           _buildDropdown('Goal', _target, _targets, (val) => setState(() => _target = val!)),
           SizedBox(height: 16.h),
@@ -610,6 +962,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                         child: ExerciseVideoPlayer(
                           videoPath: exercise.videoPath,
                           height: 300,
+                          fit: BoxFit.contain,
                           autoPlay: true, // Auto-play in detail view
                         ),
                       ),

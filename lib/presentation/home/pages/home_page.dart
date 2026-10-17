@@ -57,12 +57,12 @@ class _HomePageState extends State<HomePage> {
           children: [
             SizedBox(height: SizeManager.s8.h),
 
-            // Quick Actions — first thing a user sees, immediate utility
-            const QuickActionsWidget(),
+            // AI Routine Hero Banner — Primary action for today's workout
+            const HomeAiRoutineCard(),
             SizedBox(height: SizeManager.s12.h),
 
-            // AI Routine Hero Banner
-            const HomeAiRoutineCard(),
+            // Quick Actions — Fast utilities below primary workout focus
+            const QuickActionsWidget(),
             SizedBox(height: SizeManager.s16.h),
 
             // Today's Progress — Calories, Water, BMI

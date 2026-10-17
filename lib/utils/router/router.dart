@@ -41,9 +41,11 @@ import 'package:fitness_app/presentation/workout_splits/splits/ppl_splits.dart';
 import 'package:fitness_app/presentation/workout_splits/splits/upper_lower_splits.dart';
 import 'package:fitness_app/presentation/workout_splits/workout_splits.dart';
 import 'package:fitness_app/presentation/workouts/pages/new_exercise_page.dart';
-import 'package:fitness_app/presentation/workouts/pages/workouts_page.dart';
+import 'package:fitness_app/model/workout_session_model.dart';
 import 'package:fitness_app/presentation/workout_logs/workout_log_screen.dart';
 import 'package:fitness_app/presentation/workout_logs/workout_history_screen.dart';
+import 'package:fitness_app/presentation/workout_logs/workout_session_detail_page.dart';
+import 'package:fitness_app/presentation/custom_workouts/workout_session_launcher_page.dart';
 import 'package:fitness_app/presentation/workout_logs/exercise_tracker_page.dart';
 import 'package:fitness_app/presentation/workout_logs/strength_analytics_page.dart';
 import 'package:fitness_app/presentation/progress_photos/progress_photos_screen.dart';
@@ -52,7 +54,6 @@ import 'package:fitness_app/presentation/progress_photos/photo_comparison_screen
 import 'package:fitness_app/presentation/profile/pages/monthly_comparison_page.dart';
 import 'package:fitness_app/presentation/diet_nutrition/pages/protein_chart_page.dart';
 import 'package:fitness_app/presentation/progress/muscle_analytics_page.dart';
-import 'package:fitness_app/presentation/ai_coach/ai_chat_screen.dart';
 import 'package:fitness_app/presentation/challenges/exercise_of_the_week.dart';
 import 'package:fitness_app/presentation/ai_coach/workout_generator_screen.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
@@ -116,6 +117,8 @@ class Routes {
   static const String exerciseTracker = '/exerciseTracker';
   static const String strengthAnalyticsRoute = '/strengthAnalytics';
   static const String muscleAnalyticsRoute = '/muscleAnalytics';
+  static const String workoutSessionDetailRoute = '/workoutSessionDetail';
+  static const String dayWorkoutSessionRoute = '/dayWorkoutSession';
 }
 
 final GoRouter router = GoRouter(
@@ -448,6 +451,37 @@ final GoRouter router = GoRouter(
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, const MuscleAnalyticsPage())),
+    GoRoute(
+        path: Routes.workoutSessionDetailRoute,
+        pageBuilder: (context, state) {
+          final session = state.extra as WorkoutSession?;
+          final sessionId = state.uri.queryParameters['sessionId'];
+          return PageTransitions.buildPageWithSlideTransition(
+              state.pageKey,
+              WorkoutSessionDetailPage(
+                session: session,
+                sessionId: sessionId,
+              ));
+        }),
+    GoRoute(
+        path: Routes.dayWorkoutSessionRoute,
+        pageBuilder: (context, state) {
+          final extraMap = state.extra is Map
+              ? Map<String, dynamic>.from(state.extra as Map)
+              : null;
+          final extraDay = state.extra is String ? state.extra as String : null;
+          final day = state.uri.queryParameters['day'] ??
+              extraMap?['dayName']?.toString() ??
+              extraDay ??
+              'today';
+          final workouts = extraMap?['workouts'] as List<dynamic>?;
+          return PageTransitions.buildPageWithSlideTransition(
+              state.pageKey,
+              WorkoutSessionLauncherPage(
+                dayName: day,
+                initialWorkouts: workouts,
+              ));
+        }),
   ],
   errorBuilder: (context, state) {
     return Scaffold(

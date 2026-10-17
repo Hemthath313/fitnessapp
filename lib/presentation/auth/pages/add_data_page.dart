@@ -29,6 +29,7 @@ class _AddDataPageState extends State<AddDataPage> {
   String? _valueGender;
   String? _valueActivity;
   String? _valueGoal;
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -65,6 +66,8 @@ class _AddDataPageState extends State<AddDataPage> {
   }
 
   void _showSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -74,26 +77,65 @@ class _AddDataPageState extends State<AddDataPage> {
   }
 
   Future<void> validateAndSubmit() async {
-    if (_nameController.text.trim().isEmpty) {
+    if (_isSubmitting) return;
+
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
       _showSnackBar('Name is required');
       return;
     }
-    if (_surnameController.text.trim().isEmpty) {
+
+    final surname = _surnameController.text.trim();
+    if (surname.isEmpty) {
       _showSnackBar('Surname is required');
       return;
     }
-    if (_ageController.text.trim().isEmpty) {
+
+    final ageText = _ageController.text.trim();
+    if (ageText.isEmpty) {
       _showSnackBar('Age is required');
       return;
     }
-    if (_heightController.text.trim().isEmpty) {
+    final age = int.tryParse(ageText);
+    if (age == null) {
+      _showSnackBar('Please enter a valid age');
+      return;
+    }
+    if (age < 13 || age > 120) {
+      _showSnackBar('Age must be between 13 and 120');
+      return;
+    }
+
+    final heightText = _heightController.text.trim();
+    if (heightText.isEmpty) {
       _showSnackBar('Height is required');
       return;
     }
-    if (_weightController.text.trim().isEmpty) {
+    final height = double.tryParse(heightText);
+    if (height == null) {
+      _showSnackBar('Please enter a valid height');
+      return;
+    }
+    if (height < 50 || height > 260) {
+      _showSnackBar('Height must be between 50 and 260 cm');
+      return;
+    }
+
+    final weightText = _weightController.text.trim();
+    if (weightText.isEmpty) {
       _showSnackBar('Weight is required');
       return;
     }
+    final weight = double.tryParse(weightText);
+    if (weight == null) {
+      _showSnackBar('Please enter a valid weight');
+      return;
+    }
+    if (weight < 20 || weight > 400) {
+      _showSnackBar('Weight must be between 20 and 400 kg');
+      return;
+    }
+
     if (_valueGender == null) {
       _showSnackBar('Please select gender');
       return;
@@ -107,48 +149,93 @@ class _AddDataPageState extends State<AddDataPage> {
       return;
     }
 
-    // All fields are valid, proceed to add data.
-    await addUserData();
-    context.go(Routes.mainRoute);
-  }
-
-  Future<void> addUserData() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
-    final email = authProvider.user!.email;
+    setState(() {
+      _isSubmitting = true;
+    });
 
     try {
-      await homeProvider
-          .getUsersBMR(
-            gender: _valueGender!,
-            weight: double.parse(_weightController.text),
-            height: double.parse(_heightController.text),
-            age: int.parse(_ageController.text),
-            activity: _valueActivity!,
-            goal: _valueGoal!,
-          )
-          .then((_) => homeProvider.getUsersBMI(
-                height: double.parse(_heightController.text),
-                weight: double.parse(_weightController.text),
-              ))
-          .then(
-            (_) => authProvider.addUserData(
-              email: email!,
-              name: _nameController.text,
-              surname: _surnameController.text,
-              age: int.parse(_ageController.text),
-              context: context,
-              gender: _valueGender!,
-              height: double.parse(_heightController.text),
-              weight: double.parse(_weightController.text),
-              activity: _valueActivity!,
-              bmr: homeProvider.userBMRwithGoal,
-              goal: _valueGoal!,
-              bmi: homeProvider.usersBMI,
-            ),
-          );
+      final success = await addUserData(
+        age: age,
+        height: height,
+        weight: weight,
+        name: name,
+        surname: surname,
+        gender: _valueGender!,
+        activity: _valueActivity!,
+        goal: _valueGoal!,
+      );
+
+      if (success && mounted) {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        final uid = authProvider.currentUserId;
+        if (uid != null) {
+          await AuthProvider.setCachedOnboardingStatus(uid, true);
+        }
+        if (mounted) {
+          context.go(Routes.mainRoute);
+        }
+      }
+    } catch (e) {
+      _showSnackBar('Failed to save profile: ${e.toString()}');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
+  }
+
+  Future<bool> addUserData({
+    required int age,
+    required double height,
+    required double weight,
+    required String name,
+    required String surname,
+    required String gender,
+    required String activity,
+    required String goal,
+  }) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+    final email = authProvider.user?.email ?? '';
+
+    try {
+      await homeProvider.getUsersBMR(
+        gender: gender,
+        weight: weight,
+        height: height,
+        age: age,
+        activity: activity,
+        goal: goal,
+      );
+
+      await homeProvider.getUsersBMI(
+        height: height,
+        weight: weight,
+      );
+
+      if (!mounted) return false;
+
+      await authProvider.addUserData(
+        email: email,
+        name: name,
+        surname: surname,
+        age: age,
+        context: context,
+        gender: gender,
+        height: height,
+        weight: weight,
+        activity: activity,
+        bmr: homeProvider.userBMRwithGoal,
+        goal: goal,
+        bmi: homeProvider.usersBMI,
+      );
+
+      return true;
     } catch (e) {
       _showSnackBar('Failed to save data: ${e.toString()}');
+      return false;
     }
   }
 
@@ -191,6 +278,7 @@ class _AddDataPageState extends State<AddDataPage> {
                 onChangedGoal: _onChangedGoal,
               ),
               LimeGreenRoundedButtonWidget(
+                isLoading: _isSubmitting,
                 onTap: validateAndSubmit,
                 title: StringsManager.next,
               ),

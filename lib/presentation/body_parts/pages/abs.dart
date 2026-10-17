@@ -1,30 +1,10 @@
+import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/presentation/widgets/interactive_exercise_detail.dart';
 import 'package:flutter/material.dart';
 
-// Custom abs exercise data with descriptions
-class AbsExercise {
-  final String name;
-  final String videoPath;
-  final String description;
-  final String target;
-  final String equipment;
-  final List<String> instructions;
-  final String difficulty;
-  final String setsReps;
-
-  AbsExercise({
-    required this.name,
-    required this.videoPath,
-    required this.description,
-    required this.target,
-    required this.equipment,
-    required this.instructions,
-    required this.difficulty,
-    required this.setsReps,
-  });
-}
+typedef AbsExercise = Exercise;
 
 class AbsExercisesPage extends StatefulWidget {
   const AbsExercisesPage({super.key});
@@ -34,265 +14,50 @@ class AbsExercisesPage extends StatefulWidget {
 }
 
 class _AbsExercisesPageState extends State<AbsExercisesPage> {
-  // Only show exercises that have local videos
-  final List<AbsExercise> absExercises = [
-    AbsExercise(
-      name: 'V-Up',
-      videoPath: 'assets/videos/abs/abs_v-up.mp4',
-      description:
-          'Advanced core exercise that targets the entire abdominal region. Combines a crunch with a leg raise, creating a V-shape with your body.',
-      target: 'Upper Abs, Lower Abs, Hip Flexors',
-      equipment: 'None',
-      difficulty: 'Intermediate',
-      setsReps: '3 sets × 12-15 reps',
-      instructions: [
-        'Lie flat on your back with arms extended overhead',
-        'Simultaneously lift your torso and legs off the ground',
-        'Reach your hands toward your feet, creating a V-shape',
-        'Keep your core tight and avoid using momentum',
-        'Lower slowly back to starting position',
-        'Breathe out as you lift, breathe in as you lower',
-      ],
-    ),
-    AbsExercise(
-      name: 'Vertical Leg Raise',
-      videoPath: 'assets/videos/abs/abs_vertical_leg_raise.mp4',
-      description:
-          'Targets the lower abdominals and hip flexors. Hanging from a bar challenges your grip strength while building core stability.',
-      target: 'Lower Abs, Hip Flexors',
-      equipment: 'Pull-up Bar',
-      difficulty: 'Intermediate',
-      setsReps: '3 sets × 12-15 reps',
-      instructions: [
-        'Hang from a pull-up bar with arms fully extended',
-        'Keep your legs straight and together',
-        'Lift your legs up until they are parallel to the ground',
-        'Squeeze your lower abs at the top',
-        'Lower slowly with control',
-        'Avoid swinging or using momentum',
-        'Keep your core engaged throughout',
-      ],
-    ),
-    AbsExercise(
-      name: 'Incline Leg Hip Raise',
-      videoPath: 'assets/videos/abs/abs_incline_leg_hip_raise.mp4',
-      description:
-          'Performed on an incline bench, this exercise targets the lower abs with added resistance from gravity. Great for building lower ab strength.',
-      target: 'Lower Abs, Hip Flexors',
-      equipment: 'Incline Bench',
-      difficulty: 'Intermediate',
-      setsReps: '3 sets × 12-15 reps',
-      instructions: [
-        'Lie on an incline bench with your head higher than your feet',
-        'Hold onto the bench behind your head for support',
-        'Lift your legs and hips up toward your chest',
-        'Squeeze your lower abs at the top',
-        'Lower slowly with control',
-        'Keep your core engaged throughout',
-        'Avoid arching your back excessively',
-      ],
-    ),
-    AbsExercise(
-      name: 'Twisting Crunch',
-      videoPath: 'assets/videos/abs/abs_twisting_crunch.mp4',
-      description:
-          'Crunch variation with rotation that targets the obliques. The twisting motion engages the side abdominals for a complete core workout.',
-      target: 'Upper Abs, Obliques',
-      equipment: 'None',
-      difficulty: 'Beginner',
-      setsReps: '3 sets × 15-20 reps per side',
-      instructions: [
-        'Lie on your back with knees bent and feet flat',
-        'Place your hands behind your head',
-        'Crunch up while rotating your torso',
-        'Bring your right elbow toward your left knee',
-        'Lower back down and alternate sides',
-        'Keep your core engaged throughout',
-        'Avoid pulling on your neck',
-      ],
-    ),
-    AbsExercise(
-      name: 'Air Twist Crunch',
-      videoPath: 'assets/videos/abs/abs_air_twist_crunch.mp4',
-      description:
-          'Dynamic core exercise that combines a crunch with a twisting motion. Targets the obliques while improving rotational strength.',
-      target: 'Upper Abs, Obliques',
-      equipment: 'None',
-      difficulty: 'Beginner',
-      setsReps: '3 sets × 15-20 reps',
-      instructions: [
-        'Lie on your back with knees bent',
-        'Lift your shoulders off the ground',
-        'Rotate your torso side to side',
-        'Keep your core tight throughout',
-        'Move in a controlled, rhythmic motion',
-        'Breathe naturally throughout',
-        'Focus on the oblique contraction',
-      ],
-    ),
-    AbsExercise(
-      name: 'Cable Kneeling Crunch',
-      videoPath: 'assets/videos/abs/abs_cable_kneeling_crunch.mp4',
-      description:
-          'Kneeling cable crunch that provides constant resistance throughout the movement. Excellent for building upper ab strength with progressive resistance.',
-      target: 'Upper Abs',
-      equipment: 'Cable Machine',
-      difficulty: 'Intermediate',
-      setsReps: '3 sets × 12-15 reps',
-      instructions: [
-        'Kneel facing away from the cable machine',
-        'Hold the rope attachment behind your head',
-        'Crunch down, bringing your elbows toward your knees',
-        'Squeeze your abs at the bottom',
-        'Return slowly to starting position',
-        'Keep constant tension on the cable',
-        'Avoid using your arms to pull',
-      ],
-    ),
-    AbsExercise(
-      name: 'Cable Standing Crunch',
-      videoPath: 'assets/videos/abs/abs_cable_standing_crunch.mp4',
-      description:
-          'Standing cable crunch that targets the upper abs while engaging your core stabilizers. The standing position challenges balance and coordination.',
-      target: 'Upper Abs, Core Stabilizers',
-      equipment: 'Cable Machine',
-      difficulty: 'Intermediate',
-      setsReps: '3 sets × 12-15 reps',
-      instructions: [
-        'Stand facing away from the cable machine',
-        'Hold the rope attachment overhead',
-        'Crunch down, bringing your elbows toward your hips',
-        'Squeeze your abs at the bottom',
-        'Return slowly to starting position',
-        'Keep your core engaged throughout',
-        'Maintain good posture',
-      ],
-    ),
-    AbsExercise(
-      name: 'Cable Twist (Up/Down)',
-      videoPath: 'assets/videos/abs/abs_cable_twist(up_down).mp4',
-      description:
-          'Dynamic cable exercise that combines vertical and rotational movement. Targets the obliques and entire core with constant resistance.',
-      target: 'Obliques, Core',
-      equipment: 'Cable Machine',
-      difficulty: 'Advanced',
-      setsReps: '3 sets × 12-15 reps per side',
-      instructions: [
-        'Stand sideways to the cable machine',
-        'Hold the handle with both hands',
-        'Rotate your torso while moving up and down',
-        'Keep your core tight throughout',
-        'Control the movement in both directions',
-        'Alternate sides after completing reps',
-        'Maintain constant tension on the cable',
-      ],
-    ),
-    AbsExercise(
-      name: 'Lever Seated Leg Raise',
-      videoPath: 'assets/videos/abs/abs_lever_seated_leg_raise.mp4',
-      description:
-          'Machine-based leg raise that targets the lower abs. The seated position provides back support while isolating the abdominal muscles.',
-      target: 'Lower Abs',
-      equipment: 'Ab Machine',
-      difficulty: 'Beginner',
-      setsReps: '3 sets × 12-15 reps',
-      instructions: [
-        'Sit in the ab machine with back support',
-        'Place your forearms on the pads',
-        'Lift your knees up toward your chest',
-        'Squeeze your lower abs at the top',
-        'Lower slowly with control',
-        'Keep your core engaged throughout',
-        'Avoid using momentum',
-      ],
-    ),
-    AbsExercise(
-      name: 'Weighted Leg Extension',
-      videoPath: 'assets/videos/abs/abs_weighted_leg_extension.mp4',
-      description:
-          'Advanced core exercise that targets the lower abs with added resistance. The weighted variation increases difficulty and muscle activation.',
-      target: 'Lower Abs, Hip Flexors',
-      equipment: 'Dumbbell or Ankle Weights',
-      difficulty: 'Advanced',
-      setsReps: '3 sets × 10-12 reps',
-      instructions: [
-        'Lie on your back holding a weight between your feet',
-        'Keep your legs straight',
-        'Lift your legs up until perpendicular to the ground',
-        'Lower slowly with control',
-        'Keep your lower back pressed to the floor',
-        'Squeeze your lower abs throughout',
-        'Breathe out as you lift, breathe in as you lower',
-      ],
-    ),
-    AbsExercise(
-      name: '45 Degree Side Bend',
-      videoPath: 'assets/videos/abs/abs_45_degree_side_bend.mp4',
-      description:
-          'Isolation exercise that targets the obliques. The 45-degree angle provides optimal muscle activation for the side abdominals.',
-      target: 'Obliques',
-      equipment: 'Dumbbell (optional)',
-      difficulty: 'Beginner',
-      setsReps: '3 sets × 15-20 reps per side',
-      instructions: [
-        'Stand with feet shoulder-width apart',
-        'Hold a dumbbell in one hand (optional)',
-        'Bend to the side, lowering the weight',
-        'Feel the stretch in your opposite oblique',
-        'Return to starting position',
-        'Alternate sides after completing reps',
-        'Keep your core engaged throughout',
-      ],
-    ),
-    AbsExercise(
-      name: 'Stretching: Chin to Chest',
-      videoPath: 'assets/videos/abs/abs_stretching_chin_to_chest.mp4',
-      description:
-          'Stretching exercise that releases tension in the neck and upper back. Essential for maintaining flexibility and preventing muscle tightness.',
-      target: 'Neck, Upper Back',
-      equipment: 'None',
-      difficulty: 'Beginner',
-      setsReps: 'Hold for 30 seconds, repeat 3 times',
-      instructions: [
-        'Sit or stand with good posture',
-        'Slowly lower your chin toward your chest',
-        'Feel the stretch in the back of your neck',
-        'Hold the position for 30 seconds',
-        'Breathe deeply and relax',
-        'Return slowly to starting position',
-        'Repeat as needed',
-      ],
-    ),
-    AbsExercise(
-      name: 'Stretching: Spinal Stretch',
-      videoPath: 'assets/videos/abs/abs_stretching_spinal_stretch.mp4',
-      description:
-          'Gentle spinal mobility exercise that stretches the entire back and core. Helps improve posture and relieve tension after ab workouts.',
-      target: 'Spine, Core, Back',
-      equipment: 'None',
-      difficulty: 'Beginner',
-      setsReps: 'Hold for 30 seconds, repeat 3 times',
-      instructions: [
-        'Sit on the floor with legs extended',
-        'Bend forward, reaching toward your toes',
-        'Feel the stretch along your spine',
-        'Hold the position for 30 seconds',
-        'Breathe deeply and relax',
-        'Return slowly to starting position',
-        'Focus on lengthening your spine',
-      ],
-    ),
-  ];
+  // Centralized abs/core exercise catalog
+  final List<AbsExercise> absExercises = ExerciseData.abs;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _appliedDifficulty = 'All';
+  String _appliedEquipment = 'All';
+
+  List<AbsExercise> get _filteredExercises => ExerciseData.filterExercises(
+        absExercises,
+        query: _searchQuery,
+        difficulty: _appliedDifficulty,
+        equipment: _appliedEquipment,
+      );
+
+  bool get _hasActiveFilters =>
+      _searchQuery.trim().isNotEmpty ||
+      _appliedDifficulty != 'All' ||
+      _appliedEquipment != 'All';
+
+  void _resetFilters() {
+    setState(() {
+      _searchController.clear();
+      _searchQuery = '';
+      _appliedDifficulty = 'All';
+      _appliedEquipment = 'All';
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final filteredExercises = _filteredExercises;
     return Scaffold(
       backgroundColor: ColorManager.background,
       body: CustomScrollView(
         slivers: [
           // Beautiful App Bar with gradient
           SliverAppBar(
-            expandedHeight: 200.0,
+            expandedHeight: 120.0,
             floating: false,
             pinned: true,
             backgroundColor: ColorManager.surface,
@@ -302,7 +67,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
                 style: TextStyle(
                   color: ColorManager.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 24,
+                  fontSize: 20,
                 ),
               ),
               centerTitle: true,
@@ -321,7 +86,7 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
                 child: Center(
                   child: Icon(
                     Icons.fitness_center,
-                    size: 80,
+                    size: 64,
                     color: ColorManager.limerGreen2.withOpacity(0.3),
                   ),
                 ),
@@ -330,10 +95,10 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
             iconTheme: IconThemeData(color: ColorManager.textPrimary),
           ),
 
-          // Header Section
+          // Header Section + Search & Filters
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.all(20.0),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -341,62 +106,428 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
                     'Build a Strong Core',
                     style: TextStyle(
                       color: ColorManager.limerGreen2,
-                      fontSize: 28,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 6),
                   Text(
                     'Premium video workouts',
                     style: TextStyle(
                       color: ColorManager.textSecondary,
-                      fontSize: 16,
+                      fontSize: 14,
                     ),
                   ),
-                  SizedBox(height: 20),
-                  Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: ColorManager.surface,
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                        color: ColorManager.limerGreen2.withOpacity(0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          color: ColorManager.limerGreen2,
-                          size: 24,
-                        ),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'All exercises include detailed video demonstrations and step-by-step instructions.',
-                            style: TextStyle(
-                              color: ColorManager.textPrimary,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  const SizedBox(height: 14),
+                  _buildSearchAndFilters(filteredExercises.length),
                 ],
               ),
             ),
           ),
 
-          // Exercises List
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final exercise = absExercises[index];
-                return _buildExerciseCard(exercise, index);
-              },
-              childCount: absExercises.length,
+          // Exercises List or Empty State
+          if (filteredExercises.isEmpty)
+            SliverToBoxAdapter(
+              child: _buildEmptyState(),
+            )
+          else
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final exercise = filteredExercises[index];
+                  return _buildExerciseCard(exercise, index);
+                },
+                childCount: filteredExercises.length,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchAndFilters(int resultCount) {
+    final bool hasFilterSelected =
+        _appliedDifficulty != 'All' || _appliedEquipment != 'All';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                key: const Key('exercise_search_field'),
+                controller: _searchController,
+                onChanged: (value) => setState(() => _searchQuery = value),
+                style: TextStyle(color: ColorManager.textPrimary, fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: 'Search exercises by name...',
+                  hintStyle: TextStyle(
+                    color: ColorManager.textSecondary,
+                    fontSize: 14,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    color: ColorManager.primary,
+                    size: 20,
+                  ),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          key: const Key('clear_exercise_search_button'),
+                          icon: Icon(
+                            Icons.close_rounded,
+                            color: ColorManager.textSecondary,
+                            size: 18,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _searchController.clear();
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: ColorManager.surface,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: ColorManager.divider),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: ColorManager.divider),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(
+                      color: ColorManager.primary,
+                      width: 1.5,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Container(
+              decoration: BoxDecoration(
+                color: hasFilterSelected
+                    ? ColorManager.primary.withValues(alpha: 0.15)
+                    : ColorManager.surface,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: hasFilterSelected
+                      ? ColorManager.primary
+                      : ColorManager.divider,
+                  width: hasFilterSelected ? 1.5 : 1,
+                ),
+              ),
+              child: IconButton(
+                key: const Key('exercise_filter_button'),
+                icon: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Icon(
+                      Icons.tune_rounded,
+                      color: hasFilterSelected
+                          ? ColorManager.primary
+                          : ColorManager.textSecondary,
+                      size: 20,
+                    ),
+                    if (hasFilterSelected)
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          width: 7,
+                          height: 7,
+                          decoration: const BoxDecoration(
+                            color: ColorManager.primary,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                tooltip: 'Filter exercises',
+                onPressed: () => _showFilterBottomSheet(context),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Text(
+                'Showing $resultCount of ${absExercises.length} exercises',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: ColorManager.textSecondary,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            if (_hasActiveFilters)
+              TextButton(
+                key: const Key('clear_all_filters_button'),
+                onPressed: _resetFilters,
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  'Clear filters',
+                  style: TextStyle(
+                    color: ColorManager.primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _showFilterBottomSheet(BuildContext context) {
+    // Initialise draft from currently applied filters
+    String draftDifficulty = _appliedDifficulty;
+    String draftEquipment = _appliedEquipment;
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: ColorManager.surface,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (bottomSheetContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[700],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Filter Exercises',
+                          style: TextStyle(
+                            color: ColorManager.textPrimary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextButton(
+                          key: const Key('reset_sheet_filters_button'),
+                          onPressed: () {
+                            setModalState(() {
+                              draftDifficulty = 'All';
+                              draftEquipment = 'All';
+                            });
+                          },
+                          child: Text(
+                            'Reset',
+                            style: TextStyle(
+                              color: ColorManager.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'DIFFICULTY',
+                      style: TextStyle(
+                        color: ColorManager.textSecondary,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: ExerciseData.difficultyFilterOptions.map((option) {
+                        final isSelected = draftDifficulty == option;
+                        return ChoiceChip(
+                          key: Key('difficulty_filter_$option'),
+                          label: Text(option),
+                          selected: isSelected,
+                          onSelected: (_) =>
+                              setModalState(() => draftDifficulty = option),
+                          selectedColor: ColorManager.primary.withValues(alpha: 0.2),
+                          backgroundColor: ColorManager.surfaceDark,
+                          visualDensity: VisualDensity.compact,
+                          labelStyle: TextStyle(
+                            color: isSelected
+                                ? ColorManager.primary
+                                : ColorManager.textSecondary,
+                            fontSize: 12,
+                            fontWeight:
+                                isSelected ? FontWeight.bold : FontWeight.w500,
+                          ),
+                          side: BorderSide(
+                            color: isSelected
+                                ? ColorManager.primary
+                                : ColorManager.divider,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          showCheckmark: false,
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'EQUIPMENT',
+                      style: TextStyle(
+                        color: ColorManager.textSecondary,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: ExerciseData.equipmentFilterOptions.map((option) {
+                        final isSelected = draftEquipment == option;
+                        return ChoiceChip(
+                          key: Key('equipment_filter_$option'),
+                          label: Text(option),
+                          selected: isSelected,
+                          onSelected: (_) =>
+                              setModalState(() => draftEquipment = option),
+                          selectedColor: ColorManager.primary.withValues(alpha: 0.2),
+                          backgroundColor: ColorManager.surfaceDark,
+                          visualDensity: VisualDensity.compact,
+                          labelStyle: TextStyle(
+                            color: isSelected
+                                ? ColorManager.primary
+                                : ColorManager.textSecondary,
+                            fontSize: 12,
+                            fontWeight:
+                                isSelected ? FontWeight.bold : FontWeight.w500,
+                          ),
+                          side: BorderSide(
+                            color: isSelected
+                                ? ColorManager.primary
+                                : ColorManager.divider,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          showCheckmark: false,
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        key: const Key('apply_exercise_filters_button'),
+                        onPressed: () {
+                          setState(() {
+                            _appliedDifficulty = draftDifficulty;
+                            _appliedEquipment = draftEquipment;
+                          });
+                          Navigator.pop(bottomSheetContext);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ColorManager.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          'Apply Filters',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      key: const Key('exercise_empty_state'),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: ColorManager.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: ColorManager.divider),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.search_off_rounded,
+            size: 44,
+            color: ColorManager.textSecondary,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'No exercises match your search or filters.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: ColorManager.textPrimary,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextButton.icon(
+            key: const Key('reset_exercise_filters_button'),
+            onPressed: _resetFilters,
+            icon: Icon(Icons.refresh_rounded, color: ColorManager.limerGreen2, size: 18),
+            label: Text(
+              'Reset Filters',
+              style: TextStyle(
+                color: ColorManager.limerGreen2,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -405,7 +536,9 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
   }
 
   Widget _buildExerciseCard(AbsExercise exercise, int index) {
+    final hasEquipment = exercise.equipment.trim().isNotEmpty;
     return Container(
+      key: ValueKey('exercise_card_${exercise.name}'),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: ColorManager.surface,
@@ -433,58 +566,92 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
                   borderRadius: BorderRadius.circular(12),
                   child: SizedBox(
                     width: 110,
-                    height: 85,
+                    height: 92,
                     child: ExerciseVideoPlayer(
                       videoPath: exercise.videoPath,
-                      height: 85,
+                      height: 92,
                       width: 110,
+                      showThumbnailOnly: true,
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 14),
                 // Exercise details
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         exercise.name,
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: ColorManager.textPrimary,
-                          fontSize: 16,
+                          fontSize: 15.5,
                           fontWeight: FontWeight.bold,
+                          height: 1.25,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         exercise.setsReps,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: ColorManager.limerGreen2,
-                          fontSize: 13,
+                          fontSize: 12.5,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
+                      if (hasEquipment) ...[
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.fitness_center_rounded,
+                              size: 13,
+                              color: ColorManager.textSecondary,
+                            ),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Text(
+                                exercise.equipment,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: ColorManager.textPrimary.withOpacity(0.85),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: ColorManager.limerGreen2.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              exercise.difficulty,
-                              style: TextStyle(
-                                color: ColorManager.limerGreen2,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: ColorManager.limerGreen2.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                exercise.difficulty,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: ColorManager.limerGreen2,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
                           Expanded(
                             child: Text(
                               exercise.target,
@@ -509,36 +676,6 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
     );
   }
 
-  Widget _buildInfoChip(IconData icon, String text) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: ColorManager.surfaceDark,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: ColorManager.limerGreen2.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: ColorManager.limerGreen2, size: 16),
-          SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              text,
-              style: TextStyle(
-                color: ColorManager.textSecondary,
-                fontSize: 12,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _showExerciseDetails(BuildContext context, AbsExercise exercise) {
     showModalBottomSheet(
@@ -559,44 +696,4 @@ class _AbsExercisesPageState extends State<AbsExercisesPage> {
     );
   }
 
-  Widget _buildDetailCard(String label, String value, IconData icon) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(
-          color: ColorManager.limerGreen2.withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: ColorManager.limerGreen2, size: 20),
-              SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  color: ColorManager.textSecondary,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              color: ColorManager.textPrimary,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

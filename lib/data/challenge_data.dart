@@ -12,10 +12,14 @@ class ChallengeExercise {
     required this.videoPath,
     required this.setsReps,
   });
+
+  bool get hasVideo => videoPath.trim().isNotEmpty;
 }
 
 class ChallengeData {
   static final Map<int, List<ChallengeExercise>> sixPackCurriculum = _generateCurriculum();
+
+  static List<ChallengeExercise> get weeklyPool => List.unmodifiable(_weeklyPool);
 
   static Map<int, List<ChallengeExercise>> _generateCurriculum() {
     final Map<int, List<ChallengeExercise>> curriculum = {};
@@ -39,7 +43,7 @@ class ChallengeData {
         name: 'Plank',
         target: 'Core',
         equipment: 'None',
-        videoPath: 'assets/videos/abs/abs_plank.mp4', 
+        videoPath: '',
         setsReps: '3 sets x 45 seconds',
       ),
     ];
@@ -166,7 +170,7 @@ class ChallengeData {
       name: 'Plank',
       target: 'Core Stability',
       equipment: 'None',
-      videoPath: 'assets/videos/abs/abs_plank.mp4',
+      videoPath: '',
       setsReps: '4 sets x 60 seconds',
     ),
     const ChallengeExercise(

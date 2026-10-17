@@ -11,6 +11,8 @@ import 'package:fitness_app/utils/widgets/loading_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
+import 'package:fitness_app/services/notification_service.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -60,6 +62,16 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
         await provider.deleteWeeklyPlan();
         if (!mounted) return;
         await provider.fetchAndSetWorkouts();
+        if (mounted) {
+          final statsProvider =
+              Provider.of<StatisticsProvider>(context, listen: false);
+          await statsProvider.clearScheduledDays();
+          await statsProvider.resetWeeklyTarget();
+        }
+        try {
+          await NotificationService().cancelWorkoutDayReminders();
+          await NotificationService().cancelRestDayReminders();
+        } catch (_) {}
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
@@ -142,6 +154,9 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
     }
 
     if (groupedMap.isEmpty) {
+      if (otherWorkouts.isEmpty) {
+        return _buildEmptyState(context);
+      }
       return StreamBuilder<List<WorkoutLog>>(
         stream: WorkoutLogService().getLogs(),
         builder: (context, snap) {
@@ -190,13 +205,19 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
                     initiallyExpanded: true,
                     title: Row(
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(day, style: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.bold, fontSize: 18.sp)),
-                          ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                day,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.bold, fontSize: 18.sp),
+                              ),
+                            ],
+                          ),
                         ),
-                        const Spacer(),
+                        SizedBox(width: 8.w),
                         ElevatedButton.icon(
                           onPressed: () {
                             Navigator.push(context, MaterialPageRoute(builder: (context) => DayWorkoutSessionPage(dayName: day, workouts: workouts)));
@@ -382,28 +403,9 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
   }
 
   void _showWorkoutTimerDialog(BuildContext context, dynamic workout) {
-    String displayName = workout.name;
-    final regex = RegExp(r'^\[\w+\]\s*');
-    displayName = displayName.replaceAll(regex, '');
-    final cleanName = displayName.trim();
-    
-    Exercise? foundExercise;
-    try {
-      final allExercises = [...ExerciseData.chest, ...ExerciseData.back, ...ExerciseData.shoulders, ...ExerciseData.biceps, ...ExerciseData.triceps, ...ExerciseData.legs, ...ExerciseData.abs, ...ExerciseData.cardio];
-      foundExercise = allExercises.firstWhere((e) => e.name.toLowerCase() == cleanName.toLowerCase());
-    } catch (_) {}
-
-    String category = 'Chest';
-    if (foundExercise != null) {
-      if (ExerciseData.chest.any((e) => e.name == foundExercise!.name)) category = 'Chest';
-      else if (ExerciseData.biceps.any((e) => e.name == foundExercise!.name)) category = 'Biceps';
-      else if (ExerciseData.back.any((e) => e.name == foundExercise!.name)) category = 'Lats';
-      else if (ExerciseData.triceps.any((e) => e.name == foundExercise!.name)) category = 'Triceps';
-      else if (ExerciseData.legs.any((e) => e.name == foundExercise!.name)) category = 'Legs';
-      else if (ExerciseData.abs.any((e) => e.name == foundExercise!.name)) category = 'Abs';
-      else if (ExerciseData.shoulders.any((e) => e.name == foundExercise!.name)) category = 'Shoulder';
-      else if (ExerciseData.cardio.any((e) => e.name == foundExercise!.name)) category = 'Cardio';
-    }
+    final cleanName = ExerciseData.normalizeExerciseName(workout.name);
+    final foundExercise = ExerciseData.findByName(workout.name);
+    final category = ExerciseData.categoryFor(workout.name) ?? 'Chest';
 
     final exerciseToUse = foundExercise ?? Exercise(
       name: cleanName, videoPath: '', description: 'Custom exercise routine.', target: 'N/A', equipment: 'N/A', instructions: const ['Perform the custom exercise as scheduled.'], difficulty: 'Intermediate', setsReps: '${workout.setNumber} sets x ${workout.repNumber} reps',

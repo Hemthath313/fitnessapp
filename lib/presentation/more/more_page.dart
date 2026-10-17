@@ -9,6 +9,7 @@ import 'package:fitness_app/utils/router/router.dart';
 import 'package:fitness_app/utils/widgets/loading_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fitness_app/presentation/profile/widgets/gym_alarm_setting_widget.dart';
 import 'package:fitness_app/presentation/widgets/feedback_dialog.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -142,9 +143,14 @@ class MorePage extends StatelessWidget {
                   color: Colors.purple,
                   onTap: () => context.push(Routes.changeMeasurementsRoute),
                 ),
+                // Reminders & Notifications Section
+                _buildSectionTitle('Reminders & Notifications'),
+                SizedBox(height: SizeManager.s12.h),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: SizeManager.s4.w),
+                  child: const GymAlarmSettingWidget(),
+                ),
                 SizedBox(height: SizeManager.s24.h),
-
-
 
                 // Account Settings Section
                 _buildSectionTitle('Account Settings'),

@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/model/workout_log.dart';
+import 'package:fitness_app/services/progression_service.dart';
 import 'package:fitness_app/services/workout_log_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
-import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -14,19 +15,94 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 
+class ExerciseSetDraft {
+  final String weight;
+  final String reps;
+  final bool isCompleted;
+  final bool isWeightUserEdited;
+  final bool isRepsUserEdited;
+
+  const ExerciseSetDraft({
+    required this.weight,
+    required this.reps,
+    this.isCompleted = false,
+    this.isWeightUserEdited = false,
+    this.isRepsUserEdited = false,
+  });
+}
+
 class SetLogInput {
   final TextEditingController weightController;
   final TextEditingController repsController;
   bool isCompleted;
+  bool isWeightUserEdited;
+  bool isRepsUserEdited;
+  bool _isProgrammaticWeightUpdate = false;
+  bool _isProgrammaticRepsUpdate = false;
+  String _lastWeightText;
+  String _lastRepsText;
+  VoidCallback? onUserChanged;
 
   SetLogInput({
     required String defaultWeight,
     required String defaultReps,
     this.isCompleted = false,
-  })  : weightController = TextEditingController(text: defaultWeight),
-        repsController = TextEditingController(text: defaultReps);
+    this.isWeightUserEdited = false,
+    this.isRepsUserEdited = false,
+    this.onUserChanged,
+  })  : _lastWeightText = defaultWeight,
+        _lastRepsText = defaultReps,
+        weightController = TextEditingController(text: defaultWeight),
+        repsController = TextEditingController(text: defaultReps) {
+    weightController.addListener(_handleWeightChanged);
+    repsController.addListener(_handleRepsChanged);
+  }
+
+  void _handleWeightChanged() {
+    if (_isProgrammaticWeightUpdate) return;
+    if (weightController.text != _lastWeightText) {
+      _lastWeightText = weightController.text;
+      isWeightUserEdited = true;
+      onUserChanged?.call();
+    }
+  }
+
+  void _handleRepsChanged() {
+    if (_isProgrammaticRepsUpdate) return;
+    if (repsController.text != _lastRepsText) {
+      _lastRepsText = repsController.text;
+      isRepsUserEdited = true;
+      onUserChanged?.call();
+    }
+  }
+
+  void setProgrammaticWeight(String value) {
+    _isProgrammaticWeightUpdate = true;
+    _lastWeightText = value;
+    weightController.text = value;
+    _isProgrammaticWeightUpdate = false;
+  }
+
+  void setProgrammaticReps(String value) {
+    _isProgrammaticRepsUpdate = true;
+    _lastRepsText = value;
+    repsController.text = value;
+    _isProgrammaticRepsUpdate = false;
+  }
+
+  ExerciseSetDraft toDraft() {
+    return ExerciseSetDraft(
+      weight: weightController.text,
+      reps: repsController.text,
+      isCompleted: isCompleted,
+      isWeightUserEdited: isWeightUserEdited,
+      isRepsUserEdited: isRepsUserEdited,
+    );
+  }
 
   void dispose() {
+    weightController.removeListener(_handleWeightChanged);
+    repsController.removeListener(_handleRepsChanged);
     weightController.dispose();
     repsController.dispose();
   }
@@ -42,6 +118,10 @@ class InteractiveExerciseDetailWidget extends StatefulWidget {
   final String difficulty;
   final String setsReps;
   final String category;
+  final VideoControllerFactory? videoControllerFactory;
+  final VideoViewBuilder? videoViewBuilder;
+  final List<ExerciseSetDraft>? initialSets;
+  final ValueChanged<List<ExerciseSetDraft>>? onSetsChanged;
 
   const InteractiveExerciseDetailWidget({
     super.key,
@@ -54,7 +134,19 @@ class InteractiveExerciseDetailWidget extends StatefulWidget {
     required this.difficulty,
     required this.setsReps,
     required this.category,
+    this.videoControllerFactory,
+    this.videoViewBuilder,
+    this.initialSets,
+    this.onSetsChanged,
   });
+
+  static final Expando<Map<String, List<ExerciseSetDraft>>> _navigatorDrafts =
+      Expando<Map<String, List<ExerciseSetDraft>>>('InteractiveExerciseDetailDrafts');
+  static final Map<String, List<ExerciseSetDraft>> _fallbackDrafts = {};
+
+  static void clearDrafts() {
+    _fallbackDrafts.clear();
+  }
 
   @override
   State<InteractiveExerciseDetailWidget> createState() =>
@@ -64,8 +156,10 @@ class InteractiveExerciseDetailWidget extends StatefulWidget {
 class _InteractiveExerciseDetailWidgetState
     extends State<InteractiveExerciseDetailWidget> {
   int _currentTab = 0; // 0 = Instructions, 1 = Log Set, 2 = History
+  bool _hasVideoError = false;
   final List<SetLogInput> _sets = [];
-  final WorkoutLogService _logService = WorkoutLogService();
+  late final WorkoutLogService _logService = WorkoutLogService();
+  late final Stream<List<WorkoutLog>> _logsStream = _initLogsStream();
   
   // Previous log caching
   WorkoutLog? _previousLog;
@@ -77,11 +171,65 @@ class _InteractiveExerciseDetailWidgetState
   int _restTimerSeconds = 0;
   bool _isResting = false;
 
+  String get _draftKey {
+    final clean = ExerciseData.normalizeExerciseName(widget.name);
+    final catalog = ExerciseData.findByName(clean);
+    return (catalog?.name ?? clean).trim().toLowerCase();
+  }
+
+  Map<String, List<ExerciseSetDraft>> _draftStore() {
+    final nav = Navigator.maybeOf(context);
+    if (nav != null) {
+      var map = InteractiveExerciseDetailWidget._navigatorDrafts[nav];
+      if (map == null) {
+        map = <String, List<ExerciseSetDraft>>{};
+        InteractiveExerciseDetailWidget._navigatorDrafts[nav] = map;
+      }
+      return map;
+    }
+    return InteractiveExerciseDetailWidget._fallbackDrafts;
+  }
+
+  void _syncDrafts() {
+    final drafts = _sets.map((s) => s.toDraft()).toList();
+    final hasUserMutation = drafts.any(
+      (d) => d.isWeightUserEdited || d.isRepsUserEdited || d.isCompleted,
+    );
+    if (hasUserMutation) {
+      _draftStore()[_draftKey] = drafts;
+    }
+    widget.onSetsChanged?.call(drafts);
+  }
+
+  Stream<List<WorkoutLog>> _initLogsStream() {
+    try {
+      return _logService.getLogs();
+    } catch (_) {
+      return const Stream.empty();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    _loadPreviousLogAndMax();
+    _hasVideoError = widget.videoPath.trim().isEmpty;
     _parseAndInitializeSets();
+    _loadPreviousLogAndMax();
+  }
+
+  @override
+  void didUpdateWidget(covariant InteractiveExerciseDetailWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.videoPath != widget.videoPath) {
+      _hasVideoError = widget.videoPath.trim().isEmpty;
+    }
+    if (oldWidget.name != widget.name) {
+      for (var set in _sets) {
+        set.dispose();
+      }
+      _parseAndInitializeSets();
+      _loadPreviousLogAndMax();
+    }
   }
 
   @override
@@ -91,6 +239,18 @@ class _InteractiveExerciseDetailWidgetState
       set.dispose();
     }
     super.dispose();
+  }
+
+  int _parseDefaultRepsInt() {
+    try {
+      final text = widget.setsReps.toLowerCase();
+      final repsRegex = RegExp(r'(\d+)\s*rep');
+      final matchReps = repsRegex.firstMatch(text);
+      if (matchReps != null) {
+        return int.parse(matchReps.group(1)!);
+      }
+    } catch (_) {}
+    return 12;
   }
 
   // Parse default sets and reps from the config string, e.g. "3 sets x 12 reps"
@@ -116,32 +276,125 @@ class _InteractiveExerciseDetailWidgetState
     } catch (_) {}
 
     _sets.clear();
+
+    // Restore from active-session sets or unsaved user-edited draft if available
+    final List<ExerciseSetDraft>? savedDrafts =
+        (widget.initialSets != null && widget.initialSets!.isNotEmpty)
+            ? widget.initialSets
+            : _draftStore()[_draftKey];
+
+    final cachedLog = WorkoutLogService.getCachedLastLog(widget.name);
+    if (cachedLog != null) {
+      _previousLog = cachedLog;
+      double maxWeight = 0.0;
+      for (var s in cachedLog.sets) {
+        if (s.weight > maxWeight) maxWeight = s.weight;
+      }
+      _historicMaxWeight = maxWeight;
+    }
+
+    if (savedDrafts != null && savedDrafts.isNotEmpty) {
+      for (final draft in savedDrafts) {
+        _sets.add(
+          SetLogInput(
+            defaultWeight: draft.weight,
+            defaultReps: draft.reps,
+            isCompleted: draft.isCompleted,
+            isWeightUserEdited: draft.isWeightUserEdited,
+            isRepsUserEdited: draft.isRepsUserEdited,
+            onUserChanged: _syncDrafts,
+          ),
+        );
+      }
+      return;
+    }
+
+    final progression = ProgressionService.calculateNextTarget(
+      exerciseName: widget.name,
+      previousLog: cachedLog,
+      defaultTargetReps: int.tryParse(defaultReps) ?? 12,
+      equipment: widget.equipment,
+      category: widget.category,
+    );
+    final defaultWeightStr = progression.formattedWeight;
+
     for (int i = 0; i < defaultSetsCount; i++) {
-      _sets.add(SetLogInput(defaultWeight: "", defaultReps: defaultReps));
+      String rowReps = defaultReps;
+      if (cachedLog != null && cachedLog.sets.isNotEmpty) {
+        if (progression.type == ProgressionType.increaseWeight) {
+          rowReps = '${progression.targetMinReps}';
+        } else if (i < cachedLog.sets.length && cachedLog.sets[i].reps > 0) {
+          rowReps = '${cachedLog.sets[i].reps}';
+        } else if (cachedLog.sets.last.reps > 0) {
+          rowReps = '${cachedLog.sets.last.reps}';
+        }
+      }
+      _sets.add(
+        SetLogInput(
+          defaultWeight: defaultWeightStr,
+          defaultReps: rowReps,
+          onUserChanged: _syncDrafts,
+        ),
+      );
     }
   }
 
-  // Fetch Firestore history for previous sets and personal records
+  // Fetch Firestore or cached history for previous sets and personal records
   Future<void> _loadPreviousLogAndMax() async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
+      final List<WorkoutLog> logs = [];
+      User? user;
+      try {
+        user = FirebaseAuth.instance.currentUser;
+      } catch (_) {
+        user = null;
+      }
 
-      final snapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('workout_logs')
-          .orderBy('date', descending: true)
-          .get();
+      if (user != null) {
+        final snapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('workout_logs')
+            .orderBy('date', descending: true)
+            .get();
 
-      final logs = snapshot.docs
-          .map((doc) => WorkoutLog.fromMap(doc.data(), doc.id))
-          .where((log) => log.exerciseName.toLowerCase() == widget.name.toLowerCase())
-          .toList();
+        if (!mounted) return;
 
+        final cleanTarget =
+            ExerciseData.normalizeExerciseName(widget.name).toLowerCase();
+        logs.addAll(
+          snapshot.docs
+              .map((doc) => WorkoutLog.fromMap(doc.data(), doc.id))
+              .where(
+                (log) =>
+                    ExerciseData.normalizeExerciseName(log.exerciseName)
+                        .toLowerCase() ==
+                    cleanTarget,
+              ),
+        );
+      } else {
+        final cached = await _logService.getLastExerciseLog(widget.name);
+        if (!mounted) return;
+        if (cached != null) {
+          logs.add(cached);
+        }
+      }
+
+      final defaultRepsInt = _parseDefaultRepsInt();
       if (logs.isNotEmpty) {
+        final latestLog = logs.first;
+        WorkoutLogService.seedLastLogCache(widget.name, latestLog);
+        final progression = ProgressionService.calculateNextTarget(
+          exerciseName: widget.name,
+          previousLog: latestLog,
+          defaultTargetReps: defaultRepsInt,
+          equipment: widget.equipment,
+          category: widget.category,
+        );
+        final recommendedWeightStr = progression.formattedWeight;
+
         setState(() {
-          _previousLog = logs.first; // Most recent log
+          _previousLog = latestLog; // Most recent log
           
           // Calculate historical max weight
           double maxWeight = 0.0;
@@ -154,35 +407,48 @@ class _InteractiveExerciseDetailWidgetState
           }
           _historicMaxWeight = maxWeight;
 
-          // Pre-fill log input controllers with previous values
+          // Pre-fill unedited log input controllers with progression/history values
           for (int i = 0; i < _sets.length; i++) {
-            if (i < _previousLog!.sets.length) {
-              _sets[i].weightController.text =
-                  _previousLog!.sets[i].weight.toString();
-              _sets[i].repsController.text =
-                  _previousLog!.sets[i].reps.toString();
-            } else if (_previousLog!.sets.isNotEmpty) {
-              // Fallback to prefill using last set info
-              _sets[i].weightController.text =
-                  _previousLog!.sets.last.weight.toString();
-              _sets[i].repsController.text =
-                  _previousLog!.sets.last.reps.toString();
+            if (_sets[i].isCompleted) continue;
+
+            if (!_sets[i].isWeightUserEdited) {
+              _sets[i].setProgrammaticWeight(recommendedWeightStr);
+            }
+            if (!_sets[i].isRepsUserEdited) {
+              if (progression.type == ProgressionType.increaseWeight) {
+                _sets[i].setProgrammaticReps('${progression.targetMinReps}');
+              } else if (i < _previousLog!.sets.length &&
+                  _previousLog!.sets[i].reps > 0) {
+                _sets[i].setProgrammaticReps('${_previousLog!.sets[i].reps}');
+              } else if (_previousLog!.sets.isNotEmpty &&
+                  _previousLog!.sets.last.reps > 0) {
+                _sets[i].setProgrammaticReps('${_previousLog!.sets.last.reps}');
+              }
             }
           }
         });
       } else {
+        final defaultWeightStr = ProgressionService.formatInitialWeight(
+          widget.name,
+          equipment: widget.equipment,
+          category: widget.category,
+        );
         setState(() {
           _previousLog = null;
           _historicMaxWeight = 0.0;
           for (var set in _sets) {
-            set.weightController.text = "";
+            if (!set.isCompleted && !set.isWeightUserEdited) {
+              set.setProgrammaticWeight(defaultWeightStr);
+            }
           }
         });
       }
     } catch (_) {} finally {
-      setState(() {
-        _isLoadingPrevious = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoadingPrevious = false;
+        });
+      }
     }
   }
 
@@ -220,19 +486,32 @@ class _InteractiveExerciseDetailWidgetState
         _startRestTimer();
       }
     });
+    _syncDrafts();
   }
 
   // Add Set row dynamically
   void _addSetRow() {
     setState(() {
-      String weight = "";
-      String reps = "10";
+      final fallbackWeight = ProgressionService.formatInitialWeight(
+        widget.name,
+        equipment: widget.equipment,
+        category: widget.category,
+      );
+      String weight = fallbackWeight;
+      String reps = '${_parseDefaultRepsInt()}';
       if (_sets.isNotEmpty) {
         weight = _sets.last.weightController.text;
         reps = _sets.last.repsController.text;
       }
-      _sets.add(SetLogInput(defaultWeight: weight, defaultReps: reps));
+      _sets.add(
+        SetLogInput(
+          defaultWeight: weight,
+          defaultReps: reps,
+          onUserChanged: _syncDrafts,
+        ),
+      );
     });
+    _syncDrafts();
   }
 
   // Remove Set row
@@ -242,6 +521,7 @@ class _InteractiveExerciseDetailWidgetState
       final removed = _sets.removeLast();
       removed.dispose();
     });
+    _syncDrafts();
   }
 
   // Save live log to Firebase
@@ -287,6 +567,7 @@ class _InteractiveExerciseDetailWidgetState
       _restTimer?.cancel();
       _isResting = false;
       _restTimerSeconds = 0;
+      _draftStore().remove(_draftKey);
 
       // Check if this was a new Personal Record
       final bool isPR = currentMaxWeight > _historicMaxWeight && _historicMaxWeight > 0;
@@ -439,12 +720,16 @@ class _InteractiveExerciseDetailWidgetState
             defaultWeight: setObj.weight.toStringAsFixed(setObj.weight % 1 == 0 ? 0 : 1),
             defaultReps: setObj.reps.toString(),
             isCompleted: false,
+            isWeightUserEdited: true,
+            isRepsUserEdited: true,
+            onUserChanged: _syncDrafts,
           ),
         );
       }
       
       _currentTab = 1; // Navigate to Log Set tab
     });
+    _syncDrafts();
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -562,50 +847,69 @@ class _InteractiveExerciseDetailWidgetState
           ),
         ),
         SizedBox(height: 12.h),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: widget.instructions.length,
-          itemBuilder: (context, index) {
-            return Container(
-              margin: EdgeInsets.only(bottom: 12.h),
-              padding: EdgeInsets.all(14.w),
-              decoration: BoxDecoration(
-                color: ColorManager.surfaceLight,
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: ColorManager.divider),
+        if (widget.instructions.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(14.w),
+            decoration: BoxDecoration(
+              color: ColorManager.surfaceLight,
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: ColorManager.divider),
+            ),
+            child: Text(
+              'Detailed step-by-step instructions are not available for this exercise.',
+              style: TextStyle(
+                color: ColorManager.textSecondary,
+                fontSize: 14.sp,
+                height: 1.4,
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    radius: 14.r,
-                    backgroundColor: ColorManager.primary,
-                    child: Text(
-                      '${index + 1}',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12.sp,
+            ),
+          )
+        else
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: widget.instructions.length,
+            itemBuilder: (context, index) {
+              return Container(
+                margin: EdgeInsets.only(bottom: 12.h),
+                padding: EdgeInsets.all(14.w),
+                decoration: BoxDecoration(
+                  color: ColorManager.surfaceLight,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: ColorManager.divider),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      radius: 14.r,
+                      backgroundColor: ColorManager.primary,
+                      child: Text(
+                        '${index + 1}',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12.sp,
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: Text(
-                      widget.instructions[index],
-                      style: TextStyle(
-                        color: ColorManager.textPrimary,
-                        fontSize: 14.sp,
-                        height: 1.4,
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: Text(
+                        widget.instructions[index],
+                        style: TextStyle(
+                          color: ColorManager.textPrimary,
+                          fontSize: 14.sp,
+                          height: 1.4,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
+                  ],
+                ),
+              );
+            },
+          ),
       ],
     );
   }
@@ -751,12 +1055,15 @@ class _InteractiveExerciseDetailWidgetState
                       height: 38.h,
                       margin: EdgeInsets.symmetric(horizontal: 6.w),
                       child: TextField(
+                        key: Key('detail_weight_input_$idx'),
                         controller: setInput.weightController,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         textAlign: TextAlign.center,
                         enabled: !setInput.isCompleted,
                         style: TextStyle(color: ColorManager.textPrimary, fontSize: 14.sp),
                         decoration: InputDecoration(
+                          hintText: '—',
+                          hintStyle: TextStyle(color: ColorManager.textTertiary, fontSize: 13.sp),
                           contentPadding: EdgeInsets.zero,
                           filled: true,
                           fillColor: setInput.isCompleted ? ColorManager.surfaceDark : ColorManager.surfaceLight,
@@ -775,6 +1082,7 @@ class _InteractiveExerciseDetailWidgetState
                       height: 38.h,
                       margin: EdgeInsets.symmetric(horizontal: 6.w),
                       child: TextField(
+                        key: Key('detail_reps_input_$idx'),
                         controller: setInput.repsController,
                         keyboardType: TextInputType.number,
                         textAlign: TextAlign.center,
@@ -1113,7 +1421,7 @@ class _InteractiveExerciseDetailWidgetState
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<WorkoutLog>>(
-      stream: _logService.getLogs(),
+      stream: _logsStream,
       builder: (context, snapshot) {
         final logs = snapshot.data ?? [];
         final filteredLogs = logs
@@ -1153,11 +1461,12 @@ class _InteractiveExerciseDetailWidgetState
                           fontSize: 20.sp,
                           fontWeight: FontWeight.bold,
                         ),
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     IconButton(
+                      key: const Key('close_exercise_detail_button'),
                       icon: const Icon(Icons.close),
                       onPressed: () => Navigator.pop(context),
                       color: ColorManager.textSecondary,
@@ -1228,14 +1537,16 @@ class _InteractiveExerciseDetailWidgetState
                 ),
               ),
 
-              // Video player (fixed at top if Instructions or History is active, hide inside Log Set to save space!)
-              if (_currentTab != 1)
-                Padding(
+              // Keep video mounted across tabs so switching to/from Log Set does not dispose or restart playback
+              Offstage(
+                offstage: _currentTab == 1,
+                child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 6.h),
                   child: Container(
                     height: 180.h,
                     width: double.infinity,
                     decoration: BoxDecoration(
+                      color: Colors.black,
                       borderRadius: BorderRadius.circular(20.r),
                       border: Border.all(color: ColorManager.divider),
                     ),
@@ -1247,29 +1558,42 @@ class _InteractiveExerciseDetailWidgetState
                             videoPath: widget.videoPath,
                             height: 180.h,
                             width: double.infinity,
+                            fit: BoxFit.contain,
                             autoPlay: true,
+                            controllerFactory: widget.videoControllerFactory,
+                            videoViewBuilder: widget.videoViewBuilder,
+                            onErrorChanged: (hasError) {
+                              if (mounted && _hasVideoError != hasError) {
+                                setState(() {
+                                  _hasVideoError = hasError;
+                                });
+                              }
+                            },
                           ),
-                          // Overlay instructions text indicator
-                          Positioned(
-                            bottom: 8.h,
-                            right: 8.w,
-                            child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                              decoration: BoxDecoration(
-                                color: Colors.black54,
-                                borderRadius: BorderRadius.circular(10.r),
-                              ),
-                              child: Text(
-                                'Video Guide',
-                                style: TextStyle(color: Colors.white, fontSize: 10.sp),
+                          // Overlay instructions text indicator only when video is valid
+                          if (!_hasVideoError &&
+                              widget.videoPath.trim().isNotEmpty)
+                            Positioned(
+                              bottom: 8.h,
+                              right: 8.w,
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                                decoration: BoxDecoration(
+                                  color: Colors.black54,
+                                  borderRadius: BorderRadius.circular(10.r),
+                                ),
+                                child: Text(
+                                  'Video Guide',
+                                  style: TextStyle(color: Colors.white, fontSize: 10.sp),
+                                ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                     ),
                   ),
                 ),
+              ),
 
               // Dynamic scrollable panels
               Expanded(

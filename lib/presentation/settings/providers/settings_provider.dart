@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/data/db.dart';
+import 'package:fitness_app/presentation/auth/providers/auth_provider.dart' as app_auth;
 import 'package:fitness_app/utils/widgets/loading_overlay.dart';
 import 'package:flutter/material.dart';
 
@@ -75,6 +76,7 @@ class SettingsProvider with ChangeNotifier {
       if (isGoogleUser) {
         // For Google users, no reauthentication needed - just delete
         await DataBase(user!.uid).deleteUserData();
+        await app_auth.AuthProvider.clearCachedOnboardingStatus(user.uid);
         await user.delete();
       } else {
         // For regular users, reauthenticate first
@@ -83,6 +85,7 @@ class SettingsProvider with ChangeNotifier {
         UserCredential result =
             await user!.reauthenticateWithCredential(credential);
         await DataBase(result.user!.uid).deleteUserData();
+        await app_auth.AuthProvider.clearCachedOnboardingStatus(result.user!.uid);
         await result.user!.delete();
       }
 

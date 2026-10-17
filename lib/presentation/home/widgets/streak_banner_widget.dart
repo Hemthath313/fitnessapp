@@ -10,8 +10,17 @@ import 'package:provider/provider.dart';
 class StreakBannerWidget extends StatelessWidget {
   const StreakBannerWidget({super.key});
 
-  String _getMotivation(int streak) {
-    if (streak == 0) return 'Log a workout today to start your streak! 💪';
+  String _getMotivation(StatisticsProvider stats) {
+    final streak = stats.currentStreak;
+    if (streak == 0) {
+      if (!stats.hasActiveSchedule && !stats.hasWorkoutHistory) {
+        return 'Complete your first workout to start your streak! 💪';
+      }
+      return 'Log a workout today to start your streak! 💪';
+    }
+    if (stats.isRestDay()) {
+      return 'Rest day — your $streak-day streak is safe and active! 🛡️';
+    }
     if (streak == 1) return 'Great start! Day 1 is the hardest. 🌟';
     if (streak < 3) return 'You\'re building momentum. Keep it up!';
     if (streak < 7) return 'Impressive! You\'re on fire. Don\'t stop now! 🔥';
@@ -192,7 +201,7 @@ class StreakBannerWidget extends StatelessWidget {
                 SizedBox(height: 10.h),
                 // Motivation text
                 Text(
-                  _getMotivation(streak),
+                  _getMotivation(stats),
                   style: TextStyle(
                     color: streak > 0
                         ? Colors.white70

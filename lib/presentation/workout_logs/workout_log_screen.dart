@@ -2,9 +2,9 @@ import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/model/workout_log.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/presentation/workout_tools/plate_calculator_sheet.dart';
+import 'package:fitness_app/services/progression_service.dart';
 import 'package:fitness_app/services/workout_log_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
-import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -12,28 +12,29 @@ import 'package:provider/provider.dart';
 class WorkoutLogScreen extends StatefulWidget {
   const WorkoutLogScreen({super.key});
 
+  static List<String> get suggestedExercises => ExerciseData.allExerciseNames;
+
   @override
   State<WorkoutLogScreen> createState() => _WorkoutLogScreenState();
 }
 
 class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
   final _exerciseController = TextEditingController();
+  TextEditingController? _autocompleteController;
   final _notesController = TextEditingController();
   final List<WorkoutSet> _sets = [WorkoutSet(weight: 0, reps: 0)];
   final List<TextEditingController> _weightControllers = [TextEditingController()];
   final List<TextEditingController> _repControllers = [TextEditingController()];
+  final List<bool> _isWeightUserEdited = [false];
+  final List<String> _lastWeightTexts = [''];
+  bool _isProgrammaticWeightUpdate = false;
   
   String _category = 'Strength';
   final _logService = WorkoutLogService();
   bool _isSaving = false;
 
-  static final List<String> _suggestedExercises = [
-    ...ExerciseData.chest.map((e) => e.name),
-    ...ExerciseData.back.map((e) => e.name),
-    ...ExerciseData.legs.map((e) => e.name),
-    ...ExerciseData.shoulders.map((e) => e.name),
-    ...ExerciseData.arms.map((e) => e.name),
-  ].toSet().toList();
+  List<String> get _suggestedExercises => WorkoutLogScreen.suggestedExercises;
+
 
   static const List<String> _popularQuickChips = [
     'Barbell Bench Press',
@@ -43,6 +44,78 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
     'Barbell Row',
     'Pull-Ups',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _attachWeightListener(0);
+  }
+
+  void _attachWeightListener(int index) {
+    final ctrl = _weightControllers[index];
+    ctrl.addListener(() {
+      if (_isProgrammaticWeightUpdate) return;
+      final idx = _weightControllers.indexOf(ctrl);
+      if (idx != -1 && ctrl.text != _lastWeightTexts[idx]) {
+        _lastWeightTexts[idx] = ctrl.text;
+        _isWeightUserEdited[idx] = true;
+      }
+    });
+  }
+
+  void _setProgrammaticWeight(int index, String value) {
+    if (index < 0 || index >= _weightControllers.length) return;
+    _isProgrammaticWeightUpdate = true;
+    _lastWeightTexts[index] = value;
+    _weightControllers[index].text = value;
+    _isProgrammaticWeightUpdate = false;
+  }
+
+  Future<void> _selectExerciseAndSeedWeight(String rawName) async {
+    final trimmed = rawName.trim();
+    if (trimmed.isEmpty) return;
+
+    final cachedLog = WorkoutLogService.getCachedLastLog(trimmed);
+    final initialProgression = ProgressionService.calculateNextTarget(
+      exerciseName: trimmed,
+      previousLog: cachedLog,
+      category: _category,
+    );
+    final initialWeightStr = initialProgression.formattedWeight;
+
+    setState(() {
+      _exerciseController.text = trimmed;
+      if (_autocompleteController != null &&
+          _autocompleteController!.text != trimmed) {
+        _autocompleteController!.text = trimmed;
+      }
+      for (int i = 0; i < _weightControllers.length; i++) {
+        if (!_isWeightUserEdited[i]) {
+          _setProgrammaticWeight(i, initialWeightStr);
+        }
+      }
+    });
+
+    try {
+      final fetchedLog = await _logService.getLastExerciseLog(trimmed);
+      if (!mounted || _exerciseController.text.trim() != trimmed) return;
+      if (fetchedLog != null) {
+        final progression = ProgressionService.calculateNextTarget(
+          exerciseName: trimmed,
+          previousLog: fetchedLog,
+          category: _category,
+        );
+        final weightStr = progression.formattedWeight;
+        setState(() {
+          for (int i = 0; i < _weightControllers.length; i++) {
+            if (!_isWeightUserEdited[i]) {
+              _setProgrammaticWeight(i, weightStr);
+            }
+          }
+        });
+      }
+    } catch (_) {}
+  }
 
   @override
   void dispose() {
@@ -59,9 +132,27 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
 
   void _addSet() {
     setState(() {
+      String initialWeight = '';
+      if (_weightControllers.isNotEmpty &&
+          _weightControllers.last.text.trim().isNotEmpty) {
+        initialWeight = _weightControllers.last.text.trim();
+      } else if (_exerciseController.text.trim().isNotEmpty) {
+        final exName = _exerciseController.text.trim();
+        final cached = WorkoutLogService.getCachedLastLog(exName);
+        final prog = ProgressionService.calculateNextTarget(
+          exerciseName: exName,
+          previousLog: cached,
+          category: _category,
+        );
+        initialWeight = prog.formattedWeight;
+      }
+      final newIdx = _weightControllers.length;
       _sets.add(WorkoutSet(weight: 0, reps: 0));
-      _weightControllers.add(TextEditingController());
+      _weightControllers.add(TextEditingController(text: initialWeight));
       _repControllers.add(TextEditingController());
+      _isWeightUserEdited.add(false);
+      _lastWeightTexts.add(initialWeight);
+      _attachWeightListener(newIdx);
     });
   }
 
@@ -73,6 +164,8 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
         _weightControllers.removeAt(index);
         _repControllers[index].dispose();
         _repControllers.removeAt(index);
+        _isWeightUserEdited.removeAt(index);
+        _lastWeightTexts.removeAt(index);
       });
     }
   }
@@ -159,14 +252,15 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                 });
               },
               onSelected: (String selection) {
-                setState(() {
-                  _exerciseController.text = selection;
-                });
+                _selectExerciseAndSeedWeight(selection);
               },
               fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-                controller.addListener(() {
-                  _exerciseController.text = controller.text;
-                });
+                if (_autocompleteController != controller) {
+                  _autocompleteController = controller;
+                  controller.addListener(() {
+                    _exerciseController.text = controller.text;
+                  });
+                }
                 return TextField(
                   controller: controller,
                   focusNode: focusNode,
@@ -253,9 +347,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                       backgroundColor: _exerciseController.text == chip ? ColorManager.primary : ColorManager.surface,
                       side: BorderSide(color: ColorManager.divider.withOpacity(0.5)),
                       onPressed: () {
-                        setState(() {
-                          _exerciseController.text = chip;
-                        });
+                        _selectExerciseAndSeedWeight(chip);
                       },
                     ),
                   );
@@ -363,6 +455,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                                     width: 65.w,
                                     height: 32.h,
                                     child: TextField(
+                                      key: Key('quick_log_weight_input_$index'),
                                       controller: _weightControllers[index],
                                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                       textAlign: TextAlign.center,
@@ -386,6 +479,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                                     width: 65.w,
                                     height: 32.h,
                                     child: TextField(
+                                      key: Key('quick_log_reps_input_$index'),
                                       controller: _repControllers[index],
                                       keyboardType: TextInputType.number,
                                       textAlign: TextAlign.center,

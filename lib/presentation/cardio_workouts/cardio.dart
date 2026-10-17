@@ -1,29 +1,9 @@
+import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 
-// Custom cardio exercise data with descriptions
-class CardioExercise {
-  final String name;
-  final String videoPath;
-  final String description;
-  final String target;
-  final String equipment;
-  final List<String> instructions;
-  final String difficulty;
-  final String setsReps;
-
-  CardioExercise({
-    required this.name,
-    required this.videoPath,
-    required this.description,
-    required this.target,
-    required this.equipment,
-    required this.instructions,
-    required this.difficulty,
-    required this.setsReps,
-  });
-}
+typedef CardioExercise = Exercise;
 
 class CardioExercisesPage extends StatefulWidget {
   const CardioExercisesPage({super.key});
@@ -33,190 +13,8 @@ class CardioExercisesPage extends StatefulWidget {
 }
 
 class _CardioExercisesPageState extends State<CardioExercisesPage> {
-  // Only show exercises that have local videos
-  final List<CardioExercise> cardioExercises = [
-    CardioExercise(
-      name: 'Battling Ropes',
-      videoPath: 'assets/videos/cardio/cardio_battling_ropes.mp4',
-      description:
-          'High-intensity full-body exercise that builds explosive power and cardiovascular endurance. The alternating wave motion engages your core, shoulders, and legs simultaneously.',
-      target: 'Full Body, Cardiovascular',
-      equipment: 'Battling Ropes',
-      difficulty: 'Intermediate',
-      setsReps: '3-5 sets × 30-60 seconds',
-      instructions: [
-        'Stand with feet shoulder-width apart, holding one rope in each hand',
-        'Alternate creating waves by raising and lowering each arm rapidly',
-        'Keep your core engaged and maintain a slight squat position',
-        'Focus on creating powerful, consistent waves',
-        'Breathe rhythmically and maintain intensity',
-        'Rest 30-60 seconds between sets',
-      ],
-    ),
-    CardioExercise(
-      name: 'Bridge Pose',
-      videoPath: 'assets/videos/cardio/cardio_bridge_pose.mp4',
-      description:
-          'Yoga-inspired exercise that strengthens the glutes, hamstrings, and core while improving flexibility. Great for active recovery and low-impact cardio.',
-      target: 'Glutes, Hamstrings, Core',
-      equipment: 'Mat (Optional)',
-      difficulty: 'Beginner',
-      setsReps: '3 sets × 10-15 reps',
-      instructions: [
-        'Lie on your back with knees bent and feet flat on the floor',
-        'Place your arms at your sides with palms facing down',
-        'Press through your heels and lift your hips up',
-        'Squeeze your glutes at the top and hold for 2-3 seconds',
-        'Lower your hips slowly back to the starting position',
-        'Keep your core engaged throughout the movement',
-      ],
-    ),
-    CardioExercise(
-      name: 'Burpee',
-      videoPath: 'assets/videos/cardio/cardio_burpee.mp4',
-      description:
-          'The ultimate full-body cardio exercise. Combines squat, plank, push-up, and jump into one explosive movement. Burns maximum calories in minimum time.',
-      target: 'Full Body, Cardiovascular',
-      equipment: 'None',
-      difficulty: 'Advanced',
-      setsReps: '3-5 sets × 8-15 reps',
-      instructions: [
-        'Start in a standing position with feet shoulder-width apart',
-        'Squat down and place your hands on the floor',
-        'Jump your feet back into a plank position',
-        'Perform a push-up (optional for beginners)',
-        'Jump your feet back to squat position',
-        'Explode up with arms overhead, landing softly',
-        'Repeat immediately for continuous movement',
-      ],
-    ),
-    CardioExercise(
-      name: 'Flexian Leg Sit Up',
-      videoPath: 'assets/videos/cardio/cardio_flexian_leg_sit_up.mp4',
-      description:
-          'Dynamic core exercise that combines sit-ups with leg movements. Targets your abs while providing cardiovascular benefits and improving coordination.',
-      target: 'Abs, Core, Hip Flexors',
-      equipment: 'Mat (Optional)',
-      difficulty: 'Intermediate',
-      setsReps: '3 sets × 12-20 reps',
-      instructions: [
-        'Lie on your back with legs extended and arms behind your head',
-        'Simultaneously lift your torso and bring knees toward chest',
-        'Touch your elbows to your knees at the top',
-        'Lower back down with control, extending legs',
-        'Keep your core engaged throughout',
-        'Maintain a steady rhythm',
-      ],
-    ),
-    CardioExercise(
-      name: 'Jumping Jack',
-      videoPath: 'assets/videos/cardio/cardio_jumping_jack.mp4',
-      description:
-          'Classic cardio exercise that gets your heart rate up quickly. Simple yet effective for warming up or as part of a HIIT workout. Great for all fitness levels.',
-      target: 'Full Body, Cardiovascular',
-      equipment: 'None',
-      difficulty: 'Beginner',
-      setsReps: '3-5 sets × 20-50 reps',
-      instructions: [
-        'Stand with feet together and arms at your sides',
-        'Jump up, spreading your legs shoulder-width apart',
-        'Simultaneously raise your arms overhead',
-        'Jump back to starting position',
-        'Land softly on the balls of your feet',
-        'Maintain a steady, rhythmic pace',
-      ],
-    ),
-    CardioExercise(
-      name: 'Jumping Rope',
-      videoPath: 'assets/videos/cardio/cardio_jumping_rope.mp4',
-      description:
-          'One of the most efficient cardio exercises. Burns calories fast, improves coordination, and builds endurance. Portable and requires minimal space.',
-      target: 'Calves, Shoulders, Cardiovascular',
-      equipment: 'Jump Rope',
-      difficulty: 'Beginner',
-      setsReps: '3-5 sets × 30-120 seconds',
-      instructions: [
-        'Hold the rope handles at hip level with elbows close to body',
-        'Jump lightly on the balls of your feet',
-        'Turn the rope with your wrists, not your arms',
-        'Land softly and maintain a steady rhythm',
-        'Keep your core engaged and back straight',
-        'Start with shorter intervals and build up',
-      ],
-    ),
-    CardioExercise(
-      name: 'Plyo Slide Lunge Stretch',
-      videoPath: 'assets/videos/cardio/cardio_plyo_slide_lunge_stretch.mp4',
-      description:
-          'Dynamic lunge variation that combines strength, power, and flexibility. The sliding motion adds a unique challenge while improving hip mobility.',
-      target: 'Legs, Glutes, Hip Flexors',
-      equipment: 'Slide Board or Towel',
-      difficulty: 'Intermediate',
-      setsReps: '3 sets × 10-12 reps per leg',
-      instructions: [
-        'Start in a lunge position with one foot on the slide',
-        'Slide the back foot backward while maintaining lunge position',
-        'Push through the front heel to return to starting position',
-        'Alternate legs or complete all reps on one side',
-        'Keep your front knee aligned over your ankle',
-        'Maintain an upright torso throughout',
-      ],
-    ),
-    CardioExercise(
-      name: 'Stationary Bike',
-      videoPath: 'assets/videos/cardio/cardio_stationary_bike.mp4',
-      description:
-          'Low-impact cardio exercise perfect for all fitness levels. Great for building endurance, burning calories, and improving cardiovascular health without stressing joints.',
-      target: 'Legs, Cardiovascular',
-      equipment: 'Stationary Bike',
-      difficulty: 'Beginner',
-      setsReps: '20-60 minutes continuous',
-      instructions: [
-        'Adjust the seat height so your leg is almost fully extended at bottom',
-        'Start pedaling at a comfortable pace',
-        'Maintain proper posture with core engaged',
-        'Adjust resistance to match your fitness level',
-        'Keep a steady rhythm and breathe consistently',
-        'Gradually increase intensity or duration over time',
-      ],
-    ),
-    CardioExercise(
-      name: 'Treadmill Running',
-      videoPath: 'assets/videos/cardio/cardio_treadmill_running.mp4',
-      description:
-          'Classic cardio exercise that builds endurance and burns calories. The controlled environment allows you to track speed, distance, and incline precisely.',
-      target: 'Legs, Cardiovascular',
-      equipment: 'Treadmill',
-      difficulty: 'Beginner',
-      setsReps: '20-60 minutes continuous',
-      instructions: [
-        'Start with a warm-up walk for 2-3 minutes',
-        'Gradually increase speed to your running pace',
-        'Maintain good posture with slight forward lean',
-        'Land on midfoot, not heel, for better efficiency',
-        'Swing arms naturally and keep core engaged',
-        'Cool down with a walk before stopping',
-      ],
-    ),
-    CardioExercise(
-      name: 'Walk Wave Machine',
-      videoPath: 'assets/videos/cardio/cardio_walk_wave_machine.mp4',
-      description:
-          'Low-impact cardio machine that simulates walking motion. Perfect for beginners, rehabilitation, or active recovery days. Provides smooth, natural movement.',
-      target: 'Legs, Cardiovascular',
-      equipment: 'Wave Machine',
-      difficulty: 'Beginner',
-      setsReps: '20-45 minutes continuous',
-      instructions: [
-        'Step onto the machine and hold the handrails for balance',
-        'Start with a slow, comfortable pace',
-        'Maintain natural walking motion',
-        'Keep your core engaged and posture upright',
-        'Gradually increase speed or resistance',
-        'Cool down gradually before stopping',
-      ],
-    ),
-  ];
+  // Centralized cardio exercise catalog
+  final List<CardioExercise> cardioExercises = ExerciseData.cardio;
 
   @override
   Widget build(BuildContext context) {
@@ -226,7 +24,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
         slivers: [
           // Beautiful App Bar with gradient
           SliverAppBar(
-            expandedHeight: 200.0,
+            expandedHeight: 120.0,
             floating: false,
             pinned: true,
             backgroundColor: ColorManager.background,
@@ -267,7 +65,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
           // Header Section
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.all(20.0),
+              padding: EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -279,7 +77,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 6),
                   Text(
                     'Premium video workouts',
                     style: TextStyle(
@@ -287,37 +85,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                       fontSize: 16,
                     ),
                   ),
-                  SizedBox(height: 20),
-                  Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: ColorManager.surface,
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                        color: ColorManager.limerGreen2.withOpacity(0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          color: ColorManager.limerGreen2,
-                          size: 24,
-                        ),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'All exercises include detailed video demonstrations and step-by-step instructions.',
-                            style: TextStyle(
-                              color: ColorManager.textPrimary,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
@@ -339,7 +107,9 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
   }
 
   Widget _buildExerciseCard(CardioExercise exercise, int index) {
+    final hasEquipment = exercise.equipment.trim().isNotEmpty;
     return Container(
+      key: ValueKey('exercise_card_${exercise.name}'),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: ColorManager.surface,
@@ -367,58 +137,92 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                   borderRadius: BorderRadius.circular(12),
                   child: SizedBox(
                     width: 110,
-                    height: 85,
+                    height: 92,
                     child: ExerciseVideoPlayer(
                       videoPath: exercise.videoPath,
-                      height: 85,
+                      height: 92,
                       width: 110,
+                      showThumbnailOnly: true,
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 14),
                 // Exercise details
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         exercise.name,
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: ColorManager.textPrimary,
-                          fontSize: 16,
+                          fontSize: 15.5,
                           fontWeight: FontWeight.bold,
+                          height: 1.25,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         exercise.setsReps,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: ColorManager.limerGreen2,
-                          fontSize: 13,
+                          fontSize: 12.5,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
+                      if (hasEquipment) ...[
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.fitness_center_rounded,
+                              size: 13,
+                              color: ColorManager.textSecondary,
+                            ),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Text(
+                                exercise.equipment,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: ColorManager.textPrimary.withOpacity(0.85),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: ColorManager.limerGreen2.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              exercise.difficulty,
-                              style: TextStyle(
-                                color: ColorManager.limerGreen2,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: ColorManager.limerGreen2.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                exercise.difficulty,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: ColorManager.limerGreen2,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
                           Expanded(
                             child: Text(
                               exercise.target,
@@ -439,37 +243,6 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildInfoChip(IconData icon, String text) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: ColorManager.surfaceDark,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: ColorManager.limerGreen2.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: ColorManager.limerGreen2, size: 16),
-          SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              text,
-              style: TextStyle(
-                color: ColorManager.textSecondary,
-                fontSize: 12,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -522,6 +295,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                         child: ExerciseVideoPlayer(
                           videoPath: exercise.videoPath,
                           height: 300,
+                          fit: BoxFit.contain,
                           autoPlay: true, // Auto-play in detail view
                         ),
                       ),

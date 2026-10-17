@@ -136,37 +136,10 @@ class _WorkoutPageState extends State<WorkoutPage> {
   // ===================== EXERCISE VIDEO HANDLING =====================
 
   void _handleExerciseTap(String savedName) {
-    String cleanName = savedName;
-    
-    // Try to remove bracketed info from start or end
-    if (savedName.contains(']')) {
-      final parts = savedName.split(']');
-      // Case: [Day 1] Push Up
-      if (savedName.trim().startsWith('[')) {
-         if (parts.length > 1) {
-           cleanName = parts[1].trim();
-         }
-      } 
-      // Case: Push Up [Day 1]
-      else {
-         cleanName = parts.first.trim();
-      }
-    }
-
-    final allExercises = [
-      ...ExerciseData.chest,
-      ...ExerciseData.back,
-      ...ExerciseData.legs,
-      ...ExerciseData.shoulders,
-      ...ExerciseData.arms,
-    ];
-
-    try {
-      final exercise = allExercises.firstWhere(
-        (e) => e.name.toLowerCase() == cleanName.toLowerCase(),
-      );
+    final exercise = ExerciseData.findByName(savedName);
+    if (exercise != null) {
       _showExerciseDetails(context, exercise);
-    } catch (_) {
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Video detail not available for this exercise'),
@@ -243,6 +216,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
         child: ExerciseVideoPlayer(
           videoPath: exercise.videoPath,
           height: 300,
+          fit: BoxFit.contain,
           autoPlay: true,
         ),
       ),

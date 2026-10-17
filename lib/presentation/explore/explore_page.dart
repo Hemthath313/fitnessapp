@@ -17,7 +17,10 @@ class ExploreWidget extends StatefulWidget {
 }
 
 class _ExploreWidgetState extends State<ExploreWidget>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   late AnimationController _controller;
   late final List<Map<String, dynamic>> cards;
   late final List<Animation<Offset>> animations;
@@ -37,7 +40,9 @@ class _ExploreWidgetState extends State<ExploreWidget>
           if (!sub.isPremium) {
             await InterstitialAdService.showStrengthWorkoutAd();
           }
-          context.push(Routes.bodypartsPage);
+          if (mounted) {
+            context.push(Routes.bodypartsPage);
+          }
         },
       },
       {
@@ -109,6 +114,7 @@ class _ExploreWidgetState extends State<ExploreWidget>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return SafeArea(
       bottom: false,
       child: Column(

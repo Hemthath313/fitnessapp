@@ -68,51 +68,74 @@ class StreakCalendarWidget extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(6.w),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.local_fire_department_rounded,
-                          color: Colors.orange,
-                          size: 24.sp,
-                        ),
-                      ),
-                      SizedBox(width: 10.w),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            currentStreak > 0
-                                ? '$currentStreak Day Streak!'
-                                : 'No Active Streak',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(6.w),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withOpacity(0.15),
+                            shape: BoxShape.circle,
                           ),
-                          SizedBox(height: 2.h),
-                          Text(
-                            completedToday
-                                ? 'Streak active for today!'
-                                : 'Log a workout to start a streak',
-                            style: TextStyle(
-                              color: completedToday
-                                  ? ColorManager.limerGreen2
-                                  : ColorManager.textSecondary,
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
+                          child: Icon(
+                            Icons.local_fire_department_rounded,
+                            color: Colors.orange,
+                            size: 24.sp,
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                        SizedBox(width: 10.w),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                currentStreak > 0
+                                    ? '$currentStreak Day Streak!'
+                                    : (!statsProvider.hasActiveSchedule &&
+                                            !statsProvider.hasWorkoutHistory
+                                        ? 'Start Your First Workout'
+                                        : 'No Active Streak'),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              SizedBox(height: 2.h),
+                              Text(
+                                completedToday
+                                    ? 'Streak active for today!'
+                                    : (currentStreak > 0 &&
+                                            statsProvider.isRestDay(today)
+                                        ? 'Planned rest day — streak preserved!'
+                                        : (currentStreak > 0 &&
+                                                statsProvider
+                                                    .isPendingScheduledDay(today)
+                                            ? 'Workout scheduled today — streak pending'
+                                            : (!statsProvider.hasActiveSchedule &&
+                                                    !statsProvider
+                                                        .hasWorkoutHistory
+                                                ? 'Complete your first workout to start a streak'
+                                                : 'Log a workout to start a streak'))),
+                                style: TextStyle(
+                                  color: completedToday ||
+                                          (currentStreak > 0 &&
+                                              statsProvider.isRestDay(today))
+                                      ? ColorManager.limerGreen2
+                                      : ColorManager.textSecondary,
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  SizedBox(width: 8.w),
                   Text(
                     'This Week',
                     style: TextStyle(
@@ -216,14 +239,18 @@ class StreakCalendarWidget extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Next Milestone: $nextMilestoneName',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Text(
+                      'Next Milestone: $nextMilestoneName',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  SizedBox(width: 8.w),
                   Text(
                     '$currentStreak/$targetDays Days',
                     style: TextStyle(

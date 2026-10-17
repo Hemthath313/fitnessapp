@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'dart:async';
 import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
@@ -8,6 +9,26 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  /// Pure routing resolver based on authenticated user, onboarding status, and email verification.
+  /// Guarantees that unauthenticated, unverified, or unknown-onboarding users are safely routed.
+  static String determineInitialRoute({
+    required User? user,
+    required bool? hasAgeParameter,
+  }) {
+    final emailIsVerified = user?.emailVerified ?? false;
+    if (user != null && hasAgeParameter == true && emailIsVerified) {
+      return Routes.mainRoute;
+    } else if (user != null &&
+        hasAgeParameter == false &&
+        emailIsVerified == true) {
+      return Routes.addDataRoute;
+    } else {
+      return Routes.boardingRoute;
+    }
+  }
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
@@ -96,15 +117,11 @@ class _SplashScreenState extends State<SplashScreen>
     
     print('SplashScreen: Final state - user: ${user?.uid}, hasAge: $hasAgeParameter, verified: $emailIsVerified');
 
-    if (user != null && hasAgeParameter == true && emailIsVerified) {
-      context.go(Routes.mainRoute);
-    } else if (user != null &&
-        hasAgeParameter == false &&
-        emailIsVerified == true) {
-      context.go(Routes.addDataRoute);
-    } else {
-      context.go(Routes.boardingRoute);
-    }
+    final destination = SplashScreen.determineInitialRoute(
+      user: user,
+      hasAgeParameter: hasAgeParameter,
+    );
+    context.go(destination);
   }
 
   @override

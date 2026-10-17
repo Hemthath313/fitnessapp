@@ -95,6 +95,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
               child: ExerciseVideoPlayer(
                 videoPath: exercise.videoPath,
                 height: 250,
+                fit: BoxFit.contain,
                 autoPlay: true,
               ),
             ),
@@ -196,6 +197,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
                         videoPath: exercise.videoPath,
                         width: 70.w,
                         height: 70.w,
+                        showThumbnailOnly: true,
                       ),
                     ),
                     title: Text(

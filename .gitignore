@@ -45,3 +45,10 @@ app.*.map.json
 /android/app/release
 android/app/.cxx/
 
+# Keystore & Signing Secrets
+key.properties
+**/key.properties
+*.jks
+*.keystore
+*.p12
+

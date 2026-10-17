@@ -1,4 +1,5 @@
 import 'package:fitness_app/model/workout_log.dart';
+import 'package:fitness_app/services/strength_service.dart';
 import 'package:fitness_app/services/workout_log_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -17,15 +18,18 @@ class ExerciseTrackerPage extends StatefulWidget {
 }
 
 class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
-  int _activeTab = 0; // 0: Weights, 1: Repetitions, 2: Performance
+  int _activeTab = 0; // 0: Top Weight, 1: Estimated 1RM, 2: Volume, 3: Reps
   final _logService = WorkoutLogService();
 
   @override
   Widget build(BuildContext context) {
+    final cleanTitle = ExerciseIdentity.cleanDisplayName(widget.exerciseName);
+    final targetKey = ExerciseIdentity.canonicalKey(widget.exerciseName);
+
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: AppBar(
-        title: Text(widget.exerciseName, style: TextStyle(color: ColorManager.textPrimary)),
+        title: Text(cleanTitle, style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold)),
         backgroundColor: ColorManager.background,
         iconTheme: IconThemeData(color: ColorManager.textPrimary),
         elevation: 0,
@@ -39,7 +43,7 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
 
           final logs = snapshot.data ?? [];
           final filteredLogs = logs
-              .where((l) => l.exerciseName.toLowerCase() == widget.exerciseName.toLowerCase())
+              .where((l) => ExerciseIdentity.canonicalKey(l.exerciseName) == targetKey)
               .toList();
 
           if (filteredLogs.isEmpty) {
@@ -50,7 +54,7 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
                   Icon(Icons.analytics_outlined, size: 64.sp, color: ColorManager.textTertiary),
                   SizedBox(height: 16.h),
                   Text(
-                    'No tracking logs found for this exercise',
+                    'No tracking logs found for $cleanTitle',
                     style: TextStyle(color: ColorManager.textTertiary, fontSize: 16.sp),
                   ),
                 ],
@@ -72,18 +76,21 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildTabButton(0, 'Weights'),
-                    _buildTabButton(1, 'Repetitions'),
-                    _buildTabButton(2, 'Performance'),
+                    _buildTabButton(0, 'Weight'),
+                    SizedBox(width: 6.w),
+                    _buildTabButton(1, 'Est. 1RM'),
+                    SizedBox(width: 6.w),
+                    _buildTabButton(2, 'Volume'),
+                    SizedBox(width: 6.w),
+                    _buildTabButton(3, 'Reps'),
                   ],
                 ),
               ),
 
               // 2. Chart Section
               Container(
-                margin: EdgeInsets.all(16.w),
+                margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                 padding: EdgeInsets.all(16.w),
                 height: 220.h,
                 decoration: BoxDecoration(
@@ -96,17 +103,23 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
 
               // 3. Header title for history
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'History Logs',
-                    style: TextStyle(
-                      color: ColorManager.textPrimary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16.sp,
+                padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 4.h),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Session History (${historyLogs.length})',
+                      style: TextStyle(
+                        color: ColorManager.textPrimary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16.sp,
+                      ),
                     ),
-                  ),
+                    Text(
+                      _activeTab == 1 ? 'Epley 1RM Guardrails Active' : '',
+                      style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp),
+                    ),
+                  ],
                 ),
               ),
 
@@ -118,16 +131,16 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
                   itemBuilder: (context, index) {
                     final log = historyLogs[index];
                     return Container(
-                      margin: EdgeInsets.only(bottom: 16.h),
+                      margin: EdgeInsets.only(bottom: 12.h),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Left Date Badge
                           Container(
-                            width: 85.w,
-                            padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
+                            width: 80.w,
+                            padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 6.w),
                             decoration: BoxDecoration(
-                              color: ColorManager.accent.withOpacity(0.15),
+                              color: ColorManager.accent.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(12.r),
                               border: Border.all(color: ColorManager.accent.withOpacity(0.3)),
                             ),
@@ -135,7 +148,7 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  DateFormat('M/d/yy').format(log.date),
+                                  DateFormat('MMM d').format(log.date),
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     color: ColorManager.accent,
@@ -143,10 +156,16 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
                                     fontSize: 12.sp,
                                   ),
                                 ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  DateFormat('yyyy').format(log.date),
+                                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp),
+                                ),
                               ],
                             ),
                           ),
-                          SizedBox(width: 12.w),
+                          SizedBox(width: 10.w),
+
                           // Right sets log block
                           Expanded(
                             child: Container(
@@ -163,22 +182,29 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
                                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                                     children: [
                                       _buildLogHeaderCell('Set'),
-                                      _buildLogHeaderCell('Weight (kg)'),
+                                      _buildLogHeaderCell('Weight'),
                                       _buildLogHeaderCell('Reps'),
+                                      _buildLogHeaderCell('Est. 1RM'),
                                     ],
                                   ),
-                                  const Divider(),
+                                  const Divider(height: 12),
                                   ...log.sets.asMap().entries.map((entry) {
                                     final setIdx = entry.key + 1;
                                     final setVal = entry.value;
+                                    final est1RM = StrengthService.calculateEstimated1RM(setVal);
+
                                     return Padding(
                                       padding: EdgeInsets.symmetric(vertical: 4.h),
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                                         children: [
                                           _buildLogDataCell('$setIdx'),
-                                          _buildLogDataCell('${setVal.weight}'),
+                                          _buildLogDataCell('${setVal.weight.toStringAsFixed(setVal.weight % 1 == 0 ? 0 : 1)} kg'),
                                           _buildLogDataCell('${setVal.reps}'),
+                                          _buildLogDataCell(
+                                            est1RM > 0 ? '${est1RM.toStringAsFixed(1)} kg' : '—',
+                                            color: est1RM > 0 ? ColorManager.primary : ColorManager.textTertiary,
+                                          ),
                                         ],
                                       ),
                                     );
@@ -202,33 +228,28 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
 
   Widget _buildTabButton(int index, String title) {
     final isSelected = _activeTab == index;
-    return GestureDetector(
-      onTap: () => setState(() => _activeTab = index),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-        decoration: BoxDecoration(
-          color: isSelected ? ColorManager.accent : ColorManager.surface,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(
-            color: isSelected ? ColorManager.accent : ColorManager.divider,
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _activeTab = index),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: EdgeInsets.symmetric(vertical: 8.h),
+          decoration: BoxDecoration(
+            color: isSelected ? ColorManager.accent : ColorManager.surface,
+            borderRadius: BorderRadius.circular(16.r),
+            border: Border.all(
+              color: isSelected ? ColorManager.accent : ColorManager.divider,
+            ),
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: ColorManager.accent.withOpacity(0.2),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  )
-                ]
-              : null,
-        ),
-        child: Text(
-          title,
-          style: TextStyle(
-            color: isSelected ? Colors.white : ColorManager.textSecondary,
-            fontWeight: FontWeight.bold,
-            fontSize: 12.sp,
+          child: Center(
+            child: Text(
+              title,
+              style: TextStyle(
+                color: isSelected ? Colors.white : ColorManager.textSecondary,
+                fontWeight: FontWeight.bold,
+                fontSize: 11.sp,
+              ),
+            ),
           ),
         ),
       ),
@@ -243,21 +264,21 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
         style: TextStyle(
           color: ColorManager.textTertiary,
           fontWeight: FontWeight.bold,
-          fontSize: 11.sp,
+          fontSize: 10.sp,
         ),
       ),
     );
   }
 
-  Widget _buildLogDataCell(String value) {
+  Widget _buildLogDataCell(String value, {Color? color}) {
     return Expanded(
       child: Text(
         value,
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: ColorManager.textPrimary,
+          color: color ?? ColorManager.textPrimary,
           fontWeight: FontWeight.bold,
-          fontSize: 13.sp,
+          fontSize: 12.sp,
         ),
       ),
     );
@@ -269,27 +290,35 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
 
     for (int i = 0; i < graphLogs.length; i++) {
       final log = graphLogs[i];
+      final workingSets = log.sets.where((s) => s.isCompleted && s.type != SetType.warmup && s.weight > 0).toList();
       double val = 0.0;
 
       if (_activeTab == 0) {
-        // Max weight in sets
-        val = log.sets.map((s) => s.weight).fold(0.0, math.max);
+        // Max weight in working sets
+        val = workingSets.isEmpty ? 0.0 : workingSets.map((s) => s.weight).fold(0.0, math.max);
       } else if (_activeTab == 1) {
-        // Max reps in sets
-        val = log.sets.map((s) => s.reps).fold(0, math.max).toDouble();
+        // Estimated 1RM
+        val = workingSets.isEmpty
+            ? 0.0
+            : workingSets.map((s) => StrengthService.calculateEstimated1RM(s)).fold(0.0, math.max);
+      } else if (_activeTab == 2) {
+        // Total Volume
+        val = workingSets.isEmpty
+            ? 0.0
+            : workingSets.map((s) => s.weight * s.reps).fold(0.0, (sum, item) => sum + item);
       } else {
-        // Total Volume (Performance)
-        val = log.sets.map((s) => s.weight * s.reps).fold(0.0, (sum, item) => sum + item);
+        // Max reps
+        val = workingSets.isEmpty ? 0.0 : workingSets.map((s) => s.reps).fold(0, math.max).toDouble();
       }
 
       spots.add(FlSpot(i.toDouble(), val));
       dateLabels[i] = DateFormat('M/d').format(log.date);
     }
 
-    if (spots.isEmpty) {
+    if (spots.isEmpty || spots.every((s) => s.y == 0)) {
       return Center(
         child: Text(
-          'No chart data available',
+          'No working sets data available yet',
           style: TextStyle(color: ColorManager.textTertiary, fontSize: 13.sp),
         ),
       );
