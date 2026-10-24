@@ -9,6 +9,7 @@ import 'package:fitness_app/presentation/consumption/providers/consumption_provi
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/presentation/custom_workouts/day_workout_session_page.dart';
+import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:intl/intl.dart';
 
 class QuickActionsWidget extends StatelessWidget {
@@ -274,7 +275,9 @@ class QuickActionsWidget extends StatelessWidget {
         'label': 'AI Routine',
         'color': Colors.purpleAccent,
         'isCompleted': false,
-        'onTap': () => context.push(Routes.workoutGeneratorRoute),
+        'onTap': () {
+          context.push(Routes.workoutGeneratorRoute);
+        },
       },
     ];
 
@@ -306,10 +309,11 @@ class QuickActionsWidget extends StatelessWidget {
               children: actions.map((act) {
                 final Color baseColor = act['color'] as Color;
                 final bool isCompleted = act['isCompleted'] as bool? ?? false;
-                return GestureDetector(
-                  onTap: act['onTap'] as VoidCallback,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: act['onTap'] as VoidCallback,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                     children: [
                       // Circular Icon wrapper with optional completion badge
                       Stack(
@@ -358,6 +362,9 @@ class QuickActionsWidget extends StatelessWidget {
                       SizedBox(height: 8.h),
                       Text(
                         act['label'] as String,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: ColorManager.textSecondary,
                           fontSize: 12.sp,
@@ -366,8 +373,9 @@ class QuickActionsWidget extends StatelessWidget {
                       ),
                     ],
                   ),
-                );
-              }).toList(),
+                ),
+              );
+            }).toList(),
             ),
           ),
         ],

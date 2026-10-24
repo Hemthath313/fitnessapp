@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
+import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/services/notification_service.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -250,6 +251,13 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final isPremium =
+        Provider.of<SubscriptionProvider?>(context)?.isPremium ?? false;
+    final workoutProvider =
+        Provider.of<WorkoutProvider>(context, listen: false);
+    final statsProvider =
+        Provider.of<StatisticsProvider>(context, listen: false);
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(24.w),
@@ -261,25 +269,67 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.calendar_month_rounded, size: 64.sp, color: ColorManager.primary.withOpacity(0.2)),
+          Icon(Icons.calendar_month_rounded, size: 64.sp, color: ColorManager.primary.withValues(alpha: 0.2)),
           SizedBox(height: 16.h),
           Text('No Plan Active', style: TextStyle(color: ColorManager.textPrimary, fontSize: 18.sp, fontWeight: FontWeight.bold)),
           SizedBox(height: 8.h),
           Text(
-            'Use AI to generate a full weekly schedule instantly.',
+            isPremium
+                ? 'Use AI to generate a full weekly schedule instantly.'
+                : 'Activate your free 3-day starter routine (Mon, Wed, Fri) or upgrade to Pro for custom AI splits.',
             textAlign: TextAlign.center,
             style: TextStyle(color: ColorManager.textSecondary, fontSize: 14.sp),
           ),
           SizedBox(height: 20.h),
           ElevatedButton.icon(
             onPressed: () => context.push(Routes.workoutGeneratorRoute),
-            icon: Icon(Icons.auto_awesome, color: Colors.white),
-            label: Text('Generate Plan', style: TextStyle(color: Colors.white)),
+            icon: const Icon(Icons.auto_awesome, color: Colors.white),
+            label: const Text('Generate Plan with AI', style: TextStyle(color: Colors.white)),
             style: ElevatedButton.styleFrom(
               backgroundColor: ColorManager.primary,
-              padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
+              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
             ),
           ),
+          if (!isPremium) ...[
+            SizedBox(height: 10.h),
+            TextButton.icon(
+              onPressed: () async {
+                try {
+                  await workoutProvider.restoreDefaultThreeDaySplit();
+                  await statsProvider.updateScheduledDays(
+                    const ['Monday', 'Wednesday', 'Friday'],
+                    effectiveDate: DateTime.now(),
+                  );
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text(
+                          '3-Day Starter Routine activated! Ready for your workout.',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        backgroundColor: ColorManager.success,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Failed to activate starter plan: $e'),
+                        backgroundColor: ColorManager.error,
+                      ),
+                    );
+                  }
+                }
+              },
+              icon: const Icon(Icons.fitness_center_rounded, color: Colors.white70, size: 16),
+              label: const Text(
+                'Or Activate Free 3-Day Starter Routine',
+                style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
         ],
       ),
     );

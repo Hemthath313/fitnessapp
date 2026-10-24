@@ -51,9 +51,8 @@ class HomeProvider with ChangeNotifier {
         _userData.clear();
       }
     } catch (e) {
-      // Log error and return empty data instead of rethrowing
-      print('Error fetching user data: $e');
-      _userData.clear();
+      // Log error and preserve existing in-memory cached data instead of wiping it
+      debugPrint('HomeProvider: Error fetching user data (offline): $e');
     }
     return _userData;
   }

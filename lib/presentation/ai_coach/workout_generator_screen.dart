@@ -158,6 +158,14 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
   }
 
   Future<void> _generateWorkout() async {
+    final subscriptionProvider =
+        Provider.of<SubscriptionProvider?>(context, listen: false);
+    final isPremium = subscriptionProvider?.isPremium ?? false;
+    if (!isPremium) {
+      context.push(Routes.premiumScreen);
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _generatedWeek = [];
@@ -450,32 +458,53 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: ColorManager.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
         title: Row(
           children: [
-            Icon(Icons.star_rounded, color: Colors.amber, size: 24.sp),
+            Icon(Icons.star_rounded, color: Colors.amber, size: 26.sp),
             SizedBox(width: 8.w),
             Flexible(
               child: Text(
-                'Unlock Weekly Routine',
+                'Unlock AI Workouts',
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: ColorManager.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 16.sp,
+                  fontSize: 17.sp,
                 ),
               ),
             ),
           ],
         ),
-        content: Text(
-          'Saving and activating your custom AI Workout Plan is a Premium feature. Upgrade to Pro to track your schedule with built-in rest timers and animated video guides!',
-          style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Your custom ${_selectedDays.length}-day split has been generated! Upgrade to Pro to save this split to your schedule, track rest timers, and access video exercise guides.',
+              style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp, height: 1.4),
+            ),
+            SizedBox(height: 12.h),
+            _buildProPerkRow(Icons.calendar_today_rounded, 'Sync custom split to schedule'),
+            SizedBox(height: 6.h),
+            _buildProPerkRow(Icons.timer_outlined, 'Built-in rest timers & sound alerts'),
+            SizedBox(height: 6.h),
+            _buildProPerkRow(Icons.play_circle_outline_rounded, 'HD exercise video techniques'),
+            SizedBox(height: 14.h),
+            Text(
+              'Or you can continue with our free 3-day starter split (Mon/Wed/Fri).',
+              style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
+            ),
+          ],
         ),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text('Maybe Later', style: TextStyle(color: ColorManager.textTertiary)),
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              await _activateFreeStarterPlan(context);
+            },
+            child: Text('Use 3-Day Free Plan', style: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.w600, fontSize: 12.sp)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -490,21 +519,72 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
     );
   }
 
+  Future<void> _activateFreeStarterPlan(BuildContext context) async {
+    try {
+      final workoutProvider = Provider.of<WorkoutProvider>(context, listen: false);
+      final statsProvider = Provider.of<StatisticsProvider>(context, listen: false);
+      await workoutProvider.restoreDefaultThreeDaySplit();
+      final now = workoutProvider.currentNow;
+      await statsProvider.updateScheduledDays(
+        const ['Monday', 'Wednesday', 'Friday'],
+        effectiveDate: now,
+      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              '3-Day Starter Routine activated! Ready for your workout.',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            backgroundColor: ColorManager.success,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to activate starter plan: $e'),
+            backgroundColor: ColorManager.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildProPerkRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 15.sp, color: ColorManager.primary),
+        SizedBox(width: 8.w),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              color: ColorManager.textSecondary,
+              fontSize: 12.sp,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Future<void> _saveAllWorkouts() async {
     if (_isSaving) return;
 
     final subscriptionProvider =
-        Provider.of<SubscriptionProvider>(context, listen: false);
-    final provider = Provider.of<WorkoutProvider>(context, listen: false);
-    final bool isFirstTimeStarterActivation =
-        provider.groupedSplitWorkouts.isEmpty;
-    final bool canSave =
-        subscriptionProvider.isPremium || isFirstTimeStarterActivation;
+        Provider.of<SubscriptionProvider?>(context, listen: false);
+    final isPremium = subscriptionProvider?.isPremium ?? false;
 
-    if (!canSave) {
+    if (!isPremium) {
       _showUpgradeToSaveDialog(context);
       return;
     }
+
+    final provider = Provider.of<WorkoutProvider>(context, listen: false);
 
     setState(() {
       _isSaving = true;
@@ -652,10 +732,9 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
   }
 
   Widget _buildResultsSection() {
-    final isPremium = Provider.of<SubscriptionProvider>(context).isPremium;
-    final workoutProvider = Provider.of<WorkoutProvider>(context);
-    final bool canSave =
-        isPremium || workoutProvider.groupedSplitWorkouts.isEmpty;
+    final isPremium =
+        Provider.of<SubscriptionProvider?>(context)?.isPremium ?? false;
+    final bool canSave = isPremium;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -698,6 +777,9 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isPremium =
+        Provider.of<SubscriptionProvider?>(context)?.isPremium ?? false;
+
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: AppBar(
@@ -726,15 +808,24 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                          color: Colors.white, strokeWidth: 2),
                     )
-                  : Text(
-                      'GENERATE WEEKLY PLAN',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.auto_awesome,
+                            size: 18.sp, color: Colors.black),
+                        SizedBox(width: 8.w),
+                        Text(
+                          'GENERATE WEEKLY PLAN',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
                     ),
             ),
             SizedBox(height: 24.h),
@@ -752,7 +843,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
       decoration: BoxDecoration(
         color: ColorManager.surface,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: ColorManager.primary.withOpacity(0.3)),
+        border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -951,7 +1042,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: ColorManager.primary.withOpacity(0.3),
+                            color: ColorManager.primary.withValues(alpha: 0.3),
                             blurRadius: 20,
                             spreadRadius: 5,
                           ),
@@ -1058,7 +1149,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                           color: ColorManager.surface,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: ColorManager.primary.withOpacity(0.2),
+                            color: ColorManager.primary.withValues(alpha: 0.2),
                             width: 1,
                           ),
                         ),
@@ -1144,7 +1235,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
         color: ColorManager.surface,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(
-          color: ColorManager.primary.withOpacity(0.3),
+          color: ColorManager.primary.withValues(alpha: 0.3),
           width: 1,
         ),
       ),

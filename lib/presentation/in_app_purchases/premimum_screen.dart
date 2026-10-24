@@ -3,7 +3,6 @@ import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:provider/provider.dart';
 
 class PremiumScreen extends StatefulWidget {
@@ -198,9 +197,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
           Colors.greenAccent,
         ),
         _buildFeatureItem(
-          Icons.fitness_center_rounded, 
-          'Barbell Plate Math & Visualizer', 
-          'Instant 2D Olympic plate math per side for all barbell lifts (kg & lbs).',
+          Icons.view_carousel_rounded, 
+          'Pro Splits & Workout Challenges', 
+          'Unlock PPL, Upper/Lower, and all 30-day challenge training days.',
           Colors.amberAccent,
         ),
         _buildFeatureItem(

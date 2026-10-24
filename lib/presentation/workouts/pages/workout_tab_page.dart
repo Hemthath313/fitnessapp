@@ -1,5 +1,6 @@
 import 'package:fitness_app/presentation/explore/explore_page.dart';
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
+import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/journal/widgets/weekly_schedule_widget.dart';
 import 'package:fitness_app/utils/managers/asset_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
@@ -107,26 +108,28 @@ class _WorkoutTabPageState extends State<WorkoutTabPage>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Hello, $firstName 👋',
-                        style: TextStyle(
-                          color: ColorManager.white,
-                          fontSize: SizeManager.s24.sp,
-                          fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Hello, $firstName 👋',
+                          style: TextStyle(
+                            color: ColorManager.white,
+                            fontSize: SizeManager.s24.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        'Ready to crush your goals today?',
-                        style: TextStyle(
-                          color: ColorManager.textSecondary,
-                          fontSize: SizeManager.s14.sp,
+                        SizedBox(height: 4.h),
+                        Text(
+                          'Ready to crush your goals today?',
+                          style: TextStyle(
+                            color: ColorManager.textSecondary,
+                            fontSize: SizeManager.s14.sp,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   GestureDetector(
                     onTap: () => context.push(Routes.workoutGeneratorRoute),

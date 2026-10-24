@@ -177,7 +177,7 @@ class _JournalPageState extends State<JournalPage> {
         Container(
           width: double.infinity,
           padding: EdgeInsets.all(SizeManager.s16.w),
-          height: SizeManager.s150.h,
+          constraints: BoxConstraints(minHeight: SizeManager.s150.h),
           decoration: BoxDecoration(
             color: ColorManager.surface,
             borderRadius: BorderRadius.circular(SizeManager.s16.r),
@@ -287,15 +287,16 @@ class _JournalPageState extends State<JournalPage> {
               Icon(Icons.auto_awesome,
                   color: ColorManager.primary),
               SizedBox(width: SizeManager.s8.w),
-              Text(
-                'AI Workout Generator',
-                style: TextStyle(
-                  color: ColorManager.textPrimary,
-                  fontSize: SizeManager.s18.sp,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  'AI Workout Generator',
+                  style: TextStyle(
+                    color: ColorManager.textPrimary,
+                    fontSize: SizeManager.s18.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-              const Spacer(),
               if (!isPremium)
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
@@ -325,15 +326,13 @@ class _JournalPageState extends State<JournalPage> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                context.push(Routes.workoutGeneratorRoute);
-              },
+              onPressed: () => context.push(Routes.workoutGeneratorRoute),
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.primary,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(SizeManager.s12.r)),
               ),
-              child: Text(
+              child: const Text(
                 'Generate Workout',
                 style: TextStyle(
                     color: Colors.white,

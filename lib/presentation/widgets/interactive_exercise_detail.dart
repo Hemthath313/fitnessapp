@@ -6,6 +6,7 @@ import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/model/workout_log.dart';
 import 'package:fitness_app/services/progression_service.dart';
 import 'package:fitness_app/services/workout_log_service.dart';
+import 'package:fitness_app/presentation/workout_tools/plate_calculator_sheet.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -209,10 +210,17 @@ class _InteractiveExerciseDetailWidgetState
     }
   }
 
+  String get _effectiveVideoPath {
+    final rawPath = widget.videoPath.trim();
+    if (rawPath.isNotEmpty) return rawPath;
+    final catalog = ExerciseData.findByName(widget.name);
+    return catalog?.videoPath ?? '';
+  }
+
   @override
   void initState() {
     super.initState();
-    _hasVideoError = widget.videoPath.trim().isEmpty;
+    _hasVideoError = _effectiveVideoPath.isEmpty;
     _parseAndInitializeSets();
     _loadPreviousLogAndMax();
   }
@@ -220,8 +228,8 @@ class _InteractiveExerciseDetailWidgetState
   @override
   void didUpdateWidget(covariant InteractiveExerciseDetailWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.videoPath != widget.videoPath) {
-      _hasVideoError = widget.videoPath.trim().isEmpty;
+    if (oldWidget.videoPath != widget.videoPath || oldWidget.name != widget.name) {
+      _hasVideoError = _effectiveVideoPath.isEmpty;
     }
     if (oldWidget.name != widget.name) {
       for (var set in _sets) {
@@ -522,6 +530,27 @@ class _InteractiveExerciseDetailWidgetState
       removed.dispose();
     });
     _syncDrafts();
+  }
+
+  void _openPlateCalculator(int idx) {
+    final currWeight =
+        double.tryParse(_sets[idx].weightController.text) ?? 0.0;
+    final initialWeight = currWeight > 0 ? currWeight : 60.0;
+
+    PlateCalculatorSheet.show(
+      context,
+      initialWeight: initialWeight,
+      onWeightApplied: (appliedWeight) {
+        final formatted = appliedWeight % 1 == 0
+            ? appliedWeight.toInt().toString()
+            : appliedWeight.toStringAsFixed(1);
+        setState(() {
+          _sets[idx].setProgrammaticWeight(formatted);
+          _sets[idx].isWeightUserEdited = true;
+        });
+        _syncDrafts();
+      },
+    );
   }
 
   // Save live log to Firebase
@@ -1009,6 +1038,10 @@ class _InteractiveExerciseDetailWidgetState
           itemCount: _sets.length,
           itemBuilder: (context, idx) {
             final setInput = _sets[idx];
+            final isBarbell = PlateCalculatorSheet.isBarbellExercise(
+              name: widget.name,
+              equipment: widget.equipment,
+            );
             
             // Format previous values if available
             String prevDisplay = "—";
@@ -1071,6 +1104,23 @@ class _InteractiveExerciseDetailWidgetState
                             borderRadius: BorderRadius.circular(8.r),
                             borderSide: BorderSide(color: ColorManager.divider),
                           ),
+                          suffixIcon: isBarbell
+                              ? IconButton(
+                                  key: Key('detail_plate_calc_$idx'),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  icon: Icon(
+                                    Icons.calculate_outlined,
+                                    size: 16.sp,
+                                    color: setInput.isCompleted
+                                        ? Colors.white24
+                                        : ColorManager.primary,
+                                  ),
+                                  onPressed: setInput.isCompleted
+                                      ? null
+                                      : () => _openPlateCalculator(idx),
+                                )
+                              : null,
                         ),
                       ),
                     ),
@@ -1555,7 +1605,7 @@ class _InteractiveExerciseDetailWidgetState
                       child: Stack(
                         children: [
                           ExerciseVideoPlayer(
-                            videoPath: widget.videoPath,
+                            videoPath: _effectiveVideoPath,
                             height: 180.h,
                             width: double.infinity,
                             fit: BoxFit.contain,
@@ -1572,7 +1622,7 @@ class _InteractiveExerciseDetailWidgetState
                           ),
                           // Overlay instructions text indicator only when video is valid
                           if (!_hasVideoError &&
-                              widget.videoPath.trim().isNotEmpty)
+                              _effectiveVideoPath.isNotEmpty)
                             Positioned(
                               bottom: 8.h,
                               right: 8.w,

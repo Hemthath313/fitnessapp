@@ -7,6 +7,7 @@ import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
 import 'package:fitness_app/presentation/boarding/pages/boarding_page.dart';
 import 'package:fitness_app/presentation/chat_screen/chat_screen.dart';
 import 'package:fitness_app/presentation/in_app_purchases/premimum_screen.dart';
+import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_app/presentation/body_parts/pages/abs.dart';
 import 'package:fitness_app/presentation/body_parts/pages/biceps.dart';

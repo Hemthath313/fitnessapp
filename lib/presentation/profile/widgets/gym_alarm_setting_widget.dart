@@ -92,12 +92,29 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
 
     if (enabled) {
       await NotificationService().scheduleDailyGymAlarm(_alarmTime);
+      if (!mounted) return;
+      final formattedTime = _alarmTime.format(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Daily Gym Alarm set for $formattedTime'),
+          duration: const Duration(seconds: 2),
+          backgroundColor: ColorManager.surface,
+        ),
+      );
     } else {
       await NotificationService().cancelDailyGymAlarm();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Daily Gym Alarm turned off'),
+          duration: const Duration(seconds: 2),
+          backgroundColor: ColorManager.surface,
+        ),
+      );
     }
   }
 
-  Future<void> _selectAlarmTime(BuildContext context) async {
+  Future<void> _selectAlarmTime() async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: _alarmTime,
@@ -125,6 +142,15 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
       });
       if (_isAlarmEnabled) {
         await NotificationService().scheduleDailyGymAlarm(picked);
+        if (!mounted) return;
+        final formattedTime = picked.format(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Daily Gym Alarm updated to $formattedTime'),
+            duration: const Duration(seconds: 2),
+            backgroundColor: ColorManager.surface,
+          ),
+        );
       }
     }
   }
@@ -295,12 +321,14 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
               Icon(Icons.notifications_active_rounded,
                   color: ColorManager.primary, size: 20.sp),
               SizedBox(width: 8.w),
-              Text(
-                'Notification Preferences',
-                style: TextStyle(
-                  color: ColorManager.textPrimary,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  'Notification Preferences',
+                  style: TextStyle(
+                    color: ColorManager.textPrimary,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -337,7 +365,7 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
                 ? _buildTimeSelector(
                     label: 'Alarm Time',
                     time: _alarmTime,
-                    onTap: () => _selectAlarmTime(context),
+                    onTap: _selectAlarmTime,
                   )
                 : null,
           ),

@@ -5,7 +5,6 @@ import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:provider/provider.dart';
@@ -39,9 +38,24 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
               Map<String, dynamic>>(
           future: _userDataFuture,
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return SpinKitSpinningLines(color: ColorManager.limerGreen2);
-            } else if (snapshot.hasError) {
+            final homeProvider =
+                Provider.of<HomeProvider>(context, listen: false);
+            final cachedData = homeProvider.userData;
+            final effectiveData = (snapshot.hasData && snapshot.data!.isNotEmpty)
+                ? snapshot.data!
+                : (cachedData.isNotEmpty ? cachedData : null);
+
+            if (snapshot.connectionState == ConnectionState.waiting &&
+                effectiveData == null) {
+              return Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24.h),
+                  child: CircularProgressIndicator(
+                    color: ColorManager.primary,
+                  ),
+                ),
+              );
+            } else if (snapshot.hasError && effectiveData == null) {
               return Container(
                 padding: EdgeInsets.all(16),
                 child: Column(
@@ -61,13 +75,13 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                   ],
                 ),
               );
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            } else if (effectiveData == null || effectiveData.isEmpty) {
               return Container(
                 padding: EdgeInsets.all(16),
                 child: Column(
                   children: [
                     Icon(Icons.info_outline,
-                        color: ColorManager.limerGreen2, size: 48),
+                        color: ColorManager.primary, size: 48),
                     SizedBox(height: 16),
                     Text(
                       'No fitness data available',
@@ -83,7 +97,7 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
               );
             } else {
               // Safe null checks for user data
-              final userData = snapshot.data!;
+              final userData = effectiveData;
               final bmrVal = userData['bmr'] as double? ?? 0.0;
               final bmr = bmrVal == 0.0 ? 2000.0 : bmrVal;
               final bmi = userData['bmi'] as double? ?? 0.0;

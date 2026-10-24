@@ -1,4 +1,6 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
+import 'package:fitness_app/services/connectivity_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'dart:async';
 import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
@@ -30,7 +32,7 @@ class SplashScreen extends StatefulWidget {
   }
 
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen>
@@ -38,8 +40,13 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
-  late Animation<double> _gradientAnimation;
-  bool _showFinalText = false; // Show final text after gradient animation
+
+  bool _isOfflineBlocked = false;
+  bool _isRetrying = false;
+  bool _hasRetryError = false;
+  Timer? _navigationTimer;
+  Timer? _offlineRetryTimer;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
   @override
   void initState() {
@@ -49,18 +56,14 @@ class _SplashScreenState extends State<SplashScreen>
     try {
       NotificationService().initialize();
     } catch (e) {
-      print('Error initializing notifications on launch: $e');
+      debugPrint('Error initializing notifications on launch: $e');
     }
 
     // Animation controller (Runs only once)
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 2),
-    )..forward().whenComplete(() {
-        setState(() {
-          _showFinalText = true; // Show final text after animation completes
-        });
-      });
+      duration: const Duration(seconds: 2),
+    )..forward();
 
     // Bounce scale effect for logo
     _scaleAnimation = TweenSequence<double>([
@@ -78,36 +81,133 @@ class _SplashScreenState extends State<SplashScreen>
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0)
         .animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
 
-    // Gradient shift from left to right (Runs once)
-    _gradientAnimation = Tween<double>(begin: -1.0, end: 1.0)
-        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-
     // Navigate to home screen after 3 seconds
-    Future.delayed(Duration(seconds: 3), () {
-      navigate();
+    _navigationTimer = Timer(const Duration(seconds: 3), () {
+      if (mounted) {
+        navigate();
+      }
     });
   }
 
+  void _startObservingConnectivity() {
+    _connectivitySubscription?.cancel();
+    _connectivitySubscription =
+        NetworkService.onConnectivityChanged.listen((results) async {
+      final hasInterface = results.any(
+        (r) =>
+            r == ConnectivityResult.mobile ||
+            r == ConnectivityResult.wifi ||
+            r == ConnectivityResult.ethernet,
+      );
+      if (!hasInterface) return;
+
+      // Validate actual uplink before triggering retry
+      final hasInternet = await NetworkService.hasInternetAccess();
+      if (!hasInternet) return;
+
+      if (mounted && _isOfflineBlocked && !_isRetrying) {
+        await _retryVerification();
+      }
+    });
+
+    _offlineRetryTimer?.cancel();
+    _offlineRetryTimer = Timer.periodic(const Duration(seconds: 4), (_) async {
+      if (!mounted || !_isOfflineBlocked || _isRetrying) return;
+      final hasInternet = await NetworkService.hasInternetAccess();
+      if (hasInternet && mounted && _isOfflineBlocked && !_isRetrying) {
+        await _retryVerification();
+      }
+    });
+  }
+
+  Future<void> _retryVerification() async {
+    if (_isRetrying || !mounted) return;
+
+    setState(() {
+      _isRetrying = true;
+      _hasRetryError = false;
+    });
+
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final user = authProvider.user;
+
+      if (user == null || !user.emailVerified) {
+        _connectivitySubscription?.cancel();
+        _offlineRetryTimer?.cancel();
+        context.go(Routes.boardingRoute);
+        return;
+      }
+
+      final activeUid = user.uid;
+
+      // Call loadUserData to query Firestore with bounded timeout
+      await authProvider.loadUserData();
+
+      if (!mounted) return;
+
+      // Prevent stale response if user switched during async gap
+      if (authProvider.user?.uid != activeUid) {
+        return;
+      }
+
+      final resolvedHasAge = authProvider.hasAgeParameter;
+      if (resolvedHasAge != null) {
+        _connectivitySubscription?.cancel();
+        _offlineRetryTimer?.cancel();
+        final destination = SplashScreen.determineInitialRoute(
+          user: authProvider.user,
+          hasAgeParameter: resolvedHasAge,
+        );
+        context.go(destination);
+      } else {
+        setState(() {
+          _isRetrying = false;
+          _hasRetryError = true;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isRetrying = false;
+          _hasRetryError = true;
+        });
+      }
+    } finally {
+      if (mounted && _isRetrying) {
+        setState(() {
+          _isRetrying = false;
+        });
+      }
+    }
+  }
+
   Future<void> navigate() async {
-    print('SplashScreen: Starting navigation logic');
+    if (!mounted) return;
+    debugPrint('SplashScreen: Starting navigation logic');
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     // Wait for initial auth state to load (with timeout)
-    print('SplashScreen: Waiting for AuthProvider.isLoading (current: ${authProvider.isLoading})');
+    debugPrint('SplashScreen: Waiting for AuthProvider.isLoading (current: ${authProvider.isLoading})');
     int attempts = 0;
     while (authProvider.isLoading && attempts < 20) {
       await Future.delayed(const Duration(milliseconds: 100));
+      if (!mounted) return;
       attempts++;
     }
-    print('SplashScreen: Out of wait loop. Attempts: $attempts, isLoading: ${authProvider.isLoading}');
+    debugPrint('SplashScreen: Out of wait loop. Attempts: $attempts, isLoading: ${authProvider.isLoading}');
 
-    // Ensure user data is loaded before proceeding
-    print('SplashScreen: Calling authProvider.loadUserData()');
-    await authProvider.loadUserData();
-    print('SplashScreen: loadUserData() completed');
+    // Only load user data if not yet resolved (e.g. autoInitialize: false in unit test)
+    if (authProvider.user != null && authProvider.hasAgeParameter == null) {
+      debugPrint('SplashScreen: Calling authProvider.loadUserData()');
+      await authProvider.loadUserData();
+      debugPrint('SplashScreen: loadUserData() completed');
+    }
 
-    // Wait a bit more to ensure state is updated
-    await Future.delayed(const Duration(milliseconds: 100));
+    if (!mounted) return;
+
+    // Wait a brief frame to ensure state is updated
+    await Future.delayed(const Duration(milliseconds: 50));
 
     if (!mounted) return;
 
@@ -115,17 +215,53 @@ class _SplashScreenState extends State<SplashScreen>
     final hasAgeParameter = authProvider.hasAgeParameter;
     final emailIsVerified = user?.emailVerified ?? false;
     
-    print('SplashScreen: Final state - user: ${user?.uid}, hasAge: $hasAgeParameter, verified: $emailIsVerified');
+    debugPrint('SplashScreen: Final state - user: ${user?.uid}, hasAge: $hasAgeParameter, verified: $emailIsVerified');
 
-    final destination = SplashScreen.determineInitialRoute(
-      user: user,
-      hasAgeParameter: hasAgeParameter,
-    );
-    context.go(destination);
+    // Case 1: Unauthenticated user -> boarding
+    if (user == null) {
+      context.go(Routes.boardingRoute);
+      return;
+    }
+
+    // Case 2: Unverified email -> boarding (safeguards preserved)
+    if (!emailIsVerified) {
+      context.go(Routes.boardingRoute);
+      return;
+    }
+
+    // Case 3: User is authenticated and email verified:
+    // If onboarding status is already known (either true -> mainRoute or false -> addDataRoute)
+    if (hasAgeParameter != null) {
+      final destination = SplashScreen.determineInitialRoute(
+        user: user,
+        hasAgeParameter: hasAgeParameter,
+      );
+      context.go(destination);
+      return;
+    }
+
+    // Case 4: Authenticated & email-verified, but onboarding status cannot be verified offline
+    final hasInternet = await NetworkService.hasInternetAccess();
+    if (!mounted) return;
+    if (!hasInternet) {
+      setState(() {
+        _isOfflineBlocked = true;
+        _isRetrying = false;
+        _hasRetryError = false;
+      });
+      _startObservingConnectivity();
+      return;
+    }
+
+    // If device reports active internet, attempt verification
+    await _retryVerification();
   }
 
   @override
   void dispose() {
+    _navigationTimer?.cancel();
+    _offlineRetryTimer?.cancel();
+    _connectivitySubscription?.cancel();
     _controller.dispose(); // Clean up animation controller
     super.dispose();
   }
@@ -135,29 +271,159 @@ class _SplashScreenState extends State<SplashScreen>
     return Scaffold(
       backgroundColor: ColorManager.background, // Pure black background
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Logo with bounce & fade effect (happens only once)
-            AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: _scaleAnimation.value, // Bounce effect
-                  child: Opacity(
-                    opacity: _fadeAnimation.value, // Fade-in effect (one time)
-                    child: Image.asset(
-                      'assets/images/applogo.png', // Replace with your logo
-                      width: 260, // Adjusted size for balance
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Logo with bounce & fade effect (happens only once)
+              AnimatedBuilder(
+                animation: _controller,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: _scaleAnimation.value, // Bounce effect
+                    child: Opacity(
+                      opacity: _fadeAnimation.value, // Fade-in effect (one time)
+                      child: Image.asset(
+                        'assets/images/applogo.png', // Replace with your logo
+                        width: 260, // Adjusted size for balance
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+              if (_isOfflineBlocked) ...[
+                const SizedBox(height: 28),
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: ColorManager.darkSurface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: _hasRetryError
+                          ? Colors.red.withValues(alpha: 0.5)
+                          : ColorManager.primary.withValues(alpha: 0.3),
+                      width: 1.5,
                     ),
                   ),
-                );
-              },
-            ),
-
-            SizedBox(height: 35), // **Increased spacing between logo & text**
-            // Show full text normally after animation completes
-          ],
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: (_hasRetryError ? Colors.red : ColorManager.primary)
+                              .withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          _hasRetryError
+                              ? Icons.error_outline_rounded
+                              : Icons.wifi_off_rounded,
+                          color: _hasRetryError ? Colors.redAccent : ColorManager.primary,
+                          size: 36,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'No internet connection',
+                        key: Key('splash_offline_title'),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        'We need an internet connection to verify your profile. Please reconnect to continue.',
+                        key: const Key('splash_offline_message'),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: ColorManager.textSecondary,
+                          fontSize: 13,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        "We'll automatically retry when you're back online.",
+                        key: const Key('splash_offline_supporting_text'),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: ColorManager.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      if (_isRetrying) ...[
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: ColorManager.primary,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              'Verifying profile...',
+                              key: const Key('splash_retrying_indicator'),
+                              style: TextStyle(
+                                color: ColorManager.textSecondary,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                      if (_hasRetryError && !_isRetrying) ...[
+                        const SizedBox(height: 14),
+                        const Text(
+                          'Verification failed. Tap Retry to try again.',
+                          key: Key('splash_retry_error_text'),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.redAccent,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton.icon(
+                          key: const Key('splash_offline_retry_button'),
+                          onPressed: _retryVerification,
+                          icon: const Icon(Icons.refresh_rounded, size: 18),
+                          label: const Text(
+                            'Retry Now',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: ColorManager.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

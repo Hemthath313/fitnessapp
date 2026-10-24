@@ -63,17 +63,11 @@ android {
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             ndk {
-                debugSymbolLevel 'NONE'
+                debugSymbolLevel 'SYMBOL_TABLE'
             }
         }
         debug {
             signingConfig signingConfigs.debug
-        }
-    }
-
-    packaging {
-        jniLibs {
-            keepDebugSymbols += ['**/*.so']
         }
     }
 }

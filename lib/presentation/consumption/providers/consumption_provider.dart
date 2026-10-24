@@ -23,6 +23,14 @@ class ConsumptionProvider with ChangeNotifier {
     return [..._water];
   }
 
+  User? get _currentUser {
+    try {
+      return FirebaseAuth.instance.currentUser;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> addNewMeal({
     required String title,
     required double amount,
@@ -33,7 +41,7 @@ class ConsumptionProvider with ChangeNotifier {
     required DateTime dateTime,
   }) async {
     try {
-      User? user = FirebaseAuth.instance.currentUser;
+      User? user = _currentUser;
 
       await FirebaseFirestore.instance
           .collection('meals')
@@ -65,7 +73,7 @@ class ConsumptionProvider with ChangeNotifier {
   }
 
   Future fetchAndSetMeals() async {
-    User? user = FirebaseAuth.instance.currentUser;
+    User? user = _currentUser;
 
     if (user == null) {
       print('No user found for fetching meals');
@@ -127,19 +135,25 @@ class ConsumptionProvider with ChangeNotifier {
   }
 
   Future<void> clearAllMeals() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    final mealsCollection = FirebaseFirestore.instance
-        .collection('meals')
-        .doc(user!.uid)
-        .collection('mealData');
+    User? user = _currentUser;
+    if (user == null) return;
 
-    final meals = await mealsCollection.get();
-    for (var doc in meals.docs) {
-      await doc.reference.delete();
+    try {
+      final mealsCollection = FirebaseFirestore.instance
+          .collection('meals')
+          .doc(user.uid)
+          .collection('mealData');
+
+      final meals = await mealsCollection.get();
+      for (var doc in meals.docs) {
+        await doc.reference.delete();
+      }
+      _meals.clear();
+      kCalaDay = 0;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('ConsumptionProvider: clearAllMeals error (offline): $e');
     }
-    _meals.clear();
-    kCalaDay = 0;
-    notifyListeners();
   }
 
   bool isLastDateTimeDifferent(DateTime now, DateTime lastDateTime) {
@@ -159,7 +173,7 @@ class ConsumptionProvider with ChangeNotifier {
     required DateTime dateTime,
   }) async {
     try {
-      User? user = FirebaseAuth.instance.currentUser;
+      User? user = _currentUser;
 
       await FirebaseFirestore.instance
           .collection('meals')
@@ -188,40 +202,50 @@ class ConsumptionProvider with ChangeNotifier {
   }
 
   Future<DateTime?> getLastClearedDate() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user!.uid)
-        .collection('dailyReset')
-        .doc('resetTracker')
-        .get();
+    try {
+      User? user = _currentUser;
+      if (user == null) return null;
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('dailyReset')
+          .doc('resetTracker')
+          .get();
 
-    if (doc.exists && doc.data() != null) {
-      return (doc['lastClearedDate'] as Timestamp).toDate();
+      if (doc.exists && doc.data() != null) {
+        return (doc['lastClearedDate'] as Timestamp).toDate();
+      }
+      return null;
+    } catch (e) {
+      debugPrint('ConsumptionProvider: getLastClearedDate error (offline): $e');
+      return null;
     }
-    return null;
   }
 
   Future<void> setLastClearedDate(DateTime date) async {
-    User? user = FirebaseAuth.instance.currentUser;
+    User? user = _currentUser;
 
     if (user == null) {
-      print('No user found for setting last cleared date');
+      debugPrint('No user found for setting last cleared date');
       return;
     }
 
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('dailyReset')
-        .doc('resetTracker')
-        .set({
-      'lastClearedDate': Timestamp.fromDate(date),
-    });
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('dailyReset')
+          .doc('resetTracker')
+          .set({
+        'lastClearedDate': Timestamp.fromDate(date),
+      });
+    } catch (e) {
+      debugPrint('ConsumptionProvider: setLastClearedDate error (offline): $e');
+    }
   }
 
   Future fetchAndSetWater() async {
-    User? user = FirebaseAuth.instance.currentUser;
+    User? user = _currentUser;
 
     if (user == null) {
       print('No user found for fetching water data');
@@ -284,48 +308,59 @@ class ConsumptionProvider with ChangeNotifier {
   }
 
   Future<void> clearAllWater() async {
-    User? user = FirebaseAuth.instance.currentUser;
+    User? user = _currentUser;
 
     if (user == null) {
-      print('No user found for clearing water data');
+      debugPrint('No user found for clearing water data');
       return;
     }
 
-    final waterCollection = FirebaseFirestore.instance
-        .collection('meals')
-        .doc(user.uid)
-        .collection('waterData');
+    try {
+      final waterCollection = FirebaseFirestore.instance
+          .collection('meals')
+          .doc(user.uid)
+          .collection('waterData');
 
-    final water = await waterCollection.get();
-    for (var doc in water.docs) {
-      await doc.reference.delete();
+      final water = await waterCollection.get();
+      for (var doc in water.docs) {
+        await doc.reference.delete();
+      }
+      _water.clear();
+      waterADay = 0;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('ConsumptionProvider: clearAllWater error (offline): $e');
     }
-    _water.clear();
-    waterADay = 0;
-    notifyListeners();
   }
 
-  Future<void> fetchConsumedCalories() async {
-    String userId = FirebaseAuth.instance.currentUser?.uid ?? 'testUser';
-    String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  Future<int> fetchConsumedCalories() async {
+    try {
+      String? userId = _currentUser?.uid;
+      if (userId == null) return 0;
+      String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
-    DocumentSnapshot doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('mealRecords')
-        .doc(todayDate)
-        .get();
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('mealRecords')
+          .doc(todayDate)
+          .get();
 
-    if (doc.exists) {
-      final data = doc.data() as Map<String, dynamic>;
-      notifyListeners(); // Update UI
-      return data['consumedCalories'] ?? 0;
+      if (doc.exists && doc.data() != null) {
+        final data = doc.data() as Map<String, dynamic>;
+        notifyListeners(); // Update UI
+        return data['consumedCalories'] ?? 0;
+      }
+      return 0;
+    } catch (e) {
+      debugPrint('ConsumptionProvider: fetchConsumedCalories error (offline): $e');
+      return 0;
     }
   }
 
   Future<void> deleteMeal(String mealID) async {
     try {
-      User? user = FirebaseAuth.instance.currentUser;
+      User? user = _currentUser;
 
       await FirebaseFirestore.instance
           .collection('meals')
@@ -343,25 +378,33 @@ class ConsumptionProvider with ChangeNotifier {
   }
 
   Future<void> getConsumedCalories() async {
-    print("getConsumedCalories");
-    User? user = FirebaseAuth.instance.currentUser;
-    String todayDate = getTodayDate();
+    try {
+      User? user = _currentUser;
+      if (user == null) {
+        consumedCalories = 0;
+        notifyListeners();
+        return;
+      }
+      String todayDate = getTodayDate();
 
-    DocumentReference mealRecordRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user!.uid)
-        .collection('mealRecords')
-        .doc(todayDate);
+      DocumentReference mealRecordRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('mealRecords')
+          .doc(todayDate);
 
-    DocumentSnapshot snapshot = await mealRecordRef.get();
+      DocumentSnapshot snapshot = await mealRecordRef.get();
 
-    if (snapshot.exists) {
-      consumedCalories = snapshot['consumedCalories'] ?? 0;
-      print('Consumed Calories123: ${consumedCalories}');
-    } else {
-      consumedCalories = 0;
+      if (snapshot.exists && snapshot.data() != null) {
+        final data = snapshot.data() as Map<String, dynamic>;
+        consumedCalories = data['consumedCalories'] ?? 0;
+      } else {
+        consumedCalories = 0;
+      }
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint('ConsumptionProvider: getConsumedCalories error (offline): $e');
     }
-
-    notifyListeners();
   }
 }

@@ -80,6 +80,23 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  int _activeSessionId = 0;
+  String? _activeUserId;
+
+  void clearState() {
+    _activeSessionId++;
+    _user = null;
+    _activeUserId = null;
+    _hasAgeParameter = null;
+    _isNewUser = null;
+    _isOfflineFallback = false;
+    userOverrideForTesting = null;
+    userIdOverrideForTesting = null;
+    hasAgeParameterOverrideForTesting = null;
+    isLoading = false;
+    notifyListeners();
+  }
+
   AuthProvider({bool autoInitialize = true}) {
     if (!autoInitialize) {
       isLoading = false;
@@ -87,64 +104,19 @@ class AuthProvider with ChangeNotifier {
     }
     try {
       // Load initial auth state immediately
-      _loadInitialAuthState();
-      
+      _loadUserDataForUser(_currentUser, isInitial: true);
+
       // Listen to auth state changes
-      FirebaseAuth.instance.authStateChanges().listen((User? user) async {
-        _user = userOverrideForTesting ?? user;
-        if (_user != null) {
-          // Reload user to get latest data including emailVerified status
-          try {
-            await _user!.reload();
-            if (userOverrideForTesting == null) {
-              _user = FirebaseAuth.instance.currentUser ?? _user;
-            }
-          } catch (e) {
-            // If reload fails (offline/network error), continue with current user
+      FirebaseAuth.instance.authStateChanges().listen((User? user) {
+        final targetUser = userOverrideForTesting ?? user;
+        if (targetUser != null) {
+          // Avoid duplicate concurrent load if already actively processing this user
+          if (targetUser.uid == _activeUserId && (isLoading || _hasAgeParameter != null)) {
+            return;
           }
-          
-          final uid = userIdOverrideForTesting ?? _user?.uid;
-          if (uid != null && uid.isNotEmpty) {
-            FirebaseFirestore.instance
-                .collection('users')
-                .doc(uid)
-                .get()
-                .timeout(const Duration(seconds: 5))
-                .then((docSnapshot) async {
-              final hasAge = docSnapshot.exists &&
-                  docSnapshot.data() != null &&
-                  docSnapshot.data()!.containsKey('age');
-              _hasAgeParameter = hasAge;
-              _isOfflineFallback = false;
-              _isNewUser =
-                  _user!.metadata.creationTime == _user!.metadata.lastSignInTime &&
-                      !_hasAgeParameter!;
-              await setCachedOnboardingStatus(uid, hasAge);
-              isLoading = false;
-              notifyListeners();
-            }).catchError((error) async {
-              final cached = await getCachedOnboardingStatus(uid);
-              if (cached != null) {
-                _hasAgeParameter = cached;
-                _isOfflineFallback = true;
-              } else {
-                _hasAgeParameter = null;
-                _isOfflineFallback = false;
-              }
-              isLoading = false;
-              notifyListeners();
-            });
-          } else {
-            isLoading = false;
-            notifyListeners();
-          }
+          _loadUserDataForUser(targetUser);
         } else {
-          // User logged out - clear all state
-          _hasAgeParameter = null;
-          _isNewUser = null;
-          _isOfflineFallback = false;
-          isLoading = false;
-          notifyListeners();
+          clearState();
         }
       });
     } catch (_) {
@@ -153,78 +125,120 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> _loadInitialAuthState() async {
+  Future<void> _loadUserDataForUser(User? targetUser, {bool isInitial = false}) async {
+    final sessionId = ++_activeSessionId;
+    final currentUser = targetUser ?? _currentUser;
+
+    if (currentUser == null) {
+      _user = null;
+      _activeUserId = null;
+      _hasAgeParameter = null;
+      _isNewUser = null;
+      _isOfflineFallback = false;
+      isLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    _user = currentUser;
+    final uid = userIdOverrideForTesting ?? currentUser.uid;
+    _activeUserId = uid;
+
+    // Fast path: Instant local cache hydration from SharedPreferences
+    if (uid.isNotEmpty) {
+      final cached = await getCachedOnboardingStatus(uid);
+      if (sessionId != _activeSessionId || _activeUserId != uid) return;
+
+      if (cached != null) {
+        _hasAgeParameter = cached;
+        _isOfflineFallback = true;
+        // Promptly mark initial loading complete as soon as cached status is known
+        if (isLoading) {
+          isLoading = false;
+          notifyListeners();
+        }
+      }
+    }
+
+    // Network sync: Refresh user credentials and fetch latest Firestore status
     try {
-      final currentUser = _currentUser;
-      if (currentUser != null) {
-        try {
-          if (onUserReloadForTesting != null) {
-            await onUserReloadForTesting!();
-          } else {
-            await currentUser.reload();
+      try {
+        if (onUserReloadForTesting != null) {
+          await onUserReloadForTesting!();
+        } else {
+          await currentUser.reload().timeout(const Duration(seconds: 2));
+        }
+        if (sessionId != _activeSessionId || _activeUserId != uid) return;
+        if (userOverrideForTesting == null) {
+          _user = FirebaseAuth.instance.currentUser ?? currentUser;
+        }
+      } catch (_) {
+        // Reload failed (offline or network timeout) - proceed with current credentials
+        if (sessionId != _activeSessionId || _activeUserId != uid) return;
+      }
+
+      if (uid.isNotEmpty) {
+        bool hasAge;
+        if (remoteOnboardingFetcherForTesting != null) {
+          final res = await remoteOnboardingFetcherForTesting!(uid);
+          if (res == null) {
+            throw FirebaseException(
+              plugin: 'firestore',
+              code: 'unavailable',
+              message: 'Offline or Firestore unavailable',
+            );
           }
-          if (userOverrideForTesting == null) {
-            _user = FirebaseAuth.instance.currentUser ?? currentUser;
-          } else {
-            _user = currentUser;
+          hasAge = res;
+        } else {
+          final docSnapshot = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(uid)
+              .get()
+              .timeout(const Duration(seconds: 2));
+
+          if (docSnapshot.metadata.isFromCache &&
+              (!docSnapshot.exists ||
+                  docSnapshot.data() == null ||
+                  !docSnapshot.data()!.containsKey('age'))) {
+            throw FirebaseException(
+              plugin: 'firestore',
+              code: 'unavailable',
+              message: 'User profile verification requires internet connection while offline',
+            );
           }
-        } catch (_) {
-          _user = currentUser;
+
+          hasAge = docSnapshot.exists &&
+              docSnapshot.data() != null &&
+              docSnapshot.data()!.containsKey('age');
         }
 
-        final uid = userIdOverrideForTesting ?? _user?.uid;
-        if (uid != null && uid.isNotEmpty) {
-          try {
-            bool hasAge;
-            if (remoteOnboardingFetcherForTesting != null) {
-              final res = await remoteOnboardingFetcherForTesting!(uid);
-              if (res == null) {
-                throw FirebaseException(
-                  plugin: 'firestore',
-                  code: 'unavailable',
-                  message: 'Offline or Firestore unavailable',
-                );
-              }
-              hasAge = res;
-            } else {
-              final docSnapshot = await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(uid)
-                  .get()
-                  .timeout(const Duration(seconds: 5));
-              hasAge = docSnapshot.exists &&
-                  docSnapshot.data() != null &&
-                  docSnapshot.data()!.containsKey('age');
-            }
+        if (sessionId != _activeSessionId || _activeUserId != uid) return;
 
-            _hasAgeParameter = hasAge;
-            _isOfflineFallback = false;
-            final isCreatedNow =
-                _user?.metadata.creationTime == _user?.metadata.lastSignInTime;
-            _isNewUser = isCreatedNow && !_hasAgeParameter!;
-            await setCachedOnboardingStatus(uid, hasAge);
-          } catch (e) {
-            final cached = await getCachedOnboardingStatus(uid);
-            if (cached != null) {
-              _hasAgeParameter = cached;
-              _isOfflineFallback = true;
-            } else {
-              _hasAgeParameter = null;
-              _isOfflineFallback = false;
-            }
-          }
-        }
+        _hasAgeParameter = hasAge;
+        _isOfflineFallback = false;
+        final isCreatedNow =
+            _user?.metadata.creationTime == _user?.metadata.lastSignInTime;
+        _isNewUser = isCreatedNow && !_hasAgeParameter!;
+        await setCachedOnboardingStatus(uid, hasAge);
+      }
+    } catch (e) {
+      debugPrint('AuthProvider: Remote sync failed with exception: $e');
+      // Remote sync failed (offline / timeout / unavailable)
+      if (sessionId != _activeSessionId || _activeUserId != uid) return;
+
+      final cached = await getCachedOnboardingStatus(uid);
+      if (cached != null) {
+        _hasAgeParameter = cached;
+        _isOfflineFallback = true;
       } else {
-        _user = null;
         _hasAgeParameter = null;
-        _isNewUser = null;
         _isOfflineFallback = false;
       }
-      isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      isLoading = false;
-      notifyListeners();
+    } finally {
+      if (sessionId == _activeSessionId && _activeUserId == uid) {
+        isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -234,46 +248,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   void callAuth() {
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      _user = userOverrideForTesting ?? user;
-      if (_user != null) {
-        final uid = userIdOverrideForTesting ?? _user?.uid;
-        if (uid != null && uid.isNotEmpty) {
-          FirebaseFirestore.instance
-              .collection('users')
-              .doc(uid)
-              .get()
-              .timeout(const Duration(seconds: 5))
-              .then((docSnapshot) async {
-            final hasAge = docSnapshot.exists &&
-                docSnapshot.data() != null &&
-                docSnapshot.data()!.containsKey('age');
-            _hasAgeParameter = hasAge;
-            _isOfflineFallback = false;
-            _isNewUser =
-                _user!.metadata.creationTime == _user!.metadata.lastSignInTime &&
-                    !_hasAgeParameter!;
-            await setCachedOnboardingStatus(uid, hasAge);
-            notifyListeners();
-          }).catchError((error) async {
-            final cached = await getCachedOnboardingStatus(uid);
-            if (cached != null) {
-              _hasAgeParameter = cached;
-              _isOfflineFallback = true;
-            } else {
-              _hasAgeParameter = null;
-              _isOfflineFallback = false;
-            }
-            notifyListeners();
-          });
-        }
-      } else {
-        _hasAgeParameter = null;
-        _isNewUser = null;
-        _isOfflineFallback = false;
-        notifyListeners();
-      }
-    });
+    _loadUserDataForUser(_currentUser);
   }
 
   User? get user => userOverrideForTesting ?? _user;
@@ -609,84 +584,10 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> loadUserData() async {
-    isLoading = true;
-    notifyListeners();
-    
-    try {
-      final currentUser = _currentUser;
-
-      if (currentUser != null) {
-        // Reload user to get latest data including emailVerified status
-        try {
-          if (onUserReloadForTesting != null) {
-            await onUserReloadForTesting!();
-          } else {
-            await currentUser.reload();
-          }
-          if (userOverrideForTesting == null) {
-            _user = FirebaseAuth.instance.currentUser ?? currentUser;
-          } else {
-            _user = currentUser;
-          }
-        } catch (_) {
-          // If reload fails (offline/network failure), continue with current user
-          _user = currentUser;
-        }
-
-        final uid = userIdOverrideForTesting ?? _user?.uid;
-        if (uid != null && uid.isNotEmpty) {
-          try {
-            bool hasAge;
-            if (remoteOnboardingFetcherForTesting != null) {
-              final res = await remoteOnboardingFetcherForTesting!(uid);
-              if (res == null) {
-                throw FirebaseException(
-                  plugin: 'firestore',
-                  code: 'unavailable',
-                  message: 'Offline or Firestore unavailable',
-                );
-              }
-              hasAge = res;
-            } else {
-              final docSnapshot = await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(uid)
-                  .get()
-                  .timeout(const Duration(seconds: 5));
-              hasAge = docSnapshot.exists &&
-                  docSnapshot.data() != null &&
-                  docSnapshot.data()!.containsKey('age');
-            }
-
-            _hasAgeParameter = hasAge;
-            _isOfflineFallback = false;
-            final isCreatedNow =
-                _user?.metadata.creationTime == _user?.metadata.lastSignInTime;
-            _isNewUser = isCreatedNow && !_hasAgeParameter!;
-            await setCachedOnboardingStatus(uid, hasAge);
-          } catch (e) {
-            // Firestore request failed because device is offline or timed out
-            final cached = await getCachedOnboardingStatus(uid);
-            if (cached != null) {
-              _hasAgeParameter = cached;
-              _isOfflineFallback = true;
-            } else {
-              _hasAgeParameter = null;
-              _isOfflineFallback = false;
-            }
-          }
-        }
-      } else {
-        _user = null;
-        _hasAgeParameter = null;
-        _isNewUser = null;
-        _isOfflineFallback = false;
-      }
-    } catch (e) {
-      // Handle error silently
-    } finally {
-      isLoading = false;
+    if (_hasAgeParameter == null) {
+      isLoading = true;
       notifyListeners();
     }
+    await _loadUserDataForUser(_currentUser);
   }
 }

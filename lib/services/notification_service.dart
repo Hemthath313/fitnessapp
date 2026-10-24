@@ -227,6 +227,9 @@ class NotificationService {
           }
         }
       }
+
+      // 7. Re-verify and restore daily gym alarm if enabled
+      await rescheduleDailyGymAlarmIfNeeded();
     } catch (e) {
       if (kDebugMode) {
         print('Error initializing NotificationService: $e');
@@ -365,8 +368,28 @@ class NotificationService {
     }
   }
 
+  void _configureLocalTimeZone() {
+    try {
+      tz.initializeTimeZones();
+      final String timeZoneName = DateTime.now().timeZoneName;
+      if (tz.timeZoneDatabase.locations.containsKey(timeZoneName)) {
+        tz.setLocalLocation(tz.getLocation(timeZoneName));
+        return;
+      }
+      final localOffset = DateTime.now().timeZoneOffset;
+      for (final location in tz.timeZoneDatabase.locations.values) {
+        if (location.currentTimeZone.offset == localOffset) {
+          tz.setLocalLocation(location);
+          return;
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) print('Error configuring local timezone: $e');
+    }
+  }
+
   Future<void> initializeLocalNotifications() async {
-    tz.initializeTimeZones();
+    _configureLocalTimeZone();
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/launcher_icon');
 
@@ -868,25 +891,48 @@ class NotificationService {
       final hasPerm = await hasNotificationPermission();
       if (!hasPerm) return;
 
-      tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+      _configureLocalTimeZone();
+      tz.TZDateTime now = _currentTzNow();
       tz.TZDateTime scheduledDate =
           tz.TZDateTime(tz.local, now.year, now.month, now.day, time.hour, time.minute);
       if (scheduledDate.isBefore(now)) {
         scheduledDate = scheduledDate.add(const Duration(days: 1));
       }
 
-      const AndroidNotificationDetails androidPlatformChannelSpecifics =
+      // Ensure high-priority alarm notification channel is registered on Android
+      try {
+        final androidImpl = _localNotificationsPlugin
+            .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>();
+        if (androidImpl != null) {
+          const AndroidNotificationChannel alarmChannel = AndroidNotificationChannel(
+            'gym_alarm',
+            'Gym Alarm',
+            description: 'Daily alarm for your gym session',
+            importance: Importance.max,
+            playSound: true,
+            enableVibration: true,
+            audioAttributesUsage: AudioAttributesUsage.alarm,
+          );
+          await androidImpl.createNotificationChannel(alarmChannel);
+        }
+      } catch (e) {
+        if (kDebugMode) print('Error creating alarm channel: $e');
+      }
+
+      final AndroidNotificationDetails androidPlatformChannelSpecifics =
           AndroidNotificationDetails(
               'gym_alarm', 'Gym Alarm',
               channelDescription: 'Daily alarm for your gym session',
               importance: Importance.max,
-              priority: Priority.high,
-              sound: null, // Uses default notification sound for now
+              priority: Priority.max,
               playSound: true,
               enableVibration: true,
-              fullScreenIntent: true); // Wake up screen/show as high priority
+              fullScreenIntent: true,
+              category: AndroidNotificationCategory.alarm,
+              audioAttributesUsage: AudioAttributesUsage.alarm);
       
-      const NotificationDetails platformChannelSpecifics =
+      final NotificationDetails platformChannelSpecifics =
           NotificationDetails(android: androidPlatformChannelSpecifics);
 
       final scheduleMode = await _resolveScheduleMode();
@@ -903,6 +949,20 @@ class NotificationService {
       if (kDebugMode) print('Scheduled daily gym alarm for $scheduledDate');
     } catch (e) {
       if (kDebugMode) print('Failed to schedule gym alarm: $e');
+    }
+  }
+
+  Future<void> rescheduleDailyGymAlarmIfNeeded() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final bool enabled = prefs.getBool('gym_alarm_enabled') ?? false;
+      if (enabled) {
+        final hour = prefs.getInt('gym_alarm_hour') ?? 6;
+        final minute = prefs.getInt('gym_alarm_minute') ?? 0;
+        await scheduleDailyGymAlarm(TimeOfDay(hour: hour, minute: minute));
+      }
+    } catch (e) {
+      if (kDebugMode) print('Failed to reschedule daily gym alarm: $e');
     }
   }
 

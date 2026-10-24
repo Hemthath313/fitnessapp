@@ -17,16 +17,23 @@ import 'package:fitness_app/presentation/widgets/update_dialog.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/presentation/workout_logs/workout_log_history_page.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
-import 'package:fitness_app/utils/router/router.dart';
 import 'package:fitness_app/utils/widgets/error_boundary.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:async';
+import 'package:fitness_app/presentation/widgets/premium_upsell_banner.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+  final Duration? paywallTimerDelayForTesting;
+  final bool? initialShowBannerForTesting;
+
+  const MainPage({
+    super.key,
+    this.paywallTimerDelayForTesting,
+    this.initialShowBannerForTesting,
+  });
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -63,10 +70,17 @@ class _MainPageState extends State<MainPage> {
   bool get isWorkoutsPage => _currentIndex == 1;
   bool get isHomePage => _currentIndex == 0;
 
+  Timer? _paywallTimer;
+  bool _showPaywallBanner = false;
+  bool _bannerDismissedByUser = false;
+
   @override
   void initState() {
     super.initState();
-    _startPaywallTimer();
+    if (widget.initialShowBannerForTesting == true) {
+      _showPaywallBanner = true;
+    }
+    _startPaywallTimer(delay: widget.paywallTimerDelayForTesting);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       // Check if user is authenticated before loading data
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -173,108 +187,35 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
-  void _startPaywallTimer() {
-    Future.delayed(const Duration(minutes: 1), () {
-      if (mounted) {
-        final subProvider = Provider.of<SubscriptionProvider>(context, listen: false);
-        if (!subProvider.isPremium) {
-          _showPaywallDialog();
-        }
+  @override
+  void dispose() {
+    _paywallTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startPaywallTimer({Duration? delay}) {
+    _paywallTimer?.cancel();
+    final effectiveDelay = delay ?? const Duration(minutes: 1);
+    _paywallTimer = Timer(effectiveDelay, () {
+      if (!mounted) return;
+      final subProvider =
+          Provider.of<SubscriptionProvider?>(context, listen: false);
+      final isPremium = subProvider?.isPremium ?? false;
+      if (!isPremium && !_bannerDismissedByUser) {
+        setState(() {
+          _showPaywallBanner = true;
+        });
       }
     });
   }
 
-  void _showPaywallDialog() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Container(
-          padding: EdgeInsets.all(24.w),
-          decoration: BoxDecoration(
-            color: ColorManager.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 10,
-                spreadRadius: 2,
-              )
-            ],
-          ),
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40.w,
-                    height: 4.h,
-                    margin: EdgeInsets.only(bottom: 24.h),
-                    decoration: BoxDecoration(
-                      color: ColorManager.textTertiary.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(2.r),
-                    ),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.star_rounded, color: Colors.amber, size: 32.sp),
-                    SizedBox(width: 8.w),
-                    Text('Unlock Premium', style: TextStyle(color: ColorManager.textPrimary, fontSize: 24.sp, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                SizedBox(height: 16.h),
-                Text('Take your fitness to the next level with:', textAlign: TextAlign.center, style: TextStyle(color: ColorManager.textSecondary, fontSize: 16.sp)),
-                SizedBox(height: 24.h),
-                _buildDialogFeaturePoint(Icons.auto_awesome, 'Unlimited AI Workouts & Splits', Colors.tealAccent),
-                _buildDialogFeaturePoint(Icons.fitness_center_rounded, 'Barbell Plate Math & Visualizer', Colors.amberAccent),
-                _buildDialogFeaturePoint(Icons.file_download_outlined, 'Workout History & CSV Export', Colors.blueAccent),
-                _buildDialogFeaturePoint(Icons.ads_click, 'Ad-Free Training Experience', Colors.greenAccent),
-                SizedBox(height: 32.h),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorManager.primary,
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    context.push(Routes.premiumScreen);
-                  },
-                  child: Text('View Premium Options', style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold)),
-                ),
-                SizedBox(height: 12.h),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('Maybe Later', style: TextStyle(color: ColorManager.textTertiary, fontSize: 14.sp)),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildDialogFeaturePoint(IconData icon, String text, Color color) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 12.h),
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 20.sp),
-          SizedBox(width: 12.w),
-          Expanded(child: Text(text, style: TextStyle(color: ColorManager.textPrimary, fontSize: 14.sp, fontWeight: FontWeight.w500))),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final subProvider = Provider.of<SubscriptionProvider?>(context);
+    final isPremium = subProvider?.isPremium ?? false;
+    final bool shouldShowBanner =
+        _showPaywallBanner && !isPremium && !_bannerDismissedByUser;
+
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: appBar() != null
@@ -290,7 +231,7 @@ class _MainPageState extends State<MainPage> {
         selectedIndex: _currentIndex,
         onDestinationSelected: ontap,
         backgroundColor: ColorManager.surface,
-        indicatorColor: ColorManager.primary.withOpacity(0.15),
+        indicatorColor: ColorManager.primary.withValues(alpha: 0.15),
         surfaceTintColor: Colors.transparent,
         shadowColor: Colors.transparent,
         elevation: 0,
@@ -327,9 +268,27 @@ class _MainPageState extends State<MainPage> {
       body: SafeArea(
         top: false,
         bottom: false,
-        child: ErrorBoundary(
-          child: pages[_currentIndex].animate().fadeIn(duration: 500.ms),
-          fallbackMessage: 'Unable to load this page',
+        child: Column(
+          children: [
+            if (shouldShowBanner)
+              Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 8.h),
+                child: PremiumUpsellBannerCard(
+                  onDismiss: () {
+                    setState(() {
+                      _bannerDismissedByUser = true;
+                      _showPaywallBanner = false;
+                    });
+                  },
+                ),
+              ),
+            Expanded(
+              child: ErrorBoundary(
+                fallbackMessage: 'Unable to load this page',
+                child: pages[_currentIndex].animate().fadeIn(duration: 500.ms),
+              ),
+            ),
+          ],
         ),
       ),
     );

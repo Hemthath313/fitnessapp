@@ -101,7 +101,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
       List<String>? customInstructions;
 
       if (w is Map) {
-        rawName = (w['name'] as String?) ?? '';
+        rawName = (w['name'] as String?) ?? (w['workoutName'] as String?) ?? '';
         totalSets = (w['setNumber'] as num?)?.toInt() ?? 3;
         targetReps = (w['repNumber'] as num?)?.toInt() ?? 8;
         customVideoPath = w['videoPath'] as String?;
@@ -277,7 +277,9 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
     if (catalogExercise != null) {
       return Exercise(
         name: catalogExercise.name,
-        videoPath: ex.customVideoPath ?? catalogExercise.videoPath,
+        videoPath: (ex.customVideoPath != null && ex.customVideoPath!.trim().isNotEmpty)
+            ? ex.customVideoPath!
+            : catalogExercise.videoPath,
         description: ex.customDescription ?? catalogExercise.description,
         target: ex.customTarget ?? catalogExercise.target,
         equipment: ex.customEquipment ?? catalogExercise.equipment,
@@ -287,6 +289,33 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                 ex.customInstructions!.isNotEmpty)
             ? ex.customInstructions!
             : catalogExercise.instructions,
+      );
+    }
+
+    // Fallback: search across catalog for keyword match
+    Exercise? fallbackCatalog;
+    for (final candidate in ExerciseData.all) {
+      if (ExerciseData.matchesSearchQuery(candidate, ex.exerciseName)) {
+        fallbackCatalog = candidate;
+        break;
+      }
+    }
+
+    if (fallbackCatalog != null) {
+      return Exercise(
+        name: cleanName.isNotEmpty ? cleanName : fallbackCatalog.name,
+        videoPath: (ex.customVideoPath != null && ex.customVideoPath!.trim().isNotEmpty)
+            ? ex.customVideoPath!
+            : fallbackCatalog.videoPath,
+        description: ex.customDescription ?? fallbackCatalog.description,
+        target: ex.customTarget ?? fallbackCatalog.target,
+        equipment: ex.customEquipment ?? fallbackCatalog.equipment,
+        difficulty: ex.customDifficulty ?? fallbackCatalog.difficulty,
+        setsReps: setsRepsLabel,
+        instructions: (ex.customInstructions != null &&
+                ex.customInstructions!.isNotEmpty)
+            ? ex.customInstructions!
+            : fallbackCatalog.instructions,
       );
     }
 
@@ -372,12 +401,14 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Substitute Exercise',
-                    style: TextStyle(
-                      color: ColorManager.white,
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Text(
+                      'Substitute Exercise',
+                      style: TextStyle(
+                        color: ColorManager.white,
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   IconButton(
@@ -399,17 +430,20 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                     borderRadius: BorderRadius.circular(12.r),
                     border: Border.all(color: ColorManager.divider),
                   ),
-                  child: ListTile(
-                    leading: Icon(Icons.swap_horiz_rounded, color: ColorManager.primary),
-                    title: Text(
-                      altName,
-                      style: TextStyle(color: ColorManager.white, fontWeight: FontWeight.bold, fontSize: 14.sp),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: ListTile(
+                      leading: Icon(Icons.swap_horiz_rounded, color: ColorManager.primary),
+                      title: Text(
+                        altName,
+                        style: TextStyle(color: ColorManager.white, fontWeight: FontWeight.bold, fontSize: 14.sp),
+                      ),
+                      trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14.sp, color: ColorManager.textTertiary),
+                      onTap: () async {
+                        Navigator.pop(ctx);
+                        await _applySubstitution(ex, altName);
+                      },
                     ),
-                    trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14.sp, color: ColorManager.textTertiary),
-                    onTap: () async {
-                      Navigator.pop(ctx);
-                      await _applySubstitution(ex, altName);
-                    },
                   ),
                 );
               }),
@@ -421,14 +455,15 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
   }
 
   Future<void> _applySubstitution(_SessionExerciseState ex, String newExerciseName) async {
+    final catalogExercise = ExerciseData.findByName(newExerciseName);
     setState(() {
       ex.exerciseName = newExerciseName;
-      ex.customVideoPath = null;
-      ex.customDescription = null;
-      ex.customTarget = null;
-      ex.customEquipment = null;
-      ex.customDifficulty = null;
-      ex.customInstructions = null;
+      ex.customVideoPath = catalogExercise?.videoPath;
+      ex.customDescription = catalogExercise?.description;
+      ex.customTarget = catalogExercise?.target;
+      ex.customEquipment = catalogExercise?.equipment;
+      ex.customDifficulty = catalogExercise?.difficulty;
+      ex.customInstructions = catalogExercise?.instructions;
       ex.isLoadingHistory = true;
     });
 
@@ -1027,6 +1062,11 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
 
   Widget _buildSetRow(_SessionExerciseState ex, int setIdx, bool isCompound) {
     final isDone = ex.isCompleted[setIdx];
+    final resolvedExercise = _resolveExerciseForSession(ex);
+    final isBarbell = PlateCalculatorSheet.isBarbellExercise(
+      name: resolvedExercise.name,
+      equipment: resolvedExercise.equipment,
+    );
 
     // Previous Performance Ghost Value
     String prevStr = '—';
@@ -1083,7 +1123,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
             ),
           ),
 
-          // 3. Weight Input Field + Stepper
+          // 3. Weight Input Field + Stepper (+ Barbell Plate Calculator)
           Expanded(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -1097,10 +1137,10 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                     setState(() {});
                   },
                 ),
-                SizedBox(width: 4.w),
+                SizedBox(width: isBarbell ? 2.w : 4.w),
                 Flexible(
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 46.w),
+                    constraints: BoxConstraints(maxWidth: isBarbell ? 40.w : 46.w),
                     child: SizedBox(
                       height: 32.h,
                       child: TextField(
@@ -1122,7 +1162,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                     ),
                   ),
                 ),
-                SizedBox(width: 4.w),
+                SizedBox(width: isBarbell ? 2.w : 4.w),
                 _buildStepperButton(
                   icon: Icons.add,
                   onTap: isDone ? null : () {
@@ -1132,6 +1172,10 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                     setState(() {});
                   },
                 ),
+                if (isBarbell) ...[
+                  SizedBox(width: 3.w),
+                  _buildPlateCalcButton(ex, setIdx, isDone),
+                ],
               ],
             ),
           ),
@@ -1241,6 +1285,60 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
         ),
         child: Icon(icon, size: 11.sp, color: onTap != null ? ColorManager.textSecondary : Colors.white24),
       ),
+    );
+  }
+
+  Widget _buildPlateCalcButton(_SessionExerciseState ex, int setIdx, bool isDone) {
+    return Tooltip(
+      message: 'Barbell Plate Calculator',
+      child: InkWell(
+        key: Key('session_plate_calc_${ex.order}_$setIdx'),
+        onTap: isDone ? null : () => _openPlateCalculator(ex, setIdx),
+        borderRadius: BorderRadius.circular(4.r),
+        child: Container(
+          width: 20.w,
+          height: 24.h,
+          decoration: BoxDecoration(
+            color: isDone
+                ? ColorManager.surfaceDark
+                : ColorManager.primary.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(4.r),
+            border: Border.all(
+              color: isDone
+                  ? Colors.white12
+                  : ColorManager.primary.withOpacity(0.4),
+              width: 1,
+            ),
+          ),
+          child: Center(
+            child: Icon(
+              Icons.calculate_outlined,
+              size: 13.sp,
+              color: isDone ? Colors.white24 : ColorManager.primary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openPlateCalculator(_SessionExerciseState ex, int setIdx) {
+    final currWeight =
+        double.tryParse(ex.weightControllers[setIdx].text) ?? 0.0;
+    final initialWeight = currWeight > 0 ? currWeight : 60.0;
+
+    PlateCalculatorSheet.show(
+      context,
+      initialWeight: initialWeight,
+      onWeightApplied: (appliedWeight) {
+        final formatted = appliedWeight % 1 == 0
+            ? appliedWeight.toInt().toString()
+            : appliedWeight.toStringAsFixed(1);
+        setState(() {
+          ex.setProgrammaticWeight(setIdx, formatted);
+          ex.isWeightUserEdited[setIdx] = true;
+        });
+      },
     );
   }
 

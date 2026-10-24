@@ -506,5 +506,76 @@ void main() {
         }
       },
     );
+
+    testWidgets(
+      'Phase 2B: Swapping an exercise updates details and loads valid video without unavailable error',
+      (WidgetTester tester) async {
+        final List<FakeSessionVideoPlayerController> createdControllers = [];
+        final workouts = [
+          WorkoutModel(
+            id: 'w1',
+            name: 'Barbell Bench Press',
+            setNumber: 3,
+            repNumber: 10,
+            dateTime: DateTime(2026, 10, 11),
+          ),
+        ];
+
+        await _pumpSessionPage(
+          tester,
+          DayWorkoutSessionPage(
+            dayName: 'Monday',
+            workouts: workouts,
+            videoViewBuilder: (_) => const SizedBox.expand(),
+            videoControllerFactory: (assetPath, options) {
+              final ctrl = FakeSessionVideoPlayerController(
+                assetPath: assetPath,
+                options: options,
+              );
+              createdControllers.add(ctrl);
+              return ctrl;
+            },
+          ),
+        );
+
+        // Tap the swap button for the exercise
+        await tester.tap(find.byKey(const Key('session_exercise_swap_0')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 350));
+
+        // The modal should display alternative exercises
+        expect(find.text('Substitute Exercise'), findsOneWidget);
+        expect(find.text('Dumbbell Bench Press'), findsOneWidget);
+
+        // Select 'Dumbbell Bench Press'
+        await tester.tap(find.text('Dumbbell Bench Press'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 350));
+
+        // Modal should be closed and exercise card now shows 'Dumbbell Bench Press'
+        expect(find.text('Substitute Exercise'), findsNothing);
+        expect(find.textContaining('Dumbbell Bench Press'), findsOneWidget);
+
+        // Open details guide for the swapped exercise
+        await tester.tap(find.byKey(const Key('session_exercise_guide_0')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 350));
+
+        // Details should open and video player controller should be initialized with the resolved video
+        expect(find.byType(InteractiveExerciseDetailWidget), findsOneWidget);
+        expect(find.text('Video guide unavailable'), findsNothing);
+        expect(createdControllers.isNotEmpty, isTrue);
+        final swappedVideoCtrl = createdControllers.last;
+        expect(swappedVideoCtrl.assetPath.isNotEmpty, isTrue);
+        expect(swappedVideoCtrl.assetPath.endsWith('.mp4'), isTrue);
+        expect(swappedVideoCtrl.initializeCalls, 1);
+
+        // Close detail sheet
+        await tester.tap(find.byKey(const Key('close_exercise_detail_button')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 350));
+        expect(find.byType(InteractiveExerciseDetailWidget), findsNothing);
+      },
+    );
   });
 }

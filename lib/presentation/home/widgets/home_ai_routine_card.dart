@@ -2,6 +2,7 @@ import 'package:fitness_app/model/workout_model.dart';
 import 'package:fitness_app/presentation/custom_workouts/day_workout_session_page.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
+import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/workout_tools/plate_calculator_sheet.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/services/notification_service.dart';
@@ -300,22 +301,60 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
     );
   }
 
+  Future<void> _activateFreeStarterPlan(BuildContext context) async {
+    try {
+      final workoutProvider =
+          Provider.of<WorkoutProvider>(context, listen: false);
+      final statsProvider =
+          Provider.of<StatisticsProvider>(context, listen: false);
+      await workoutProvider.restoreDefaultThreeDaySplit();
+      final now = workoutProvider.currentNow;
+      await statsProvider.updateScheduledDays(
+        const ['Monday', 'Wednesday', 'Friday'],
+        effectiveDate: now,
+      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              '3-Day Starter Routine activated! Ready for your workout.',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            backgroundColor: ColorManager.success,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to activate starter plan: $e'),
+            backgroundColor: ColorManager.error,
+          ),
+        );
+      }
+    }
+  }
+
   /// Empty State: No Plan Active -> Invite user to review and activate their personalized plan
   Widget _buildNoPlanCard(BuildContext context) {
     final homeProvider = Provider.of<HomeProvider?>(context);
     final stats = Provider.of<StatisticsProvider?>(context);
+    final subscriptionProvider = Provider.of<SubscriptionProvider?>(context);
+    final isPremium = subscriptionProvider?.isPremium ?? false;
     final userGoal = homeProvider?.userData['goal']?.toString();
     final bool hasOnboardingGoal = userGoal != null && userGoal.isNotEmpty;
     final bool hasExistingSchedule = stats != null && stats.hasActiveSchedule;
 
     final String title = hasOnboardingGoal
-        ? 'Activate Your $userGoal Plan'
+        ? 'Activate 3-Day $userGoal Plan'
         : 'Build Your AI Workout Plan';
     final String subtitle = hasOnboardingGoal
-        ? 'We prepared an adaptive starter split tailored to your goal ($userGoal). Review your schedule and tap to activate.'
+        ? 'We prepared an adaptive starter split tailored to your goal ($userGoal). Review your schedule and tap to customize.'
         : 'Choose 3 to 6 days per week with smart exercises, rest timers, and video guides.';
     final String buttonLabel = hasOnboardingGoal
-        ? 'Review & Activate Plan'
+        ? 'Review & Customize Plan'
         : 'Build My Plan with AI';
 
     return Padding(
@@ -354,7 +393,10 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.auto_awesome, color: ColorManager.primary, size: 13.sp),
+                        Icon(
+                            Icons.auto_awesome,
+                            color: ColorManager.primary,
+                            size: 13.sp),
                         SizedBox(width: 5.w),
                         Flexible(
                           child: Text(
@@ -378,7 +420,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                 Text(
                   hasExistingSchedule
                       ? '${stats.scheduledDayNames.length}-Day Schedule'
-                      : '3-6 Day Splits',
+                      : '3-6 Day Custom Splits',
                   style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
                 ),
               ],
@@ -406,7 +448,10 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () => context.push(Routes.workoutGeneratorRoute),
-                icon: Icon(Icons.flash_on_rounded, size: 18.sp, color: Colors.black),
+                icon: const Icon(
+                    Icons.auto_awesome,
+                    size: 18,
+                    color: Colors.black),
                 label: Text(
                   buttonLabel,
                   style: TextStyle(
@@ -423,6 +468,23 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                 ),
               ),
             ),
+            if (!isPremium) ...[
+              SizedBox(height: 10.h),
+              Center(
+                child: TextButton.icon(
+                  onPressed: () => _activateFreeStarterPlan(context),
+                  icon: const Icon(Icons.bolt_rounded, color: Colors.white70, size: 16),
+                  label: const Text(
+                    'Or tap to activate Free 3-Day Starter Plan',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

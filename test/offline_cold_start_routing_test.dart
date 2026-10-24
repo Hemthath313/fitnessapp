@@ -1,6 +1,9 @@
+import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
 import 'package:fitness_app/presentation/splash_screen/splashscreen.dart';
+import 'package:fitness_app/services/connectivity_service.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -54,6 +57,11 @@ void main() {
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
+    NetworkService.resetTestingOverrides();
+  });
+
+  tearDown(() {
+    NetworkService.resetTestingOverrides();
   });
 
   group('Offline Cold-Start Routing & Onboarding Cache', () {
@@ -489,7 +497,8 @@ void main() {
           reason: 'SplashScreen must navigate to mainRoute for verified onboarded user offline');
     });
 
-    testWidgets('SplashScreen navigates to boardingRoute when offline without cached status', (tester) async {
+    testWidgets('SplashScreen displays offline prompt and stays on splash when offline without cached status', (tester) async {
+      NetworkService.internetAccessCheckerForTesting = () async => false;
       const uid = 'user_cold_uncached';
       final user = FakeUser(
         uid: uid,
@@ -516,8 +525,137 @@ void main() {
       await tester.pump(const Duration(seconds: 4));
       await tester.pumpAndSettle();
 
-      expect(navigatedRoute, equals(Routes.boardingRoute),
-          reason: 'SplashScreen must safely navigate to boardingRoute when onboarding is unknown');
+      expect(navigatedRoute, isNull,
+          reason: 'SplashScreen must not route away when onboarding verification is blocked offline');
+      expect(find.byKey(const Key('splash_offline_title')), findsOneWidget);
+      expect(find.text('No internet connection'), findsOneWidget);
+      expect(find.byKey(const Key('splash_offline_message')), findsOneWidget);
+      expect(
+        find.text('We need an internet connection to verify your profile. Please reconnect to continue.'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('splash_offline_supporting_text')), findsOneWidget);
+      expect(
+        find.text("We'll automatically retry when you're back online."),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('SplashScreen automatically retries and navigates to mainRoute when connectivity returns', (tester) async {
+      final connectivityController = StreamController<List<ConnectivityResult>>.broadcast();
+      addTearDown(() => connectivityController.close());
+
+      bool internetOnline = false;
+      NetworkService.internetAccessCheckerForTesting = () async => internetOnline;
+      NetworkService.connectivityStreamForTesting = connectivityController.stream;
+
+      const uid = 'user_auto_retry';
+      final user = FakeUser(
+        uid: uid,
+        emailVerified: true,
+        onReload: () async {},
+      );
+
+      bool firestoreShouldSucceed = false;
+      final authProvider = AuthProvider(autoInitialize: false)
+        ..userOverrideForTesting = user
+        ..remoteOnboardingFetcherForTesting = (_) async {
+          if (!firestoreShouldSucceed) {
+            throw Exception('Firestore unavailable offline');
+          }
+          return true; // Successfully resolved onboarding status
+        };
+
+      String? navigatedRoute;
+      await tester.pumpWidget(
+        createSplashTestApp(
+          authProvider: authProvider,
+          onNavigated: (r) => navigatedRoute = r,
+        ),
+      );
+
+      await tester.pump(const Duration(seconds: 4));
+      await tester.pumpAndSettle();
+
+      // Initially offline, blocked on splash screen
+      expect(navigatedRoute, isNull);
+      expect(find.byKey(const Key('splash_offline_title')), findsOneWidget);
+
+      // Now simulate internet returning
+      internetOnline = true;
+      firestoreShouldSucceed = true;
+      connectivityController.add([ConnectivityResult.wifi]);
+
+      // Allow stream event and retry to process
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pumpAndSettle();
+
+      expect(navigatedRoute, equals(Routes.mainRoute),
+          reason: 'When internet returns, profile verification must retry and navigate to mainRoute');
+    });
+
+    testWidgets('SplashScreen displays retry error and allows manual retry when reconnect fails', (tester) async {
+      final connectivityController = StreamController<List<ConnectivityResult>>.broadcast();
+      addTearDown(() => connectivityController.close());
+
+      bool internetOnline = false;
+      NetworkService.internetAccessCheckerForTesting = () async => internetOnline;
+      NetworkService.connectivityStreamForTesting = connectivityController.stream;
+
+      const uid = 'user_manual_retry';
+      final user = FakeUser(
+        uid: uid,
+        emailVerified: true,
+        onReload: () async {},
+      );
+
+      bool firestoreShouldSucceed = false;
+      final authProvider = AuthProvider(autoInitialize: false)
+        ..userOverrideForTesting = user
+        ..remoteOnboardingFetcherForTesting = (_) async {
+          if (!firestoreShouldSucceed) {
+            throw Exception('Firestore still failing');
+          }
+          return true;
+        };
+
+      String? navigatedRoute;
+      await tester.pumpWidget(
+        createSplashTestApp(
+          authProvider: authProvider,
+          onNavigated: (r) => navigatedRoute = r,
+        ),
+      );
+
+      await tester.pump(const Duration(seconds: 4));
+      await tester.pumpAndSettle();
+
+      expect(navigatedRoute, isNull);
+
+      // Network reports interface returned, but Firestore request still fails
+      internetOnline = true;
+      firestoreShouldSucceed = false;
+      connectivityController.add([ConnectivityResult.mobile]);
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pumpAndSettle();
+
+      // Error message and retry button must be visible
+      expect(find.byKey(const Key('splash_retry_error_text')), findsOneWidget);
+      expect(find.text('Verification failed. Tap Retry to try again.'), findsOneWidget);
+      expect(find.byKey(const Key('splash_offline_retry_button')), findsOneWidget);
+
+      // Now backend becomes healthy, user taps "Retry Now"
+      firestoreShouldSucceed = true;
+      await tester.tap(find.byKey(const Key('splash_offline_retry_button')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pumpAndSettle();
+
+      expect(navigatedRoute, equals(Routes.mainRoute),
+          reason: 'Tapping manual retry button must re-attempt verification and navigate on success');
     });
 
     testWidgets('SplashScreen navigates to addDataRoute when offline with incomplete onboarding', (tester) async {

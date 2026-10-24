@@ -2471,6 +2471,124 @@ class ExerciseData {
     'skull crushers': 'Cable Lying Extension',
     'barbell squat': 'Classic Barbell Squat',
     'deadlift': 'Barbell Straight Leg Deadlift',
+
+    // Bench & Chest
+    'dumbbell bench press': 'Dumbbell Hammer Press',
+    'flat dumbbell press': 'Dumbbell Hammer Press',
+    'machine chest press': 'Lever Chest Press',
+    'chest press machine': 'Lever Chest Press',
+    'smith machine bench press': 'Barbell Bench Press',
+    'incline machine chest press': 'Incline Dumbbell Press',
+    'smith incline press': 'Incline Dumbbell Press',
+    'incline barbell bench press': 'Barbell Bench Press',
+    'barbell incline bench press': 'Barbell Bench Press',
+    'push-ups': 'Deep Pushups',
+    'push ups': 'Deep Pushups',
+    'pushups': 'Deep Pushups',
+    'cable chest fly': 'Cable Standing Fly',
+    'cable fly': 'Cable Standing Fly',
+    'pec deck fly': 'Lever Pec Dec Fly',
+    'pec dec fly': 'Lever Pec Dec Fly',
+    'pec deck': 'Lever Pec Dec Fly',
+    'decline bench press': 'Barbell Decline Bench Press',
+
+    // Squat & Legs
+    'hack squat': 'Sled Hack Squat',
+    'goblet squat': 'Dumbbell Goblet Squat',
+    'dumbbell goblet squat': 'Dumbbell Goblet Squat',
+    'bulgarian split squat': 'Dumbbell Single Leg Squat',
+    'split squat': 'Dumbbell Single Leg Squat',
+    'single leg squat': 'Dumbbell Single Leg Squat',
+    'bodyweight squats': 'Classic Barbell Squat',
+    'bodyweight squat': 'Classic Barbell Squat',
+    'air squat': 'Classic Barbell Squat',
+    'front squat': 'Barbell Front Chest Squat',
+    'barbell front squat': 'Barbell Front Chest Squat',
+    'sumo squat': 'Dumbbell Sumo Squat',
+    'dumbbell sumo squat': 'Dumbbell Sumo Squat',
+    'leg press': 'Leg Press',
+    'sled leg press': 'Sled 45 Degree Wide Leg Press',
+    '45 degree leg press': 'Sled 45 Degree Wide Leg Press',
+    'leg extension': 'Leg Extension',
+    'leg curl': 'Lying Leg Curl',
+    'lying leg curl': 'Lying Leg Curl',
+    'seated leg curl': 'Lever Seated Leg Curl',
+    'calf raise': 'Donkey Calf Raise',
+    'standing calf raise': 'Smith Machine Standing Calf Raise',
+    'seated calf raise': 'Dumbbell Seated Calf Raise',
+    'dumbbell walking lunge': 'Dumbbell Lunge',
+    'walking lunge': 'Dumbbell Lunge',
+    'walking lunges': 'Dumbbell Lunge',
+    'dumbbell lunges': 'Dumbbell Lunge',
+    'barbell lunges': 'Barbell Lunge',
+
+    // Deadlift & Back
+    'romanian deadlift': 'Barbell Straight Leg Deadlift',
+    'rdl': 'Barbell Straight Leg Deadlift',
+    'trap bar deadlift': 'Barbell Straight Leg Deadlift',
+    'dumbbell romanian deadlift': 'Barbell Straight Leg Deadlift',
+    'dumbbell rdl': 'Barbell Straight Leg Deadlift',
+    'straight leg deadlift': 'Barbell Straight Leg Deadlift',
+    'stiff leg deadlift': 'Barbell Straight Leg Deadlift',
+    'one-arm dumbbell row': 'Dumbbell Bent Over Row',
+    'single arm dumbbell row': 'Dumbbell Bent Over Row',
+    'dumbbell row': 'Dumbbell Bent Over Row',
+    'bent over row': 'Barbell Underhand Bent Over Row',
+    'chest-supported row': 'Dumbbell Incline Row',
+    'incline dumbbell row': 'Dumbbell Incline Row',
+    't-bar row': 'Lever T-Bar Row',
+    'neutral grip lat pulldown': 'Cable Pulldown',
+    'straight arm pulldown': 'Cable Straight Arm Pulldown',
+    'cable straight arm pulldown': 'Cable Straight Arm Pulldown',
+
+    // Shoulders
+    'dumbbell shoulder press': 'Dumbbell Bench Seated Press',
+    'seated dumbbell press': 'Dumbbell Bench Seated Press',
+    'seated dumbbell shoulder press': 'Dumbbell Bench Seated Press',
+    'seated machine shoulder press': 'Lever Military Press',
+    'machine shoulder press': 'Lever Military Press',
+    'shoulder press': 'Military Press',
+    'lateral raise': 'Dumbbell Seated Lateral Raise',
+    'lateral raises': 'Dumbbell Seated Lateral Raise',
+    'side lateral raise': 'Dumbbell Seated Lateral Raise',
+    'front raise': 'Dumbbell Seated Front Raise',
+    'rear delt fly': 'Dumbbell Rear Lateral Raise',
+    'rear delt row': 'Cable Rear Delt Row',
+    'face pull': 'Cable Rear Delt Row',
+    'shrugs': 'Barbell Shrug',
+    'dumbbell shrugs': 'Dumbbell Shrug',
+
+    // Arms (Biceps & Triceps)
+    'barbell bicep curl': 'Barbell Curl',
+    'barbell biceps curl': 'Barbell Curl',
+    'bicep curl': 'Barbell Curl',
+    'bicep curls': 'Barbell Curl',
+    'hammer curl': 'Dumbbell Crossbody Hammer Curl',
+    'hammer curls': 'Dumbbell Crossbody Hammer Curl',
+    'dumbbell hammer curl': 'Dumbbell Crossbody Hammer Curl',
+    'cable bicep curl': 'Cable Standing Inner Curl',
+    'cable biceps curl': 'Cable Standing Inner Curl',
+    'preacher curl': 'Dumbbell Seated Preacher Curl',
+    'ez bar curl': 'EZ Barbell Biceps Curl',
+    'overhead cable tricep extension': 'Cable Overhead Triceps Extension',
+    'overhead cable triceps extension': 'Cable Overhead Triceps Extension',
+    'tricep extension': 'Cable Pushdown',
+    'triceps extension': 'Cable Pushdown',
+    'tricep dips': 'Bench Dips',
+    'triceps dips': 'Bench Dips',
+    'dips': 'Chest Dips',
+    'close grip bench press': 'Barbell Close Grip Bench Press',
+    'close grip pushups': 'Close Grip Push-up',
+    'close-grip push-ups': 'Close Grip Push-up',
+
+    // Core & Cardio
+    'glute bridge': 'Bridge Pose',
+    'plank': 'Bridge Pose',
+    'leg raise': 'Vertical Leg Raise',
+    'hanging leg raise': 'Vertical Leg Raise',
+    'crunches': 'Twisting Crunch',
+    'sit-ups': 'Flexian Leg Sit Up',
+    'sit ups': 'Flexian Leg Sit Up',
   };
 
   /// Strips optional `[Day]` prefix or suffix tags and trims whitespace.
@@ -2602,6 +2720,27 @@ class ExerciseData {
           return exercise;
         }
             }
+    }
+
+    // Try de-hyphenated alias lookup (e.g. push-ups -> push ups)
+    final dehyphenated = lower.replaceAll('-', ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (dehyphenated != lower) {
+      final dehyphenatedAlias = legacyAliases[dehyphenated];
+      if (dehyphenatedAlias != null) {
+        final aliasLower = dehyphenatedAlias.toLowerCase();
+        for (final exercise in all) {
+          if (exercise.name.toLowerCase() == aliasLower) {
+            return exercise;
+          }
+        }
+      }
+    }
+
+    // Token & keyword search fallback
+    for (final exercise in all) {
+      if (matchesSearchQuery(exercise, normalized)) {
+        return exercise;
+      }
     }
 
     return null;

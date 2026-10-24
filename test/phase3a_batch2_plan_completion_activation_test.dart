@@ -632,6 +632,12 @@ void main() {
               path: Routes.workoutGeneratorRoute,
               builder: (context, state) => const WorkoutGeneratorScreen(),
             ),
+            GoRoute(
+              path: Routes.premiumScreen,
+              builder: (context, state) => const Scaffold(
+                body: Center(child: Text('PremiumScreen')),
+              ),
+            ),
           ],
         );
 
@@ -662,36 +668,15 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // 1. HomeAiRoutineCard shows the advertised goal-personalized activation prompt
-        expect(find.text('Activate Your Gain Muscle Plan'), findsOneWidget);
-        expect(find.text('Review & Activate Plan'), findsOneWidget);
+        // 1. HomeAiRoutineCard shows the starter activation prompt
+        expect(find.text('Activate 3-Day Gain Muscle Plan'), findsOneWidget);
+        expect(find.text('Or tap to activate Free 3-Day Starter Plan'), findsOneWidget);
 
-        // 2. Tap 'Review & Activate Plan' -> navigates to WorkoutGeneratorScreen
-        await tester.tap(find.text('Review & Activate Plan'));
+        // 2. Free user taps 'Or tap to activate Free 3-Day Starter Plan' -> activates default 3-day split without opening AI generator
+        await tester.tap(find.text('Or tap to activate Free 3-Day Starter Plan'));
         await tester.pumpAndSettle();
 
-        expect(find.text('AI Workout Generator'), findsOneWidget);
-        // Onboarding goal 'Gain Muscle' pre-populated 'Muscle Build (Hypertrophy)'
-        expect(find.text('Muscle Build (Hypertrophy)'), findsWidgets);
-
-        // 3. Generate the starter 3-day routine
-        final generateBtn = find.text('GENERATE WEEKLY PLAN');
-        await tester.ensureVisible(generateBtn);
-        await tester.tap(generateBtn);
-        await tester.pump(const Duration(milliseconds: 1300));
-        await tester.pumpAndSettle();
-
-        // 4. First-time free user sees 'Save to Schedule' (NOT 'Save (Pro)')
-        expect(find.text('Save to Schedule'), findsOneWidget);
-        expect(find.text('Save (Pro)'), findsNothing);
-
-        // 5. Tap 'Save to Schedule' to activate the starter routine
-        final saveBtn = find.text('Save to Schedule');
-        await tester.ensureVisible(saveBtn);
-        await tester.tap(saveBtn);
-        await tester.pumpAndSettle();
-
-        // Starter routine and schedule are now active
+        // 3. Starter routine and schedule are now active
         expect(
           workoutProvider.groupedSplitWorkouts.keys.toSet(),
           equals({'Monday', 'Wednesday', 'Friday'}),
@@ -702,24 +687,19 @@ void main() {
         );
         expect(statsProvider.weeklyTarget, 3);
 
-        // 6. Now that an active routine exists, free user sees 'Save (Pro)' and Pro upgrade dialog on subsequent save attempts
-        expect(find.text('Save (Pro)'), findsOneWidget);
-        await tester.tap(find.text('Save (Pro)'));
-        await tester.pumpAndSettle();
-        expect(find.text('Unlock Weekly Routine'), findsOneWidget);
-        await tester.tap(find.text('Maybe Later'));
-        await tester.pumpAndSettle();
-
-        // 7. Return to Home and verify the activated routine is displayed as today's scheduled workout
-        router.pop();
-        await tester.pumpAndSettle();
-
+        // 4. Verify the activated routine is displayed on Home
         expect(
           find.text('3-Day Split (Monday · Wednesday · Friday)'),
           findsOneWidget,
         );
         expect(find.text("TODAY'S TARGET"), findsOneWidget);
         expect(find.text('Wednesday Routine'), findsOneWidget);
+
+        // 5. Subsequent attempts to re-plan by free user navigates to WorkoutGeneratorScreen
+        expect(find.text('Re-plan'), findsOneWidget);
+        await tester.tap(find.text('Re-plan'));
+        await tester.pumpAndSettle();
+        expect(find.byType(WorkoutGeneratorScreen), findsOneWidget);
       },
     );
   });

@@ -1,22 +1,23 @@
-import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:provider/provider.dart';
 
 class PlateCalculatorSheet extends StatefulWidget {
   final double initialWeight;
+  final bool initialIsKg;
   final ValueChanged<double>? onWeightApplied;
 
   const PlateCalculatorSheet({
     super.key,
     this.initialWeight = 60.0,
+    this.initialIsKg = true,
     this.onWeightApplied,
   });
 
   static Future<void> show(
     BuildContext context, {
     double initialWeight = 60.0,
+    bool initialIsKg = true,
     ValueChanged<double>? onWeightApplied,
   }) {
     return showModalBottomSheet(
@@ -25,10 +26,122 @@ class PlateCalculatorSheet extends StatefulWidget {
       backgroundColor: Colors.transparent,
       builder: (ctx) => PlateCalculatorSheet(
         initialWeight: initialWeight,
+        initialIsKg: initialIsKg,
         onWeightApplied: onWeightApplied,
       ),
     );
   }
+
+  /// Evaluates whether an exercise uses a barbell where plate math is meaningful.
+  /// Safely excludes bodyweight, dumbbell, machine, cable, and cardio movements.
+  static bool isBarbellExercise({
+    required String name,
+    String? equipment,
+  }) {
+    final cleanName = name.trim().toLowerCase();
+    final cleanEquip = (equipment ?? '').trim().toLowerCase();
+
+    // 1. Explicit Exclusions: Non-barbell modalities
+    if (cleanName.contains('dumbbell') ||
+        cleanEquip.contains('dumbbell') ||
+        cleanName.contains('kettlebell') ||
+        cleanEquip.contains('kettlebell') ||
+        cleanName.contains('bodyweight') ||
+        cleanEquip.contains('bodyweight') ||
+        cleanName.contains('cable') ||
+        cleanEquip.contains('cable') ||
+        cleanName.contains('machine') ||
+        cleanEquip.contains('machine') ||
+        cleanName.contains('band') ||
+        cleanEquip.contains('band') ||
+        cleanName.contains('running') ||
+        cleanName.contains('walk') ||
+        cleanName.contains('cycling') ||
+        cleanName.contains('jump') ||
+        cleanName.contains('push-up') ||
+        cleanName.contains('push up') ||
+        cleanName.contains('pull-up') ||
+        cleanName.contains('pull up') ||
+        cleanName.contains('chin-up') ||
+        cleanName.contains('chin up') ||
+        cleanName.contains('dip') ||
+        cleanName.contains('crunch') ||
+        cleanName.contains('plank')) {
+      return false;
+    }
+
+    // 2. Equipment check
+    if (cleanEquip.contains('barbell') ||
+        cleanEquip.contains('ez bar') ||
+        cleanEquip.contains('olympic bar')) {
+      return true;
+    }
+
+    // 3. Name check for explicit "barbell" or "ez bar"
+    if (cleanName.contains('barbell') ||
+        cleanName.contains('ez bar') ||
+        cleanName.contains('olympic bar')) {
+      return true;
+    }
+
+    // 4. Recognized standard barbell lifts
+    final standardBarbellLifts = [
+      'deadlift',
+      'bench press',
+      'overhead press',
+      'military press',
+      'back squat',
+      'front squat',
+      'clean and jerk',
+      'power clean',
+      'power snatch',
+      'snatch',
+      'pendlay row',
+      'hip thrust',
+      'good morning',
+      'zercher squat',
+    ];
+
+    for (final lift in standardBarbellLifts) {
+      if (cleanName.contains(lift)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /// Calculates the Olympic/standard plates required per side.
+  static Map<double, int> calculatePlatesPerSide({
+    required double targetWeight,
+    required double barWeight,
+    required bool isKg,
+  }) {
+    final Map<double, int> plateCounts = {};
+    if (targetWeight <= barWeight) return plateCounts;
+
+    double remainingWeightPerSide = (targetWeight - barWeight) / 2.0;
+    final plates = isKg ? _kgPlates : _lbPlates;
+
+    for (final plate in plates) {
+      if (remainingWeightPerSide >= plate) {
+        final count = (remainingWeightPerSide / plate).floor();
+        if (count > 0) {
+          plateCounts[plate] = count;
+          remainingWeightPerSide -= count * plate;
+          // Clean up floating precision
+          remainingWeightPerSide =
+              double.parse(remainingWeightPerSide.toStringAsFixed(3));
+        }
+      }
+    }
+    return plateCounts;
+  }
+
+  // Standard Olympic Plates in kg
+  static const List<double> _kgPlates = [25.0, 20.0, 15.0, 10.0, 5.0, 2.5, 1.25];
+  // Standard Olympic Plates in lbs
+  static const List<double> _lbPlates = [45.0, 35.0, 25.0, 10.0, 5.0, 2.5];
 
   @override
   State<PlateCalculatorSheet> createState() => _PlateCalculatorSheetState();
@@ -36,20 +149,20 @@ class PlateCalculatorSheet extends StatefulWidget {
 
 class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
   late double _targetWeight;
-  double _barWeight = 20.0; // Standard 20kg Olympic Bar
-  bool _isKg = true; // true = kg, false = lbs
-
-  // Standard Olympic Plates in kg
-  static const List<double> _kgPlates = [25.0, 20.0, 15.0, 10.0, 5.0, 2.5, 1.25];
-  // Standard Olympic Plates in lbs
-  static const List<double> _lbPlates = [45.0, 35.0, 25.0, 10.0, 5.0, 2.5];
+  late double _barWeight;
+  late bool _isKg;
 
   late TextEditingController _weightController;
 
   @override
   void initState() {
     super.initState();
-    _targetWeight = widget.initialWeight > 0 ? widget.initialWeight : 60.0;
+    _isKg = widget.initialIsKg;
+    _barWeight = _isKg ? 20.0 : 45.0;
+    _targetWeight = widget.initialWeight > 0
+        ? widget.initialWeight
+        : (_isKg ? 60.0 : 135.0);
+    if (_targetWeight < _barWeight) _targetWeight = _barWeight;
     _weightController = TextEditingController(text: _formatWeight(_targetWeight));
   }
 
@@ -73,24 +186,11 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
 
   // Calculate plates required per side
   Map<double, int> _calculatePlatesPerSide() {
-    final Map<double, int> plateCounts = {};
-    if (_targetWeight <= _barWeight) return plateCounts;
-
-    double remainingWeightPerSide = (_targetWeight - _barWeight) / 2.0;
-    final plates = _isKg ? _kgPlates : _lbPlates;
-
-    for (final plate in plates) {
-      if (remainingWeightPerSide >= plate) {
-        final count = (remainingWeightPerSide / plate).floor();
-        if (count > 0) {
-          plateCounts[plate] = count;
-          remainingWeightPerSide -= count * plate;
-          // Clean up floating precision
-          remainingWeightPerSide = double.parse(remainingWeightPerSide.toStringAsFixed(3));
-        }
-      }
-    }
-    return plateCounts;
+    return PlateCalculatorSheet.calculatePlatesPerSide(
+      targetWeight: _targetWeight,
+      barWeight: _barWeight,
+      isKg: _isKg,
+    );
   }
 
   Color _getPlateColor(double plate) {
@@ -159,7 +259,6 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final subProvider = Provider.of<SubscriptionProvider>(context);
     final platesPerSide = _calculatePlatesPerSide();
     final weightPerSide = (_targetWeight - _barWeight) / 2.0;
 
@@ -203,21 +302,21 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(8.w),
-                      decoration: BoxDecoration(
-                        color: ColorManager.primary.withOpacity(0.15),
-                        shape: BoxShape.circle,
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(8.w),
+                        decoration: BoxDecoration(
+                          color: ColorManager.primary.withOpacity(0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.fitness_center_rounded, color: ColorManager.primary, size: 20.sp),
                       ),
-                      child: Icon(Icons.fitness_center_rounded, color: ColorManager.primary, size: 20.sp),
-                    ),
-                    SizedBox(width: 10.w),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                      SizedBox(width: 10.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Barbell Plate Math',
@@ -227,33 +326,20 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(width: 6.w),
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                              decoration: BoxDecoration(
-                                color: Colors.amber.shade700,
-                                borderRadius: BorderRadius.circular(4.r),
-                              ),
-                              child: Text(
-                                'PRO TOOL',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 9.sp,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
+                            Text(
+                              'Visual Olympic plate calculator per side',
+                              style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
-                        Text(
-                          'Visual Olympic plate calculator per side',
-                          style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
-                        ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
                 IconButton(
+                  key: const Key('plate_calculator_close_button'),
                   icon: const Icon(Icons.close_rounded, color: Colors.white54),
                   onPressed: () => Navigator.pop(context),
                 ),
@@ -276,11 +362,11 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStatItem('Total Weight', '${_formatWeight(_targetWeight)} ${_isKg ? 'kg' : 'lbs'}', ColorManager.primary),
+                  Expanded(child: _buildStatItem('Total Weight', '${_formatWeight(_targetWeight)} ${_isKg ? 'kg' : 'lbs'}', ColorManager.primary)),
                   Container(height: 30.h, width: 1, color: Colors.white12),
-                  _buildStatItem('Bar Weight', '${_formatWeight(_barWeight)} ${_isKg ? 'kg' : 'lbs'}', Colors.white70),
+                  Expanded(child: _buildStatItem('Bar Weight', '${_formatWeight(_barWeight)} ${_isKg ? 'kg' : 'lbs'}', Colors.white70)),
                   Container(height: 30.h, width: 1, color: Colors.white12),
-                  _buildStatItem('Per Side', '${_formatWeight(weightPerSide > 0 ? weightPerSide : 0)} ${_isKg ? 'kg' : 'lbs'}', Colors.amberAccent),
+                  Expanded(child: _buildStatItem('Per Side', '${_formatWeight(weightPerSide > 0 ? weightPerSide : 0)} ${_isKg ? 'kg' : 'lbs'}', Colors.amberAccent)),
                 ],
               ),
             ),
@@ -397,11 +483,11 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
               children: [
                 Text('Bar:', style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp, fontWeight: FontWeight.bold)),
                 SizedBox(width: 8.w),
-                _buildBarOption(20.0, _isKg ? 'Olympic (20kg)' : 'Standard (45lb)'),
+                _buildBarOption(_isKg ? 20.0 : 45.0, _isKg ? 'Olympic (20kg)' : 'Standard (45lb)'),
                 SizedBox(width: 6.w),
-                _buildBarOption(15.0, _isKg ? 'Women (15kg)' : 'Women (35lb)'),
+                _buildBarOption(_isKg ? 15.0 : 35.0, _isKg ? 'Women (15kg)' : 'Women (35lb)'),
                 SizedBox(width: 6.w),
-                _buildBarOption(10.0, _isKg ? 'EZ Bar (10kg)' : 'EZ Bar (25lb)'),
+                _buildBarOption(_isKg ? 10.0 : 25.0, _isKg ? 'EZ Bar (10kg)' : 'EZ Bar (25lb)'),
               ],
             ),
             SizedBox(height: 20.h),
@@ -409,6 +495,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
             // Action Buttons
             if (widget.onWeightApplied != null)
               ElevatedButton.icon(
+                key: const Key('plate_calculator_apply_button'),
                 onPressed: () {
                   widget.onWeightApplied!(_targetWeight);
                   Navigator.pop(context);
@@ -560,9 +647,9 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
   Widget _buildStatItem(String label, String value, Color valueColor) {
     return Column(
       children: [
-        Text(label, style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp)),
+        Text(label, textAlign: TextAlign.center, style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp)),
         SizedBox(height: 4.h),
-        Text(value, style: TextStyle(color: valueColor, fontSize: 15.sp, fontWeight: FontWeight.bold)),
+        Text(value, textAlign: TextAlign.center, style: TextStyle(color: valueColor, fontSize: 15.sp, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -633,7 +720,15 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
     final isSelected = _barWeight == weight;
     return Expanded(
       child: InkWell(
-        onTap: () => setState(() => _barWeight = weight),
+        onTap: () {
+          setState(() {
+            _barWeight = weight;
+            if (_targetWeight < _barWeight) {
+              _targetWeight = _barWeight;
+              _weightController.text = _formatWeight(_targetWeight);
+            }
+          });
+        },
         borderRadius: BorderRadius.circular(8.r),
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 6.h),

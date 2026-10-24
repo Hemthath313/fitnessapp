@@ -3,6 +3,8 @@ import 'package:fitness_app/presentation/home/widgets/carousel_slider_home_widge
 import 'package:fitness_app/presentation/home/widgets/fitness_data_widget.dart';
 import 'package:fitness_app/presentation/home/widgets/home_page_text_spacer_widget.dart';
 import 'package:fitness_app/presentation/home/widgets/quick_actions_widget.dart';
+import 'package:fitness_app/presentation/home/widgets/recent_prs_widget.dart';
+import 'package:fitness_app/presentation/home/widgets/streak_calendar_widget.dart';
 import 'package:fitness_app/presentation/home/widgets/achievements_widget.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
@@ -57,23 +59,32 @@ class _HomePageState extends State<HomePage> {
           children: [
             SizedBox(height: SizeManager.s8.h),
 
-            // AI Routine Hero Banner — Primary action for today's workout
+            // 1. Next Workout Hero Banner — Primary action for today's training
             const HomeAiRoutineCard(),
             SizedBox(height: SizeManager.s12.h),
 
-            // Quick Actions — Fast utilities below primary workout focus
+            // 2. Weekly Consistency — Habit tracking and streak calendar
+            const StreakCalendarWidget(),
+            SizedBox(height: SizeManager.s12.h),
+
+            // 3. Quick Actions — Fast utilities below primary workout focus
             const QuickActionsWidget(),
             SizedBox(height: SizeManager.s16.h),
 
-            // Today's Progress — Calories, Water, BMI
+            // 4. Fitness Data — Daily Calorie Tracker, Water, BMI
             FitnessDataWidget(),
             SizedBox(height: SizeManager.s16.h),
 
-            // Challenges Carousel
+            // 5. Recent PRs & Strength Progress — Real personal records and 1RMs
+            const RecentPRsWidget(),
+            SizedBox(height: SizeManager.s16.h),
+
+            // 6. Challenges — Verified challenges without promotional splits clutter
             const HomePageTextSpacerWidget(
               title: StringsManager.challenges,
             ),
             const CarouselSliderHomeWidget(),
+            SizedBox(height: SizeManager.s16.h),
 
             const PremiumAwareBannerAd(pageName: 'home', bottomMargin: 60.0),
             SizedBox(height: SizeManager.s16.h),
