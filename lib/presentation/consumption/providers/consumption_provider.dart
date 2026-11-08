@@ -14,6 +14,16 @@ class ConsumptionProvider with ChangeNotifier {
   double kCalaDay = 0.0;
   double waterADay = 0.0;
   int consumedCalories = 0;
+  double _waterGoalLiters = 2.5;
+
+  double get waterGoalLiters => _waterGoalLiters;
+
+  void setWaterGoal(double liters) {
+    if (liters > 0) {
+      _waterGoalLiters = liters;
+      notifyListeners();
+    }
+  }
 
   List<MealModel> get meals {
     return [..._meals];

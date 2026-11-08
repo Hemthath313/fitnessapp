@@ -159,6 +159,34 @@ class _HomePageAppBarWidgetState extends State<HomePageAppBarWidget> {
                 size: SizeManager.s26,
               ),
             ),
+            // Profile access button
+            GestureDetector(
+              key: const Key('appbar_profile_button'),
+              onTap: () => context.push(Routes.addDataRoute),
+              child: Container(
+                margin: EdgeInsets.only(right: 6.w),
+                width: 32.w,
+                height: 32.w,
+                decoration: BoxDecoration(
+                  color: ColorManager.primary.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: ColorManager.primary.withValues(alpha: 0.3),
+                    width: 1.2,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    displayName.isNotEmpty ? displayName[0].toUpperCase() : 'U',
+                    style: TextStyle(
+                      color: ColorManager.primary,
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
             SizedBox(width: 4.w),
           ],
           centerTitle: false,
@@ -173,26 +201,30 @@ class _HomePageAppBarWidgetState extends State<HomePageAppBarWidget> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '${_getGreeting()}, $displayName ${_getGreetingEmoji()}',
-                  style: TextStyle(
-                    color: ColorManager.textPrimary,
-                    fontSize: 17.sp,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.3,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '${_getGreeting()}, $displayName ${_getGreetingEmoji()}',
+                    style: TextStyle(
+                      color: ColorManager.textPrimary,
+                      fontSize: 17.sp,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.3,
+                    ),
                   ),
                 ),
                 SizedBox(height: 2.h),
-                Text(
-                  streak > 0
-                      ? '🔥 $streak-day streak — keep it going!'
-                      : 'Start your streak today!',
-                  style: TextStyle(
-                    color: streak > 0
-                        ? Colors.orange.shade600
-                        : ColorManager.textSecondary,
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w500,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Your daily fitness companion',
+                    style: TextStyle(
+                      color: ColorManager.textSecondary,
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ],

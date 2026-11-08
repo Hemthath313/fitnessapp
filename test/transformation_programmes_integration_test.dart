@@ -626,7 +626,7 @@ void main() {
       });
 
       await tester.pumpWidget(_wrapWidget(
-        child: const Scaffold(body: SingleChildScrollView(child: DashboardChallengeSection())),
+        child: const Scaffold(body: SingleChildScrollView(child: DashboardChallengeSection(suppressActiveTransformation: false))),
         homeProvider: homeProvider,
         transformationProvider: transformationProvider,
       ));
@@ -642,7 +642,7 @@ void main() {
       });
 
       await tester.pumpWidget(_wrapWidget(
-        child: const Scaffold(body: SingleChildScrollView(child: DashboardChallengeSection())),
+        child: const Scaffold(body: SingleChildScrollView(child: DashboardChallengeSection(suppressActiveTransformation: false))),
         homeProvider: homeProvider,
         transformationProvider: transformationProvider,
       ));
@@ -660,7 +660,7 @@ void main() {
       );
 
       await tester.pumpWidget(_wrapWidget(
-        child: const Scaffold(body: SingleChildScrollView(child: DashboardChallengeSection())),
+        child: const Scaffold(body: SingleChildScrollView(child: DashboardChallengeSection(suppressActiveTransformation: false))),
         homeProvider: homeProvider,
         transformationProvider: transformationProvider,
       ));
@@ -777,7 +777,7 @@ void main() {
       );
 
       await tester.pumpWidget(_wrapWidget(
-        child: const Scaffold(body: SingleChildScrollView(child: DashboardChallengeSection())),
+        child: const Scaffold(body: SingleChildScrollView(child: DashboardChallengeSection(suppressActiveTransformation: false))),
         transformationProvider: provider,
       ));
       await tester.pumpAndSettle();

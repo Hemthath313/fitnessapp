@@ -1,4 +1,5 @@
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
+import 'package:fitness_app/presentation/home/widgets/streak_calendar_widget.dart';
 import 'package:fitness_app/presentation/progress/widgets/adaptive_strength_summary_card.dart';
 import 'package:fitness_app/presentation/profile/providers/profile_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
@@ -231,6 +232,9 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
               const AdaptiveStrengthSummaryCard(),
               SizedBox(height: 20.h),
 
+              // Weekly Consistency & Streak Calendar
+              const StreakCalendarWidget(),
+              SizedBox(height: 20.h),
 
               // Timeframe Tabs selector
               Container(
@@ -310,61 +314,67 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                             ),
                           ],
                         ),
-                        Row(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-                              decoration: BoxDecoration(
-                                color: weightDelta <= 0
-                                    ? ColorManager.primary.withOpacity(0.12)
-                                    : Colors.orange.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(12.r),
-                                border: Border.all(
-                                  color: weightDelta <= 0 ? ColorManager.primary.withOpacity(0.3) : Colors.orange.withOpacity(0.3),
-                                ),
-                              ),
-                              child: Text(
-                                '${weightDelta >= 0 ? '+' : ''}${weightDelta.toStringAsFixed(1)} kg',
-                                style: TextStyle(
-                                  color: weightDelta <= 0 ? ColorManager.primary : Colors.orange,
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 10.w),
-                            GestureDetector(
-                              onTap: () => context.push(Routes.changeWeightRoute),
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                                decoration: BoxDecoration(
-                                  color: ColorManager.primary.withOpacity(0.12),
-                                  borderRadius: BorderRadius.circular(12.r),
-                                  border: Border.all(
-                                    color: ColorManager.primary.withOpacity(0.3),
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerRight,
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                                  decoration: BoxDecoration(
+                                    color: weightDelta <= 0
+                                        ? ColorManager.primary.withOpacity(0.12)
+                                        : Colors.orange.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(12.r),
+                                    border: Border.all(
+                                      color: weightDelta <= 0 ? ColorManager.primary.withOpacity(0.3) : Colors.orange.withOpacity(0.3),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    '${weightDelta >= 0 ? '+' : ''}${weightDelta.toStringAsFixed(1)} kg',
+                                    style: TextStyle(
+                                      color: weightDelta <= 0 ? ColorManager.primary : Colors.orange,
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.add_rounded,
-                                      color: ColorManager.primary,
-                                      size: 16.sp,
-                                    ),
-                                    SizedBox(width: 4.w),
-                                    Text(
-                                      'Log',
-                                      style: TextStyle(
-                                        color: ColorManager.primary,
-                                        fontSize: 12.sp,
-                                        fontWeight: FontWeight.bold,
+                                SizedBox(width: 10.w),
+                                GestureDetector(
+                                  onTap: () => context.push(Routes.changeWeightRoute),
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                                    decoration: BoxDecoration(
+                                      color: ColorManager.primary.withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(12.r),
+                                      border: Border.all(
+                                        color: ColorManager.primary.withOpacity(0.3),
                                       ),
                                     ),
-                                  ],
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.add_rounded,
+                                          color: ColorManager.primary,
+                                          size: 16.sp,
+                                        ),
+                                        SizedBox(width: 4.w),
+                                        Text(
+                                          'Log',
+                                          style: TextStyle(
+                                            color: ColorManager.primary,
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
@@ -472,14 +482,19 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Body Measurements',
-                    style: TextStyle(
-                      color: ColorManager.white,
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Text(
+                      'Body Measurements',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: ColorManager.white,
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
+                  SizedBox(width: 8.w),
                   GestureDetector(
                     onTap: () => context.push(Routes.changeMeasurementsRoute),
                     child: Text(

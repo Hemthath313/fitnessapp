@@ -17,10 +17,12 @@ import 'package:fitness_app/utils/router/router.dart';
 /// or a featured challenge card when no plan is active, plus the preserved mini-challenge carousel.
 class DashboardChallengeSection extends StatelessWidget {
   final TransformationPlanBlueprint? overrideRecommendedPlanForTesting;
+  final bool suppressActiveTransformation;
 
   const DashboardChallengeSection({
     super.key,
     this.overrideRecommendedPlanForTesting,
+    this.suppressActiveTransformation = true,
   });
 
   /// Selects the recommended programme using the user's actual onboarding information:
@@ -175,17 +177,32 @@ class DashboardChallengeSection extends StatelessWidget {
                 getRecommendedProgramme(userData: homeProvider?.userData);
 
             if (provider == null) {
-              return _buildFeaturedChallengeCard(context, featured);
+              return Padding(
+                padding: EdgeInsets.only(bottom: 14.h),
+                child: _buildFeaturedChallengeCard(context, featured),
+              );
             }
 
             if (provider.isLoading) {
-              return _buildLoadingPlaceholder();
+              return Padding(
+                padding: EdgeInsets.only(bottom: 14.h),
+                child: _buildLoadingPlaceholder(),
+              );
             }
 
+            // Phase 3 Deduplication: The active transformation is already prominently
+            // displayed in HomeAiRoutineCard (the primary workout hero). Suppress the
+            // duplicate active challenge card here to avoid redundant presentation.
             if (provider.hasActiveTransformation) {
-              return _buildActiveChallengeCard(
-                context,
-                provider.activeTransformation!,
+              if (suppressActiveTransformation) {
+                return const SizedBox.shrink();
+              }
+              return Padding(
+                padding: EdgeInsets.only(bottom: 14.h),
+                child: _buildActiveChallengeCard(
+                  context,
+                  provider.activeTransformation!,
+                ),
               );
             }
 
@@ -193,17 +210,22 @@ class DashboardChallengeSection extends StatelessWidget {
             final hasCompleted = provider.history.isNotEmpty &&
                 provider.history.first.status == 'completed';
             if (hasCompleted) {
-              return _buildCompletedChallengeCard(
-                context,
-                provider.history.first,
+              return Padding(
+                padding: EdgeInsets.only(bottom: 14.h),
+                child: _buildCompletedChallengeCard(
+                  context,
+                  provider.history.first,
+                ),
               );
             }
 
             // Default: No active transformation -> Featured Recommended Challenge Card
-            return _buildFeaturedChallengeCard(context, featured);
+            return Padding(
+              padding: EdgeInsets.only(bottom: 14.h),
+              child: _buildFeaturedChallengeCard(context, featured),
+            );
           },
         ),
-        SizedBox(height: 14.h),
 
         // 3. Preserved Mini-Challenges & Technique Carousel (30-Day Six Pack & Weekly Technique)
         Padding(

@@ -47,6 +47,11 @@ class TransformationProvider with ChangeNotifier {
       return sub.isPremium;
     }
 
+    // In unit testing environments using userIdOverrideForTesting:
+    if (userIdOverrideForTesting != null) {
+      return defaultEntitlementForTesting;
+    }
+
     final uid = _uid;
     if (uid != null && uid.isNotEmpty) {
       try {
@@ -70,10 +75,6 @@ class TransformationProvider with ChangeNotifier {
       } catch (e) {
         debugPrint('TransformationProvider: Error reading cached subscription: $e');
       }
-    }
-
-    if (userIdOverrideForTesting != null) {
-      return defaultEntitlementForTesting;
     }
 
     return false;

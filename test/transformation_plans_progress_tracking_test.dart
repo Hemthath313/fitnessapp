@@ -446,7 +446,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrapWithScreenUtil(
-          child: const Material(child: SingleChildScrollView(child: DashboardChallengeSection())),
+          child: const Material(child: SingleChildScrollView(child: DashboardChallengeSection(suppressActiveTransformation: false))),
           transformationProvider: provider,
         ),
       );
@@ -467,7 +467,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrapWithScreenUtil(
-          child: const Material(child: SingleChildScrollView(child: DashboardChallengeSection())),
+          child: const Material(child: SingleChildScrollView(child: DashboardChallengeSection(suppressActiveTransformation: false))),
           transformationProvider: provider,
         ),
       );

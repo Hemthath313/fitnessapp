@@ -45,6 +45,12 @@ class HomeProvider with ChangeNotifier {
           if (data['fitness_level'] != null) _userData['fitness_level'] = data['fitness_level'];
           if (data['fitnessLevel'] != null) _userData['fitnessLevel'] = data['fitnessLevel'];
           if (data['level'] != null) _userData['level'] = data['level'];
+          if (data['targetCalories'] != null) _userData['targetCalories'] = (data['targetCalories'] as num).toDouble();
+          if (data['target_calories'] != null) _userData['target_calories'] = (data['target_calories'] as num).toDouble();
+          if (data['calorieGoal'] != null) _userData['calorieGoal'] = (data['calorieGoal'] as num).toDouble();
+          if (data['tdee'] != null) _userData['tdee'] = (data['tdee'] as num).toDouble();
+          if (data['waterGoal'] != null) _userData['waterGoal'] = (data['waterGoal'] as num).toDouble();
+          if (data['dailyWaterTarget'] != null) _userData['dailyWaterTarget'] = (data['dailyWaterTarget'] as num).toDouble();
         } else {
           // Return empty data if document doesn't exist
           _userData.clear();

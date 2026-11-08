@@ -79,93 +79,116 @@ class CarouselHomeBox extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                            decoration: BoxDecoration(
-                              color: ColorManager.primary.withOpacity(0.9),
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                            child: Text(
-                              badge.toUpperCase(),
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 9.sp,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
+                          Flexible(
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                              decoration: BoxDecoration(
+                                color: ColorManager.primary.withValues(alpha: 0.9),
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              child: Text(
+                                badge.toUpperCase(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9.sp,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
                               ),
                             ),
                           ),
-                          if (actionText != null)
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.5),
-                                borderRadius: BorderRadius.circular(12.r),
-                                border: Border.all(color: Colors.white24),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    actionText!,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10.sp,
-                                      fontWeight: FontWeight.w600,
+                          if (actionText != null) ...[
+                            SizedBox(width: 8.w),
+                            Flexible(
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.5),
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  border: Border.all(color: Colors.white24),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        actionText!,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10.sp,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(width: 4.w),
-                                  Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 11.sp),
-                                ],
+                                    SizedBox(width: 4.w),
+                                    Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 11.sp),
+                                  ],
+                                ),
                               ),
                             ),
+                          ],
                         ],
                       ),
                       // Bottom row: Title + Subtitle + Optional Progress bar
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            title,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
-                              height: 1.2,
-                              shadows: [
-                                Shadow(
-                                  blurRadius: 6,
-                                  color: Colors.black.withOpacity(0.8),
-                                  offset: const Offset(0, 1),
+                      Flexible(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                title,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.bold,
+                                  height: 1.2,
+                                  shadows: [
+                                    Shadow(
+                                      blurRadius: 6,
+                                      color: Colors.black.withOpacity(0.8),
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
-                          if (subtitle != null) ...[
-                            SizedBox(height: 3.h),
-                            Text(
-                              subtitle!,
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.85),
-                                fontSize: 11.sp,
-                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ],
-                          if (progress != null) ...[
-                            SizedBox(height: 8.h),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(4.r),
-                              child: LinearProgressIndicator(
-                                value: progress!.clamp(0.0, 1.0),
-                                minHeight: 4.h,
-                                backgroundColor: Colors.white24,
-                                valueColor: AlwaysStoppedAnimation<Color>(ColorManager.primary),
+                            if (subtitle != null) ...[
+                              SizedBox(height: 2.h),
+                              Flexible(
+                                child: Text(
+                                  subtitle!,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.85),
+                                    fontSize: 11.sp,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
+                            if (progress != null) ...[
+                              SizedBox(height: 6.h),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(4.r),
+                                child: LinearProgressIndicator(
+                                  value: progress!.clamp(0.0, 1.0),
+                                  minHeight: 4.h,
+                                  backgroundColor: Colors.white24,
+                                  valueColor: AlwaysStoppedAnimation<Color>(ColorManager.primary),
+                                ),
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                     ],
                   ),

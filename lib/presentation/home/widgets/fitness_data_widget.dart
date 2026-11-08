@@ -8,13 +8,153 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:provider/provider.dart';
+import 'package:fitness_app/presentation/transformation_plans/providers/transformation_provider.dart';
+import 'package:fitness_app/utils/tdee_calculator.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 
+class CalorieGoalInfo {
+  final double? targetCalories;
+  final bool hasValidTarget;
+  final String sourceDescription;
+
+  const CalorieGoalInfo({
+    this.targetCalories,
+    required this.hasValidTarget,
+    required this.sourceDescription,
+  });
+}
+
 class FitnessDataWidget extends StatefulWidget {
+  final bool compact;
+
   const FitnessDataWidget({
     super.key,
+    this.compact = false,
   });
+
+  /// Static helper to resolve calorie goal according to Phase 1 data accuracy rules.
+  static CalorieGoalInfo resolveCalorieGoal({
+    required BuildContext context,
+    required Map<String, dynamic> userData,
+  }) {
+    // Priority 1: Active transformation personalized calorie target
+    final transformationProvider =
+        Provider.of<TransformationProvider?>(context, listen: false);
+    if (transformationProvider != null &&
+        transformationProvider.hasActiveTransformation &&
+        transformationProvider.activeTransformation != null &&
+        transformationProvider.activeTransformation!.targetCalories > 0) {
+      return CalorieGoalInfo(
+        targetCalories:
+            transformationProvider.activeTransformation!.targetCalories,
+        hasValidTarget: true,
+        sourceDescription: 'Transformation Target',
+      );
+    }
+
+    // Priority 2: Configured user calorie target
+    final configuredTarget = (userData['targetCalories'] as num?)?.toDouble() ??
+        (userData['target_calories'] as num?)?.toDouble() ??
+        (userData['calorieGoal'] as num?)?.toDouble();
+    if (configuredTarget != null && configuredTarget > 0) {
+      return CalorieGoalInfo(
+        targetCalories: configuredTarget,
+        hasValidTarget: true,
+        sourceDescription: 'Daily Goal',
+      );
+    }
+
+    // Priority 3: Existing TDEE calculation and appropriate activity factor
+    final tdeeVal = (userData['tdee'] as num?)?.toDouble();
+    final goal = (userData['goal'] as String?) ?? '';
+    final gender = (userData['gender'] as String?) ?? '';
+
+    if (tdeeVal != null && tdeeVal > 0) {
+      final target = TDEECalculator.calculateTargetCalories(
+        tdee: tdeeVal,
+        goal: goal,
+        gender: gender.isNotEmpty ? gender : 'Male',
+      );
+      if (target > 0) {
+        return CalorieGoalInfo(
+          targetCalories: target,
+          hasValidTarget: true,
+          sourceDescription: 'TDEE Target',
+        );
+      }
+    }
+
+    // TDEE calculation from user biometric parameters
+    final weight = (userData['weight'] as num?)?.toDouble() ?? 0.0;
+    final height = (userData['height'] as num?)?.toDouble() ?? 0.0;
+    final age = (userData['age'] as num?)?.toInt() ?? 0;
+    final activity = (userData['activity'] as String?) ?? '';
+
+    if (weight > 0 && height > 0 && age > 0 && gender.isNotEmpty) {
+      final calculatedTdee = TDEECalculator.calculateTDEE(
+        gender: gender,
+        weightKg: weight,
+        heightCm: height,
+        age: age,
+        activityLevel: activity.isNotEmpty ? activity : 'MODERATE',
+      );
+      final target = TDEECalculator.calculateTargetCalories(
+        tdee: calculatedTdee,
+        goal: goal,
+        gender: gender,
+      );
+      if (target > 0) {
+        return CalorieGoalInfo(
+          targetCalories: target,
+          hasValidTarget: true,
+          sourceDescription: 'TDEE Target',
+        );
+      }
+    }
+
+    // Priority 4: Missing target state - honest unavailable/setup state
+    return const CalorieGoalInfo(
+      targetCalories: null,
+      hasValidTarget: false,
+      sourceDescription: 'Target Not Set',
+    );
+  }
+
+  /// Static helper to resolve water goal according to Phase 1 dynamic water rules.
+  static double resolveWaterGoal({
+    required BuildContext context,
+    required ConsumptionProvider consumptionProvider,
+    required Map<String, dynamic> userData,
+  }) {
+    // 1. Active transformation daily water target (ml to L)
+    final transformationProvider =
+        Provider.of<TransformationProvider?>(context, listen: false);
+    if (transformationProvider != null &&
+        transformationProvider.hasActiveTransformation &&
+        transformationProvider.activeTransformation != null &&
+        transformationProvider.activeTransformation!.dailyWaterTargetMl > 0) {
+      return transformationProvider
+              .activeTransformation!.dailyWaterTargetMl /
+          1000.0;
+    }
+
+    // 2. Custom water goal on ConsumptionProvider
+    if (consumptionProvider.waterGoalLiters > 0 &&
+        consumptionProvider.waterGoalLiters != 2.5) {
+      return consumptionProvider.waterGoalLiters;
+    }
+
+    // 3. User profile configured water goal (userData)
+    final userWaterGoal = (userData['waterGoal'] as num?)?.toDouble() ??
+        (userData['dailyWaterTarget'] as num?)?.toDouble();
+    if (userWaterGoal != null && userWaterGoal > 0) {
+      return userWaterGoal > 100 ? (userWaterGoal / 1000.0) : userWaterGoal;
+    }
+
+    // 4. Default fallback: 2.5 L
+    return 2.5;
+  }
 
   @override
   State<FitnessDataWidget> createState() => _FitnessDataWidgetState();
@@ -30,6 +170,26 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
     _userDataFuture = homeProvider.fetchUserData();
   }
+
+  CalorieGoalInfo _resolveCalorieGoal({
+    required BuildContext context,
+    required Map<String, dynamic> userData,
+  }) =>
+      FitnessDataWidget.resolveCalorieGoal(
+        context: context,
+        userData: userData,
+      );
+
+  double _resolveWaterGoal({
+    required BuildContext context,
+    required ConsumptionProvider consumptionProvider,
+    required Map<String, dynamic> userData,
+  }) =>
+      FitnessDataWidget.resolveWaterGoal(
+        context: context,
+        consumptionProvider: consumptionProvider,
+        userData: userData,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -98,8 +258,26 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
             } else {
               // Safe null checks for user data
               final userData = effectiveData;
-              final bmrVal = userData['bmr'] as double? ?? 0.0;
-              final bmr = bmrVal == 0.0 ? 2000.0 : bmrVal;
+              final calorieInfo = _resolveCalorieGoal(context: context, userData: userData);
+              final hasTarget = calorieInfo.hasValidTarget;
+              final targetCalories = calorieInfo.targetCalories ?? 0.0;
+              final consumedCalories = consumptionProvider.consumedCalories;
+              final remainingCalories = hasTarget
+                  ? (targetCalories - consumedCalories).clamp(0.0, double.infinity)
+                  : 0.0;
+              final caloriePercent = (hasTarget && targetCalories > 0
+                      ? (consumedCalories / targetCalories)
+                      : 0.0)
+                  .clamp(0.0, 1.0);
+
+              final waterGoal = _resolveWaterGoal(
+                context: context,
+                consumptionProvider: consumptionProvider,
+                userData: userData,
+              );
+              final consumedWater = consumptionProvider.waterADay;
+              final waterPercent = (waterGoal > 0 ? (consumedWater / waterGoal) : 0.0).clamp(0.0, 1.0);
+
               final bmi = userData['bmi'] as double? ?? 0.0;
               Color getProgressColor(double bmi) {
                 var isNormalBMI = bmi >= 18.5 && bmi <= 25;
@@ -207,63 +385,116 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                               circularStrokeCap: CircularStrokeCap.round,
                               radius: 50.r,
                               lineWidth: 9.w,
-                              percent: (bmr > 0 ? (consumptionProvider.consumedCalories / bmr) : 0.0).clamp(0.0, 1.0),
+                              percent: caloriePercent,
                               progressColor: isDarkMode ? ColorManager.primary : Colors.white,
                               backgroundColor: isDarkMode ? Colors.white10 : Colors.white24,
                               animateFromLastPercent: true,
                               animation: true,
                               center: Column(
+                                mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    consumptionProvider.consumedCalories.toString(),
-                                    style: TextStyle(
-                                      color: textColor,
-                                      fontSize: 20.sp,
-                                      fontWeight: FontWeight.bold,
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      consumedCalories.toString(),
+                                      style: TextStyle(
+                                        color: textColor,
+                                        fontSize: 20.sp,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
-                                  Text(
-                                    "/ ${bmr.toStringAsFixed(0)} kcal",
-                                    style: TextStyle(
-                                      color: calorieSmallLabelText,
-                                      fontSize: 10.sp,
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      hasTarget
+                                          ? "/ ${targetCalories.toStringAsFixed(0)} kcal"
+                                          : "/ -- kcal",
+                                      style: TextStyle(
+                                        color: calorieSmallLabelText,
+                                        fontSize: 10.sp,
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
                             // Right Side: Metrics List
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildCalorieMetric(
-                                  label: "Consumed",
-                                  value: "${consumptionProvider.consumedCalories} kcal",
-                                  dotColor: isDarkMode ? const Color(0xFF93C5FD) : const Color(0xFFEAF1FF), 
-                                  textColor: calorieSecondaryText,
-                                  valueColor: textColor,
-                                ),
-                                SizedBox(height: 10.h),
-                                _buildCalorieMetric(
-                                  label: "Remaining",
-                                  value: "${(bmr - consumptionProvider.consumedCalories).clamp(0.0, double.infinity).toStringAsFixed(0)} kcal",
-                                  dotColor: isDarkMode ? const Color(0xFF60A5FA) : const Color(0xFFDCE7FF),
-                                  textColor: calorieSecondaryText,
-                                  valueColor: textColor,
-                                ),
-                                SizedBox(height: 10.h),
-                                _buildCalorieMetric(
-                                  label: "Goal",
-                                  value: "${bmr.toStringAsFixed(0)} kcal",
-                                  dotColor: isDarkMode ? ColorManager.primary : Colors.white,
-                                  textColor: calorieSecondaryText,
-                                  valueColor: textColor,
-                                ),
-                              ],
+                            Flexible(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildCalorieMetric(
+                                    label: "Consumed",
+                                    value: "$consumedCalories kcal",
+                                    dotColor: isDarkMode ? const Color(0xFF93C5FD) : const Color(0xFFEAF1FF), 
+                                    textColor: calorieSecondaryText,
+                                    valueColor: textColor,
+                                  ),
+                                  SizedBox(height: 10.h),
+                                  _buildCalorieMetric(
+                                    label: "Remaining",
+                                    value: hasTarget
+                                        ? "${remainingCalories.toStringAsFixed(0)} kcal"
+                                        : "--",
+                                    dotColor: isDarkMode ? const Color(0xFF60A5FA) : const Color(0xFFDCE7FF),
+                                    textColor: calorieSecondaryText,
+                                    valueColor: textColor,
+                                  ),
+                                  SizedBox(height: 10.h),
+                                  _buildCalorieMetric(
+                                    label: "Goal",
+                                    value: hasTarget
+                                        ? "${targetCalories.toStringAsFixed(0)} kcal"
+                                        : "Not Set",
+                                    dotColor: isDarkMode ? ColorManager.primary : Colors.white,
+                                    textColor: calorieSecondaryText,
+                                    valueColor: textColor,
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
+                        if (!hasTarget) ...[
+                          SizedBox(height: 12.h),
+                          GestureDetector(
+                            onTap: () => context.push(Routes.changeWeightRoute),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                              decoration: BoxDecoration(
+                                color: (isDarkMode ? Colors.white : Colors.black).withAlpha(15),
+                                borderRadius: BorderRadius.circular(8.r),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.tune_rounded,
+                                      size: 13.sp,
+                                      color: isDarkMode ? ColorManager.primary : Colors.white),
+                                  SizedBox(width: 6.w),
+                                  Flexible(
+                                    child: Text(
+                                      'Set daily calorie target in Profile',
+                                      style: TextStyle(
+                                        color: isDarkMode ? ColorManager.primary : Colors.white,
+                                        fontSize: 11.sp,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  SizedBox(width: 4.w),
+                                  Icon(Icons.arrow_forward_ios_rounded,
+                                      size: 9.sp,
+                                      color: isDarkMode ? ColorManager.primary : Colors.white),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -306,45 +537,57 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                                       height: 48.h,
                                       child: CustomPaint(
                                         painter: _WaterGlassPainter(
-                                          fillPercent: (consumptionProvider.waterADay / 2.5),
+                                          fillPercent: waterPercent,
                                           isDarkMode: isDarkMode,
                                         ),
                                       ),
                                     ),
-                                    SizedBox(width: 14.w),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          crossAxisAlignment: CrossAxisAlignment.end,
-                                          children: [
-                                            Text(
-                                              consumptionProvider.waterADay.toStringAsFixed(1),
-                                              style: TextStyle(
-                                                color: lightThemeTextColor,
-                                                fontSize: 22.sp,
-                                                fontWeight: FontWeight.bold,
+                                    SizedBox(width: 10.w),
+                                    Flexible(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            crossAxisAlignment: CrossAxisAlignment.end,
+                                            children: [
+                                              Flexible(
+                                                child: FittedBox(
+                                                  fit: BoxFit.scaleDown,
+                                                  alignment: Alignment.centerLeft,
+                                                  child: Text(
+                                                    consumedWater.toStringAsFixed(1),
+                                                    style: TextStyle(
+                                                      color: lightThemeTextColor,
+                                                      fontSize: 22.sp,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                            SizedBox(width: 2.w),
-                                            Text(
-                                              "L",
-                                              style: TextStyle(
-                                                color: lightThemeTextColor,
-                                                fontSize: 13.sp,
-                                                fontWeight: FontWeight.bold,
+                                              SizedBox(width: 2.w),
+                                              Text(
+                                                "L",
+                                                style: TextStyle(
+                                                  color: lightThemeTextColor,
+                                                  fontSize: 13.sp,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                        Text(
-                                          "/ 2.5 L",
-                                          style: TextStyle(
-                                            color: lightThemeSecondaryTextColor,
-                                            fontSize: 12.sp,
+                                            ],
                                           ),
-                                        ),
-                                      ],
+                                          FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            alignment: Alignment.centerLeft,
+                                            child: Text(
+                                              "/ ${waterGoal.toStringAsFixed(1)} L",
+                                              style: TextStyle(
+                                                color: lightThemeSecondaryTextColor,
+                                                fontSize: 12.sp,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -353,7 +596,7 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(4.r),
                                   child: LinearProgressIndicator(
-                                    value: (consumptionProvider.waterADay / 2.5).clamp(0.0, 1.0),
+                                    value: waterPercent,
                                     backgroundColor: isDarkMode ? Colors.white10 : Colors.grey.withOpacity(0.1),
                                     valueColor: const AlwaysStoppedAnimation<Color>(ColorManager.primary),
                                     minHeight: 6.h,
@@ -404,12 +647,15 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                                 ),
                                 const Spacer(),
                                 Center(
-                                  child: Text(
-                                    getMessage(bmi),
-                                    style: TextStyle(
-                                      color: getProgressColor(bmi),
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.bold,
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      getMessage(bmi),
+                                      style: TextStyle(
+                                        color: getProgressColor(bmi),
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -436,26 +682,33 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
     required Color valueColor,
   }) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 8.w,
-          height: 8.w,
+          width: 7.w,
+          height: 7.w,
           decoration: BoxDecoration(
             color: dotColor,
             shape: BoxShape.circle,
           ),
         ),
-        SizedBox(width: 8.w),
+        SizedBox(width: 6.w),
         SizedBox(
-          width: 85.w,
+          width: 72.w,
           child: Text(
             label,
-            style: TextStyle(color: textColor.withOpacity(0.8), fontSize: 13.sp),
+            style: TextStyle(color: textColor.withAlpha(200), fontSize: 12.sp),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
-        Text(
-          value,
-          style: TextStyle(color: valueColor, fontSize: 13.sp, fontWeight: FontWeight.bold),
+        Flexible(
+          child: Text(
+            value,
+            style: TextStyle(color: valueColor, fontSize: 12.sp, fontWeight: FontWeight.bold),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ],
     );

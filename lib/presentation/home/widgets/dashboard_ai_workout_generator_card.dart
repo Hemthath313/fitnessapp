@@ -132,11 +132,16 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: 8.w),
-                Text(
-                  '3–6 Day Custom Splits',
-                  style: TextStyle(
-                    color: ColorManager.textTertiary,
-                    fontSize: 11.sp,
+                Flexible(
+                  child: Text(
+                    '3–6 Day Custom Splits',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.end,
+                    style: TextStyle(
+                      color: ColorManager.textTertiary,
+                      fontSize: 11.sp,
+                    ),
                   ),
                 ),
               ],
@@ -233,11 +238,13 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                     color: Colors.white70,
                     size: 16,
                   ),
-                  label: const Text(
+                  label: Text(
                     'Or tap to activate Free 3-Day Starter Plan',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: Colors.white70,
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

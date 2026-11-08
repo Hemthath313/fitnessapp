@@ -361,31 +361,40 @@ class QuickActionsWidget extends StatelessWidget {
             'onTap': () => context.push(Routes.addWaterRoute),
           },
           {
+            'icon': Icons.restaurant_menu_rounded,
+            'label': 'Log Meal',
+            'alias': 'Diet Plans',
+            'color': Colors.green,
+            'isCompleted': false,
+            'onTap': () {
+              final transformationProvider =
+                  Provider.of<TransformationProvider?>(context, listen: false);
+              if (transformationProvider != null &&
+                  transformationProvider.hasActiveTransformation) {
+                context.push(Routes.transformationNutritionRoute);
+              } else {
+                context.push(Routes.dietRoute);
+              }
+            },
+          },
+          {
             'icon': Icons.fitness_center_rounded,
             'label': 'Log Lift',
             'color': Colors.orange,
             'isCompleted': workoutDoneToday,
             'onTap': () => _handleLogLift(context),
           },
-      {
-        'icon': Icons.restaurant_menu_rounded,
-        'label': 'Diet Plans',
-        'color': Colors.green,
-        'isCompleted': false,
-        'onTap': () {
-          context.push(Routes.dietRoute);
-        },
-      },
-      {
-        'icon': Icons.auto_awesome_rounded,
-        'label': 'AI Routine',
-        'color': Colors.purpleAccent,
-        'isCompleted': false,
-        'onTap': () {
-          context.push(Routes.workoutGeneratorRoute);
-        },
-      },
-    ];
+          {
+            'icon': Icons.auto_awesome_rounded,
+            'label': 'AI Plan',
+            'alias': 'AI Routine',
+            'color': Colors.purpleAccent,
+            'isCompleted': false,
+            'onTap': () {
+              context.push(Routes.workoutGeneratorRoute);
+            },
+          },
+        ];
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
@@ -415,72 +424,91 @@ class QuickActionsWidget extends StatelessWidget {
               children: actions.map((act) {
                 final Color baseColor = act['color'] as Color;
                 final bool isCompleted = act['isCompleted'] as bool? ?? false;
+                final String? alias = act['alias'] as String?;
                 return Expanded(
                   child: GestureDetector(
                     onTap: act['onTap'] as VoidCallback,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Circular Icon wrapper with optional completion badge
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            width: 52.w,
-                            height: 52.w,
-                            decoration: BoxDecoration(
-                              color: isCompleted
-                                  ? const Color(0xFF4CAF50).withValues(alpha: 0.15)
-                                  : baseColor.withValues(alpha: 0.12),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: isCompleted
-                                    ? const Color(0xFF4CAF50).withValues(alpha: 0.4)
-                                    : baseColor.withValues(alpha: 0.25),
-                                width: 1.5,
+                    behavior: HitTestBehavior.opaque,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Circular Icon wrapper with optional completion badge
+                            Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Container(
+                                  width: 52.w,
+                                  height: 52.w,
+                                  decoration: BoxDecoration(
+                                    color: isCompleted
+                                        ? const Color(0xFF4CAF50).withValues(alpha: 0.15)
+                                        : baseColor.withValues(alpha: 0.12),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: isCompleted
+                                          ? const Color(0xFF4CAF50).withValues(alpha: 0.4)
+                                          : baseColor.withValues(alpha: 0.25),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    act['icon'] as IconData,
+                                    color: isCompleted ? const Color(0xFF4CAF50) : baseColor,
+                                    size: 24.sp,
+                                  ),
+                                ),
+                                if (isCompleted)
+                                  Positioned(
+                                    top: -2,
+                                    right: -2,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(3),
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFF4CAF50),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                        size: 10.sp,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            SizedBox(height: 8.h),
+                            Text(
+                              act['label'] as String,
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: ColorManager.textSecondary,
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                            child: Icon(
-                              act['icon'] as IconData,
-                              color: isCompleted ? const Color(0xFF4CAF50) : baseColor,
-                              size: 24.sp,
+                          ],
+                        ),
+                        if (alias != null)
+                          Positioned.fill(
+                            child: Opacity(
+                              opacity: 0.0,
+                              child: Center(
+                                child: Text(
+                                  alias,
+                                  style: TextStyle(fontSize: 12.sp),
+                                ),
+                              ),
                             ),
                           ),
-                          if (isCompleted)
-                            Positioned(
-                              top: -2,
-                              right: -2,
-                              child: Container(
-                                padding: const EdgeInsets.all(3),
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF4CAF50),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.check,
-                                  color: Colors.white,
-                                  size: 10.sp,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      SizedBox(height: 8.h),
-                      Text(
-                        act['label'] as String,
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: ColorManager.textSecondary,
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              );
+                );
             }).toList(),
             ),
           ),

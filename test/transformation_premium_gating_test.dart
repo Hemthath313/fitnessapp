@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:fitness_app/data/transformation_plans_data.dart';
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
+import 'package:fitness_app/presentation/custom_workouts/workout_session_launcher_page.dart';
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/presentation/home/widgets/home_ai_routine_card.dart';
@@ -162,6 +163,18 @@ Widget _buildTestHarness({
           body: Center(child: Text('DAY_WORKOUT_SESSION_DESTINATION')),
         ),
       ),
+      GoRoute(
+        path: '/sessionLauncher',
+        builder: (context, state) {
+          final planId = state.uri.queryParameters['planId'];
+          return WorkoutSessionLauncherPage(
+            dayName: 'Day 1',
+            planId: planId,
+            planDay: 1,
+            initialWorkouts: const [],
+          );
+        },
+      ),
     ],
   );
 
@@ -189,6 +202,11 @@ void main() {
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
+    TransformationProvider.defaultEntitlementForTesting = false;
+  });
+
+  tearDown(() {
+    TransformationProvider.defaultEntitlementForTesting = true;
   });
 
   group('Transformation Premium Subscription Gating Suite', () {
@@ -322,11 +340,39 @@ void main() {
     });
 
     // -------------------------------------------------------------------------
-    // Scenario 6: Free user cannot enroll through provider or alternate entry points
+    // Scenario 6A: Provider enrollment when entitlement argument is omitted
     // -------------------------------------------------------------------------
-    testWidgets('Scenario 6: Provider defense-in-depth rejects non-premium enrollment with zero writes', (tester) async {
+    testWidgets('Scenario 6A: Provider enrollment when entitlement argument is omitted fails for free user with zero writes', (tester) async {
       final transProvider = TransformationProvider(autoLoad: false);
-      transProvider.userIdOverrideForTesting = 'free_user_hacker';
+      transProvider.userIdOverrideForTesting = 'free_user_omitted_arg';
+      bool batchExecuted = false;
+      transProvider.batchCommitForTesting = (uid,
+          {activeData,
+          bool deleteActive = false,
+          historyData,
+          historyDocId}) async {
+        batchExecuted = true;
+      };
+
+      // Call enrollInPlan with subscriptionProvider omitted!
+      await transProvider.enrollInPlan(
+        blueprint: TransformationPlansData.beginnerFitness30,
+        targetCalories: 2000,
+        targetMacros: const {'protein': 140.0, 'carbs': 200.0, 'fat': 50.0},
+      );
+
+      expect(batchExecuted, isFalse);
+      expect(transProvider.hasActiveTransformation, isFalse);
+      expect(transProvider.error, contains('Active Premium subscription required'));
+    });
+
+    // -------------------------------------------------------------------------
+    // Scenario 6B: Free user attempts to enroll through provider with free SubscriptionProvider
+    // -------------------------------------------------------------------------
+    testWidgets('Scenario 6B: Provider rejects enrollment with free SubscriptionProvider instance with zero writes', (tester) async {
+      final freeSub = _MockSubscriptionProvider(isPremium: false);
+      final transProvider = TransformationProvider(autoLoad: false);
+      transProvider.userIdOverrideForTesting = 'free_user_with_free_sub';
       bool batchExecuted = false;
       transProvider.batchCommitForTesting = (uid,
           {activeData,
@@ -337,15 +383,40 @@ void main() {
       };
 
       await transProvider.enrollInPlan(
-        blueprint: TransformationPlansData.beginnerFitness30,
-        targetCalories: 2000,
-        targetMacros: const {'protein': 140.0, 'carbs': 200.0, 'fat': 50.0},
-        isPremium: false, // Non-premium flag
+        blueprint: TransformationPlansData.weightLoss60,
+        targetCalories: 1800,
+        targetMacros: const {'protein': 150.0, 'carbs': 180.0, 'fat': 45.0},
+        subscriptionProvider: freeSub,
       );
 
       expect(batchExecuted, isFalse);
       expect(transProvider.hasActiveTransformation, isFalse);
       expect(transProvider.error, contains('Active Premium subscription required'));
+    });
+
+    // -------------------------------------------------------------------------
+    // Scenario 6C: Free user direct navigation to transformation workout session launcher
+    // -------------------------------------------------------------------------
+    testWidgets('Scenario 6C: Free user direct navigation to transformation workout intercepts to paywall', (tester) async {
+      _configureTestViewport(tester);
+
+      final freeSub = _MockSubscriptionProvider(isPremium: false);
+      final transProvider = TransformationProvider(autoLoad: false);
+
+      await tester.pumpWidget(_buildTestHarness(
+        child: const WorkoutSessionLauncherPage(
+          dayName: 'Day 1',
+          planId: 'beginner_fitness_30',
+          planDay: 1,
+          initialWorkouts: [],
+        ),
+        subscriptionProvider: freeSub,
+        transformationProvider: transProvider,
+      ));
+      await tester.pumpAndSettle();
+
+      // Intercepted and replaced route with PremiumScreen!
+      expect(find.text('PREMIUM_SCREEN_DESTINATION'), findsOneWidget);
     });
 
     // -------------------------------------------------------------------------
@@ -453,7 +524,7 @@ void main() {
         blueprint: TransformationPlansData.beginnerFitness30,
         targetCalories: 2000,
         targetMacros: const {'protein': 140.0, 'carbs': 200.0, 'fat': 50.0},
-        isPremium: true,
+        subscriptionProvider: _MockSubscriptionProvider(isPremium: true),
       );
 
       // Data is preserved

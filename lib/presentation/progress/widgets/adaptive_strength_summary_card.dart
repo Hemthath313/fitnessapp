@@ -59,31 +59,38 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Icon(Icons.bolt_rounded, color: Colors.amber, size: 20.sp),
-                          SizedBox(width: 6.w),
-                          Text(
-                            'Adaptive Strength Overview',
-                            style: TextStyle(
-                              color: ColorManager.white,
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Icon(Icons.bolt_rounded, color: Colors.amber, size: 20.sp),
+                            SizedBox(width: 6.w),
+                            Expanded(
+                              child: Text(
+                                'Adaptive Strength Overview',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: ColorManager.white,
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                      SizedBox(width: 8.w),
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                         decoration: BoxDecoration(
-                          color: ColorManager.primary.withOpacity(0.12),
+                          color: ColorManager.primary.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(10.r),
                         ),
                         child: Text(
                           'This Week',
                           style: TextStyle(
                             color: ColorManager.primary,
-                            fontSize: 10.sp,
+                            fontSize: 11.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -110,22 +117,26 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                                 style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
                               ),
                               SizedBox(height: 4.h),
-                              Row(
-                                children: [
-                                  Text(
-                                    '$workoutsThisWeek / $weeklyTarget',
-                                    style: TextStyle(
-                                      color: workoutsThisWeek >= weeklyTarget ? Colors.greenAccent : ColorManager.white,
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.bold,
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      '$workoutsThisWeek / $weeklyTarget',
+                                      style: TextStyle(
+                                        color: workoutsThisWeek >= weeklyTarget ? Colors.greenAccent : ColorManager.white,
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(width: 4.w),
-                                  Text(
-                                    'workouts',
-                                    style: TextStyle(color: ColorManager.textSecondary, fontSize: 10.sp),
-                                  ),
-                                ],
+                                    SizedBox(width: 4.w),
+                                    Text(
+                                      'workouts',
+                                      style: TextStyle(color: ColorManager.textSecondary, fontSize: 10.sp),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
@@ -147,28 +158,32 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                                 style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
                               ),
                               SizedBox(height: 4.h),
-                              Row(
-                                children: [
-                                  Text(
-                                    '${weeklyMetrics.thisWeekVolume.toInt()} kg',
-                                    style: TextStyle(
-                                      color: ColorManager.primary,
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  if (weeklyMetrics.volumeChangePct != 0) ...[
-                                    SizedBox(width: 4.w),
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Row(
+                                  children: [
                                     Text(
-                                      '${weeklyMetrics.volumeChangePct > 0 ? '+' : ''}${weeklyMetrics.volumeChangePct.toStringAsFixed(0)}%',
+                                      '${weeklyMetrics.thisWeekVolume.toInt()} kg',
                                       style: TextStyle(
-                                        color: weeklyMetrics.volumeChangePct >= 0 ? Colors.green : Colors.orange,
-                                        fontSize: 10.sp,
+                                        color: ColorManager.primary,
+                                        fontSize: 16.sp,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
+                                    if (weeklyMetrics.volumeChangePct != 0) ...[
+                                      SizedBox(width: 4.w),
+                                      Text(
+                                        '${weeklyMetrics.volumeChangePct > 0 ? '+' : ''}${weeklyMetrics.volumeChangePct.toStringAsFixed(0)}%',
+                                        style: TextStyle(
+                                          color: weeklyMetrics.volumeChangePct >= 0 ? Colors.green : Colors.orange,
+                                          fontSize: 10.sp,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
                                   ],
-                                ],
+                                ),
                               ),
                             ],
                           ),
@@ -254,12 +269,17 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                         children: [
                           Icon(Icons.analytics_outlined, color: ColorManager.primary, size: 16.sp),
                           SizedBox(width: 6.w),
-                          Text(
-                            'Open Full Strength & PR Vault',
-                            style: TextStyle(
-                              color: ColorManager.primary,
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.bold,
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'Open Full Strength & PR Vault',
+                                style: TextStyle(
+                                  color: ColorManager.primary,
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ),
                           SizedBox(width: 4.w),

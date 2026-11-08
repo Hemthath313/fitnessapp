@@ -52,7 +52,7 @@ void main() {
       provider.activeDocFetcherForTesting = (_) => null;
 
       await tester.pumpWidget(
-        _buildTestWidget(const DashboardChallengeSection(), provider, scrollable: true),
+        _buildTestWidget(const DashboardChallengeSection(suppressActiveTransformation: false), provider, scrollable: true),
       );
       await tester.pumpAndSettle();
 
@@ -102,7 +102,7 @@ void main() {
       await provider.loadTransformation();
 
       await tester.pumpWidget(
-        _buildTestWidget(const DashboardChallengeSection(), provider, scrollable: true),
+        _buildTestWidget(const DashboardChallengeSection(suppressActiveTransformation: false), provider, scrollable: true),
       );
       await tester.pumpAndSettle();
 
@@ -146,7 +146,7 @@ void main() {
       provider.history.add(completedState);
 
       await tester.pumpWidget(
-        _buildTestWidget(const DashboardChallengeSection(), provider, scrollable: true),
+        _buildTestWidget(const DashboardChallengeSection(suppressActiveTransformation: false), provider, scrollable: true),
       );
       await tester.pumpAndSettle();
 
