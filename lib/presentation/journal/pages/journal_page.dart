@@ -31,7 +31,7 @@ class _JournalPageState extends State<JournalPage> {
               'My AI Hub',
               style: TextStyle(
                 color: ColorManager.white,
-                fontSize: SizeManager.s24.sp,
+                fontSize: 24.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -40,7 +40,7 @@ class _JournalPageState extends State<JournalPage> {
               'Hyper-personalized fitness intelligence',
               style: TextStyle(
                 color: ColorManager.textSecondary,
-                fontSize: SizeManager.s14.sp,
+                fontSize: 14.sp,
               ),
             ),
             SizedBox(height: SizeManager.s24.h),
@@ -109,7 +109,7 @@ class _JournalPageState extends State<JournalPage> {
         borderRadius: BorderRadius.circular(SizeManager.s20.r),
         boxShadow: [
           BoxShadow(
-            color: ColorManager.primary.withOpacity(0.3),
+            color: ColorManager.primary.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -126,15 +126,15 @@ class _JournalPageState extends State<JournalPage> {
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: SizeManager.s18.sp,
+                    fontSize: 18.sp,
                   ),
                 ),
                 SizedBox(height: SizeManager.s4.h),
                 Text(
                   'Ads-free, AI Workouts, Pro Tools & More.',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: SizeManager.s12.sp,
+                    color: Colors.white.withValues(alpha: 0.9),
+                    fontSize: 12.sp,
                   ),
                 ),
               ],
@@ -182,7 +182,7 @@ class _JournalPageState extends State<JournalPage> {
             color: ColorManager.surface,
             borderRadius: BorderRadius.circular(SizeManager.s16.r),
             border: Border.all(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               width: 1,
             ),
           ),
@@ -192,7 +192,7 @@ class _JournalPageState extends State<JournalPage> {
               Container(
                 padding: EdgeInsets.all(SizeManager.s10.w),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: color, size: SizeManager.s28.sp),
@@ -203,7 +203,7 @@ class _JournalPageState extends State<JournalPage> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: ColorManager.white,
-                  fontSize: SizeManager.s14.sp,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -226,7 +226,7 @@ class _JournalPageState extends State<JournalPage> {
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
               decoration: BoxDecoration(
-                color: Colors.amber.withOpacity(0.12),
+                color: Colors.amber.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(6.r),
               ),
               child: Row(
@@ -236,7 +236,7 @@ class _JournalPageState extends State<JournalPage> {
                     'COMING SOON',
                     style: TextStyle(
                       color: Colors.amber,
-                      fontSize: 8.sp,
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.5,
                     ),
@@ -275,7 +275,7 @@ class _JournalPageState extends State<JournalPage> {
         color: ColorManager.surface,
         borderRadius: BorderRadius.circular(SizeManager.s20.r),
         border: Border.all(
-          color: ColorManager.primary.withOpacity(0.2),
+          color: ColorManager.primary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -292,7 +292,7 @@ class _JournalPageState extends State<JournalPage> {
                   'AI Workout Generator',
                   style: TextStyle(
                     color: ColorManager.textPrimary,
-                    fontSize: SizeManager.s18.sp,
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -308,7 +308,7 @@ class _JournalPageState extends State<JournalPage> {
                     'PREMIUM',
                     style: TextStyle(
                         color: Colors.black,
-                        fontSize: 10.sp,
+                        fontSize: 11.sp,
                         fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -320,7 +320,7 @@ class _JournalPageState extends State<JournalPage> {
                 ? 'Generate customized weekly workout routines tailored to your goals.'
                 : 'Unlock personalized weekly workout splits powered by AI.',
             style: TextStyle(
-                color: ColorManager.white70, fontSize: SizeManager.s12.sp),
+                color: ColorManager.white70, fontSize: 12.sp),
           ),
           SizedBox(height: SizeManager.s20.h),
           SizedBox(
@@ -335,7 +335,7 @@ class _JournalPageState extends State<JournalPage> {
               child: const Text(
                 'Generate Workout',
                 style: TextStyle(
-                    color: Colors.white,
+                    color: ColorManager.onMint,
                     fontWeight: FontWeight.bold),
               ),
             ),

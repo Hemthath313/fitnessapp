@@ -193,14 +193,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.6"
-  dartz:
-    dependency: "direct main"
-    description:
-      name: dartz
-      sha256: e6acf34ad2e31b1eb00948692468c30ab48ac8250e0f0df661e29f12dd252168
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.10.1"
   dbus:
     dependency: transitive
     description:
@@ -241,14 +233,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-  dots_indicator:
-    dependency: transitive
-    description:
-      name: dots_indicator
-      sha256: c070af5058a084ba7b354df4b4c26c719595d70a3531eea6edd8af8716684ba3
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.1"
   dropdown_button2:
     dependency: "direct main"
     description:
@@ -417,30 +401,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.8.10"
-  firebase_database:
-    dependency: "direct main"
-    description:
-      name: firebase_database
-      sha256: "35b37c04307b99c5f746387ce03292531c3aa1de91facffbd9cff5e069a8b5fd"
-      url: "https://pub.dev"
-    source: hosted
-    version: "11.3.10"
-  firebase_database_platform_interface:
-    dependency: transitive
-    description:
-      name: firebase_database_platform_interface
-      sha256: "095342e96d94b486b8273afc6327f777d53b63a169bd4201e5153ee3b8210c11"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.6+10"
-  firebase_database_web:
-    dependency: transitive
-    description:
-      name: firebase_database_web
-      sha256: "05f9b871d97b3ca879937947d0728ea95294395e7ddd5685583e8662be99eb16"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.6+16"
   firebase_messaging:
     dependency: "direct main"
     description:
@@ -542,54 +502,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
-  flutter_keyboard_visibility:
-    dependency: transitive
-    description:
-      name: flutter_keyboard_visibility
-      sha256: "98664be7be0e3ffca00de50f7f6a287ab62c763fc8c762e0a21584584a3ff4f8"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.0.0"
-  flutter_keyboard_visibility_linux:
-    dependency: transitive
-    description:
-      name: flutter_keyboard_visibility_linux
-      sha256: "6fba7cd9bb033b6ddd8c2beb4c99ad02d728f1e6e6d9b9446667398b2ac39f08"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
-  flutter_keyboard_visibility_macos:
-    dependency: transitive
-    description:
-      name: flutter_keyboard_visibility_macos
-      sha256: c5c49b16fff453dfdafdc16f26bdd8fb8d55812a1d50b0ce25fc8d9f2e53d086
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
-  flutter_keyboard_visibility_platform_interface:
-    dependency: transitive
-    description:
-      name: flutter_keyboard_visibility_platform_interface
-      sha256: e43a89845873f7be10cb3884345ceb9aebf00a659f479d1c8f4293fcb37022a4
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.0"
-  flutter_keyboard_visibility_web:
-    dependency: transitive
-    description:
-      name: flutter_keyboard_visibility_web
-      sha256: d3771a2e752880c79203f8d80658401d0c998e4183edca05a149f5098ce6e3d1
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.0"
-  flutter_keyboard_visibility_windows:
-    dependency: transitive
-    description:
-      name: flutter_keyboard_visibility_windows
-      sha256: fc4b0f0b6be9b93ae527f3d527fb56ee2d918cd88bbca438c478af7bcfd0ef73
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
   flutter_launcher_icons:
     dependency: "direct main"
     description:
@@ -776,14 +688,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.12.4+4"
-  hidden_drawer_menu:
-    dependency: "direct main"
-    description:
-      name: hidden_drawer_menu
-      sha256: "74ca9c4ffc45c05dec3fd4e12cd6bd0851029d909ee5531bf31244b7160f96b9"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.1"
   home_widget:
     dependency: "direct main"
     description:
@@ -952,14 +856,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.20.2"
-  introduction_screen:
-    dependency: "direct main"
-    description:
-      name: introduction_screen
-      sha256: "02c123e074ee85b0ad0a8d3cd990f1eae78d5cfb2ac4588ad3703ac2a07fb5b0"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.17"
   json_annotation:
     dependency: transitive
     description:
@@ -1168,14 +1064,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.0"
-  photo_view:
-    dependency: "direct main"
-    description:
-      name: photo_view
-      sha256: "8036802a00bae2a78fc197af8a158e3e2f7b500561ed23b4c458107685e645bb"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.14.0"
   platform:
     dependency: transitive
     description:
@@ -1216,6 +1104,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.28.0"
+  share_plus:
+    dependency: "direct main"
+    description:
+      name: share_plus
+      sha256: db40767f130189d53f3ae8a6393c217ff4a492da1baff718a9873679c0c00224
+      url: "https://pub.dev"
+    source: hosted
+    version: "13.3.1"
+  share_plus_platform_interface:
+    dependency: transitive
+    description:
+      name: share_plus_platform_interface
+      sha256: "365ef7379fc22507256adda3385152942ffce08935452bc972c2e52a0bebae41"
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.2.0"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -1637,38 +1541,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.3"
-  workmanager:
-    dependency: "direct main"
-    description:
-      name: workmanager
-      sha256: "065673b2a465865183093806925419d311a9a5e0995aa74ccf8920fd695e2d10"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.9.0+3"
-  workmanager_android:
-    dependency: transitive
-    description:
-      name: workmanager_android
-      sha256: "9ae744db4ef891f5fcd2fb8671fccc712f4f96489a487a1411e0c8675e5e8cb7"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.9.0+2"
-  workmanager_apple:
-    dependency: transitive
-    description:
-      name: workmanager_apple
-      sha256: "1cc12ae3cbf5535e72f7ba4fde0c12dd11b757caf493a28e22d684052701f2ca"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.9.1+2"
-  workmanager_platform_interface:
-    dependency: transitive
-    description:
-      name: workmanager_platform_interface
-      sha256: f40422f10b970c67abb84230b44da22b075147637532ac501729256fcea10a47
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.9.1+1"
   xdg_directories:
     dependency: transitive
     description:

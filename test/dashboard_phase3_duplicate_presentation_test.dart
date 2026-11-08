@@ -93,6 +93,12 @@ class _MockStatisticsProvider extends ChangeNotifier
   List<String> get scheduledDayNames => [];
 
   @override
+  int get totalWorkouts => 3;
+
+  @override
+  List<String> get unlockedAchievements => const [];
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
@@ -281,14 +287,14 @@ void main() {
 
       // 4. Featured challenge card renders with PRO badge & Explore CTA
       expect(find.byKey(const Key('featured_challenge_card')), findsOneWidget);
-      expect(find.text('FEATURED PROGRAMME'), findsOneWidget);
+      // Personalised (profile data present) -> labelled as a recommendation
+      expect(find.text('RECOMMENDED FOR YOU'), findsOneWidget);
       expect(find.byKey(const Key('explore_challenge_cta')), findsOneWidget);
 
       // 5. Active challenge card is NOT present
       expect(find.byKey(const Key('active_challenge_card')), findsNothing);
 
-      // 6. Mini Challenges & Technique carousel remains rendered
-      expect(find.text('Mini Challenges & Technique'), findsOneWidget);
+      // 6. Challenges shelf remains rendered
       expect(find.byType(CarouselSliderHomeWidget), findsOneWidget);
     });
 
@@ -341,11 +347,10 @@ void main() {
       // 5. Active transformation appears prominently EXACTLY ONCE on the dashboard
       expect(find.text(TransformationPlansData.weightLoss60.title), findsOneWidget);
 
-      // 6. Challenges Header and Mini Challenges carousel remain visible and accessible
+      // 6. Challenges header and the shelf remain visible and accessible
       expect(find.text('Challenges'), findsOneWidget);
       expect(
           find.byKey(const Key('view_all_challenges_button')), findsOneWidget);
-      expect(find.text('Mini Challenges & Technique'), findsOneWidget);
       expect(find.byType(CarouselSliderHomeWidget), findsOneWidget);
     });
 
@@ -397,7 +402,6 @@ void main() {
       expect(find.text(TransformationPlansData.beginnerFitness30.title), findsOneWidget);
 
       // 4. Mini challenges carousel is present
-      expect(find.text('Mini Challenges & Technique'), findsOneWidget);
       expect(find.byType(CarouselSliderHomeWidget), findsOneWidget);
     });
 
@@ -444,7 +448,6 @@ void main() {
       expect(find.byKey(const Key('active_challenge_card')), findsNothing);
 
       // 4. Mini challenges carousel is present
-      expect(find.text('Mini Challenges & Technique'), findsOneWidget);
       expect(find.byType(CarouselSliderHomeWidget), findsOneWidget);
     });
 
@@ -642,7 +645,6 @@ void main() {
 
       // 1. Carousel widget is present and visible
       expect(find.byType(CarouselSliderHomeWidget), findsOneWidget);
-      expect(find.text('Mini Challenges & Technique'), findsOneWidget);
 
       // 2. CarouselHomeBox card is present in carousel
       final carouselBoxes = find.byType(CarouselHomeBox);
@@ -953,7 +955,10 @@ void main() {
       expect(carouselBoxes, findsWidgets);
       expect(find.text('30 day Six Pack Challenge'), findsOneWidget);
 
-      // Tap the first visible carousel card
+      // The Six-Pack is the second shelf card (recommended programme leads):
+      // bring it fully into view, then tap it.
+      await tester.ensureVisible(carouselBoxes.first);
+      await tester.pumpAndSettle();
       await tester.tap(carouselBoxes.first);
       await tester.pumpAndSettle();
 
@@ -992,10 +997,14 @@ void main() {
 
       expect(find.byType(CarouselSliderHomeWidget), findsOneWidget);
 
-      // Swipe the carousel left to reveal the Exercise of the Week card
-      await tester.drag(
-          find.byType(CarouselSliderHomeWidget), const Offset(-300, 0));
-      await tester.pumpAndSettle();
+      // Swipe the shelf left until the Exercise of the Week card (last) shows
+      for (var i = 0;
+          i < 6 && find.text('Exercise of the week').evaluate().isEmpty;
+          i++) {
+        await tester.drag(
+            find.byType(CarouselSliderHomeWidget), const Offset(-400, 0));
+        await tester.pumpAndSettle();
+      }
 
       // Exercise of the Week card is now visible
       expect(find.text('Exercise of the week'), findsOneWidget);

@@ -43,16 +43,16 @@ class _NotificationsPageState extends State<NotificationsPage> {
     final now = DateTime.now();
     return [
       _AppNotification(
-        title: '🔥 Streak Alert',
+        title: '🔥 Streak check-in',
         body:
-            'You\'re about to lose your streak! Log a workout or water intake to keep it alive.',
+            'A quick session today keeps your streak going. Even 15 minutes counts!',
         icon: Icons.local_fire_department_rounded,
         color: Colors.orange,
         time: now.subtract(const Duration(minutes: 23)),
       ),
       _AppNotification(
         title: '💧 Hydration Reminder',
-        body: 'It\'s 6 PM! Have you reached your water goal for today?',
+        body: 'How\'s your water today? Log a glass to stay on target.',
         icon: Icons.water_drop_rounded,
         color: Colors.blue,
         time: now.subtract(const Duration(hours: 2)),
@@ -129,7 +129,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       'Notifications',
                       style: TextStyle(
                         color: ColorManager.textPrimary,
-                        fontSize: 22.sp,
+                        fontSize: 20.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -210,7 +210,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       margin: EdgeInsets.only(bottom: 10.h),
                       padding: EdgeInsets.only(right: 20.w),
                       decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.15),
+                        color: Colors.red.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(16.r),
                       ),
                       alignment: Alignment.centerRight,
@@ -227,12 +227,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         decoration: BoxDecoration(
                           color: notif.isRead
                               ? ColorManager.surfaceLight
-                              : notif.color.withOpacity(0.07),
+                              : notif.color.withValues(alpha: 0.07),
                           borderRadius: BorderRadius.circular(16.r),
                           border: Border.all(
                             color: notif.isRead
                                 ? ColorManager.divider
-                                : notif.color.withOpacity(0.3),
+                                : notif.color.withValues(alpha: 0.3),
                             width: 1.5,
                           ),
                         ),
@@ -244,7 +244,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               width: 42.w,
                               height: 42.w,
                               decoration: BoxDecoration(
-                                color: notif.color.withOpacity(0.15),
+                                color: notif.color.withValues(alpha: 0.15),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(notif.icon,
@@ -293,7 +293,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                     _formatTime(notif.time),
                                     style: TextStyle(
                                       color: ColorManager.textTertiary,
-                                      fontSize: 10.sp,
+                                      fontSize: 11.sp,
                                     ),
                                   ),
                                 ],

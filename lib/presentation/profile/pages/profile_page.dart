@@ -77,7 +77,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   RadiusManager.r40.r,
                                 ),
                                 border: Border.all(
-                                  color: ColorManager.primary.withOpacity(0.2),
+                                  color: ColorManager.primary.withValues(alpha: 0.2),
                                 ),
                               ),
                               child: Center(
@@ -150,7 +150,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s150.w,
-                                      color: ColorManager.primary.withOpacity(0.5),
+                                      color: ColorManager.primary.withValues(alpha: 0.5),
                                     )
                                   ],
                                 ),
@@ -178,7 +178,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s130.w,
-                                      color: ColorManager.primary.withOpacity(0.5),
+                                      color: ColorManager.primary.withValues(alpha: 0.5),
                                     )
                                   ],
                                 ),
@@ -206,7 +206,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s110.w,
-                                      color: ColorManager.primary.withOpacity(0.5),
+                                      color: ColorManager.primary.withValues(alpha: 0.5),
                                     )
                                   ],
                                 ),
@@ -234,7 +234,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s100.w,
-                                      color: ColorManager.primary.withOpacity(0.5),
+                                      color: ColorManager.primary.withValues(alpha: 0.5),
                                     )
                                   ],
                                 ),
@@ -262,7 +262,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s140.w,
-                                      color: ColorManager.primary.withOpacity(0.5),
+                                      color: ColorManager.primary.withValues(alpha: 0.5),
                                     )
                                   ],
                                 ),
@@ -290,7 +290,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s140.w,
-                                      color: ColorManager.primary.withOpacity(0.5),
+                                      color: ColorManager.primary.withValues(alpha: 0.5),
                                     )
                                   ],
                                 ),
@@ -318,7 +318,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s150.w,
-                                      color: ColorManager.primary.withOpacity(0.5),
+                                      color: ColorManager.primary.withValues(alpha: 0.5),
                                     )
                                   ],
                                 ),
@@ -346,7 +346,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       height: SizeManager.s2.h,
                                       width: SizeManager.s140.w,
-                                      color: ColorManager.primary.withOpacity(0.5),
+                                      color: ColorManager.primary.withValues(alpha: 0.5),
                                     )
                                   ],
                                 ),
@@ -367,12 +367,12 @@ class _ProfilePageState extends State<ProfilePage> {
                                   color: ColorManager.surface,
                                   borderRadius: BorderRadius.circular(16.r),
                                   border: Border.all(
-                                    color: ColorManager.primary.withOpacity(0.3),
+                                    color: ColorManager.primary.withValues(alpha: 0.3),
                                     width: 1,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: ColorManager.primary.withOpacity(0.1),
+                                      color: ColorManager.primary.withValues(alpha: 0.1),
                                       blurRadius: 10,
                                       offset: const Offset(0, 4),
                                     ),
@@ -383,7 +383,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     Container(
                                       padding: EdgeInsets.all(12.w),
                                       decoration: BoxDecoration(
-                                        color: ColorManager.primary.withOpacity(0.1),
+                                        color: ColorManager.primary.withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(12.r),
                                       ),
                                       child: Icon(
@@ -422,7 +422,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                       value: themeProvider.isDarkMode,
                                       onChanged: (value) => themeProvider.toggleTheme(),
                                       activeColor: ColorManager.primary,
-                                      activeTrackColor: ColorManager.primary.withOpacity(0.5),
+                                      activeTrackColor: ColorManager.primary.withValues(alpha: 0.5),
                                     ),
                                   ],
                                 ),
@@ -495,7 +495,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     borderRadius: BorderRadius.circular(4.r),
                     boxShadow: [
                       BoxShadow(
-                        color: ColorManager.secondary.withOpacity(0.3),
+                        color: ColorManager.secondary.withValues(alpha: 0.3),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -505,7 +505,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     'PRO',
                     style: TextStyle(
                       color: ColorManager.textPrimary,
-                      fontSize: 10.sp,
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -533,7 +533,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Container(
                   margin: EdgeInsets.symmetric(horizontal: PaddingManager.p12),
                   decoration: BoxDecoration(
-                    color: ColorManager.background.withOpacity(0.75),
+                    color: ColorManager.background.withValues(alpha: 0.75),
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Column(

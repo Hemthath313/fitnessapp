@@ -53,7 +53,7 @@ class WorkoutSplitListPage extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: ColorManager.textPrimary,
-                fontSize: 16,
+                fontSize: 16.sp,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -76,7 +76,7 @@ class WorkoutSplitListPage extends StatelessWidget {
                     leading: Container(
                       padding: EdgeInsets.all(8.w),
                       decoration: BoxDecoration(
-                        color: ColorManager.primary.withOpacity(0.1),
+                        color: ColorManager.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(Icons.fitness_center_rounded, color: ColorManager.primary, size: 24.sp),
@@ -112,7 +112,7 @@ class WorkoutSplitListPage extends StatelessWidget {
                           'days/wk',
                           style: TextStyle(
                             color: ColorManager.textTertiary,
-                            fontSize: 10.sp,
+                            fontSize: 11.sp,
                           ),
                         ),
                       ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ComingSoon extends StatelessWidget {
   const ComingSoon({super.key});
@@ -18,20 +19,20 @@ class ComingSoon extends StatelessWidget {
               color: Colors.lime,
             ),
             const SizedBox(height: 20),
-            const Text(
+             Text(
               'Coming Soon',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 28,
+                fontSize: 24.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
+             Text(
               'Stay tuned for exciting updates!',
               style: TextStyle(
                 color: Colors.white54,
-                fontSize: 16,
+                fontSize: 16.sp,
               ),
             ),
           ],

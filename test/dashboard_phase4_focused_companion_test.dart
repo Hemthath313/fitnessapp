@@ -167,6 +167,12 @@ class _MockStatisticsProvider extends ChangeNotifier
   Future<Map<String, dynamic>> getWeeklyStats() async => {};
 
   @override
+  int get totalWorkouts => 3;
+
+  @override
+  List<String> get unlockedAchievements => const [];
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
@@ -458,8 +464,11 @@ void main() {
       expect(find.text('days'), findsOneWidget);
       expect(find.byIcon(Icons.local_fire_department_rounded), findsWidgets);
 
-      // Subtitle is clean companion message, NOT repeating streak
-      expect(find.text('Your daily fitness companion'), findsOneWidget);
+      // Time-based greeting line above the name, NOT repeating streak
+      expect(
+        find.textContaining(RegExp(r'^Good (Morning|Afternoon|Evening),$')),
+        findsOneWidget,
+      );
       expect(find.textContaining('7-day streak'), findsNothing);
 
       // Tap streak badge -> routes to workout history
@@ -645,7 +654,7 @@ void main() {
     // -------------------------------------------------------------------------
     // Test 7: All four quick actions remain functional
     // -------------------------------------------------------------------------
-    testWidgets('7. All four quick actions (Water, Log Meal, Log Lift, AI Plan) navigate properly',
+    testWidgets('7. Quick actions (Log Meal, Log Lift, AI Plan) navigate; Water is reached via the snapshot card',
         (tester) async {
       _configureTestViewport(tester, width: 390);
 
@@ -672,8 +681,9 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
-      expect(find.text('Water'), findsWidgets);
-      await tester.tap(find.text('Water').first);
+      // Water is no longer duplicated in Quick Actions: only the snapshot card shows it
+      expect(find.text('Water'), findsOneWidget);
+      await tester.tap(find.text('Water'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
       expect(find.text('Add Water Screen'), findsOneWidget);
@@ -773,11 +783,11 @@ void main() {
       // Raw BMR (1600) is NEVER displayed as goal
       expect(find.text('/ 1600 kcal'), findsNothing);
 
-      // Tapping calorie section routes to new meal
+      // Tapping calorie section routes to the Diet page
       await tester.tap(find.byKey(const Key('snapshot_calorie_card')));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
-      expect(find.text('New Meal Screen'), findsOneWidget);
+      expect(find.text('Diet Screen'), findsOneWidget);
     });
 
     // -------------------------------------------------------------------------
@@ -826,7 +836,7 @@ void main() {
       await tester.tap(find.byKey(const Key('snapshot_calorie_card')));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
-      expect(find.text('New Meal Screen'), findsOneWidget);
+      expect(find.text('Diet Screen'), findsOneWidget);
     });
 
     // -------------------------------------------------------------------------
@@ -932,7 +942,7 @@ void main() {
       await tester.tap(find.byKey(const Key('snapshot_calorie_card')));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
-      expect(find.text('Profile Setup Screen'), findsOneWidget);
+      expect(find.text('Diet Screen'), findsOneWidget);
     });
 
     // -------------------------------------------------------------------------
@@ -1059,6 +1069,9 @@ void main() {
       // Six-Pack Challenge card
       final carouselBoxes = find.byType(CarouselHomeBox);
       expect(carouselBoxes, findsWidgets);
+      // Recommended programme leads the shelf, so bring the Six-Pack into view
+      await tester.ensureVisible(carouselBoxes.first);
+      await tester.pumpAndSettle();
       await tester.tap(carouselBoxes.first);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));

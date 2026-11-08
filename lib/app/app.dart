@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:fitness_app/utils/managers/app_font.dart';
 import 'package:provider/provider.dart';
 import '../presentation/auth/providers/auth_provider.dart';
 import '../presentation/consumption/providers/consumption_provider.dart';
@@ -29,6 +30,7 @@ class _MyAppState extends State<MyApp> {
   ThemeData _buildLightTheme() {
     return ThemeData(
       useMaterial3: true,
+      fontFamily: AppFonts.family,
       colorScheme: AppTheme.lightColorScheme,
       scaffoldBackgroundColor: ColorManager.lightBackground,
 
@@ -50,7 +52,7 @@ class _MyAppState extends State<MyApp> {
       cardTheme: CardThemeData(
         color: ColorManager.lightSurface,
         elevation: 1,
-        shadowColor: ColorManager.lightTextTertiary.withOpacity(0.1),
+        shadowColor: ColorManager.lightTextTertiary.withValues(alpha: 0.1),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -61,14 +63,14 @@ class _MyAppState extends State<MyApp> {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: ColorManager.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: const Color(0xFF06201B),
           elevation: 2,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(
-            fontSize: 16,
+          textStyle: TextStyle(
+            fontSize: 16.sp,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
           ),
@@ -79,8 +81,8 @@ class _MyAppState extends State<MyApp> {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: ColorManager.primary,
-          textStyle: const TextStyle(
-            fontSize: 16,
+          textStyle: TextStyle(
+            fontSize: 16.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -95,8 +97,8 @@ class _MyAppState extends State<MyApp> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(
-            fontSize: 16,
+          textStyle: TextStyle(
+            fontSize: 16.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -151,7 +153,7 @@ class _MyAppState extends State<MyApp> {
 
       // Divider Theme
       dividerTheme: DividerThemeData(
-        color: ColorManager.lightTextTertiary.withOpacity(0.2),
+        color: ColorManager.lightTextTertiary.withValues(alpha: 0.2),
         thickness: 1,
         space: 1,
       ),
@@ -161,7 +163,7 @@ class _MyAppState extends State<MyApp> {
         backgroundColor: ColorManager.lightSurfaceDark,
         selectedColor: ColorManager.primary,
         labelStyle: TextStyle(color: ColorManager.lightTextPrimary),
-        secondaryLabelStyle: TextStyle(color: Colors.white),
+        secondaryLabelStyle: TextStyle(color: Color(0xFF06201B)),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -177,12 +179,12 @@ class _MyAppState extends State<MyApp> {
         ),
         titleTextStyle: TextStyle(
           color: ColorManager.lightTextPrimary,
-          fontSize: 20,
+          fontSize: 20.sp,
           fontWeight: FontWeight.bold,
         ),
         contentTextStyle: TextStyle(
           color: ColorManager.lightTextSecondary,
-          fontSize: 16,
+          fontSize: 16.sp,
         ),
       ),
 
@@ -214,7 +216,7 @@ class _MyAppState extends State<MyApp> {
       // Floating Action Button Theme
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: ColorManager.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: const Color(0xFF06201B),
         elevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -227,6 +229,7 @@ class _MyAppState extends State<MyApp> {
   ThemeData _buildDarkTheme() {
     return ThemeData(
       useMaterial3: true,
+      fontFamily: AppFonts.family,
       colorScheme: AppTheme.darkColorScheme,
       scaffoldBackgroundColor: ColorManager.darkBackground,
 
@@ -264,8 +267,8 @@ class _MyAppState extends State<MyApp> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(
-            fontSize: 16,
+          textStyle: TextStyle(
+            fontSize: 16.sp,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
           ),
@@ -276,8 +279,8 @@ class _MyAppState extends State<MyApp> {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: ColorManager.primary,
-          textStyle: const TextStyle(
-            fontSize: 16,
+          textStyle: TextStyle(
+            fontSize: 16.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -292,8 +295,8 @@ class _MyAppState extends State<MyApp> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(
-            fontSize: 16,
+          textStyle: TextStyle(
+            fontSize: 16.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -348,7 +351,7 @@ class _MyAppState extends State<MyApp> {
 
       // Divider Theme
       dividerTheme: DividerThemeData(
-        color: ColorManager.darkTextTertiary.withOpacity(0.2),
+        color: ColorManager.darkTextTertiary.withValues(alpha: 0.2),
         thickness: 1,
         space: 1,
       ),
@@ -374,12 +377,12 @@ class _MyAppState extends State<MyApp> {
         ),
         titleTextStyle: TextStyle(
           color: ColorManager.darkTextPrimary,
-          fontSize: 20,
+          fontSize: 20.sp,
           fontWeight: FontWeight.bold,
         ),
         contentTextStyle: TextStyle(
           color: ColorManager.darkTextSecondary,
-          fontSize: 16,
+          fontSize: 16.sp,
         ),
       ),
 
@@ -504,7 +507,7 @@ class _MyAppState extends State<MyApp> {
                   ),
                   if (themeProvider.isProcessing)
                     Container(
-                      color: Colors.black.withOpacity(0.7),
+                      color: Colors.black.withValues(alpha: 0.7),
                       child: Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,

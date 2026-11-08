@@ -91,6 +91,12 @@ class _MockStatisticsProvider extends ChangeNotifier implements StatisticsProvid
   }
 
   @override
+  int get totalWorkouts => 3;
+
+  @override
+  List<String> get unlockedAchievements => const [];
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
@@ -389,7 +395,7 @@ void main() {
       );
       expect(repaintBoundary, findsWidgets);
 
-      // Pump 1 second of shimmer animation without exceptions
+      // Pump 1 second of frames without exceptions (chip is static now)
       await tester.pump(const Duration(seconds: 1));
       expect(find.text('7'), findsOneWidget);
     });

@@ -112,7 +112,7 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
                   color: const Color(0xFFFF5E36).withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Text('🔥', style: TextStyle(fontSize: 16)),
+                child:  Text('🔥', style: TextStyle(fontSize: 16.sp)),
               ),
               SizedBox(width: 10.w),
               Expanded(
@@ -132,7 +132,7 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
                       'Combine abs training with overall fat loss.',
                       style: TextStyle(
                         color: ColorManager.textSecondary,
-                        fontSize: 10.sp,
+                        fontSize: 11.sp,
                       ),
                     ),
                   ],
@@ -164,7 +164,7 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
             color: ColorManager.textPrimary, fontSize: 18.sp, fontWeight: FontWeight.bold));
 
     if (isCompleted) {
-      bgColor = ColorManager.limerGreen2.withOpacity(0.2);
+      bgColor = ColorManager.limerGreen2.withValues(alpha: 0.2);
       borderColor = ColorManager.limerGreen2;
       icon = Icon(Icons.check_circle,
           color: ColorManager.limerGreen2, size: 24.sp);

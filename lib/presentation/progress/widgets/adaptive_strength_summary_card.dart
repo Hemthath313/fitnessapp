@@ -71,7 +71,7 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   color: ColorManager.white,
-                                  fontSize: 15.sp,
+                                  fontSize: 14.sp,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -133,7 +133,7 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                                     SizedBox(width: 4.w),
                                     Text(
                                       'workouts',
-                                      style: TextStyle(color: ColorManager.textSecondary, fontSize: 10.sp),
+                                      style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
                                     ),
                                   ],
                                 ),
@@ -177,7 +177,7 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                                         '${weeklyMetrics.volumeChangePct > 0 ? '+' : ''}${weeklyMetrics.volumeChangePct.toStringAsFixed(0)}%',
                                         style: TextStyle(
                                           color: weeklyMetrics.volumeChangePct >= 0 ? Colors.green : Colors.orange,
-                                          fontSize: 10.sp,
+                                          fontSize: 11.sp,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -200,7 +200,7 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: ColorManager.surfaceDark,
                         borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(color: Colors.amber.withOpacity(0.25)),
+                        border: Border.all(color: Colors.amber.withValues(alpha: 0.25)),
                       ),
                       child: Row(
                         children: [
@@ -260,9 +260,9 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                       width: double.infinity,
                       padding: EdgeInsets.symmetric(vertical: 10.h),
                       decoration: BoxDecoration(
-                        color: ColorManager.primary.withOpacity(0.12),
+                        color: ColorManager.primary.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(color: ColorManager.primary.withOpacity(0.3)),
+                        border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,

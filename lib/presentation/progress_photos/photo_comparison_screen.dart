@@ -260,7 +260,7 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
             borderRadius: BorderRadius.circular(12.r),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.3),
                 blurRadius: 10,
                 offset: const Offset(0, 5),
               ),
@@ -311,7 +311,7 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
         decoration: BoxDecoration(
           color: ColorManager.surface,
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: ColorManager.primary.withOpacity(0.3)),
+          border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
         ),
         child: Column(
           children: [
@@ -376,7 +376,7 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
       decoration: BoxDecoration(
         color: ColorManager.surface,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: ColorManager.primary.withOpacity(0.3)),
+        border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [

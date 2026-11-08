@@ -1,4 +1,5 @@
 import 'package:fitness_app/utils/managers/color_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -16,71 +17,134 @@ class MealCard extends StatelessWidget {
     required this.onTap,
   });
 
+  IconData _iconFor(String name) {
+    final n = name.toLowerCase();
+    if (n.contains('breakfast')) return Icons.free_breakfast_rounded;
+    if (n.contains('lunch')) return Icons.lunch_dining_rounded;
+    if (n.contains('dinner')) return Icons.dinner_dining_rounded;
+    if (n.contains('snack')) return Icons.cookie_rounded;
+    if (n.contains('shake') || n.contains('pre') || n.contains('post')) {
+      return Icons.local_drink_rounded;
+    }
+    return Icons.restaurant_rounded;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final bool done = meal['isCompleted'] == true;
+    final String name = meal['name'].toString();
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
       margin: EdgeInsets.symmetric(vertical: 6.h),
       decoration: BoxDecoration(
-        color: meal['isCompleted']
-            ? Colors.green.withOpacity(0.2)
+        color: done
+            ? ColorManager.primary.withValues(alpha: 0.14)
             : ColorManager.surface,
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: ColorManager.surfaceDark,
-            blurRadius: 6,
-            offset: const Offset(2, 2),
-          )
-        ],
+        borderRadius: BorderRadius.circular(AppRadius.card.r),
       ),
-      child: ListTile(
-        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-        leading: Icon(
-          meal['isCompleted'] ? Icons.check_circle : Icons.fastfood,
-          color: meal['isCompleted'] ? Colors.green : Colors.orangeAccent,
-          size: 28.sp,
-        ),
-        title: Text(
-          meal['name'],
-          style: TextStyle(fontWeight: FontWeight.bold, color: ColorManager.textPrimary, fontSize: 16.sp),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      // Transparent Material so the ink splash paints above the card colour.
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadius.card.r),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(14.w, 12.h, 8.w, 12.h),
+            child: Row(
               children: [
-                Text(
-                  '${meal['calories']} kcal | ${meal['protein']}g Protein',
-                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
+                Container(
+                  width: 44.w,
+                  height: 44.w,
+                  decoration: BoxDecoration(
+                    color: ColorManager.iconChip,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    _iconFor(name),
+                    color: ColorManager.primary,
+                    size: 22.sp,
+                  ),
                 ),
-                SizedBox(width: 8.w),
-                _buildMacroBadge(),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: ColorManager.textPrimary,
+                          fontSize: 16.sp,
+                        ),
+                      ),
+                      SizedBox(height: 3.h),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              '${meal['calories']} kcal | ${meal['protein']}g Protein',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: ColorManager.textSecondary,
+                                fontSize: 12.sp,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 8.w),
+                          _buildMacroBadge(),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                // Round check toggle (44px tap target)
+                Semantics(
+                  button: true,
+                  checked: done,
+                  label: 'Mark $name as eaten',
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => onToggleMeal(!done),
+                    child: SizedBox(
+                      width: 48.w,
+                      height: 48.w,
+                      child: Center(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: 28.w,
+                          height: 28.w,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: done ? ColorManager.primary : Colors.transparent,
+                            border: Border.all(
+                              color: done
+                                  ? ColorManager.primary
+                                  : ColorManager.textTertiary,
+                              width: 2,
+                            ),
+                          ),
+                          child: done
+                              ? Icon(
+                                  Icons.check_rounded,
+                                  size: 18.sp,
+                                  color: const Color(0xFF06201B),
+                                )
+                              : null,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
-            SizedBox(height: 4.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Tap to see details & foods',
-                  style: TextStyle(fontSize: 10.sp, color: Colors.white54),
-                ),
-                Icon(Icons.chevron_right, color: ColorManager.textTertiary, size: 16.sp)
-              ],
-            ),
-          ],
-        ),
-        trailing: Transform.scale(
-          scale: 0.8,
-          child: Switch(
-            value: meal['isCompleted'],
-            onChanged: onToggleMeal,
-            activeColor: Colors.green,
           ),
         ),
-        onTap: onTap,
       ),
     );
   }
@@ -89,27 +153,28 @@ class MealCard extends StatelessWidget {
     final protein = (meal['protein'] as num).toDouble();
     final calories = (meal['calories'] as num).toDouble();
 
-    // Simple logic: if protein is high relative to others
     if (protein > 25) {
-      return _badge('High Protein', Colors.orange);
+      return _badge('High Protein');
     } else if (calories < 300) {
-      return _badge('Low Cal', Colors.blue);
+      return _badge('Low Cal');
     }
     return const SizedBox.shrink();
   }
 
-  Widget _badge(String label, Color color) {
+  Widget _badge(String label) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+      padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(4.r),
-        border: Border.all(color: color.withOpacity(0.5), width: 0.5),
+        color: ColorManager.primary.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(AppRadius.pill.r),
       ),
       child: Text(
         label,
-        style:
-            TextStyle(color: color, fontSize: 8.sp, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          color: ColorManager.primary,
+          fontSize: 11.sp,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }

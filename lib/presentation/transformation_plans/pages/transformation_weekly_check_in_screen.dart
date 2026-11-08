@@ -298,7 +298,7 @@ class _TransformationWeeklyCheckInScreenState
                           'Since Start',
                           style: TextStyle(
                             color: ColorManager.textTertiary,
-                            fontSize: 10.sp,
+                            fontSize: 11.sp,
                           ),
                         ),
                         SizedBox(height: 2.h),
@@ -391,7 +391,7 @@ class _TransformationWeeklyCheckInScreenState
                   selectedColor: ColorManager.primary,
                   backgroundColor: ColorManager.surface,
                   labelStyle: TextStyle(
-                    color: isSelected ? Colors.white : ColorManager.textSecondary,
+                    color: isSelected ? ColorManager.onMint : ColorManager.textSecondary,
                     fontSize: 12.sp,
                     fontWeight:
                         isSelected ? FontWeight.bold : FontWeight.normal,
@@ -455,14 +455,14 @@ class _TransformationWeeklyCheckInScreenState
                         width: 20.h,
                         child: const CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: ColorManager.onMint,
                         ),
                       )
                     : Text(
                         'Submit Week $_targetWeek Check-In',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 15.sp,
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

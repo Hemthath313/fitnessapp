@@ -189,19 +189,20 @@ void main() {
       // Section titles
       expect(find.text('Primary Programmes (3)'), findsOneWidget);
 
-      // Beginner recommendation callout banner
-      expect(find.text('Recommended for You: Complete Beginner'), findsOneWidget);
+      // The long intro / recommendation banners were removed to reduce noise.
+      expect(find.text('Personalized Coaching Curriculums'), findsNothing);
+      expect(find.text('Recommended for You: Complete Beginner'), findsNothing);
 
       // Primary programme 1: Complete Beginner
       expect(find.text('Complete Beginner – 30 Days'), findsOneWidget);
-      expect(find.text('Recommended for New Users'), findsOneWidget);
-      expect(find.text('3 Days/Wk'), findsOneWidget);
+      expect(find.text('RECOMMENDED FOR NEW USERS'), findsOneWidget);
+      expect(find.text('30 Days'), findsOneWidget);
       expect(find.text('Habits & Form'), findsOneWidget);
 
       // Scroll to 60-Day Weight Loss
       await tester.scrollUntilVisible(find.text('60-Day Weight Loss Challenge'), 300);
       expect(find.text('60-Day Weight Loss Challenge'), findsOneWidget);
-      expect(find.text('Popular Fat Loss'), findsOneWidget);
+      expect(find.text('POPULAR FAT LOSS'), findsOneWidget);
 
       // Scroll to Specialised section
       await tester.scrollUntilVisible(find.text('Specialised Programmes (1)'), 300);
@@ -209,7 +210,7 @@ void main() {
 
       await tester.scrollUntilVisible(find.text('12-Week Strength Building Challenge'), 300);
       expect(find.text('12-Week Strength Building Challenge'), findsOneWidget);
-      expect(find.text('Strength Specialisation'), findsOneWidget);
+      expect(find.text('STRENGTH SPECIALISATION'), findsOneWidget);
     });
   });
 

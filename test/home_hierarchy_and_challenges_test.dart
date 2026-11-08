@@ -1,4 +1,3 @@
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:fitness_app/presentation/home/pages/home_page.dart';
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
@@ -110,18 +109,17 @@ void main() {
       expect(find.text(StringsManager.workoutsplit), findsNothing);
       expect(find.text('EXPLORE SPLITS'), findsNothing);
 
-      // Page 0: Genuine 30-Day Six-Pack Challenge (Not started badge)
+      // Page 0 (no leading card here): Genuine 30-Day Six-Pack Challenge
       expect(find.text(StringsManager.sixPackChallenge), findsOneWidget);
       expect(find.text('30-DAY CHALLENGE'), findsOneWidget);
 
-      // Verify viewport fraction is 1.0 (no awkward peeking clutter)
-      final carouselFinder = find.byType(CarouselSlider);
-      expect(carouselFinder, findsOneWidget);
-      final carouselWidget = tester.widget<CarouselSlider>(carouselFinder);
-      expect(carouselWidget.options.viewportFraction, 1.0);
+      // The shelf is a PageView with a peek (viewportFraction < 1) so the next
+      // card is visibly swipeable.
+      final shelfFinder = find.byType(PageView);
+      expect(shelfFinder, findsOneWidget);
 
-      // Drag to Page 1: Weekly Technique Spotlight
-      await tester.drag(carouselFinder, const Offset(-500, 0));
+      // Swipe to the last page: Weekly Technique Spotlight
+      await tester.drag(shelfFinder, const Offset(-500, 0));
       await tester.pumpAndSettle();
 
       expect(find.text(StringsManager.exerciseOfWeek), findsOneWidget);

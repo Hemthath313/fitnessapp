@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class BannerAdWidget extends StatefulWidget {
   @override
@@ -52,11 +53,11 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
       // Show error message for debugging
       return Container(
         height: 50,
-        color: Colors.red.withOpacity(0.1),
+        color: Colors.red.withValues(alpha: 0.1),
         child: Center(
           child: Text(
             'Ad Error: $_errorMessage',
-            style: TextStyle(color: Colors.red, fontSize: 12),
+            style: TextStyle(color: Colors.red, fontSize: 12.sp),
             textAlign: TextAlign.center,
           ),
         ),
@@ -65,11 +66,11 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
       // Show loading indicator
       return Container(
         height: 50,
-        color: Colors.grey.withOpacity(0.1),
+        color: Colors.grey.withValues(alpha: 0.1),
         child: Center(
           child: Text(
             'Loading Ad...',
-            style: TextStyle(color: Colors.grey, fontSize: 12),
+            style: TextStyle(color: Colors.grey, fontSize: 12.sp),
           ),
         ),
       );

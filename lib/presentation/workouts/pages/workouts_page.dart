@@ -205,7 +205,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: ColorManager.primary.withOpacity(0.3),
+            color: ColorManager.primary.withValues(alpha: 0.3),
             blurRadius: 20,
             spreadRadius: 5,
           ),
@@ -227,7 +227,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
         name,
         style: TextStyle(
           color: ColorManager.textPrimary,
-          fontSize: 28.sp,
+          fontSize: 24.sp,
           fontWeight: FontWeight.bold,
         ),
       );
@@ -269,7 +269,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
             'Instructions',
             style: TextStyle(
               color: ColorManager.primary,
-              fontSize: 22.sp,
+              fontSize: 20.sp,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -317,7 +317,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
       decoration: BoxDecoration(
         color: ColorManager.surface,
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: ColorManager.primary.withOpacity(0.3)),
+        border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

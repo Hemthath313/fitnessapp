@@ -1,9 +1,6 @@
-import 'package:fitness_app/utils/managers/style_manager.dart';
-import 'package:flutter/material.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
-import 'package:fitness_app/utils/managers/value_manager.dart';
-
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class NewMealPageAppBar extends StatelessWidget {
@@ -15,33 +12,39 @@ class NewMealPageAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppBar(
       elevation: 0.0,
+      scrolledUnderElevation: 0.0,
+      centerTitle: true,
+      automaticallyImplyLeading: false,
+      backgroundColor: ColorManager.background,
+      leadingWidth: 68.w,
+      leading: Padding(
+        padding: EdgeInsets.only(left: 20.w),
+        child: Center(
+          child: Material(
+            color: ColorManager.iconChip,
+            shape: const CircleBorder(),
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: () => Navigator.of(context).maybePop(),
+              child: SizedBox(
+                width: 44.w,
+                height: 44.w,
+                child: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  size: 18.sp,
+                  color: ColorManager.textPrimary,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
       title: Text(
         StringsManager.addMealABtitle,
-        style: StyleManager.abTitleTextStyle,
-      ),
-      backgroundColor: ColorManager.background,
-      leading: Padding(
-        padding: const EdgeInsets.only(left: PaddingManager.p12),
-        child: Container(
-          height: SizeManager.s40.h,
-          width: SizeManager.s40.w,
-          decoration: BoxDecoration(
-            color: ColorManager.grey3,
-            borderRadius: BorderRadius.circular(
-              RadiusManager.r40.r,
-            ),
-          ),
-          child: IconButton(
-            splashColor: ColorManager.grey3,
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            icon:  Icon(
-              Icons.arrow_back_ios_new,
-              size: SizeManager.s26,
-              color: ColorManager.white,
-            ),
-          ),
+        style: TextStyle(
+          color: ColorManager.textPrimary,
+          fontSize: 18.sp,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );

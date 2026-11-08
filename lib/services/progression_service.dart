@@ -320,6 +320,35 @@ class ProgressionService {
         neutralDefaultWeight;
   }
 
+  /// One-line hint for the plan card, derived from the same rule the guided
+  /// session uses, so the card never promises a heavier weight than the
+  /// session will actually prefill. Returns null with no usable history.
+  static String? nudgeFor(String exerciseName, WorkoutLog? previousLog) {
+    if (previousLog == null || previousLog.sets.isEmpty) return null;
+    final rec = calculateNextTarget(
+      exerciseName: exerciseName,
+      previousLog: previousLog,
+    );
+    final hasWeight = rec.hasRecommendedWeight && rec.recommendedWeight > 0;
+    final weight = formatWeight(rec.recommendedWeight);
+    switch (rec.type) {
+      case ProgressionType.increaseWeight:
+        return '🔺 Try $weight kg today';
+      case ProgressionType.increaseReps:
+        return hasWeight
+            ? 'Same $weight kg, aim for +1 rep per set'
+            : 'Aim for +1 rep per set';
+      case ProgressionType.maintain:
+        return hasWeight
+            ? 'Hold $weight kg, aim for ${rec.targetMinReps}+ clean reps'
+            : 'Aim for ${rec.targetMinReps}+ clean reps';
+      case ProgressionType.deload:
+        return hasWeight ? 'Ease back to $weight kg' : 'Take it lighter today';
+      case ProgressionType.baseline:
+        return null;
+    }
+  }
+
   static ProgressionRecommendation calculateNextTarget({
     required String exerciseName,
     required WorkoutLog? previousLog,

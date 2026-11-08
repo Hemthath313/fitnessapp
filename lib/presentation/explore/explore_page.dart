@@ -2,12 +2,12 @@ import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_app/presentation/banner_ads/banner_ad_service.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
-import 'package:fitness_app/presentation/interstitial_ads/interstitial_ad_service.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_app/utils/managers/asset_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ExploreWidget extends StatefulWidget {
   const ExploreWidget({super.key});
@@ -29,22 +29,9 @@ class _ExploreWidgetState extends State<ExploreWidget>
   void initState() {
     super.initState();
 
+    // The exercise library (and its body-part grid) lives on My Plan, so
+    // Explore keeps recovery, diet, cardio and the programme splits.
     cards = [
-      {
-        'image': ImageManager.strengthWorkout,
-        'title': StringsManager.strengh,
-        'description': 'Build strength and endurance with tailored workouts.',
-        'isPremiumRequired': false,
-        'onTap': () async {
-          final sub = Provider.of<SubscriptionProvider>(context, listen: false);
-          if (!sub.isPremium) {
-            await InterstitialAdService.showStrengthWorkoutAd();
-          }
-          if (mounted) {
-            context.push(Routes.bodypartsPage);
-          }
-        },
-      },
       {
         'image': ImageManager.postWorkout,
         'title': 'Pain Relief & Mobility',
@@ -57,9 +44,7 @@ class _ExploreWidgetState extends State<ExploreWidget>
         'title': StringsManager.diet,
         'description': 'Nutritional guidance for better performance.',
         'isPremiumRequired': false,
-        'onTap': () {
-          context.push(Routes.dietRoute);
-        },
+        'onTap': () => context.push(Routes.dietRoute),
       },
       {
         'image': ImageManager.cardioWorkout,
@@ -178,12 +163,12 @@ class ExploreCard extends StatelessWidget {
           color: ColorManager.surface,
           borderRadius: BorderRadius.circular(20.0),
           border: Border.all(
-            color: ColorManager.divider.withOpacity(0.4),
+            color: ColorManager.divider.withValues(alpha: 0.4),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -216,8 +201,8 @@ class ExploreCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Colors.black.withOpacity(0.85),
-                          Colors.black.withOpacity(0.35),
+                          Colors.black.withValues(alpha: 0.85),
+                          Colors.black.withValues(alpha: 0.35),
                           Colors.transparent,
                         ],
                         begin: Alignment.bottomCenter,
@@ -239,7 +224,7 @@ class ExploreCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.amber.withOpacity(0.4),
+                              color: Colors.amber.withValues(alpha: 0.4),
                               blurRadius: 8,
                               spreadRadius: 0,
                             )
@@ -247,7 +232,7 @@ class ExploreCard extends StatelessWidget {
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
-                          children: const [
+                          children:  [
                             Icon(Icons.workspace_premium_rounded,
                                 color: Colors.white, size: 14),
                             SizedBox(width: 4),
@@ -255,7 +240,7 @@ class ExploreCard extends StatelessWidget {
                               'PREMIUM',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 11,
+                                fontSize: 11.sp,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 0.5,
                               ),
@@ -270,7 +255,7 @@ class ExploreCard extends StatelessWidget {
                       child: Center(
                         child: Icon(
                           Icons.lock_rounded,
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           size: 36,
                         ),
                       ),
@@ -289,9 +274,9 @@ class ExploreCard extends StatelessWidget {
                             children: [
                               Text(
                                 title,
-                                style: const TextStyle(
+                                style:  TextStyle(
                                   color: Colors.white,
-                                  fontSize: 22.0,
+                                  fontSize: 20.sp,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 0.2,
                                 ),
@@ -302,8 +287,8 @@ class ExploreCard extends StatelessWidget {
                                     ? 'Unlock with Premium to access'
                                     : description,
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.75),
-                                  fontSize: 13.0,
+                                  color: Colors.white.withValues(alpha: 0.75),
+                                  fontSize: 13.sp,
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
@@ -316,7 +301,7 @@ class ExploreCard extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: isPremiumLocked
                                 ? Colors.amber.shade700
-                                : ColorManager.primary.withOpacity(0.85),
+                                : ColorManager.primary.withValues(alpha: 0.85),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(

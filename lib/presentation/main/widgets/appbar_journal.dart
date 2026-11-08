@@ -18,7 +18,7 @@ class JournalAppBarWidget extends StatelessWidget {
           'My AI Hub',
           style: TextStyle(
             color: ColorManager.white,
-            fontSize: SizeManager.s20.sp,
+            fontSize: 20.sp,
             fontWeight: FontWeight.bold,
           ),
         ),

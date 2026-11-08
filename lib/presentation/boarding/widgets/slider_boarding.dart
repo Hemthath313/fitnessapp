@@ -7,6 +7,7 @@ import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SliderBoardingWidget extends StatefulWidget {
   const SliderBoardingWidget({super.key});
@@ -48,7 +49,7 @@ class _SliderBoardingWidgetState extends State<SliderBoardingWidget>
     return Padding(
       padding: const EdgeInsets.all(PaddingManager.p20),
       child: SlideAction(
-        outerColor: Colors.white.withOpacity(0.08), // Frosted glass slider lane
+        outerColor: Colors.white.withValues(alpha: 0.08), // Frosted glass slider lane
         innerColor: ColorManager.primary, // Brand electric blue button
         sliderButtonIcon: SlideTransition(
           position: _offsetAnimation,
@@ -65,12 +66,12 @@ class _SliderBoardingWidgetState extends State<SliderBoardingWidget>
         child: SlideTransition(
           position: _offsetAnimation,
           child: Shimmer.fromColors(
-            baseColor: Colors.white.withOpacity(0.8), // Pure white text shimmer
+            baseColor: Colors.white.withValues(alpha: 0.8), // Pure white text shimmer
             highlightColor: Colors.white,
             child: Text(
               StringsManager.swipeToPrc,
-              style: const TextStyle(
-                fontSize: SizeManager.s18,
+              style:  TextStyle(
+                fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
               ),

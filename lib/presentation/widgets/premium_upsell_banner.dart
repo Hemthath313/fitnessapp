@@ -89,7 +89,7 @@ class PremiumUpsellBannerCard extends StatelessWidget {
                         'PRO',
                         style: TextStyle(
                           color: Colors.black,
-                          fontSize: 9.sp,
+                          fontSize: 11.sp,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 0.4,
                         ),
@@ -131,7 +131,7 @@ class PremiumUpsellBannerCard extends StatelessWidget {
               onPressed: onUpgrade ?? () => context.push(Routes.premiumScreen),
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: const Color(0xFF06201B),
                 padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 16.w),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.r),
@@ -141,14 +141,14 @@ class PremiumUpsellBannerCard extends StatelessWidget {
               icon: Icon(
                 Icons.flash_on_rounded,
                 size: 15.sp,
-                color: Colors.white,
+                color: ColorManager.onMint,
               ),
               label: Text(
                 buttonText,
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: ColorManager.onMint,
                 ),
               ),
             ),

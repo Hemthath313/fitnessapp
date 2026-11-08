@@ -152,6 +152,7 @@ class _DietMainState extends State<DietMain>
         actions: [
           if (!isPremium)
             IconButton(
+              tooltip: 'Go Premium',
               icon: const Icon(Icons.star, color: Colors.amber),
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PremiumScreen())),
             )
@@ -177,7 +178,7 @@ class _DietMainState extends State<DietMain>
                     'Your Active Plan',
                     style: TextStyle(
                       color: ColorManager.textPrimary,
-                      fontSize: 18,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -185,15 +186,15 @@ class _DietMainState extends State<DietMain>
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.amber.withOpacity(0.2),
+                        color: Colors.amber.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: Colors.amber),
                       ),
                       child: Row(
-                        children: const [
+                        children:  [
                           Icon(Icons.lock, color: Colors.amber, size: 12),
                           SizedBox(width: 4),
-                          Text('PREMIUM', style: TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold)),
+                          Text('PREMIUM', style: TextStyle(color: Colors.amber, fontSize: 11.sp, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
@@ -218,7 +219,7 @@ class _DietMainState extends State<DietMain>
                         child: IgnorePointer(
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.4),
+                              color: Colors.black.withValues(alpha: 0.4),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Center(
@@ -254,7 +255,7 @@ class _DietMainState extends State<DietMain>
                     child: Text(
                       'Please set your goal in the Profile tab to unlock your nutrition plan.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: ColorManager.textSecondary, fontSize: 14),
+                      style: TextStyle(color: ColorManager.textSecondary, fontSize: 14.sp),
                     ),
                   ),
                 ),
@@ -267,7 +268,7 @@ class _DietMainState extends State<DietMain>
                 'Strategy Highlights',
                 style: TextStyle(
                   color: ColorManager.textPrimary,
-                  fontSize: 18,
+                  fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -289,7 +290,7 @@ class _DietMainState extends State<DietMain>
                 'Tools & Resources',
                 style: TextStyle(
                   color: ColorManager.textPrimary,
-                  fontSize: 18,
+                  fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -303,11 +304,11 @@ class _DietMainState extends State<DietMain>
                   decoration: BoxDecoration(
                     color: ColorManager.surface,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: ColorManager.primary.withOpacity(0.3)),
+                    border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
                     gradient: LinearGradient(
                       colors: [
                         ColorManager.surface,
-                        ColorManager.primary.withOpacity(0.1),
+                        ColorManager.primary.withValues(alpha: 0.1),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -318,7 +319,7 @@ class _DietMainState extends State<DietMain>
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: ColorManager.primary.withOpacity(0.2),
+                          color: ColorManager.primary.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(Icons.menu_book, color: ColorManager.primary, size: 24),
@@ -332,7 +333,7 @@ class _DietMainState extends State<DietMain>
                               'Food Library',
                               style: TextStyle(
                                 color: ColorManager.textPrimary,
-                                fontSize: 16,
+                                fontSize: 16.sp,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -341,7 +342,7 @@ class _DietMainState extends State<DietMain>
                               'Browse protein sources & nutritional info',
                               style: TextStyle(
                                 color: ColorManager.textSecondary,
-                                fontSize: 13,
+                                fontSize: 13.sp,
                               ),
                             ),
                           ],
@@ -369,10 +370,7 @@ class _DietMainState extends State<DietMain>
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            ColorManager.primary.withOpacity(0.8),
-            ColorManager.primary.withOpacity(0.4),
-          ],
+          colors: [ColorManager.heroTealStart, ColorManager.heroTealMid],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -383,7 +381,7 @@ class _DietMainState extends State<DietMain>
           CircleAvatar(
             radius: 25,
             backgroundColor: Colors.white24,
-            child: Icon(icon, color: ColorManager.textPrimary, size: 30),
+            child: Icon(icon, color: Colors.white, size: 30),
           ),
           const SizedBox(width: 16),
           Column(
@@ -391,13 +389,13 @@ class _DietMainState extends State<DietMain>
             children: [
               Text(
                 'Current Sprint',
-                style: TextStyle(color: ColorManager.textSecondary, fontSize: 12),
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 12.sp),
               ),
               Text(
                 title,
                 style: TextStyle(
-                  color: ColorManager.textPrimary,
-                  fontSize: 22,
+                  color: Colors.white,
+                  fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -419,7 +417,7 @@ class _DietMainState extends State<DietMain>
           Expanded(
             child: Text(
               text,
-              style: TextStyle(color: ColorManager.textSecondary, fontSize: 14, height: 1.4),
+              style: TextStyle(color: ColorManager.textSecondary, fontSize: 14.sp, height: 1.4),
             ),
           ),
         ],
@@ -499,7 +497,7 @@ class _DietMainState extends State<DietMain>
         border: Border.all(color: ColorManager.divider),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )
@@ -528,7 +526,7 @@ class _DietMainState extends State<DietMain>
                         'Macro & Calorie Estimator',
                         style: TextStyle(
                           color: ColorManager.textPrimary,
-                          fontSize: 15.sp,
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -566,7 +564,7 @@ class _DietMainState extends State<DietMain>
                         ),
                         Text(
                           '${_calculatorWeight.toStringAsFixed(1)} kg',
-                          style: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.bold, fontSize: 15.sp),
+                          style: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.bold, fontSize: 14.sp),
                         ),
                       ],
                     ),
@@ -575,7 +573,7 @@ class _DietMainState extends State<DietMain>
                         activeTrackColor: ColorManager.primary,
                         inactiveTrackColor: ColorManager.divider,
                         thumbColor: ColorManager.primary,
-                        overlayColor: ColorManager.primary.withOpacity(0.2),
+                        overlayColor: ColorManager.primary.withValues(alpha: 0.2),
                         valueIndicatorColor: ColorManager.primary,
                       ),
                       child: Slider(
@@ -620,7 +618,7 @@ class _DietMainState extends State<DietMain>
                             '$calculatedCalories kcal',
                             style: TextStyle(
                               color: ColorManager.textPrimary,
-                              fontSize: 28.sp,
+                              fontSize: 24.sp,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -711,7 +709,7 @@ class _DietMainState extends State<DietMain>
     return ChoiceChip(
       label: Text(label, style: TextStyle(fontSize: 12.sp)),
       selected: isSelected,
-      selectedColor: ColorManager.primary.withOpacity(0.2),
+      selectedColor: ColorManager.primary.withValues(alpha: 0.2),
       checkmarkColor: ColorManager.primary,
       labelStyle: TextStyle(
         color: isSelected ? ColorManager.primary : ColorManager.textSecondary,

@@ -121,7 +121,7 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: ColorManager.primary,
-                              fontSize: 10.sp,
+                              fontSize: 11.sp,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.6,
                             ),
@@ -151,7 +151,7 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
               'Build Your AI Workout Routine',
               style: TextStyle(
                 color: ColorManager.white,
-                fontSize: 17.sp,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -317,7 +317,7 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: ColorManager.primary,
-                              fontSize: 10.sp,
+                              fontSize: 11.sp,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.6,
                             ),
@@ -345,7 +345,7 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
               'Your Custom AI Routine',
               style: TextStyle(
                 color: ColorManager.white,
-                fontSize: 17.sp,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),

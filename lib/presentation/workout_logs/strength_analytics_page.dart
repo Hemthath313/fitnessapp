@@ -327,7 +327,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
       decoration: BoxDecoration(
         color: ColorManager.surface,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: rank < 3 ? Colors.amber.withOpacity(0.4) : ColorManager.divider),
+        border: Border.all(color: rank < 3 ? Colors.amber.withValues(alpha: 0.4) : ColorManager.divider),
       ),
       child: InkWell(
         onTap: () => context.push(
@@ -380,7 +380,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
                 ),
                 Text(
                   metricLabel,
-                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp),
+                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
                 ),
               ],
             ),
@@ -539,7 +539,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
                       ),
                       child: Text(
                         _chartMetricIs1RM ? 'Switch to Weight' : 'Switch to 1RM',
-                        style: TextStyle(color: ColorManager.primary, fontSize: 10.sp, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: ColorManager.primary, fontSize: 11.sp, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -580,7 +580,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
           style: ElevatedButton.styleFrom(
             backgroundColor: ColorManager.surface,
             foregroundColor: ColorManager.primary,
-            side: BorderSide(color: ColorManager.primary.withOpacity(0.4)),
+            side: BorderSide(color: ColorManager.primary.withValues(alpha: 0.4)),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
             padding: EdgeInsets.symmetric(vertical: 12.h),
           ),
@@ -606,7 +606,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
         show: true,
         drawVerticalLine: false,
         getDrawingHorizontalLine: (_) => FlLine(
-          color: ColorManager.divider.withOpacity(0.4),
+          color: ColorManager.divider.withValues(alpha: 0.4),
           strokeWidth: 1,
         ),
       ),
@@ -618,7 +618,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
             reservedSize: 36.w,
             getTitlesWidget: (v, _) => Text(
               '${v.toInt()}kg',
-              style: TextStyle(color: ColorManager.textTertiary, fontSize: 9.sp),
+              style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
             ),
           ),
         ),
@@ -643,7 +643,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
           ),
           belowBarData: BarAreaData(
             show: true,
-            color: ColorManager.primary.withOpacity(0.08),
+            color: ColorManager.primary.withValues(alpha: 0.08),
           ),
         ),
       ],
@@ -718,7 +718,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
         borderRadius: BorderRadius.circular(14.r),
         border: Border.all(
           color: insight.status == StrengthStatus.stalled
-              ? Colors.orange.withOpacity(0.4)
+              ? Colors.orange.withValues(alpha: 0.4)
               : ColorManager.divider,
         ),
       ),
@@ -733,16 +733,16 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
                 insight.exerciseName,
                 style: TextStyle(
                   color: ColorManager.textPrimary,
-                  fontSize: 15.sp,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                 decoration: BoxDecoration(
-                  color: badgeColor.withOpacity(0.12),
+                  color: badgeColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8.r),
-                  border: Border.all(color: badgeColor.withOpacity(0.3)),
+                  border: Border.all(color: badgeColor.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -753,7 +753,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
                       badgeLabel,
                       style: TextStyle(
                         color: badgeColor,
-                        fontSize: 10.sp,
+                        fontSize: 11.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

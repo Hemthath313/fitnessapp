@@ -71,7 +71,7 @@ class _TransformationStrengthProgressCardState
                             'Strength Progress',
                             style: TextStyle(
                               color: ColorManager.textPrimary,
-                              fontSize: 15.sp,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.bold,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -92,7 +92,7 @@ class _TransformationStrengthProgressCardState
                         '${summary.totalStrengthWorkouts} Workouts',
                         style: TextStyle(
                           color: ColorManager.primary,
-                          fontSize: 10.sp,
+                          fontSize: 11.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -226,7 +226,7 @@ class _TransformationStrengthProgressCardState
             label,
             style: TextStyle(
               color: ColorManager.textSecondary,
-              fontSize: 10.sp,
+              fontSize: 11.sp,
             ),
             overflow: TextOverflow.ellipsis,
           ),
@@ -292,7 +292,7 @@ class _TransformationStrengthProgressCardState
                     _show1RM ? '1RM Trend' : 'Weight Trend',
                     style: TextStyle(
                       color: _show1RM ? ColorManager.primary : ColorManager.textSecondary,
-                      fontSize: 10.sp,
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -359,7 +359,7 @@ class _TransformationStrengthProgressCardState
               children: [
                 Text(
                   DateFormat('MMM d').format(points.first.date),
-                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp),
+                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
                 ),
                 Expanded(
                   child: Text(
@@ -367,13 +367,13 @@ class _TransformationStrengthProgressCardState
                         ? '${selected.startingEstimated1RM.toStringAsFixed(1)} kg → ${selected.latestEstimated1RM.toStringAsFixed(1)} kg'
                         : '${selected.startingWeight.toStringAsFixed(1)} kg → ${selected.latestWeight.toStringAsFixed(1)} kg (${selected.weightDifference >= 0 ? '+' : ''}${selected.weightDifference.toStringAsFixed(1)} kg)',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: ColorManager.textPrimary, fontSize: 10.sp, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: ColorManager.textPrimary, fontSize: 11.sp, fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Text(
                   DateFormat('MMM d').format(points.last.date),
-                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp),
+                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
                 ),
               ],
             ),
@@ -425,7 +425,7 @@ class _TransformationStrengthProgressCardState
                         'Start: ${p.startingWeight.toStringAsFixed(1)} kg • Latest: ${p.latestWeight.toStringAsFixed(1)} kg',
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 10.sp,
+                          fontSize: 11.sp,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -446,7 +446,7 @@ class _TransformationStrengthProgressCardState
                       '${isPositive ? '+' : ''}${p.weightDifference.toStringAsFixed(1)} kg (${isPositive ? '+' : ''}${p.percentageImprovement.toStringAsFixed(1)}%)',
                       style: TextStyle(
                         color: isPositive ? ColorManager.success : ColorManager.textSecondary,
-                        fontSize: 10.sp,
+                        fontSize: 11.sp,
                         fontWeight: FontWeight.bold,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -503,7 +503,7 @@ class _TransformationStrengthProgressCardState
                       ),
                       Text(
                         DateFormat('MMM d, yyyy').format(pr.achievedAt),
-                        style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp),
+                        style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
                       ),
                     ],
                   ),

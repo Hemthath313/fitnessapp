@@ -38,6 +38,24 @@ class AddDataWidgets extends StatelessWidget {
   Object? valueGoal;
   void Function(Object?)? onChangedGoal;
 
+  Widget _sectionHeader(String text) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(28.w, 12.h, 28.w, 0),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          text.toUpperCase(),
+          style: TextStyle(
+            color: ColorManager.primary,
+            fontSize: 12.sp,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.8,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Widget> addDataList = [
@@ -292,6 +310,11 @@ class AddDataWidgets extends StatelessWidget {
         ),
       ),
     ];
+    // Labelled groups make the long form feel like three short steps.
+    // Insert from the back so earlier indexes stay valid.
+    addDataList.insert(5, _sectionHeader('Your goal'));
+    addDataList.insert(3, _sectionHeader('Your body'));
+    addDataList.insert(0, _sectionHeader('About you'));
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,

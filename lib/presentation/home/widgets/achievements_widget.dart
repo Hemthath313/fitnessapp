@@ -1,4 +1,5 @@
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
+import 'package:fitness_app/utils/haptics.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -32,11 +33,18 @@ const List<AchievementDef> allAchievements = [
     color: Color(0xFFFF6B35),
   ),
   AchievementDef(
-    id: '7 Day Streak',
-    emoji: '⚡',
-    title: '7-Day Warrior',
-    desc: '7 consecutive active days',
-    color: Color(0xFFFFD700),
+    id: 'Hat Trick',
+    emoji: '🎯',
+    title: 'Hat Trick',
+    desc: 'Log 3 workouts',
+    color: Color(0xFF26C6DA),
+  ),
+  AchievementDef(
+    id: '3 Day Streak',
+    emoji: '☀️',
+    title: 'Warming Up',
+    desc: '3 active days in a row',
+    color: Color(0xFFFFB300),
   ),
   AchievementDef(
     id: 'Strong Start',
@@ -46,6 +54,41 @@ const List<AchievementDef> allAchievements = [
     color: Color(0xFF4CAF50),
   ),
   AchievementDef(
+    id: '7 Day Streak',
+    emoji: '⚡',
+    title: '7-Day Warrior',
+    desc: '7 consecutive active days',
+    color: Color(0xFFFFD700),
+  ),
+  AchievementDef(
+    id: '14 Day Streak',
+    emoji: '🥊',
+    title: 'Fortnight Fighter',
+    desc: '14-day streak',
+    color: Color(0xFFEF5350),
+  ),
+  AchievementDef(
+    id: '21 Day Streak',
+    emoji: '🧱',
+    title: 'Habit Builder',
+    desc: '21-day streak',
+    color: Color(0xFF8D6E63),
+  ),
+  AchievementDef(
+    id: '25 Workouts',
+    emoji: '🥉',
+    title: '25 Club',
+    desc: 'Log 25 workouts',
+    color: Color(0xFFCD7F32),
+  ),
+  AchievementDef(
+    id: 'Half Century',
+    emoji: '🥈',
+    title: 'Half Century',
+    desc: 'Log 50 workouts',
+    color: Color(0xFFB0BEC5),
+  ),
+  AchievementDef(
     id: 'Monthly Warrior',
     emoji: '🏆',
     title: 'Monthly Warrior',
@@ -53,11 +96,39 @@ const List<AchievementDef> allAchievements = [
     color: Color(0xFFE91E63),
   ),
   AchievementDef(
+    id: '60 Day Streak',
+    emoji: '🚀',
+    title: 'Unstoppable',
+    desc: '60-day streak',
+    color: Color(0xFF42A5F5),
+  ),
+  AchievementDef(
     id: 'Centurion',
     emoji: '👑',
     title: 'Centurion',
     desc: '100 workouts logged',
     color: Color(0xFF9C27B0),
+  ),
+  AchievementDef(
+    id: '100 Day Streak',
+    emoji: '🌟',
+    title: 'Legend',
+    desc: '100-day streak',
+    color: Color(0xFFFFC107),
+  ),
+  AchievementDef(
+    id: 'Double Century',
+    emoji: '🥇',
+    title: 'Double Century',
+    desc: 'Log 200 workouts',
+    color: Color(0xFFFFD54F),
+  ),
+  AchievementDef(
+    id: 'Iron Year',
+    emoji: '🦾',
+    title: 'Iron Year',
+    desc: 'Log 365 workouts',
+    color: Color(0xFF7E57C2),
   ),
 ];
 
@@ -94,7 +165,7 @@ class AchievementsWidget extends StatelessWidget {
                       padding: EdgeInsets.symmetric(
                           horizontal: 8.w, vertical: 3.h),
                       decoration: BoxDecoration(
-                        color: ColorManager.primary.withOpacity(0.12),
+                        color: ColorManager.primary.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(10.r),
                       ),
                       child: Text(
@@ -158,19 +229,19 @@ class _AchievementBadge extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 6.w),
         decoration: BoxDecoration(
           color: isUnlocked
-              ? def.color.withOpacity(0.12)
+              ? def.color.withValues(alpha: 0.12)
               : ColorManager.surfaceLight,
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
             color: isUnlocked
-                ? def.color.withOpacity(0.4)
+                ? def.color.withValues(alpha: 0.4)
                 : ColorManager.divider,
             width: 1.5,
           ),
           boxShadow: isUnlocked
               ? [
                   BoxShadow(
-                    color: def.color.withOpacity(0.2),
+                    color: def.color.withValues(alpha: 0.2),
                     blurRadius: 8,
                     spreadRadius: 0,
                   )
@@ -207,7 +278,7 @@ class _AchievementBadge extends StatelessWidget {
                 color: isUnlocked
                     ? ColorManager.textPrimary
                     : ColorManager.textTertiary,
-                fontSize: 9.sp,
+                fontSize: 11.sp,
                 fontWeight:
                     isUnlocked ? FontWeight.bold : FontWeight.normal,
               ),
@@ -226,6 +297,7 @@ class _AchievementBadge extends StatelessWidget {
 /// Shows a full-screen celebration dialog when a new achievement is unlocked.
 void showAchievementUnlockDialog(
     BuildContext context, AchievementDef achievement) {
+  Haptics.heavy();
   showDialog(
     context: context,
     barrierDismissible: true,
@@ -236,7 +308,7 @@ void showAchievementUnlockDialog(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              achievement.color.withOpacity(0.15),
+              achievement.color.withValues(alpha: 0.15),
               ColorManager.surface,
             ],
             begin: Alignment.topCenter,
@@ -244,10 +316,10 @@ void showAchievementUnlockDialog(
           ),
           borderRadius: BorderRadius.circular(24.r),
           border: Border.all(
-              color: achievement.color.withOpacity(0.5), width: 1.5),
+              color: achievement.color.withValues(alpha: 0.5), width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: achievement.color.withOpacity(0.3),
+              color: achievement.color.withValues(alpha: 0.3),
               blurRadius: 24,
               spreadRadius: 2,
             )
@@ -278,7 +350,7 @@ void showAchievementUnlockDialog(
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: achievement.color,
-                fontSize: 22.sp,
+                fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),

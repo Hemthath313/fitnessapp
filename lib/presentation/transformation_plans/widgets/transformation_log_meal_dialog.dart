@@ -110,7 +110,7 @@ class _TransformationLogMealDialogState
                   ],
                 ),
               ),
-              IconButton(
+              IconButton(tooltip: 'Close', 
                 icon: Icon(Icons.close_rounded, color: ColorManager.textSecondary),
                 onPressed: () => Navigator.of(context).pop(),
               ),
@@ -192,7 +192,7 @@ class _TransformationLogMealDialogState
                           '${(preset * 100).toInt()}%',
                           style: TextStyle(
                             color: isSelected ? Colors.white : ColorManager.textSecondary,
-                            fontSize: 10.sp,
+                            fontSize: 11.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -287,7 +287,7 @@ class _TransformationLogMealDialogState
               label: Text(
                 _isLogging ? 'Logging...' : 'Log to Gym Buddy Food Tracker',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: ColorManager.onMint,
                   fontSize: 14.sp,
                   fontWeight: FontWeight.bold,
                 ),
@@ -323,7 +323,7 @@ class _TransformationLogMealDialogState
           label,
           style: TextStyle(
             color: ColorManager.textSecondary,
-            fontSize: 10.sp,
+            fontSize: 11.sp,
           ),
         ),
       ],

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_app/data/transformation_plans_data.dart';
 import 'package:fitness_app/model/transformation_plan_model.dart';
+import 'package:fitness_app/presentation/home/widgets/gradient_hero_card.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/transformation_plans/providers/transformation_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
@@ -43,30 +44,16 @@ class TransformationPlanDetailScreen extends StatelessWidget {
       backgroundColor: ColorManager.background,
       body: Consumer<TransformationProvider>(
         builder: (context, provider, _) {
-          return CustomScrollView(
-            slivers: [
-              // 1. Sliver AppBar with Hero Banner
-              SliverAppBar(
-                expandedHeight: 250.h,
-                pinned: true,
-                backgroundColor: ColorManager.surface,
-                leading: IconButton(
-                  icon: Container(
-                    padding: EdgeInsets.all(6.w),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.4),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: Colors.white,
-                      size: 16,
-                    ),
-                  ),
-                  onPressed: () => context.pop(),
-                ),
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
+          final topPad = MediaQuery.paddingOf(context).top;
+          return Column(
+            children: [
+              // 1. Fixed hero banner: keeps its size while the content scrolls.
+              SizedBox(
+                height: topPad + 168.h,
+                child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
@@ -77,14 +64,31 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                         end: Alignment.bottomCenter,
                       ),
                     ),
-                    padding: EdgeInsets.fromLTRB(20.w, 50.h, 20.w, 16.h),
-                    child: SingleChildScrollView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      child: Column(
+                  ),
+                      if (HeroImages.photoForPlan(resolvedPlan.id) != null) ...[
+                        // Athlete photo on the right, faded into the banner colour.
+                        HeroPhoto(
+                          asset: HeroImages.photoForPlan(resolvedPlan.id)!,
+                          widthFactor: 0.55,
+                        ),
+                      ],
+                      Padding(
+                    padding: EdgeInsets.fromLTRB(20.w, topPad + 16.h, 20.w + 100.w, 12.h),
+                    // Not a Scrollable: the banner is fixed, and a nested scroll view
+                    // would be picked up first by `find.byType(Scrollable)` in tests.
+                    child: ClipRect(
+                      child: OverflowBox(
+                        alignment: Alignment.topLeft,
+                        minHeight: 0,
+                        maxHeight: double.infinity,
+                        child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                        Wrap(
+                        Padding(
+                          // Leaves room for the back button on the same row.
+                          padding: EdgeInsets.only(left: 40.w),
+                          child: Wrap(
                           spacing: 8.w,
                           runSpacing: 4.h,
                           children: [
@@ -106,7 +110,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                                     '${resolvedPlan.durationDays} DAYS',
                                     style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 10.sp,
+                                      fontSize: 11.sp,
                                       fontWeight: FontWeight.bold,
                                       letterSpacing: 0.6,
                                     ),
@@ -124,12 +128,13 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                                 resolvedPlan.difficulty,
                                 style: TextStyle(
                                   color: Colors.white70,
-                                  fontSize: 10.sp,
+                                  fontSize: 11.sp,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
                           ],
+                        ),
                         ),
                         SizedBox(height: 8.h),
                         Text(
@@ -152,12 +157,45 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                         ),
                       ],
                     ),
+                      ),
+                    ),
                   ),
-                ),
-                ),
+                      if (HeroImages.photoForPlan(resolvedPlan.id) == null)
+                        Positioned.fill(
+                          child: HeroArt(
+                            illustrationAsset: HeroImages.forKey(HeroImages.keyForPlan(resolvedPlan.id)),
+                            personAsset: HeroImages.personForKey(HeroImages.keyForPlan(resolvedPlan.id)),
+                            size: 130.w,
+                            top: topPad + 14.h,
+                          ),
+                        ),
+                      Positioned(
+                        top: topPad + 4.h,
+                        left: 8.w,
+                        child: IconButton(tooltip: 'Back', 
+                          icon: Container(
+                            padding: EdgeInsets.all(6.w),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.4),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
+                          onPressed: () => context.pop(),
+                        ),
+                      ),
+                    ],
+                  ),
               ),
 
-              // 2. Content Body
+              // 2. Scrollable content body
+              Expanded(
+                child: CustomScrollView(
+                slivers: [
               SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
@@ -279,6 +317,9 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                       SizedBox(height: 30.h),
                     ],
                   ),
+                ),
+              ),
+                ],
                 ),
               ),
             ],
@@ -638,7 +679,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Text('⚡', style: TextStyle(fontSize: 18)),
+                 Text('⚡', style: TextStyle(fontSize: 18.sp)),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Column(
@@ -656,7 +697,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                         'Pair with the 30-Day Six-Pack Challenge.',
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 10.sp,
+                          fontSize: 11.sp,
                         ),
                       ),
                     ],
@@ -819,7 +860,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Text('🥩', style: TextStyle(fontSize: 18)),
+                 Text('🥩', style: TextStyle(fontSize: 18.sp)),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Column(
@@ -837,7 +878,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                         'Target 1.8–2.2g protein/kg and clean surplus with Bulking Diet.',
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 10.sp,
+                          fontSize: 11.sp,
                         ),
                       ),
                     ],
@@ -867,7 +908,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Text('📈', style: TextStyle(fontSize: 18)),
+                 Text('📈', style: TextStyle(fontSize: 18.sp)),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Column(
@@ -885,7 +926,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                         'Monitor personal records and strength curves.',
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 10.sp,
+                          fontSize: 11.sp,
                         ),
                       ),
                     ],
@@ -1048,7 +1089,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Text('🏆', style: TextStyle(fontSize: 18)),
+                 Text('🏆', style: TextStyle(fontSize: 18.sp)),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Column(
@@ -1066,7 +1107,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                         'Track all-time compound records and 1RM curves.',
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 10.sp,
+                          fontSize: 11.sp,
                         ),
                       ),
                     ],
@@ -1096,7 +1137,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Text('📋', style: TextStyle(fontSize: 18)),
+                 Text('📋', style: TextStyle(fontSize: 18.sp)),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Column(
@@ -1114,7 +1155,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                         'Review past session logs, tonnage, and exercise history.',
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 10.sp,
+                          fontSize: 11.sp,
                         ),
                       ),
                     ],
@@ -1147,7 +1188,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
             title,
             style: TextStyle(
               color: ColorManager.textPrimary,
-              fontSize: 15.sp,
+              fontSize: 14.sp,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -1214,7 +1255,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
             label,
             style: TextStyle(
               color: ColorManager.textTertiary,
-              fontSize: 10.sp,
+              fontSize: 11.sp,
             ),
           ),
         ],
@@ -1361,7 +1402,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                     'Day ${m.triggerDay}',
                     style: TextStyle(
                       color: primaryColor,
-                      fontSize: 10.sp,
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

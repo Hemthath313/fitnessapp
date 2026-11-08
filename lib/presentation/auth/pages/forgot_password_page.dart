@@ -46,7 +46,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   StringsManager.enterEmailToResetPw,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: FontSize.s20.sp,
+                    fontSize: 20.sp,
                     fontWeight: FontWightManager.semiBold,
                     color: ColorManager.white,
                   ),

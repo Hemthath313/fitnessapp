@@ -139,7 +139,7 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
           borderRadius: BorderRadius.circular(SizeManager.s12.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -185,7 +185,7 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
                       '${photo.weight!.toStringAsFixed(1)} kg',
                       style: TextStyle(
                         color: ColorManager.textSecondary,
-                        fontSize: 10.sp,
+                        fontSize: 11.sp,
                       ),
                     ),
                   ],
@@ -194,14 +194,14 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
                     padding:
                         EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                     decoration: BoxDecoration(
-                      color: ColorManager.primary.withOpacity(0.2),
+                      color: ColorManager.primary.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(4.r),
                     ),
                     child: Text(
                       photo.categoryDisplay,
                       style: TextStyle(
                         color: ColorManager.primary,
-                        fontSize: 9.sp,
+                        fontSize: 11.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

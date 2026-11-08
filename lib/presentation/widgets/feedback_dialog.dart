@@ -126,14 +126,14 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                   children: [
                     Icon(
                       Icons.rate_review_outlined,
-                      color: Colors.white,
+                      color: ColorManager.onMint,
                       size: SizeManager.s35.w,
                     ),
                     SizedBox(height: 8.h),
                     Text(
                       'RATE & FEEDBACK',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: ColorManager.onMint,
                         fontSize: 16.sp,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.2,
@@ -166,6 +166,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                         final starNumber = index + 1;
                         final isSelected = starNumber <= _selectedStars;
                         return IconButton(
+                          tooltip: '$starNumber star${starNumber == 1 ? '' : 's'}',
                           onPressed: () {
                             setState(() {
                               _selectedStars = starNumber;
@@ -261,13 +262,13 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                                             height: 16.w,
                                             child: const CircularProgressIndicator(
                                               strokeWidth: 2,
-                                              color: Colors.white,
+                                              color: ColorManager.onMint,
                                             ),
                                           )
                                         : Text(
                                             'SUBMIT',
                                             style: TextStyle(
-                                              color: Colors.white,
+                                              color: ColorManager.onMint,
                                               fontSize: 13.sp,
                                               fontWeight: FontWeight.bold,
                                             ),

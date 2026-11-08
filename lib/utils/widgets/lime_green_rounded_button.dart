@@ -24,12 +24,12 @@ class LimeGreenRoundedButtonWidget extends StatelessWidget {
           onPressed: isLoading ? null : onTap,
           style: ElevatedButton.styleFrom(
             backgroundColor: ColorManager.primary,
-            foregroundColor: Colors.white,
+            foregroundColor: const Color(0xFF06201B),
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12.r),
             ),
-            disabledBackgroundColor: ColorManager.primary.withOpacity(0.6),
+            disabledBackgroundColor: ColorManager.primary.withValues(alpha: 0.6),
             padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
           ),
           child: isLoading
@@ -38,15 +38,15 @@ class LimeGreenRoundedButtonWidget extends StatelessWidget {
                   width: 20.w,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF06201B)),
                   ),
                 )
               : Text(
                   title,
                   style: TextStyle(
-                    fontSize: 15.sp,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: const Color(0xFF06201B),
                     letterSpacing: 0.5,
                   ),
                 ),

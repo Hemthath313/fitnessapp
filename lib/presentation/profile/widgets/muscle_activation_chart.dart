@@ -156,7 +156,7 @@ class _MuscleActivationChartState extends State<MuscleActivationChart> {
                                   sections: sections.isEmpty
                                       ? [
                                           PieChartSectionData(
-                                            color: Colors.blueGrey.withOpacity(0.2),
+                                            color: Colors.blueGrey.withValues(alpha: 0.2),
                                             value: 1,
                                             radius: 30.r,
                                             showTitle: false,
@@ -238,7 +238,7 @@ class _MuscleActivationChartState extends State<MuscleActivationChart> {
                                       '${entry.key} (${((entry.value / totalSets) * 100).toStringAsFixed(0)}%)',
                                       style: TextStyle(
                                         color: ColorManager.textTertiary,
-                                        fontSize: 10.sp,
+                                        fontSize: 11.sp,
                                       ),
                                     ),
                                   ],
@@ -256,7 +256,7 @@ class _MuscleActivationChartState extends State<MuscleActivationChart> {
                     Positioned.fill(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: ColorManager.background.withOpacity(0.85),
+                          color: ColorManager.background.withValues(alpha: 0.85),
                           borderRadius: BorderRadius.circular(16.r),
                         ),
                         child: Column(
@@ -268,7 +268,7 @@ class _MuscleActivationChartState extends State<MuscleActivationChart> {
                               'Muscle Training Breakdown',
                               style: TextStyle(
                                 color: ColorManager.textPrimary,
-                                fontSize: 15.sp,
+                                fontSize: 14.sp,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

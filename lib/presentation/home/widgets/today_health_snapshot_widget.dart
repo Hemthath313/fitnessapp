@@ -77,12 +77,7 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
-                decoration: BoxDecoration(
-                  color: ColorManager.surfaceLight,
-                  borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(color: ColorManager.divider),
-                ),
+                padding: EdgeInsets.symmetric(vertical: 6.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -108,8 +103,8 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
                                     "Today's Snapshot",
                                     style: TextStyle(
                                       color: ColorManager.textPrimary,
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18.sp,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ),
@@ -135,31 +130,23 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
                           Expanded(
                             child: GestureDetector(
                               key: const Key('snapshot_calorie_card'),
-                              onTap: () {
-                                if (hasTarget) {
-                                  context.push(Routes.newMealRoute);
-                                } else {
-                                  context.push(Routes.changeWeightRoute);
-                                }
-                              },
+                              // Always opens the Diet page: it shows the plan, macros
+                              // and the "set your goal" prompt when no target exists.
+                              onTap: () => context.push(Routes.dietRoute),
                               child: Container(
-                                padding: EdgeInsets.all(12.w),
+                                padding: EdgeInsets.all(14.w),
                                 decoration: BoxDecoration(
                                   color: ColorManager.surface,
-                                  borderRadius: BorderRadius.circular(14.r),
-                                  border: Border.all(
-                                    color: ColorManager.divider.withValues(alpha: 0.5),
-                                  ),
+                                  borderRadius: BorderRadius.circular(22.r),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
                                       children: [
-                                        Icon(
-                                          Icons.local_fire_department_rounded,
-                                          color: Colors.orange,
-                                          size: 15.sp,
+                                        _RingIcon(
+                                          icon: Icons.local_fire_department_rounded,
+                                          percent: caloriePercent,
                                         ),
                                         SizedBox(width: 4.w),
                                         Flexible(
@@ -190,7 +177,7 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
                                         '$consumedCalories kcal',
                                         style: TextStyle(
                                           color: ColorManager.textPrimary,
-                                          fontSize: 15.sp,
+                                          fontSize: 14.sp,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -205,26 +192,12 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
                                             : 'Not Set',
                                         style: TextStyle(
                                           color: ColorManager.textSecondary,
-                                          fontSize: 10.sp,
+                                          fontSize: 11.sp,
                                         ),
                                       ),
                                     ),
                                     SizedBox(height: 8.h),
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(4.r),
-                                      child: LinearProgressIndicator(
-                                        value: caloriePercent,
-                                        backgroundColor: isDarkMode
-                                            ? Colors.white10
-                                            : Colors.black12,
-                                        valueColor:
-                                            const AlwaysStoppedAnimation<Color>(
-                                          Colors.orange,
-                                        ),
-                                        minHeight: 5.h,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4.h),
+                                    
                                     FittedBox(
                                       fit: BoxFit.scaleDown,
                                       alignment: Alignment.centerLeft,
@@ -237,8 +210,8 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
                                               ? (remainingCalories > 0
                                                   ? ColorManager.primary
                                                   : Colors.green)
-                                              : Colors.orange,
-                                              fontSize: 9.sp,
+                                              : ColorManager.ringAmber,
+                                              fontSize: 11.sp,
                                               fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -256,23 +229,19 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
                               key: const Key('snapshot_water_card'),
                               onTap: () => context.push(Routes.addWaterRoute),
                               child: Container(
-                                padding: EdgeInsets.all(12.w),
+                                padding: EdgeInsets.all(14.w),
                                 decoration: BoxDecoration(
                                   color: ColorManager.surface,
-                                  borderRadius: BorderRadius.circular(14.r),
-                                  border: Border.all(
-                                    color: ColorManager.divider.withValues(alpha: 0.5),
-                                  ),
+                                  borderRadius: BorderRadius.circular(22.r),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
                                       children: [
-                                        Icon(
-                                          Icons.water_drop_rounded,
-                                          color: Colors.blue,
-                                          size: 15.sp,
+                                        _RingIcon(
+                                          icon: Icons.water_drop_rounded,
+                                          percent: waterPercent,
                                         ),
                                         SizedBox(width: 4.w),
                                         Flexible(
@@ -309,7 +278,7 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
                                             consumedWater.toStringAsFixed(1),
                                             style: TextStyle(
                                               color: ColorManager.textPrimary,
-                                              fontSize: 15.sp,
+                                              fontSize: 14.sp,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -327,28 +296,14 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
                                             '/ ${waterGoal.toStringAsFixed(1)} L',
                                             style: TextStyle(
                                               color: ColorManager.textSecondary,
-                                              fontSize: 10.sp,
+                                              fontSize: 11.sp,
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
                                     SizedBox(height: 10.h),
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(4.r),
-                                      child: LinearProgressIndicator(
-                                        value: waterPercent,
-                                        backgroundColor: isDarkMode
-                                            ? Colors.white10
-                                            : Colors.black12,
-                                        valueColor:
-                                            const AlwaysStoppedAnimation<Color>(
-                                          Colors.blue,
-                                        ),
-                                        minHeight: 5.h,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4.h),
+                                    
                                     FittedBox(
                                       fit: BoxFit.scaleDown,
                                       alignment: Alignment.centerLeft,
@@ -357,8 +312,8 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
                                         style: TextStyle(
                                           color: waterPercent >= 1.0
                                               ? Colors.green
-                                              : Colors.blue,
-                                          fontSize: 9.sp,
+                                              : ColorManager.primary,
+                                          fontSize: 11.sp,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -406,9 +361,9 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
         }
 
         return Container(
-          margin: EdgeInsets.symmetric(horizontal: 1.w),
-          width: 12.w,
-          height: 12.w,
+          margin: EdgeInsets.symmetric(horizontal: 1.5.w),
+          width: 17.w,
+          height: 17.w,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: isDone
@@ -430,7 +385,7 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
                 ? Icon(
                     Icons.check,
                     color: Colors.white,
-                    size: 7.sp,
+                    size: 10.sp,
                   )
                 : Text(
                     days[index],
@@ -438,7 +393,7 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
                       color: isToday
                           ? ColorManager.primary
                           : ColorManager.textSecondary,
-                      fontSize: 6.5.sp,
+                      fontSize: 11.sp,
                       fontWeight:
                           isToday ? FontWeight.bold : FontWeight.normal,
                     ),
@@ -446,6 +401,47 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
           ),
         );
       }),
+    );
+  }
+}
+
+/// Circular progress ring around an icon, as in the Daily Companion tiles:
+/// dark circle, light icon, amber arc showing today's progress.
+class _RingIcon extends StatelessWidget {
+  final IconData icon;
+  final double percent;
+
+  const _RingIcon({required this.icon, required this.percent});
+
+  @override
+  Widget build(BuildContext context) {
+    final double size = 38.w;
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox.expand(
+            child: CircularProgressIndicator(
+              value: percent.clamp(0.0, 1.0),
+              strokeWidth: 2.6,
+              strokeCap: StrokeCap.round,
+              color: ColorManager.ringAmber,
+              backgroundColor: ColorManager.iconChip,
+            ),
+          ),
+          Container(
+            width: size - 10.w,
+            height: size - 10.w,
+            decoration: const BoxDecoration(
+              color: ColorManager.iconChip,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 15.sp, color: Colors.white),
+          ),
+        ],
+      ),
     );
   }
 }

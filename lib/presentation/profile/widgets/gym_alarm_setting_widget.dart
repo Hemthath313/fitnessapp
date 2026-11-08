@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fitness_app/services/notification_service.dart';
+import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
@@ -31,6 +32,10 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
 
   // 5. Water Reminder
   bool _isWaterNotifEnabled = false;
+  TimeOfDay _waterNotifTime = const TimeOfDay(hour: 18, minute: 0);
+
+  // 6. Weekly recap (Sunday evening)
+  bool _isRecapNotifEnabled = true;
 
   @override
   void initState() {
@@ -58,6 +63,12 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
           prefs.getBool('notif_recovery_reminders_enabled') ?? false;
       _isWaterNotifEnabled =
           prefs.getBool('notif_water_reminders_enabled') ?? false;
+      _isRecapNotifEnabled =
+          prefs.getBool('notif_weekly_recap_enabled') ?? true;
+      _waterNotifTime = TimeOfDay(
+        hour: prefs.getInt('notif_water_hour') ?? 18,
+        minute: prefs.getInt('notif_water_minute') ?? 0,
+      );
     });
   }
 
@@ -292,6 +303,64 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
     }
   }
 
+  Future<void> _toggleRecapReminders(bool enabled) async {
+    if (enabled) {
+      final granted = await _ensurePermission();
+      if (!granted) return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notif_weekly_recap_enabled', enabled);
+    setState(() => _isRecapNotifEnabled = enabled);
+
+    if (!enabled) {
+      await NotificationService().cancelWeeklyRecapNotification();
+      return;
+    }
+    if (!mounted) return;
+    try {
+      final stats = Provider.of<StatisticsProvider>(context, listen: false);
+      await NotificationService().scheduleWeeklyRecapNotification(
+        workoutsThisWeek: stats.workoutsCompletedThisWeek,
+        target: stats.weeklyTarget,
+        streak: stats.currentStreak,
+      );
+    } catch (_) {
+      // Next logged workout schedules it.
+    }
+  }
+
+  Future<void> _selectWaterNotifTime() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _waterNotifTime,
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.dark(
+              primary: ColorManager.primary,
+              onPrimary: Colors.black,
+              surface: ColorManager.surface,
+              onSurface: ColorManager.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != _waterNotifTime) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('notif_water_hour', picked.hour);
+      await prefs.setInt('notif_water_minute', picked.minute);
+      if (!mounted) return;
+      setState(() => _waterNotifTime = picked);
+      if (_isWaterNotifEnabled) {
+        await NotificationService().scheduleWaterReminder();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -301,12 +370,12 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
         color: ColorManager.surface,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: ColorManager.primary.withOpacity(0.3),
+          color: ColorManager.primary.withValues(alpha: 0.3),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: ColorManager.primary.withOpacity(0.08),
+            color: ColorManager.primary.withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -398,9 +467,27 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
             icon: Icons.water_drop_rounded,
             color: Colors.cyan,
             title: 'Hydration Reminder',
-            subtitle: 'Daily 6:00 PM water target check-in',
+            subtitle: 'Daily water target check-in at a time you choose',
             value: _isWaterNotifEnabled,
             onChanged: _toggleWaterReminders,
+            extraContent: _isWaterNotifEnabled
+                ? _buildTimeSelector(
+                    label: 'Reminder Time',
+                    time: _waterNotifTime,
+                    onTap: _selectWaterNotifTime,
+                  )
+                : null,
+          ),
+          Divider(color: ColorManager.divider, height: 20.h),
+
+          // 6. Weekly recap
+          _buildToggleRow(
+            icon: Icons.insights_rounded,
+            color: ColorManager.primary,
+            title: 'Weekly Recap',
+            subtitle: 'Your week in review, Sunday evening',
+            value: _isRecapNotifEnabled,
+            onChanged: _toggleRecapReminders,
           ),
         ],
       ),
@@ -423,7 +510,7 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
             Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
+                color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10.r),
               ),
               child: Icon(icon, color: color, size: 20.sp),
@@ -456,7 +543,7 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
               value: value,
               onChanged: onChanged,
               activeColor: ColorManager.primary,
-              activeTrackColor: ColorManager.primary.withOpacity(0.5),
+              activeTrackColor: ColorManager.primary.withValues(alpha: 0.5),
             ),
           ],
         ),

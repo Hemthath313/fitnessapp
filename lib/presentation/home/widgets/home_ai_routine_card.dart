@@ -5,6 +5,7 @@ import 'package:fitness_app/model/workout_model.dart';
 import 'package:fitness_app/presentation/custom_workouts/day_workout_session_page.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
+import 'package:fitness_app/presentation/home/widgets/gradient_hero_card.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/transformation_plans/providers/transformation_provider.dart';
 import 'package:fitness_app/presentation/transformation_plans/utils/transformation_equipment_adapter.dart';
@@ -12,6 +13,7 @@ import 'package:fitness_app/presentation/workout_tools/plate_calculator_sheet.da
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/services/notification_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -439,19 +441,34 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
 
     final Color accentColor = isTodayCompleted
         ? const Color(0xFF4CAF50)
-        : (isRestDay ? Colors.blueAccent : ColorManager.primary);
+        : (isRestDay ? Colors.blueAccent : Colors.white);
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: ColorManager.surface,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(
-            color: accentColor.withValues(alpha: isTodayCompleted ? 0.7 : 0.4),
-            width: 1.4,
-          ),
+          color: (isTodayCompleted || isRestDay) ? ColorManager.surface : null,
+          gradient: (isTodayCompleted || isRestDay)
+              ? null
+              : LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    ColorManager.heroTealStart,
+                    ColorManager.heroTealMid,
+                    ColorManager.surface,
+                  ],
+                  stops: const [0.0, 0.4, 1.0],
+                ),
+          borderRadius: BorderRadius.circular(24.r),
+          border: (isTodayCompleted || isRestDay)
+              ? Border.all(
+                  color: accentColor
+                      .withValues(alpha: isTodayCompleted ? 0.7 : 0.4),
+                  width: 1.4,
+                )
+              : null,
           boxShadow: [
             BoxShadow(
               color: accentColor.withValues(alpha: 0.08),
@@ -481,7 +498,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                             ? const Color(0xFF1E4331)
                             : (isRestDay
                                 ? Colors.blueAccent.withValues(alpha: 0.15)
-                                : ColorManager.primary.withValues(alpha: 0.15)),
+                                : Colors.black.withValues(alpha: 0.25)),
                         borderRadius: BorderRadius.circular(6.r),
                         border: Border.all(
                           color: accentColor.withValues(alpha: 0.4),
@@ -516,7 +533,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                               color: isTodayCompleted
                                   ? const Color(0xFF81C784)
                                   : accentColor,
-                              fontSize: 9.sp,
+                              fontSize: 11.sp,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.5,
                             ),
@@ -539,14 +556,14 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                         Text(
                           'Roadmap',
                           style: TextStyle(
-                            color: ColorManager.primary,
+                            color: Colors.white,
                             fontSize: 11.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Icon(
                           Icons.chevron_right_rounded,
-                          color: ColorManager.primary,
+                          color: Colors.white,
                           size: 14.sp,
                         ),
                       ],
@@ -562,7 +579,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
               blueprint?.title ?? active.planTitle,
               style: TextStyle(
                 color: ColorManager.white,
-                fontSize: 17.sp,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
               ),
               maxLines: 1,
@@ -625,7 +642,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                     sessionSubtitle,
                     style: TextStyle(
                       color: ColorManager.textSecondary,
-                      fontSize: 10.sp,
+                      fontSize: 11.sp,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -657,7 +674,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                             color: isTodayCompleted
                                 ? const Color(0xFFE8F5E9)
                                 : ColorManager.textSecondary,
-                            fontSize: 9.sp,
+                            fontSize: 11.sp,
                           ),
                         ),
                       )),
@@ -673,7 +690,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                         '+${exerciseNames.length - 3} more',
                         style: TextStyle(
                           color: ColorManager.primary,
-                          fontSize: 9.sp,
+                          fontSize: 11.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -692,7 +709,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                     '${(progress * 100).toInt()}% Complete',
                     style: TextStyle(
                       color: ColorManager.textSecondary,
-                      fontSize: 10.sp,
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.w600,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -704,7 +721,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                     '${active.completedDayIndices.length}/$totalDays Days Done',
                     style: TextStyle(
                       color: ColorManager.textTertiary,
-                      fontSize: 10.sp,
+                      fontSize: 11.sp,
                     ),
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.end,
@@ -911,129 +928,104 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
     final String buttonLabel = hasOnboardingGoal
         ? 'Review & Customize Plan'
         : 'Build My Plan with AI';
+    const Color onLight = Color(0xFF06201B);
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: ColorManager.surface,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(
-            color: ColorManager.primary.withValues(alpha: 0.3),
-            width: 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: ColorManager.primary.withValues(alpha: 0.08),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+      child: GradientHeroCard(
+        key: const Key('no_plan_hero_card'),
+        imageAsset: HeroImages.forGoal(userGoal),
+        imageSize: 150.w,
         padding: EdgeInsets.all(18.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                    decoration: BoxDecoration(
-                      color: ColorManager.primary.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(20.r),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                            Icons.auto_awesome,
-                            color: ColorManager.primary,
-                            size: 13.sp),
-                        SizedBox(width: 5.w),
-                        Flexible(
-                          child: Text(
-                            hasOnboardingGoal
-                                ? 'PERSONALIZED FOR YOU'
-                                : 'AI WORKOUT ROUTINE',
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: ColorManager.primary,
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.6,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+            HeroBadge(
+              text: hasOnboardingGoal
+                  ? 'PERSONALIZED FOR YOU'
+                  : 'AI WORKOUT ROUTINE',
+              icon: Icons.auto_awesome,
+            ),
+            SizedBox(height: 14.h),
+            Padding(
+              padding: EdgeInsets.only(right: GradientHeroCard.textInset),
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20.sp,
+                  height: 1.2,
+                  fontWeight: FontWeight.bold,
                 ),
-                SizedBox(width: 8.w),
-                Text(
-                  hasExistingSchedule
-                      ? '${stats.scheduledDayNames.length}-Day Schedule'
-                      : '3-6 Day Custom Splits',
-                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Padding(
+              padding: EdgeInsets.only(right: GradientHeroCard.textInset),
+              child: Text(
+                subtitle,
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  fontSize: 12.sp,
+                  height: 1.4,
                 ),
-              ],
+              ),
             ),
             SizedBox(height: 12.h),
-            Text(
-              title,
-              style: TextStyle(
-                color: ColorManager.white,
-                fontSize: 18.sp,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 6.h),
-            Text(
-              subtitle,
-              style: TextStyle(
-                color: ColorManager.textSecondary,
-                fontSize: 12.sp,
-                height: 1.4,
-              ),
+            Wrap(
+              spacing: 6.w,
+              runSpacing: 6.h,
+              children: [
+                HeroMetaChip(
+                  icon: Icons.calendar_today_rounded,
+                  text: hasExistingSchedule
+                      ? '${stats.scheduledDayNames.length}-Day Schedule'
+                      : '3-6 days / week',
+                ),
+                const HeroMetaChip(icon: Icons.timer_outlined, text: '~45 min'),
+                const HeroMetaChip(
+                    icon: Icons.play_circle_outline_rounded,
+                    text: 'Video guides'),
+              ],
             ),
             SizedBox(height: 16.h),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () => context.push(Routes.workoutGeneratorRoute),
-                icon: const Icon(
-                    Icons.auto_awesome,
-                    size: 18,
-                    color: Colors.black),
+                icon: const Icon(Icons.auto_awesome, size: 18, color: onLight),
                 label: Text(
                   buttonLabel,
                   style: TextStyle(
-                    color: Colors.black,
+                    color: onLight,
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorManager.primary,
+                  backgroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(vertical: 13.h),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14.r)),
                   elevation: 0,
                 ),
               ),
             ),
             if (!isPremium) ...[
-              SizedBox(height: 10.h),
+              SizedBox(height: 6.h),
               Center(
                 child: TextButton.icon(
                   onPressed: () => _activateFreeStarterPlan(context),
-                  icon: const Icon(Icons.bolt_rounded, color: Colors.white70, size: 16),
-                  label: const Text(
+                  icon: const Icon(Icons.bolt_rounded,
+                      color: Colors.white, size: 16),
+                  label:  Text(
                     'Or tap to activate Free 3-Day Starter Plan',
                     style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
+                      color: Colors.white,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -1331,21 +1323,21 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                       dayShort,
                       style: TextStyle(
                         color: textColor,
-                        fontSize: 10.sp,
+                        fontSize: 11.sp,
                         fontWeight: isToday || isNext || hasWorkout || isDayDone ? FontWeight.bold : FontWeight.w500,
                       ),
                     ),
                     SizedBox(height: 2.h),
                     if (isToday && !hasWorkout)
-                      Text('REST', style: TextStyle(color: Colors.blueAccent, fontSize: 8.sp, fontWeight: FontWeight.bold))
+                      Text('REST', style: TextStyle(color: Colors.blueAccent, fontSize: 11.sp, fontWeight: FontWeight.bold))
                     else if (isDayDone)
-                      Text('DONE', style: TextStyle(color: const Color(0xFF81C784), fontSize: 8.sp, fontWeight: FontWeight.bold))
+                      Text('DONE', style: TextStyle(color: const Color(0xFF81C784), fontSize: 11.sp, fontWeight: FontWeight.bold))
                     else if (isNext)
-                      Text('NEXT', style: TextStyle(color: ColorManager.primary, fontSize: 8.sp, fontWeight: FontWeight.bold))
+                      Text('NEXT', style: TextStyle(color: ColorManager.primary, fontSize: 11.sp, fontWeight: FontWeight.bold))
                     else if (hasWorkout)
-                      Text('${grouped[day]!.length}ex', style: TextStyle(color: ColorManager.textTertiary, fontSize: 8.sp))
+                      Text('${grouped[day]!.length}ex', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp))
                     else
-                      Text('—', style: TextStyle(color: Colors.white24, fontSize: 8.sp)),
+                      Text('—', style: TextStyle(color: Colors.white24, fontSize: 11.sp)),
                   ],
                 ),
               ),
@@ -1357,6 +1349,58 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
   }
 
   /// Card 1: Active Focus Card (Immediate Next Session or Completed Today)
+  /// Picks the mint anatomy cut-out that best matches the exercises of a day.
+  String _anatomyAssetFor(List<String> exerciseNames, String dayName) {
+    final text = exerciseNames.join(' ').toLowerCase();
+    const rules = <String, List<String>>{
+      'chest': ['chest', 'bench', 'push-up', 'push up', 'fly', 'pec'],
+      'back': ['back', 'row', 'pull-up', 'pull up', 'lat', 'deadlift', 'pulldown'],
+      'shoulders': ['shoulder', 'overhead', 'lateral', 'delt', 'press'],
+      'biceps': ['bicep', 'curl'],
+      'triceps': ['tricep', 'dip', 'pushdown', 'extension', 'skull'],
+      'legs': ['leg', 'squat', 'lunge', 'calf', 'glute', 'hamstring', 'quad'],
+      'abs': ['abs', 'crunch', 'plank', 'core', 'sit-up', 'sit up'],
+      'cardio': ['cardio', 'run', 'jump', 'burpee', 'hiit', 'cycle'],
+    };
+    String? best;
+    int bestScore = 0;
+    rules.forEach((key, words) {
+      var score = 0;
+      for (final w in words) {
+        if (text.contains(w)) score++;
+      }
+      if (score > bestScore) {
+        bestScore = score;
+        best = key;
+      }
+    });
+    const fallback = ['chest', 'back', 'legs', 'shoulders', 'abs', 'biceps', 'cardio'];
+    final idx = _weekDays.indexOf(dayName);
+    best ??= fallback[(idx < 0 ? 0 : idx) % fallback.length];
+    return 'assets/images/anatomy_mint/mint_$best.png';
+  }
+
+  /// Gradient day card (teal on even weekdays, coral on odd, green when done)
+  /// built on the shared [GradientHeroCard].
+  Widget _gradientDayShell({
+    required String dayName,
+    required List<String> exerciseNames,
+    required bool isDone,
+    required Widget child,
+  }) {
+    final idx = _weekDays.indexOf(dayName);
+    final bool warm = idx >= 0 && idx.isOdd;
+    return GradientHeroCard(
+      tone: isDone ? HeroTone.green : (warm ? HeroTone.coral : HeroTone.teal),
+      imageAsset: _anatomyAssetFor(exerciseNames, dayName),
+      imageSize: 118.w,
+      imageTop: 26.h,
+      radius: AppRadius.hero.r,
+      padding: EdgeInsets.all(14.w),
+      child: child,
+    );
+  }
+
   Widget _buildActiveDayCard({
     required BuildContext context,
     required String dayName,
@@ -1372,25 +1416,10 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
         .map((w) => w.name.replaceAll(RegExp(r'^\[\w+\]\s*'), '').trim())
         .toList();
 
-    return Container(
-      decoration: BoxDecoration(
-        color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(
-          color: isCompleted
-              ? const Color(0xFF4CAF50).withValues(alpha: 0.6)
-              : ColorManager.primary.withValues(alpha: 0.6),
-          width: 1.4,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: (isCompleted ? const Color(0xFF4CAF50) : ColorManager.primary).withValues(alpha: 0.08),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: EdgeInsets.all(14.w),
+    return _gradientDayShell(
+      dayName: dayName,
+      exerciseNames: exerciseNames,
+      isDone: isCompleted,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1405,12 +1434,12 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                   decoration: BoxDecoration(
                     color: isCompleted
                         ? const Color(0xFF1E4331)
-                        : ColorManager.primary.withValues(alpha: 0.15),
+                        : Colors.white.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6.r),
                     border: Border.all(
                       color: isCompleted
                           ? const Color(0xFF4CAF50).withValues(alpha: 0.4)
-                          : ColorManager.primary.withValues(alpha: 0.4),
+                          : Colors.white.withValues(alpha: 0.4),
                     ),
                   ),
                   child: Row(
@@ -1419,7 +1448,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                       Icon(
                         isCompleted ? Icons.check_circle_rounded : Icons.flash_on_rounded,
                         size: 11.sp,
-                        color: isCompleted ? const Color(0xFF4CAF50) : ColorManager.primary,
+                        color: isCompleted ? const Color(0xFF4CAF50) : Colors.white,
                       ),
                       SizedBox(width: 4.w),
                       Flexible(
@@ -1429,8 +1458,8 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                               : (isNextUp ? 'NEXT UP (TOMORROW)' : 'TODAY\'S TARGET'),
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: isCompleted ? const Color(0xFF81C784) : ColorManager.primary,
-                            fontSize: 9.sp,
+                            color: isCompleted ? const Color(0xFF81C784) : Colors.white,
+                            fontSize: 11.sp,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.5,
                           ),
@@ -1446,7 +1475,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                   child: Text(
                     'Today: $restDayName Rest',
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.blueAccent.shade100, fontSize: 10.sp, fontWeight: FontWeight.w600),
+                    style: TextStyle(color: Colors.blueAccent.shade100, fontSize: 11.sp, fontWeight: FontWeight.w600),
                   ),
                 )
               else
@@ -1454,49 +1483,54 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                   child: Text(
                     '${workouts.length} Exercises · ~45 min',
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp),
+                    style: TextStyle(color: Colors.white60, fontSize: 11.sp),
                   ),
                 ),
             ],
           ),
 
           // Title & Focus
-          Column(
+          Padding(
+ padding: EdgeInsets.only(right: 84.w),
+ child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 '$dayName Routine',
-                style: TextStyle(color: ColorManager.white, fontSize: 17.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(color: ColorManager.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 2.h),
               Text(
                 isCompleted
                     ? 'All ${workouts.length} exercises logged. Streak extended! 🔥'
                     : 'Scheduled full session with animated rest timers & set logs.',
-                style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+                style: TextStyle(color: Colors.white70, fontSize: 11.sp),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
+ ),
 
           // Exercise Pills Horizontal Wrap / Preview
-          Wrap(
+          Padding(
+ padding: EdgeInsets.only(right: 70.w),
+ child: Wrap(
             spacing: 5.w,
             runSpacing: 4.h,
             children: [
               ...exerciseNames.take(3).map((name) => Container(
                 padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
                 decoration: BoxDecoration(
-                  color: isCompleted ? const Color(0xFF1E4331) : ColorManager.surfaceDark,
+                  color: isCompleted ? const Color(0xFF1E4331) : Colors.black.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(6.r),
-                  border: Border.all(color: ColorManager.divider),
+                  border: Border.all(color: Colors.white24),
                 ),
                 child: Text(
                   name,
                   style: TextStyle(
-                    color: isCompleted ? const Color(0xFFE8F5E9) : ColorManager.textSecondary,
-                    fontSize: 10.sp,
+                    color: isCompleted ? const Color(0xFFE8F5E9) : Colors.white70,
+                    fontSize: 11.sp,
                   ),
                 ),
               )),
@@ -1504,16 +1538,17 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
                   decoration: BoxDecoration(
-                    color: ColorManager.surfaceDark,
+                    color: Colors.black.withValues(alpha: 0.25),
                     borderRadius: BorderRadius.circular(6.r),
                   ),
                   child: Text(
                     '+${exerciseNames.length - 3} more',
-                    style: TextStyle(color: ColorManager.primary, fontSize: 10.sp, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Colors.white, fontSize: 11.sp, fontWeight: FontWeight.bold),
                   ),
                 ),
             ],
           ),
+ ),
 
           // Missed Workout Catch-Up Action (Non-destructive, opt-in)
           if (missedDayName != null &&
@@ -1555,7 +1590,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                         'Missed $missedDayName? Tap to resume missed workout',
                         style: TextStyle(
                           color: Colors.amber.shade200,
-                          fontSize: 10.sp,
+                          fontSize: 11.sp,
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
@@ -1591,20 +1626,20 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
               icon: Icon(
                 isCompleted ? Icons.refresh_rounded : Icons.play_arrow_rounded,
                 size: 16.sp,
-                color: isCompleted ? Colors.white : Colors.black,
+                color: Colors.white,
               ),
               label: Text(
                 isCompleted
                     ? 'Repeat $dayName Workout'
                     : (isNextUp ? 'Start $dayName Workout Early' : 'Start Workout Session'),
                 style: TextStyle(
-                  color: isCompleted ? Colors.white : Colors.black,
+                  color: Colors.white,
                   fontSize: 12.sp,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: isCompleted ? const Color(0xFF2E7D32) : ColorManager.primary,
+                backgroundColor: isCompleted ? const Color(0xFF2E7D32) : Colors.black.withValues(alpha: 0.35),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
                 padding: EdgeInsets.zero,
               ),
@@ -1626,13 +1661,10 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
         .map((w) => w.name.replaceAll(RegExp(r'^\[\w+\]\s*'), '').trim())
         .toList();
 
-    return Container(
-      decoration: BoxDecoration(
-        color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: isDone ? const Color(0xFF4CAF50).withValues(alpha: 0.4) : ColorManager.divider),
-      ),
-      padding: EdgeInsets.all(14.w),
+    return _gradientDayShell(
+      dayName: dayName,
+      exerciseNames: exerciseNames,
+      isDone: isDone,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1642,44 +1674,50 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
                 decoration: BoxDecoration(
-                  color: isDone ? const Color(0xFF1E4331) : ColorManager.surfaceDark,
+                  color: isDone ? const Color(0xFF1E4331) : Colors.black.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(6.r),
                 ),
                 child: Text(
                   isDone ? 'COMPLETED ✓' : 'SCHEDULED',
                   style: TextStyle(
-                    color: isDone ? const Color(0xFF81C784) : ColorManager.textTertiary,
-                    fontSize: 9.sp,
+                    color: isDone ? const Color(0xFF81C784) : Colors.white60,
+                    fontSize: 11.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
               const Spacer(),
-              Text('${workouts.length} Exercises', style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp)),
+              Text('${workouts.length} Exercises', style: TextStyle(color: Colors.white60, fontSize: 11.sp)),
             ],
           ),
 
-          Text(
+          Padding(
+ padding: EdgeInsets.only(right: 84.w),
+ child: Text(
             '$dayName Routine',
             style: TextStyle(color: ColorManager.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
           ),
+ ),
 
-          Wrap(
+          Padding(
+ padding: EdgeInsets.only(right: 70.w),
+ child: Wrap(
             spacing: 5.w,
             runSpacing: 4.h,
             children: [
               ...exerciseNames.take(3).map((name) => Container(
                 padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                 decoration: BoxDecoration(
-                  color: ColorManager.surfaceDark,
+                  color: Colors.black.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(6.r),
                 ),
-                child: Text(name, style: TextStyle(color: ColorManager.textSecondary, fontSize: 10.sp)),
+                child: Text(name, style: TextStyle(color: Colors.white70, fontSize: 11.sp)),
               )),
               if (exerciseNames.length > 3)
-                Text('+${exerciseNames.length - 3} more', style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp)),
+                Text('+${exerciseNames.length - 3} more', style: TextStyle(color: Colors.white60, fontSize: 11.sp)),
             ],
           ),
+ ),
 
           SizedBox(
             width: double.infinity,
@@ -1705,7 +1743,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                 style: TextStyle(color: ColorManager.textPrimary, fontSize: 11.sp, fontWeight: FontWeight.bold),
               ),
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: ColorManager.divider),
+                side: BorderSide(color: Colors.white24),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
                 padding: EdgeInsets.zero,
               ),
@@ -1821,8 +1859,8 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                       children: [
                         Icon(Icons.fitness_center_rounded, color: ColorManager.primary, size: 16.sp),
                         SizedBox(height: 3.h),
-                        Text('Plate Math', style: TextStyle(color: ColorManager.white, fontSize: 10.sp, fontWeight: FontWeight.bold)),
-                        Text('Olympic Bar', style: TextStyle(color: ColorManager.textTertiary, fontSize: 8.sp)),
+                        Text('Plate Math', style: TextStyle(color: ColorManager.white, fontSize: 11.sp, fontWeight: FontWeight.bold)),
+                        Text('Olympic Bar', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp)),
                       ],
                     ),
                   ),
@@ -1844,8 +1882,8 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                       children: [
                         Icon(Icons.speed_rounded, color: Colors.amber, size: 16.sp),
                         SizedBox(height: 3.h),
-                        Text('1RM Calc', style: TextStyle(color: ColorManager.white, fontSize: 10.sp, fontWeight: FontWeight.bold)),
-                        Text('Max Strength', style: TextStyle(color: ColorManager.textTertiary, fontSize: 8.sp)),
+                        Text('1RM Calc', style: TextStyle(color: ColorManager.white, fontSize: 11.sp, fontWeight: FontWeight.bold)),
+                        Text('Max Strength', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp)),
                       ],
                     ),
                   ),
@@ -1927,7 +1965,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
         borderRadius: BorderRadius.circular(6.r),
         border: Border.all(color: ColorManager.divider),
       ),
-      child: Text(text, style: TextStyle(color: ColorManager.textSecondary, fontSize: 9.sp)),
+      child: Text(text, style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp)),
     );
   }
 }

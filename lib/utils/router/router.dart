@@ -4,6 +4,7 @@ import 'package:fitness_app/presentation/auth/pages/add_data_page.dart';
 import 'package:fitness_app/presentation/auth/pages/auth_page.dart';
 import 'package:fitness_app/presentation/auth/pages/forgot_password_page.dart';
 import 'package:fitness_app/presentation/auth/pages/login_or_register_page.dart';
+import 'package:fitness_app/presentation/auth/pages/plan_ready_screen.dart';
 import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
 import 'package:fitness_app/presentation/boarding/pages/boarding_page.dart';
 import 'package:fitness_app/presentation/chat_screen/chat_screen.dart';
@@ -52,7 +53,7 @@ import 'package:fitness_app/presentation/workout_splits/workout_splits.dart';
 import 'package:fitness_app/presentation/workouts/pages/new_exercise_page.dart';
 import 'package:fitness_app/model/workout_session_model.dart';
 import 'package:fitness_app/presentation/workout_logs/workout_log_screen.dart';
-import 'package:fitness_app/presentation/workout_logs/workout_history_screen.dart';
+import 'package:fitness_app/presentation/workout_logs/workout_log_history_page.dart';
 import 'package:fitness_app/presentation/workout_logs/workout_session_detail_page.dart';
 import 'package:fitness_app/presentation/custom_workouts/workout_session_launcher_page.dart';
 import 'package:fitness_app/presentation/workout_logs/exercise_tracker_page.dart';
@@ -86,6 +87,7 @@ class Routes {
   static const String deleteAccRoute = '/deleteAcc';
   static const String newMealRoute = '/newMeal';
   static const String addDataRoute = '/addData';
+  static const String planReadyRoute = '/planReady';
   static const String addWaterRoute = '/addWater';
   static const String addNewExerciseRoute = '/addExercise';
   static const String changeWeightRoute = '/changeWeight';
@@ -377,6 +379,25 @@ final GoRouter router = GoRouter(
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, AddDataPage())),
     GoRoute(
+        path: Routes.planReadyRoute,
+        // Without the data from the profile form there is nothing to show.
+        redirect: (context, state) =>
+            state.extra is PlanReadyArgs ? null : Routes.mainRoute,
+        pageBuilder: (context, state) {
+          final router = GoRouter.of(context);
+          return PageTransitions.buildPageWithSlideTransition(
+            state.pageKey,
+            PlanReadyScreen(
+              args: state.extra as PlanReadyArgs,
+              onBuildWorkout: () {
+                router.go(Routes.mainRoute);
+                router.push(Routes.workoutGeneratorRoute);
+              },
+              onSkip: () => router.go(Routes.mainRoute),
+            ),
+          );
+        }),
+    GoRoute(
         path: Routes.addWaterRoute,
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
@@ -410,7 +431,8 @@ final GoRouter router = GoRouter(
         path: Routes.workoutHistoryRoute,
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
-                state.pageKey, const WorkoutHistoryScreen())),
+                state.pageKey,
+                const WorkoutLogHistoryPage(showBackButton: true))),
     GoRoute(
         path: Routes.exerciseTracker,
         pageBuilder: (context, state) {

@@ -1,6 +1,9 @@
 import 'package:fitness_app/model/workout_log.dart';
 import 'package:fitness_app/model/workout_session_model.dart';
+import 'package:fitness_app/presentation/workout_logs/widgets/repeat_workout_widgets.dart';
+import 'package:fitness_app/services/session_edit.dart';
 import 'package:fitness_app/services/strength_service.dart';
+import 'package:fitness_app/utils/app_feedback.dart';
 import 'package:fitness_app/services/workout_log_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
@@ -26,6 +29,7 @@ class WorkoutSessionDetailPage extends StatefulWidget {
 class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
   WorkoutSession? _currentSession;
   bool _isLoading = false;
+  bool _editing = false;
   final WorkoutLogService _logService = WorkoutLogService();
 
   @override
@@ -100,6 +104,51 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
     }
   }
 
+  Future<void> _editSet(int exerciseIndex, int setIndex) async {
+    final session = _currentSession;
+    if (session == null) return;
+    final set = session.exercises[exerciseIndex].sets[setIndex];
+    final result = await showDialog<_SetEditResult>(
+      context: context,
+      builder: (_) => _SetEditDialog(weight: set.weight, reps: set.reps),
+    );
+    if (result == null || !mounted) return;
+
+    final WorkoutSession edited;
+    if (result.delete) {
+      edited = SessionEdit.removeSet(
+        session,
+        exerciseIndex: exerciseIndex,
+        setIndex: setIndex,
+      );
+      if (edited.exercises.isEmpty) {
+        AppFeedback.info(
+          context,
+          'That was the last set. Delete the whole session instead.',
+        );
+        return;
+      }
+    } else {
+      edited = SessionEdit.updateSet(
+        session,
+        exerciseIndex: exerciseIndex,
+        setIndex: setIndex,
+        weight: result.weight ?? set.weight,
+        reps: result.reps ?? set.reps,
+      );
+    }
+
+    try {
+      await _logService.updateSession(session, edited);
+      if (!mounted) return;
+      setState(() => _currentSession = edited);
+      AppFeedback.success(context, result.delete ? 'Set removed' : 'Set updated');
+    } catch (_) {
+      if (!mounted) return;
+      AppFeedback.error(context, "Couldn't save that change. Please try again.");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -146,11 +195,26 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
         ),
         actions: [
           IconButton(
+            key: const Key('edit_session_button'),
+            icon: Icon(
+              _editing ? Icons.check_rounded : Icons.edit_outlined,
+              color: ColorManager.primary,
+            ),
+            tooltip: _editing ? 'Done editing' : 'Edit sets',
+            onPressed: () => setState(() => _editing = !_editing),
+          ),
+          IconButton(
             icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
             tooltip: 'Delete Session',
             onPressed: () => _confirmDelete(context),
           ),
         ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 12.h),
+          child: RepeatWorkoutButton(session: session, expanded: true),
+        ),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
@@ -174,10 +238,10 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                   decoration: BoxDecoration(
-                    color: isPartial ? Colors.orange.withOpacity(0.15) : Colors.green.withOpacity(0.15),
+                    color: isPartial ? Colors.orange.withValues(alpha: 0.15) : Colors.green.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10.r),
                     border: Border.all(
-                      color: isPartial ? Colors.orange.withOpacity(0.4) : Colors.green.withOpacity(0.4),
+                      color: isPartial ? Colors.orange.withValues(alpha: 0.4) : Colors.green.withValues(alpha: 0.4),
                     ),
                   ),
                   child: Text(
@@ -240,8 +304,29 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
             ),
             SizedBox(height: 12.h),
 
+            if (_editing) ...[
+              Container(
+                key: const Key('edit_session_banner'),
+                width: double.infinity,
+                padding: EdgeInsets.all(12.w),
+                margin: EdgeInsets.only(bottom: 12.h),
+                decoration: BoxDecoration(
+                  color: ColorManager.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
+                ),
+                child: Text(
+                  'Tap a set to fix its weight or reps, or remove it.',
+                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp),
+                ),
+              ),
+            ],
+
             // Exercise Cards
-            ...session.exercises.map((exercise) => _buildExerciseCard(exercise)),
+            ...session.exercises
+                .asMap()
+                .entries
+                .map((e) => _buildExerciseCard(e.value, e.key)),
             SizedBox(height: 32.h),
           ],
         ),
@@ -264,7 +349,7 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
           style: TextStyle(
             color: ColorManager.white,
             fontWeight: FontWeight.bold,
-            fontSize: 15.sp,
+            fontSize: 14.sp,
           ),
         ),
         SizedBox(height: 2.h),
@@ -276,7 +361,7 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
     );
   }
 
-  Widget _buildExerciseCard(SessionExercise exercise) {
+  Widget _buildExerciseCard(SessionExercise exercise, int exerciseIndex) {
     final cleanName = ExerciseIdentity.cleanDisplayName(exercise.exerciseName);
 
     return Container(
@@ -299,7 +384,7 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
                   cleanName,
                   style: TextStyle(
                     color: ColorManager.textPrimary,
-                    fontSize: 15.sp,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -333,11 +418,11 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
             ),
             child: Row(
               children: [
-                SizedBox(width: 32.w, child: Text('SET', style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp, fontWeight: FontWeight.bold))),
-                Expanded(child: Text('TYPE', style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp, fontWeight: FontWeight.bold))),
-                SizedBox(width: 70.w, child: Text('WEIGHT', style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp, fontWeight: FontWeight.bold))),
-                SizedBox(width: 50.w, child: Text('REPS', style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp, fontWeight: FontWeight.bold))),
-                SizedBox(width: 65.w, child: Text('EST. 1RM', style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp, fontWeight: FontWeight.bold))),
+                SizedBox(width: 32.w, child: Text('SET', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold))),
+                Expanded(child: Text('TYPE', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold))),
+                SizedBox(width: 70.w, child: Text('WEIGHT', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold))),
+                SizedBox(width: 50.w, child: Text('REPS', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold))),
+                SizedBox(width: 65.w, child: Text('EST. 1RM', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold))),
                 SizedBox(width: 30.w, child: const SizedBox.shrink()),
               ],
             ),
@@ -350,7 +435,11 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
             final set = entry.value;
             final est1RM = StrengthService.calculateEstimated1RM(set);
 
-            return Padding(
+            return InkWell(
+              key: Key('set_row_${exerciseIndex}_${entry.key}'),
+              onTap: _editing ? () => _editSet(exerciseIndex, entry.key) : null,
+              borderRadius: BorderRadius.circular(8.r),
+              child: Padding(
               padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
               child: Row(
                 children: [
@@ -391,13 +480,18 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
                   SizedBox(
                     width: 30.w,
                     child: Icon(
-                      set.isCompleted ? Icons.check_circle_rounded : Icons.radio_button_unchecked,
+                      _editing
+                          ? Icons.edit_outlined
+                          : (set.isCompleted ? Icons.check_circle_rounded : Icons.radio_button_unchecked),
                       size: 16.sp,
-                      color: set.isCompleted ? Colors.greenAccent : ColorManager.textTertiary,
+                      color: _editing
+                          ? ColorManager.primary
+                          : (set.isCompleted ? Colors.greenAccent : ColorManager.textTertiary),
                     ),
                   ),
                 ],
               ),
+            ),
             );
           }),
         ],
@@ -412,17 +506,17 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
 
     switch (type) {
       case SetType.warmup:
-        bg = Colors.amber.withOpacity(0.15);
+        bg = Colors.amber.withValues(alpha: 0.15);
         text = Colors.amber;
         label = 'Warmup';
         break;
       case SetType.drop:
-        bg = Colors.purple.withOpacity(0.15);
+        bg = Colors.purple.withValues(alpha: 0.15);
         text = Colors.purpleAccent;
         label = 'Drop';
         break;
       case SetType.failure:
-        bg = Colors.red.withOpacity(0.15);
+        bg = Colors.red.withValues(alpha: 0.15);
         text = Colors.redAccent;
         label = 'Failure';
         break;
@@ -441,8 +535,108 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
       ),
       child: Text(
         label,
-        style: TextStyle(color: text, fontSize: 10.sp, fontWeight: FontWeight.w600),
+        style: TextStyle(color: text, fontSize: 11.sp, fontWeight: FontWeight.w600),
       ),
+    );
+  }
+}
+
+class _SetEditResult {
+  const _SetEditResult({this.weight, this.reps, this.delete = false});
+  final double? weight;
+  final int? reps;
+  final bool delete;
+}
+
+class _SetEditDialog extends StatefulWidget {
+  const _SetEditDialog({required this.weight, required this.reps});
+  final double weight;
+  final int reps;
+
+  @override
+  State<_SetEditDialog> createState() => _SetEditDialogState();
+}
+
+class _SetEditDialogState extends State<_SetEditDialog> {
+  late final TextEditingController _weight;
+  late final TextEditingController _reps;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _weight = TextEditingController(
+        text: widget.weight.toStringAsFixed(widget.weight % 1 == 0 ? 0 : 1));
+    _reps = TextEditingController(text: '${widget.reps}');
+  }
+
+  @override
+  void dispose() {
+    _weight.dispose();
+    _reps.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final w = double.tryParse(_weight.text.trim().replaceAll(',', '.'));
+    final r = int.tryParse(_reps.text.trim());
+    if (w == null || w < 0 || r == null || r <= 0) {
+      setState(() => _error = 'Enter a weight of 0 or more and at least 1 rep.');
+      return;
+    }
+    Navigator.pop(context, _SetEditResult(weight: w, reps: r));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: ColorManager.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+      title: Text(
+        'Edit set',
+        style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            key: const Key('edit_set_weight'),
+            controller: _weight,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            style: TextStyle(color: ColorManager.textPrimary),
+            decoration: const InputDecoration(labelText: 'Weight (kg)'),
+          ),
+          SizedBox(height: 12.h),
+          TextField(
+            key: const Key('edit_set_reps'),
+            controller: _reps,
+            keyboardType: TextInputType.number,
+            style: TextStyle(color: ColorManager.textPrimary),
+            decoration: const InputDecoration(labelText: 'Reps'),
+          ),
+          if (_error != null) ...[
+            SizedBox(height: 8.h),
+            Text(_error!, style: TextStyle(color: Colors.redAccent, fontSize: 12.sp)),
+          ],
+        ],
+      ),
+      actions: [
+        TextButton(
+          key: const Key('edit_set_delete'),
+          onPressed: () => Navigator.pop(context, const _SetEditResult(delete: true)),
+          child: const Text('Remove set', style: TextStyle(color: Colors.redAccent)),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('Cancel', style: TextStyle(color: ColorManager.textTertiary)),
+        ),
+        ElevatedButton(
+          key: const Key('edit_set_save'),
+          onPressed: _save,
+          style: ElevatedButton.styleFrom(backgroundColor: ColorManager.primary),
+          child: Text('Save', style: TextStyle(color: ColorManager.onMint)),
+        ),
+      ],
     );
   }
 }

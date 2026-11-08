@@ -126,7 +126,7 @@ class _RecentPRsWidgetState extends State<RecentPRsWidget> {
                                   'Personal Records',
                                   style: TextStyle(
                                     color: ColorManager.textPrimary,
-                                    fontSize: 15.sp,
+                                    fontSize: 14.sp,
                                     fontWeight: FontWeight.bold,
                                   ),
                                   overflow: TextOverflow.ellipsis,

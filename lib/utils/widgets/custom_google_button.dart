@@ -40,7 +40,7 @@ class CustomGoogleSignInButton extends StatelessWidget {
               'Sign in with Google',
               style: TextStyle(
                 color: Colors.black87,
-                fontSize: 15.sp,
+                fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
               ),
             ),

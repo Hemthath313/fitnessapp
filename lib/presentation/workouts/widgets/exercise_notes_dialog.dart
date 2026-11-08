@@ -77,11 +77,11 @@ class _ExerciseNotesDialogState extends State<ExerciseNotesDialog> {
                   child: Text(
                     widget.exerciseName,
                     style: StyleManager.appbarTitleTextStyle.copyWith(
-                      fontSize: SizeManager.s18.sp,
+                      fontSize: 18.sp,
                     ),
                   ),
                 ),
-                IconButton(
+                IconButton(tooltip: 'Close', 
                   icon: Icon(Icons.close, color: ColorManager.white),
                   onPressed: () => Navigator.pop(context),
                 ),
@@ -94,7 +94,7 @@ class _ExerciseNotesDialogState extends State<ExerciseNotesDialog> {
               'Track Your Progress',
               style: TextStyle(
                 color: ColorManager.white70,
-                fontSize: SizeManager.s14.sp,
+                fontSize: 14.sp,
               ),
             ),
             SizedBox(height: SizeManager.s12.h),
@@ -136,7 +136,7 @@ class _ExerciseNotesDialogState extends State<ExerciseNotesDialog> {
               'Notes',
               style: TextStyle(
                 color: ColorManager.white70,
-                fontSize: SizeManager.s14.sp,
+                fontSize: 14.sp,
               ),
             ),
             SizedBox(height: SizeManager.s8.h),

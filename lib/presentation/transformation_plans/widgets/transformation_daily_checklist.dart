@@ -112,7 +112,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                   log.hasEnoughData ? '${log.dailyAdherenceScore.round()}% Adherence' : 'In Progress',
                   style: TextStyle(
                     color: log.hasEnoughData ? primaryColor : ColorManager.textSecondary,
-                    fontSize: 10.sp,
+                    fontSize: 11.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -203,7 +203,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                   label,
                   style: TextStyle(
                     color: ColorManager.textSecondary,
-                    fontSize: 9.sp,
+                    fontSize: 11.sp,
                     fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -216,7 +216,7 @@ class TransformationDailyChecklist extends StatelessWidget {
             value,
             style: TextStyle(
               color: isComplete ? ColorManager.textPrimary : ColorManager.textSecondary,
-              fontSize: 10.sp,
+              fontSize: 11.sp,
               fontWeight: FontWeight.bold,
             ),
             overflow: TextOverflow.ellipsis,
@@ -265,7 +265,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                             'Daily Accountability Checklist',
                             style: TextStyle(
                               color: ColorManager.textPrimary,
-                              fontSize: 15.sp,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.bold,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -310,7 +310,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                       'Adherence',
                       style: TextStyle(
                         color: ColorManager.textSecondary,
-                        fontSize: 8.sp,
+                        fontSize: 11.sp,
                       ),
                     ),
                   ],
@@ -464,7 +464,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                 color: isRest
                     ? Colors.teal
                     : (isDone ? ColorManager.success : ColorManager.textSecondary),
-                fontSize: 10.sp,
+                fontSize: 11.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -561,7 +561,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                     : (isPartial ? 'Close to target' : 'Tracking in progress'),
                 style: TextStyle(
                   color: isDone ? ColorManager.success : ColorManager.textSecondary,
-                  fontSize: 10.sp,
+                  fontSize: 11.sp,
                 ),
               ),
               InkWell(
@@ -668,7 +668,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                   : (isPartial ? 'Partial intake (≥70%)' : 'Target: ${log.targetProtein.round()}g lean protein'),
               style: TextStyle(
                 color: isDone ? ColorManager.success : ColorManager.textSecondary,
-                fontSize: 10.sp,
+                fontSize: 11.sp,
               ),
             ),
           ),
@@ -773,7 +773,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                     SizedBox(width: 3.w),
                     Text(
                       'Goal: ${(log.targetWaterMl / 1000).toStringAsFixed(1)}L',
-                      style: TextStyle(color: Colors.blue, fontSize: 10.sp, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Colors.blue, fontSize: 11.sp, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -798,7 +798,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                       '+250 ml 💧',
                       style: TextStyle(
                         color: Colors.blue,
-                        fontSize: 10.sp,
+                        fontSize: 11.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

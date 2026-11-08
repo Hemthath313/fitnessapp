@@ -43,13 +43,13 @@ class MorePage extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            ColorManager.primary.withOpacity(themeProvider.isDarkMode ? 0.2 : 0.3),
-                            ColorManager.primary.withOpacity(0.1),
+                            ColorManager.primary.withValues(alpha: themeProvider.isDarkMode ? 0.2 : 0.3),
+                            ColorManager.primary.withValues(alpha: 0.1),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(SizeManager.s20.r),
                         border: Border.all(
-                          color: ColorManager.primary.withOpacity(0.2),
+                          color: ColorManager.primary.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Row(
@@ -57,12 +57,12 @@ class MorePage extends StatelessWidget {
                           // Avatar with initials instead of generic icon
                           CircleAvatar(
                             radius: SizeManager.s40.r,
-                            backgroundColor: ColorManager.primary.withOpacity(0.25),
+                            backgroundColor: ColorManager.primary.withValues(alpha: 0.25),
                             child: Text(
                               _getInitials(firstName, surname),
                               style: TextStyle(
                                 color: ColorManager.primary,
-                                fontSize: SizeManager.s24.sp,
+                                fontSize: 24.sp,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -76,7 +76,7 @@ class MorePage extends StatelessWidget {
                                   '$firstName $surname',
                                   style: TextStyle(
                                     color: ColorManager.textPrimary,
-                                    fontSize: SizeManager.s20.sp,
+                                    fontSize: 20.sp,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -85,7 +85,7 @@ class MorePage extends StatelessWidget {
                                   email,
                                   style: TextStyle(
                                     color: ColorManager.textSecondary,
-                                    fontSize: SizeManager.s14.sp,
+                                    fontSize: 14.sp,
                                   ),
                                 ),
                               ],
@@ -167,11 +167,11 @@ class MorePage extends StatelessWidget {
                         color: ColorManager.surface,
                         borderRadius: BorderRadius.circular(SizeManager.s16.r),
                         border: Border.all(
-                          color: ColorManager.primary.withOpacity(0.3),
+                          color: ColorManager.primary.withValues(alpha: 0.3),
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: ColorManager.primary.withOpacity(0.1),
+                            color: ColorManager.primary.withValues(alpha: 0.1),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -182,7 +182,7 @@ class MorePage extends StatelessWidget {
                           Container(
                             padding: EdgeInsets.all(SizeManager.s12.w),
                             decoration: BoxDecoration(
-                              color: ColorManager.primary.withOpacity(0.1),
+                              color: ColorManager.primary.withValues(alpha: 0.1),
                               borderRadius:
                                   BorderRadius.circular(SizeManager.s12.r),
                             ),
@@ -205,7 +205,7 @@ class MorePage extends StatelessWidget {
                                       : 'Light Mode',
                                   style: TextStyle(
                                     color: ColorManager.textPrimary,
-                                    fontSize: SizeManager.s16.sp,
+                                    fontSize: 16.sp,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -214,7 +214,7 @@ class MorePage extends StatelessWidget {
                                   'Tap to switch theme',
                                   style: TextStyle(
                                     color: ColorManager.textSecondary,
-                                    fontSize: SizeManager.s12.sp,
+                                    fontSize: 12.sp,
                                   ),
                                 ),
                               ],
@@ -225,7 +225,7 @@ class MorePage extends StatelessWidget {
                             onChanged: (value) => themeProvider.toggleTheme(),
                             activeColor: ColorManager.primary,
                             activeTrackColor:
-                                ColorManager.primary.withOpacity(0.5),
+                                ColorManager.primary.withValues(alpha: 0.5),
                           ),
                         ],
                       ),
@@ -324,7 +324,7 @@ class MorePage extends StatelessWidget {
                       'Logout',
                       style: TextStyle(
                         color: ColorManager.red,
-                        fontSize: SizeManager.s16.sp,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -351,14 +351,14 @@ class MorePage extends StatelessWidget {
                         'Gym Buddy',
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: SizeManager.s14.sp,
+                          fontSize: 14.sp,
                         ),
                       ),
                       Text(
                         'Version 1.0.0',
                         style: TextStyle(
                           color: ColorManager.textTertiary,
-                          fontSize: SizeManager.s12.sp,
+                          fontSize: 12.sp,
                         ),
                       ),
                     ],
@@ -397,19 +397,19 @@ class MorePage extends StatelessWidget {
               padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 6.w),
               decoration: BoxDecoration(
                 color: isUnlocked
-                    ? def.color.withOpacity(0.12)
+                    ? def.color.withValues(alpha: 0.12)
                     : ColorManager.surfaceLight,
                 borderRadius: BorderRadius.circular(16.r),
                 border: Border.all(
                   color: isUnlocked
-                      ? def.color.withOpacity(0.4)
+                      ? def.color.withValues(alpha: 0.4)
                       : ColorManager.divider,
                   width: 1.5,
                 ),
                 boxShadow: isUnlocked
                     ? [
                         BoxShadow(
-                          color: def.color.withOpacity(0.2),
+                          color: def.color.withValues(alpha: 0.2),
                           blurRadius: 8,
                         )
                       ]
@@ -433,7 +433,7 @@ class MorePage extends StatelessWidget {
                       color: isUnlocked
                           ? ColorManager.textPrimary
                           : ColorManager.textTertiary,
-                      fontSize: 9.sp,
+                      fontSize: 11.sp,
                       fontWeight: isUnlocked
                           ? FontWeight.bold
                           : FontWeight.normal,
@@ -453,7 +453,7 @@ class MorePage extends StatelessWidget {
       title,
       style: TextStyle(
         color: ColorManager.textPrimary,
-        fontSize: SizeManager.s18.sp,
+        fontSize: 18.sp,
         fontWeight: FontWeight.bold,
       ),
     );
@@ -475,11 +475,11 @@ class MorePage extends StatelessWidget {
         padding: EdgeInsets.all(SizeManager.s16.w),
         decoration: BoxDecoration(
           color: isDangerous
-              ? ColorManager.red.withOpacity(0.1)
+              ? ColorManager.red.withValues(alpha: 0.1)
               : ColorManager.surface,
           borderRadius: BorderRadius.circular(SizeManager.s16.r),
           border: Border.all(
-            color: isDangerous ? ColorManager.red : color.withOpacity(0.3),
+            color: isDangerous ? ColorManager.red : color.withValues(alpha: 0.3),
             width: isDangerous ? 2 : 1,
           ),
         ),
@@ -488,7 +488,7 @@ class MorePage extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(SizeManager.s12.w),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(SizeManager.s12.r),
               ),
               child: Icon(
@@ -506,7 +506,7 @@ class MorePage extends StatelessWidget {
                     title,
                     style: TextStyle(
                       color: ColorManager.textPrimary,
-                      fontSize: SizeManager.s16.sp,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -515,7 +515,7 @@ class MorePage extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       color: ColorManager.textSecondary,
-                      fontSize: SizeManager.s12.sp,
+                      fontSize: 12.sp,
                     ),
                   ),
                 ],
@@ -545,7 +545,7 @@ class MorePage extends StatelessWidget {
           'Logout',
           style: TextStyle(
             color: ColorManager.textPrimary,
-            fontSize: SizeManager.s18.sp,
+            fontSize: 18.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -553,7 +553,7 @@ class MorePage extends StatelessWidget {
           'Are you sure you want to logout?',
           style: TextStyle(
             color: ColorManager.textSecondary,
-            fontSize: SizeManager.s14.sp,
+            fontSize: 14.sp,
           ),
         ),
         actions: [
@@ -656,7 +656,7 @@ class _LogoutButtonState extends State<_LogoutButton> {
       onPressed: _isLoading ? null : _handleLogout,
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.red,
-        disabledBackgroundColor: Colors.red.withOpacity(0.6),
+        disabledBackgroundColor: Colors.red.withValues(alpha: 0.6),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(SizeManager.s8.r),
         ),

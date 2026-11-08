@@ -572,7 +572,7 @@ class _InteractiveExerciseDetailWidgetState
     for (var set in completedSets) {
       final w = double.tryParse(set.weightController.text) ?? 0.0;
       final r = int.tryParse(set.repsController.text) ?? 0;
-      setsToSave.add(WorkoutSet(weight: w, reps: r));
+      setsToSave.add(WorkoutSet(weight: w, reps: r, isCompleted: true));
       if (w > currentMaxWeight) {
         currentMaxWeight = w;
       }
@@ -641,7 +641,7 @@ class _InteractiveExerciseDetailWidgetState
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('🏆 ', style: TextStyle(fontSize: 24)),
+             Text('🏆 ', style: TextStyle(fontSize: 24.sp)),
             Text(
               'Personal Record!',
               style: TextStyle(
@@ -681,7 +681,7 @@ class _InteractiveExerciseDetailWidgetState
                 backgroundColor: ColorManager.primary,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
-              child: const Text('Awesome!', style: TextStyle(color: Colors.white)),
+              child: const Text('Awesome!', style: TextStyle(color: ColorManager.onMint)),
             ),
           ),
         ],
@@ -917,7 +917,7 @@ class _InteractiveExerciseDetailWidgetState
                       child: Text(
                         '${index + 1}',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: ColorManager.onMint,
                           fontWeight: FontWeight.bold,
                           fontSize: 12.sp,
                         ),
@@ -1053,7 +1053,7 @@ class _InteractiveExerciseDetailWidgetState
             return Container(
               padding: EdgeInsets.symmetric(vertical: 6.h),
               decoration: BoxDecoration(
-                color: setInput.isCompleted ? ColorManager.success.withOpacity(0.05) : Colors.transparent,
+                color: setInput.isCompleted ? ColorManager.success.withValues(alpha: 0.05) : Colors.transparent,
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Row(
@@ -1105,7 +1105,7 @@ class _InteractiveExerciseDetailWidgetState
                             borderSide: BorderSide(color: ColorManager.divider),
                           ),
                           suffixIcon: isBarbell
-                              ? IconButton(
+                              ? IconButton(tooltip: 'Plate calculator', 
                                   key: Key('detail_plate_calc_$idx'),
                                   padding: EdgeInsets.zero,
                                   constraints: const BoxConstraints(),
@@ -1155,6 +1155,7 @@ class _InteractiveExerciseDetailWidgetState
                   SizedBox(
                     width: 50.w,
                     child: IconButton(
+                      tooltip: setInput.isCompleted ? 'Mark set not done' : 'Mark set done',
                       onPressed: () => _toggleSetCompletion(idx),
                       icon: Icon(
                         setInput.isCompleted ? Icons.check_circle : Icons.radio_button_unchecked,
@@ -1206,25 +1207,43 @@ class _InteractiveExerciseDetailWidgetState
         ),
         SizedBox(height: 24.h),
 
-        // Save session button
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: _saveWorkoutLog,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ColorManager.primary,
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(vertical: 14.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.r),
-              ),
+        // Opened from a guided workout: the sets sync back to it and are saved
+        // once, when the workout is finished. Saving here as well would log
+        // the same sets twice.
+        if (widget.onSetsChanged != null)
+          Container(
+            key: const Key('sheet_sync_hint'),
+            width: double.infinity,
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: ColorManager.primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: ColorManager.primary.withValues(alpha: 0.25)),
             ),
             child: Text(
-              'Save Session Log',
-              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+              'These sets are part of your workout. They are saved when you tap Finish.',
+              style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp),
             ),
-          ),
-        ),
+          )
+        else
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _saveWorkoutLog,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ColorManager.primary,
+                  foregroundColor: const Color(0xFF06201B),
+                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                ),
+                child: Text(
+                  'Save Session Log',
+                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
       ],
     );
   }
@@ -1350,7 +1369,7 @@ class _InteractiveExerciseDetailWidgetState
                             child: Text(
                               '$setIndex',
                               style: TextStyle(
-                                fontSize: 9.sp,
+                                fontSize: 11.sp,
                                 color: ColorManager.textSecondary,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -1420,7 +1439,7 @@ class _InteractiveExerciseDetailWidgetState
                 if (dateLabels.containsKey(idx)) {
                   return Text(
                     dateLabels[idx]!,
-                    style: TextStyle(color: ColorManager.textTertiary, fontSize: 9.sp),
+                    style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
                   );
                 }
                 return const Text('');
@@ -1434,7 +1453,7 @@ class _InteractiveExerciseDetailWidgetState
               getTitlesWidget: (value, meta) {
                 return Text(
                   '${value.toStringAsFixed(0)}kg',
-                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 8.sp),
+                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
                 );
               },
             ),
@@ -1460,7 +1479,7 @@ class _InteractiveExerciseDetailWidgetState
             barWidth: 2.5.w,
             belowBarData: BarAreaData(
               show: true,
-              color: ColorManager.primary.withOpacity(0.05),
+              color: ColorManager.primary.withValues(alpha: 0.05),
             ),
           )
         ],
@@ -1515,7 +1534,7 @@ class _InteractiveExerciseDetailWidgetState
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    IconButton(
+                    IconButton(tooltip: 'Close', 
                       key: const Key('close_exercise_detail_button'),
                       icon: const Icon(Icons.close),
                       onPressed: () => Navigator.pop(context),
@@ -1529,7 +1548,7 @@ class _InteractiveExerciseDetailWidgetState
               if (_isResting)
                 Container(
                   width: double.infinity,
-                  color: ColorManager.primary.withOpacity(0.15),
+                  color: ColorManager.primary.withValues(alpha: 0.15),
                   padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1634,7 +1653,7 @@ class _InteractiveExerciseDetailWidgetState
                                 ),
                                 child: Text(
                                   'Video Guide',
-                                  style: TextStyle(color: Colors.white, fontSize: 10.sp),
+                                  style: TextStyle(color: Colors.white, fontSize: 11.sp),
                                 ),
                               ),
                             ),

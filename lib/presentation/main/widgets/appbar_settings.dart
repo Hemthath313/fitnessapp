@@ -97,7 +97,7 @@ class _SettingsPageAppBarWidgetState extends State<SettingsPageAppBarWidget> {
                 RadiusManager.r40.r,
               ),
             ),
-            child: IconButton(
+            child: IconButton(tooltip: 'Log out', 
               splashColor: ColorManager.grey3,
               onPressed: _isLoggingOut ? null : signOut,
               icon: _isLoggingOut

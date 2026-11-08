@@ -88,7 +88,7 @@ class MeasurementLineChart extends StatelessWidget {
                                 if (value < 1 || value > 12) return const Text('');
                                 return Text(
                                   months[value.toInt() - 1],
-                                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp),
+                                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
                                 );
                               },
                             ),
@@ -100,7 +100,7 @@ class MeasurementLineChart extends StatelessWidget {
                               getTitlesWidget: (value, meta) {
                                 return Text(
                                   value.toStringAsFixed(0),
-                                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp),
+                                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
                                 );
                               },
                             ),
@@ -126,7 +126,7 @@ class MeasurementLineChart extends StatelessWidget {
                             barWidth: 2.w,
                             belowBarData: BarAreaData(
                               show: true,
-                              color: ColorManager.primary.withOpacity(0.1),
+                              color: ColorManager.primary.withValues(alpha: 0.1),
                             ),
                           )
                         ],

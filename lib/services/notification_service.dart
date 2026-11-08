@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:fitness_app/services/notification_copy.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -470,12 +471,17 @@ class NotificationService {
       const NotificationDetails platformChannelSpecifics =
           NotificationDetails(android: androidPlatformChannelSpecifics);
 
+      final profile = await NotificationProfile.load();
+      final copy = NotificationCopy.streakReminder(
+          name: profile.firstName,
+          streak: profile.currentStreak,
+          longest: profile.longestStreak);
+
       final scheduleMode = await _resolveScheduleMode();
       await _localNotificationsPlugin.zonedSchedule(
           id: 1,
-          title: 'Keep Your Momentum Going! 🔥',
-          body:
-              'Great consistency so far! Step into the gym or log today\'s session to extend your streak.',
+          title: copy.title,
+          body: copy.body,
           scheduledDate: scheduledDate,
           notificationDetails: platformChannelSpecifics,
           payload: '${Routes.dayWorkoutSessionRoute}?day=today',
@@ -506,6 +512,7 @@ class NotificationService {
       }
 
       final prefs = await SharedPreferences.getInstance();
+      final profile = await NotificationProfile.load();
       final normalizedDays = <String>[];
       for (final rawDay in scheduledDays) {
         final canonical = _normalizeWeekdayName(rawDay);
@@ -572,9 +579,12 @@ class NotificationService {
         final scheduleMode = await _resolveScheduleMode();
         await _localNotificationsPlugin.zonedSchedule(
             id: 20 + dayIndex,
-            title: '$day Workout Time! 💪',
-            body:
-                'Today is your scheduled workout session. Open Gym Buddy to track your lifts!',
+            title: NotificationCopy.workoutDay(
+                    day: day, name: profile.firstName)
+                .title,
+            body: NotificationCopy.workoutDay(
+                    day: day, name: profile.firstName)
+                .body,
             scheduledDate: scheduledDate,
             notificationDetails: details,
             payload: '${Routes.dayWorkoutSessionRoute}?day=$day',
@@ -609,6 +619,7 @@ class NotificationService {
   }) async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      final profile = await NotificationProfile.load();
       final bool enabled =
           prefs.getBool('notif_workout_reminders_enabled') ?? false;
       if (!enabled) return;
@@ -675,9 +686,12 @@ class NotificationService {
       final scheduleMode = await _resolveScheduleMode();
       await _localNotificationsPlugin.zonedSchedule(
           id: notifId,
-          title: '$todayName Workout Time! 💪',
-          body:
-              'Today is your scheduled workout session. Open Gym Buddy to track your lifts!',
+          title: NotificationCopy.workoutDay(
+                  day: todayName, name: profile.firstName)
+              .title,
+          body: NotificationCopy.workoutDay(
+                  day: todayName, name: profile.firstName)
+              .body,
           scheduledDate: scheduledDate,
           notificationDetails: details,
           payload: '${Routes.dayWorkoutSessionRoute}?day=$todayName',
@@ -704,6 +718,7 @@ class NotificationService {
       }
 
       final prefs = await SharedPreferences.getInstance();
+      final profile = await NotificationProfile.load();
       final bool enabled =
           prefs.getBool('notif_recovery_reminders_enabled') ?? false;
       if (!enabled) return;
@@ -757,8 +772,8 @@ class NotificationService {
         final scheduleMode = await _resolveScheduleMode();
         await _localNotificationsPlugin.zonedSchedule(
             id: 30 + dayIndex,
-            title: 'Recovery & Rest Day 🧘',
-            body: 'Planned rest day today! Muscles grow when you rest. Stay hydrated and eat well.',
+            title: NotificationCopy.restDay(name: profile.firstName).title,
+            body: NotificationCopy.restDay(name: profile.firstName).body,
             scheduledDate: scheduledDate,
             notificationDetails: details,
             payload: Routes.mainRoute,
@@ -776,6 +791,63 @@ class NotificationService {
     }
   }
 
+  /// One-shot Sunday 7 PM "week in review" notification (id 50). Scheduled
+  /// after each workout, so the numbers always describe the week it fires in.
+  /// Skipped when the week is empty, already over, or the user opted out.
+  Future<void> scheduleWeeklyRecapNotification({
+    required int workoutsThisWeek,
+    required int target,
+    required int streak,
+  }) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final bool enabled = prefs.getBool('notif_weekly_recap_enabled') ?? true;
+      await _localNotificationsPlugin.cancel(id: 50);
+      if (!enabled || workoutsThisWeek <= 0) return;
+
+      final hasPerm = await hasNotificationPermission();
+      if (!hasPerm) return;
+
+      final tz.TZDateTime now = _currentTzNow();
+      final tz.TZDateTime sunday = tz.TZDateTime(
+          tz.local, now.year, now.month, now.day + (DateTime.sunday - now.weekday), 19);
+      // Sunday 7 PM already passed: next week's recap is scheduled by next workout.
+      if (!sunday.isAfter(now)) return;
+
+      final profile = await NotificationProfile.load();
+      final copy = NotificationCopy.weeklyRecap(
+          name: profile.firstName,
+          workouts: workoutsThisWeek,
+          target: target,
+          streak: streak);
+
+      const AndroidNotificationDetails android = AndroidNotificationDetails(
+          'weekly_recap', 'Weekly Recap',
+          channelDescription: 'Your week in review, every Sunday evening',
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority);
+      const NotificationDetails details = NotificationDetails(android: android);
+
+      final scheduleMode = await _resolveScheduleMode();
+      await _localNotificationsPlugin.zonedSchedule(
+          id: 50,
+          title: copy.title,
+          body: copy.body,
+          scheduledDate: sunday,
+          notificationDetails: details,
+          payload: Routes.mainRoute,
+          androidScheduleMode: scheduleMode);
+
+      if (kDebugMode) print('Scheduled weekly recap for $sunday');
+    } catch (e) {
+      if (kDebugMode) print('Failed to schedule weekly recap: $e');
+    }
+  }
+
+  Future<void> cancelWeeklyRecapNotification() async {
+    await _localNotificationsPlugin.cancel(id: 50);
+  }
+
   Future<void> scheduleWaterReminder() async {
     try {
       // Cancel existing water reminders (ID: 2)
@@ -789,9 +861,16 @@ class NotificationService {
       final hasPerm = await hasNotificationPermission();
       if (!hasPerm) return;
 
-      // Schedule for 6 PM today (or tomorrow if it's already past 6 PM)
+      // User-chosen time (default 6 PM); today, or tomorrow if already past
+      final int waterHour =
+          (prefs.getInt(NotificationProfile.waterHourKey) ?? 18).clamp(0, 23).toInt();
+      final int waterMinute =
+          (prefs.getInt(NotificationProfile.waterMinuteKey) ?? 0).clamp(0, 59).toInt();
+      final profile = await NotificationProfile.load();
+      final waterCopy = NotificationCopy.water(name: profile.firstName);
       tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-      tz.TZDateTime scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, now.day, 18);
+      tz.TZDateTime scheduledDate = tz.TZDateTime(
+          tz.local, now.year, now.month, now.day, waterHour, waterMinute);
       if (scheduledDate.isBefore(now)) {
         scheduledDate = scheduledDate.add(const Duration(days: 1));
       }
@@ -808,8 +887,8 @@ class NotificationService {
       final scheduleMode = await _resolveScheduleMode();
       await _localNotificationsPlugin.zonedSchedule(
           id: 2,
-          title: '💧 Drink Water',
-          body: 'It is 6 PM! Have you reached your water goal for today?',
+          title: waterCopy.title,
+          body: waterCopy.body,
           scheduledDate: scheduledDate,
           notificationDetails: platformChannelSpecifics,
           payload: Routes.addWaterRoute,
@@ -845,12 +924,15 @@ class NotificationService {
 
       final now = tz.TZDateTime.now(tz.local);
       final scheduleMode = await _resolveScheduleMode();
+      final profile = await NotificationProfile.load();
+      NotificationText comeback(int days) => NotificationCopy.comeback(
+          days: days, name: profile.firstName, longest: profile.longestStreak);
 
       // 3 Days
       await _localNotificationsPlugin.zonedSchedule(
           id: 10,
-          title: 'We miss you! 😢',
-          body: 'It\'s been 3 days! Your muscles are missing you. Come back for a quick workout.',
+          title: comeback(3).title,
+          body: comeback(3).body,
           scheduledDate: now.add(const Duration(days: 3)),
           notificationDetails: platformChannelSpecifics,
           androidScheduleMode: scheduleMode);
@@ -858,8 +940,8 @@ class NotificationService {
       // 7 Days
       await _localNotificationsPlugin.zonedSchedule(
           id: 11,
-          title: 'Don\'t lose your progress! 📉',
-          body: 'It\'s been a week. Even a 5-minute stretch helps keep the momentum going!',
+          title: comeback(7).title,
+          body: comeback(7).body,
           scheduledDate: now.add(const Duration(days: 7)),
           notificationDetails: platformChannelSpecifics,
           androidScheduleMode: scheduleMode);
@@ -867,8 +949,8 @@ class NotificationService {
       // 14 Days
       await _localNotificationsPlugin.zonedSchedule(
           id: 12,
-          title: 'Time to get back in the gym! 💪',
-          body: 'We haven\'t seen you in two weeks. Start fresh today with a light workout!',
+          title: comeback(14).title,
+          body: comeback(14).body,
           scheduledDate: now.add(const Duration(days: 14)),
           notificationDetails: platformChannelSpecifics,
           androidScheduleMode: scheduleMode);

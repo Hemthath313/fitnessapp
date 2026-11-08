@@ -183,7 +183,7 @@ class _TransformationOnboardingScreenState
         backgroundColor: ColorManager.background,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
+        leading: IconButton(tooltip: 'Back', 
           icon: Icon(
             Icons.arrow_back_ios_new_rounded,
             color: ColorManager.textPrimary,
@@ -251,7 +251,7 @@ class _TransformationOnboardingScreenState
                           color: isCurrent
                               ? ColorManager.primary
                               : (isCompleted ? ColorManager.textPrimary : ColorManager.textTertiary),
-                          fontSize: 10.sp,
+                          fontSize: 11.sp,
                           fontWeight: isCurrent ? FontWeight.bold : FontWeight.w500,
                         ),
                       ),
@@ -645,7 +645,7 @@ class _TransformationOnboardingScreenState
       children: [
         Row(
           children: [
-            Text(_plan.iconEmoji, style: TextStyle(fontSize: 22.sp)),
+            Text(_plan.iconEmoji, style: TextStyle(fontSize: 20.sp)),
             SizedBox(width: 8.w),
             Expanded(
               child: Column(
@@ -689,7 +689,7 @@ class _TransformationOnboardingScreenState
                       'CALIBRATED NUTRITION TARGET',
                       style: TextStyle(
                         color: ColorManager.primary,
-                        fontSize: 10.sp,
+                        fontSize: 11.sp,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.5,
                       ),
@@ -698,7 +698,7 @@ class _TransformationOnboardingScreenState
                   SizedBox(width: 6.w),
                   Text(
                     '${_calculatedTDEE.toStringAsFixed(0)} kcal TDEE',
-                    style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp),
+                    style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
                   ),
                 ],
               ),
@@ -711,7 +711,7 @@ class _TransformationOnboardingScreenState
                     _calculatedTargetCalories.toStringAsFixed(0),
                     style: TextStyle(
                       color: ColorManager.textPrimary,
-                      fontSize: 28.sp,
+                      fontSize: 24.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -743,7 +743,7 @@ class _TransformationOnboardingScreenState
                 'Note: Calorie and macro values are scientifically estimated baselines. Individual metabolism and rate of progress vary.',
                 style: TextStyle(
                   color: ColorManager.textTertiary,
-                  fontSize: 10.sp,
+                  fontSize: 11.sp,
                   height: 1.35,
                 ),
               ),
@@ -816,7 +816,7 @@ class _TransformationOnboardingScreenState
         child: Column(
           children: [
             Text(value, style: TextStyle(color: color, fontSize: 13.sp, fontWeight: FontWeight.bold)),
-            Text(name, style: TextStyle(color: ColorManager.textSecondary, fontSize: 10.sp)),
+            Text(name, style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp)),
           ],
         ),
       ),
@@ -955,7 +955,7 @@ class _TransformationOnboardingScreenState
               ),
               child: Text(
                 isLastStep ? 'Launch Programme Roadmap' : 'Continue',
-                style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(color: ColorManager.onMint, fontSize: 14.sp, fontWeight: FontWeight.bold),
               ),
             ),
           ),

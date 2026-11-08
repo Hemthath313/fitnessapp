@@ -67,7 +67,7 @@ class SettingsPageToggle extends StatelessWidget {
                 value: value,
                 onChanged: onChanged,
                 activeColor: ColorManager.primary,
-                activeTrackColor: ColorManager.primary.withOpacity(0.5),
+                activeTrackColor: ColorManager.primary.withValues(alpha: 0.5),
               ),
             ),
           ],

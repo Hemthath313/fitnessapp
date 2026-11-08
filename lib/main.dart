@@ -22,7 +22,7 @@ void main() {
 
       // THEN: Load environment variables (with error handling)
       try {
-        await dotenv.load(fileName: "lib/.env");
+        await dotenv.load(fileName: "lib/.env", isOptional: true);
       } catch (e) {
         if (kDebugMode) {
           debugPrint('Warning: .env file not found.');
@@ -41,12 +41,21 @@ void main() {
             options: DefaultFirebaseOptions.currentPlatform,
           );
         }
-        
+      } catch (e, st) {
+        debugPrint('Firebase initialization error: $e\n$st');
+      }
+
+      // App Check is optional; a failure here must not break the app.
+      try {
         await FirebaseAppCheck.instance.activate(
-          androidProvider: kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
+          androidProvider:
+              kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
+          appleProvider: kDebugMode
+              ? AppleProvider.debug
+              : AppleProvider.appAttestWithDeviceCheckFallback,
         );
       } catch (e) {
-        debugPrint('Firebase initialization error: $e');
+        debugPrint('Firebase App Check error: $e');
       }
 
       // Initialize Google Mobile Ads

@@ -225,12 +225,12 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                     SizedBox(height: 16),
                     Text(
                       'Unable to load fitness data',
-                      style: TextStyle(color: ColorManager.white, fontSize: 16),
+                      style: TextStyle(color: ColorManager.white, fontSize: 16.sp),
                     ),
                     SizedBox(height: 8),
                     Text(
                       'Please check your internet connection',
-                      style: TextStyle(color: ColorManager.grey2, fontSize: 14),
+                      style: TextStyle(color: ColorManager.grey2, fontSize: 14.sp),
                     ),
                   ],
                 ),
@@ -245,12 +245,12 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                     SizedBox(height: 16),
                     Text(
                       'No fitness data available',
-                      style: TextStyle(color: ColorManager.white, fontSize: 16),
+                      style: TextStyle(color: ColorManager.white, fontSize: 16.sp),
                     ),
                     SizedBox(height: 8),
                     Text(
                       'Please complete your profile setup',
-                      style: TextStyle(color: ColorManager.grey2, fontSize: 14),
+                      style: TextStyle(color: ColorManager.grey2, fontSize: 14.sp),
                     ),
                   ],
                 ),
@@ -318,8 +318,8 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                 : BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [
-                        Color(0xFF1B55E2), // Rich Royal Blue
-                        Color(0xFF3972F6), // Vibrant Medium Blue
+                        Color(0xFF0F766E), // Deep Teal
+                        Color(0xFF14B8A6), // Vibrant Teal
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -327,7 +327,7 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                     borderRadius: BorderRadius.circular(18.r),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF1B55E2).withOpacity(0.15),
+                        color: const Color(0xFF0F766E).withValues(alpha: 0.15),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       )
@@ -341,7 +341,7 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
               borderRadius: BorderRadius.circular(18.r),
               boxShadow: [
                 BoxShadow(
-                  color: (isDarkMode ? Colors.black : Colors.grey).withOpacity(0.04),
+                  color: (isDarkMode ? Colors.black : Colors.grey).withValues(alpha: 0.04),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 )
@@ -413,7 +413,7 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                                           : "/ -- kcal",
                                       style: TextStyle(
                                         color: calorieSmallLabelText,
-                                        fontSize: 10.sp,
+                                        fontSize: 11.sp,
                                       ),
                                     ),
                                   ),
@@ -522,7 +522,7 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                                       StringsManager.water,
                                       style: TextStyle(
                                         color: lightThemeTextColor,
-                                        fontSize: 15.sp,
+                                        fontSize: 14.sp,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -558,7 +558,7 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                                                     consumedWater.toStringAsFixed(1),
                                                     style: TextStyle(
                                                       color: lightThemeTextColor,
-                                                      fontSize: 22.sp,
+                                                      fontSize: 20.sp,
                                                       fontWeight: FontWeight.bold,
                                                     ),
                                                   ),
@@ -597,7 +597,7 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                                   borderRadius: BorderRadius.circular(4.r),
                                   child: LinearProgressIndicator(
                                     value: waterPercent,
-                                    backgroundColor: isDarkMode ? Colors.white10 : Colors.grey.withOpacity(0.1),
+                                    backgroundColor: isDarkMode ? Colors.white10 : Colors.grey.withValues(alpha: 0.1),
                                     valueColor: const AlwaysStoppedAnimation<Color>(ColorManager.primary),
                                     minHeight: 6.h,
                                   ),
@@ -624,7 +624,7 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                                       'BMI',
                                       style: TextStyle(
                                         color: lightThemeTextColor,
-                                        fontSize: 15.sp,
+                                        fontSize: 14.sp,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -755,7 +755,7 @@ class _WaterGlassPainter extends CustomPainter {
         ..close();
 
       final waterPaint = Paint()
-        ..color = const Color(0xFF2F6BFF) // Same vibrant blue
+        ..color = const Color(0xFF0D9488) // Same teal
         ..style = PaintingStyle.fill;
 
       canvas.drawPath(waterPath, waterPaint);
@@ -763,7 +763,7 @@ class _WaterGlassPainter extends CustomPainter {
 
     // 2. Draw the glass frame outline
     final framePaint = Paint()
-      ..color = isDarkMode ? Colors.white30 : const Color(0xFF93C5FD).withOpacity(0.5)
+      ..color = isDarkMode ? Colors.white30 : const Color(0xFF93C5FD).withValues(alpha: 0.5)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.w
       ..strokeCap = StrokeCap.round;
@@ -772,7 +772,7 @@ class _WaterGlassPainter extends CustomPainter {
 
     // 3. Draw the rim at the top of the glass
     final rimPaint = Paint()
-      ..color = isDarkMode ? Colors.white30 : const Color(0xFF93C5FD).withOpacity(0.5)
+      ..color = isDarkMode ? Colors.white30 : const Color(0xFF93C5FD).withValues(alpha: 0.5)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.w;
 
@@ -811,7 +811,7 @@ class _BmiGaugePainter extends CustomPainter {
 
     // 1. Draw background track
     final trackPaint = Paint()
-      ..color = isDarkMode ? Colors.white.withOpacity(0.08) : Colors.grey.withOpacity(0.12)
+      ..color = isDarkMode ? Colors.white.withValues(alpha: 0.08) : Colors.grey.withValues(alpha: 0.12)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 8.w
       ..strokeCap = StrokeCap.round;
@@ -867,7 +867,7 @@ class _BmiGaugePainter extends CustomPainter {
         text: bmi.toStringAsFixed(1),
         style: TextStyle(
           color: textColor,
-          fontSize: 22.sp,
+          fontSize: 20.sp,
           fontWeight: FontWeight.bold,
         ),
       ),

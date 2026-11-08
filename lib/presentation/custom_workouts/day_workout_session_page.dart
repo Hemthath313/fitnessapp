@@ -1,16 +1,22 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/data/exercise_data.dart';
+import 'package:fitness_app/model/personal_record_model.dart';
 import 'package:fitness_app/model/workout_log.dart';
 import 'package:fitness_app/model/workout_session_model.dart';
+import 'package:fitness_app/presentation/custom_workouts/widgets/workout_reward_view.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
+import 'package:fitness_app/presentation/home/widgets/achievements_widget.dart';
+import 'package:fitness_app/presentation/home/widgets/next_badge_card.dart';
 import 'package:fitness_app/presentation/widgets/interactive_exercise_detail.dart';
 import 'package:fitness_app/presentation/workout_tools/plate_calculator_sheet.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/services/exercise_substitution_service.dart';
 import 'package:fitness_app/services/progression_service.dart';
+import 'package:fitness_app/services/session_reward_service.dart';
 import 'package:fitness_app/services/update_service.dart';
 import 'package:fitness_app/services/workout_log_service.dart';
+import 'package:fitness_app/utils/haptics.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
@@ -53,6 +59,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
   bool _isSessionFinished = false;
   bool _isDetailSheetOpen = false;
   WorkoutSession? _finishedSession;
+  WorkoutRewardData _reward = const WorkoutRewardData();
 
   // Elapsed Session Timer
   Timer? _sessionTimer;
@@ -430,7 +437,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                       ),
                     ),
                   ),
-                  IconButton(
+                  IconButton(tooltip: 'Close', 
                     icon: Icon(Icons.close, color: ColorManager.textTertiary),
                     onPressed: () => Navigator.pop(ctx),
                   ),
@@ -556,6 +563,62 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
     return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
   }
 
+  /// Gathers what the reward screen celebrates. Every lookup is best-effort:
+  /// a failure only means that card is left out, never that saving fails.
+  Future<WorkoutRewardData> _collectRewards(
+      WorkoutSession session, int streakBefore) async {
+    if (!mounted) {
+      return WorkoutRewardData(
+          streakBefore: streakBefore, streakAfter: streakBefore);
+    }
+    int streakAfter = streakBefore;
+    int longest = 0;
+    int thisWeek = 0;
+    int target = 3;
+    List<AchievementDef> unlocked = const [];
+    BadgeProgress? next;
+
+    try {
+      final stats = Provider.of<StatisticsProvider?>(context, listen: false);
+      if (stats != null) {
+        streakAfter = stats.currentStreak;
+        longest = stats.longestStreak;
+        thisWeek = stats.workoutsCompletedThisWeek;
+        target = stats.weeklyTarget;
+
+        final ids = stats.consumeNewlyUnlocked();
+        unlocked = [
+          for (final id in ids)
+            ...allAchievements.where((a) => a.id == id),
+        ];
+        next = nextBadgeProgress(
+          unlocked: stats.unlockedAchievements,
+          totalWorkouts: stats.totalWorkouts,
+          currentStreak: stats.currentStreak,
+        );
+      }
+    } catch (_) {}
+
+    var prs = const <PersonalRecord>[];
+    try {
+      final all = await _logService
+          .getSessionsFuture(limit: 200)
+          .timeout(const Duration(seconds: 3));
+      prs = SessionRewards.meaningfulPRs(session: session, allSessions: all);
+    } catch (_) {}
+
+    return WorkoutRewardData(
+      streakBefore: streakBefore,
+      streakAfter: streakAfter,
+      longestStreak: longest,
+      newPRs: prs,
+      unlockedBadges: unlocked,
+      workoutsThisWeek: thisWeek,
+      weeklyTarget: target,
+      nextBadge: next,
+    );
+  }
+
   // Finish Workout (Full or Partial)
   Future<void> _finishWorkout({required bool isPartial}) async {
     if (_isSaving) return;
@@ -614,12 +677,18 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
       // Atomic Batch Save
       await _logService.saveWorkoutSession(session);
 
-      // Update Streak in StatisticsProvider
+      // Update Streak in StatisticsProvider (remember the "before" value so the
+      // reward screen can count up from it).
+      int streakBefore = 0;
       if (mounted) {
         final statsProvider =
             Provider.of<StatisticsProvider?>(context, listen: false);
+        try {
+          streakBefore = statsProvider?.currentStreak ?? 0;
+        } catch (_) {}
         await statsProvider?.updateStreak();
       }
+      final reward = await _collectRewards(session, streakBefore);
 
       // Mark day-specific SharedPreferences flag (never mark a shared "any routine" flag for today)
       final prefs = await SharedPreferences.getInstance();
@@ -654,6 +723,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
         _isSaving = false;
         _isSessionFinished = true;
         _finishedSession = session;
+        _reward = reward;
       });
       UpdateService().setWorkoutSessionActive(false);
     } catch (e) {
@@ -701,7 +771,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
           children: [
             Icon(Icons.save_outlined, color: ColorManager.primary, size: 22.sp),
             SizedBox(width: 8.w),
-            Text('Finish Early?', style: TextStyle(color: ColorManager.textPrimary, fontSize: 17.sp, fontWeight: FontWeight.bold)),
+            Text('Finish Early?', style: TextStyle(color: ColorManager.textPrimary, fontSize: 16.sp, fontWeight: FontWeight.bold)),
           ],
         ),
         content: Text(
@@ -763,7 +833,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
         appBar: AppBar(
           backgroundColor: ColorManager.surface,
           elevation: 0,
-          leading: IconButton(
+          leading: IconButton(tooltip: 'Close', 
             icon: Icon(Icons.close_rounded, color: ColorManager.textPrimary),
             onPressed: () async {
               final pop = await _onWillPop();
@@ -875,7 +945,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
           color: ex.isAllCompleted
-              ? const Color(0xFF4CAF50).withOpacity(0.5)
+              ? const Color(0xFF4CAF50).withValues(alpha: 0.5)
               : ColorManager.divider,
         ),
       ),
@@ -929,7 +999,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                                 isCompound ? 'COMPOUND' : 'ACCESSORY',
                                 style: TextStyle(
                                   color: isCompound ? ColorManager.primary : ColorManager.textTertiary,
-                                  fontSize: 9.sp,
+                                  fontSize: 11.sp,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -1006,9 +1076,9 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
               margin: EdgeInsets.only(bottom: 12.h),
               padding: EdgeInsets.all(10.w),
               decoration: BoxDecoration(
-                color: ColorManager.primary.withOpacity(0.08),
+                color: ColorManager.primary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(10.r),
-                border: Border.all(color: ColorManager.primary.withOpacity(0.25)),
+                border: Border.all(color: ColorManager.primary.withValues(alpha: 0.25)),
               ),
               child: Row(
                 children: [
@@ -1026,7 +1096,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                                 ex.progression!.badgeLabel,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(color: ColorManager.primary, fontSize: 10.sp, fontWeight: FontWeight.bold),
+                                style: TextStyle(color: ColorManager.primary, fontSize: 11.sp, fontWeight: FontWeight.bold),
                               ),
                             ),
                             SizedBox(width: 8.w),
@@ -1036,7 +1106,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 textAlign: TextAlign.end,
-                                style: TextStyle(color: ColorManager.white, fontSize: 10.sp, fontWeight: FontWeight.bold),
+                                style: TextStyle(color: ColorManager.white, fontSize: 11.sp, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ],
@@ -1044,7 +1114,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                         SizedBox(height: 2.h),
                         Text(
                           ex.progression!.reason,
-                          style: TextStyle(color: ColorManager.textSecondary, fontSize: 10.sp),
+                          style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
                         ),
                       ],
                     ),
@@ -1058,11 +1128,11 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
             padding: EdgeInsets.symmetric(vertical: 4.h),
             child: Row(
               children: [
-                SizedBox(width: 32.w, child: Center(child: Text('SET', style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp, fontWeight: FontWeight.bold)))),
-                SizedBox(width: 72.w, child: Center(child: Text('PREV', style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp, fontWeight: FontWeight.bold)))),
-                Expanded(child: Center(child: Text('KG', style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp, fontWeight: FontWeight.bold)))),
-                Expanded(child: Center(child: Text('REPS', style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp, fontWeight: FontWeight.bold)))),
-                SizedBox(width: 44.w, child: Center(child: Text('DONE', style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp, fontWeight: FontWeight.bold)))),
+                SizedBox(width: 32.w, child: Center(child: Text('SET', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold)))),
+                SizedBox(width: 72.w, child: Center(child: Text('PREV', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold)))),
+                Expanded(child: Center(child: Text('KG', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold)))),
+                Expanded(child: Center(child: Text('REPS', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold)))),
+                SizedBox(width: 44.w, child: Center(child: Text('DONE', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold)))),
               ],
             ),
           ),
@@ -1123,7 +1193,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 6.h),
       decoration: BoxDecoration(
-        color: isDone ? const Color(0xFF1E4331).withOpacity(0.3) : Colors.transparent,
+        color: isDone ? const Color(0xFF1E4331).withValues(alpha: 0.3) : Colors.transparent,
         borderRadius: BorderRadius.circular(8.r),
       ),
       child: Row(
@@ -1144,7 +1214,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                     '${setIdx + 1}',
                     style: TextStyle(
                       color: isDone ? Colors.white : ColorManager.textSecondary,
-                      fontSize: 10.sp,
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1288,6 +1358,8 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                   });
 
                   if (ex.isCompleted[setIdx]) {
+                    // Felt confirmation for every ticked set.
+                    Haptics.light();
                     // Trigger non-blocking rest timer!
                     _triggerRestTimer(isCompound);
                   }
@@ -1346,12 +1418,12 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
           decoration: BoxDecoration(
             color: isDone
                 ? ColorManager.surfaceDark
-                : ColorManager.primary.withOpacity(0.15),
+                : ColorManager.primary.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(4.r),
             border: Border.all(
               color: isDone
                   ? Colors.white12
-                  : ColorManager.primary.withOpacity(0.4),
+                  : ColorManager.primary.withValues(alpha: 0.4),
               width: 1,
             ),
           ),
@@ -1396,12 +1468,12 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.5),
+            color: Colors.black.withValues(alpha: 0.5),
             blurRadius: 10,
             offset: const Offset(0, -3),
           ),
         ],
-        border: Border(top: BorderSide(color: ColorManager.primary.withOpacity(0.4), width: 1.5)),
+        border: Border(top: BorderSide(color: ColorManager.primary.withValues(alpha: 0.4), width: 1.5)),
       ),
       child: SafeArea(
         top: false,
@@ -1415,7 +1487,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
               children: [
                 Text(
                   'REST TIMER',
-                  style: TextStyle(color: ColorManager.primary, fontSize: 9.sp, fontWeight: FontWeight.bold, letterSpacing: 0.6),
+                  style: TextStyle(color: ColorManager.primary, fontSize: 11.sp, fontWeight: FontWeight.bold, letterSpacing: 0.6),
                 ),
                 Text(
                   _formatTimer(_restSecondsRemaining),
@@ -1511,7 +1583,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                           'Prepare muscles, activate joint capsules & raise core temp',
                           style: TextStyle(
                             color: ColorManager.textSecondary,
-                            fontSize: 10.sp,
+                            fontSize: 11.sp,
                           ),
                         ),
                       ],
@@ -1629,7 +1701,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                           'Gentle stretching, parasympathetic reset & stiffness reduction',
                           style: TextStyle(
                             color: ColorManager.textSecondary,
-                            fontSize: 10.sp,
+                            fontSize: 11.sp,
                           ),
                         ),
                       ],
@@ -1700,98 +1772,11 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
 
   // Completion Screen
   Widget _buildCompletionView() {
-    final session = _finishedSession!;
-    final isPartial = session.isPartial;
-
-    return Scaffold(
-      backgroundColor: ColorManager.background,
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(24.w),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Spacer(),
-              Container(
-                padding: EdgeInsets.all(20.w),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isPartial ? Colors.amber.withOpacity(0.15) : const Color(0xFF4CAF50).withOpacity(0.15),
-                  border: Border.all(
-                    color: isPartial ? Colors.amber : const Color(0xFF4CAF50),
-                    width: 2,
-                  ),
-                ),
-                child: Icon(
-                  isPartial ? Icons.check_circle_outline_rounded : Icons.emoji_events_rounded,
-                  size: 64.sp,
-                  color: isPartial ? Colors.amber : const Color(0xFF81C784),
-                ),
-              ),
-              SizedBox(height: 20.h),
-              Text(
-                isPartial ? 'Workout Saved Early!' : 'Workout Complete! 🔥',
-                style: TextStyle(color: ColorManager.white, fontSize: 24.sp, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8.h),
-              Text(
-                isPartial
-                    ? 'All completed sets and volume have been saved to your logbook.'
-                    : 'Crushed every set on ${widget.dayName}! Streak extended.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp),
-              ),
-              SizedBox(height: 32.h),
-
-              // Metrics Card
-              Container(
-                padding: EdgeInsets.all(18.w),
-                decoration: BoxDecoration(
-                  color: ColorManager.surface,
-                  borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(color: ColorManager.divider),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildCompletionMetric('Total Volume', '${session.totalVolume.toStringAsFixed(0)} kg', Icons.fitness_center),
-                    _buildCompletionMetric('Time', _formatTimer(session.durationSeconds), Icons.timer),
-                    _buildCompletionMetric('Exercises', '${session.exercises.length}', Icons.format_list_bulleted),
-                  ],
-                ),
-              ),
-              const Spacer(),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _closeSession,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorManager.primary,
-                    padding: EdgeInsets.symmetric(vertical: 14.h),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                  ),
-                  child: Text(
-                    'Back to Home',
-                    style: TextStyle(color: Colors.black, fontSize: 15.sp, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCompletionMetric(String label, String value, IconData icon) {
-    return Column(
-      children: [
-        Icon(icon, color: ColorManager.primary, size: 20.sp),
-        SizedBox(height: 4.h),
-        Text(value, style: TextStyle(color: ColorManager.white, fontSize: 16.sp, fontWeight: FontWeight.bold)),
-        Text(label, style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp)),
-      ],
+    return WorkoutRewardView(
+      session: _finishedSession!,
+      dayName: widget.dayName,
+      data: _reward,
+      onDone: _closeSession,
     );
   }
 }

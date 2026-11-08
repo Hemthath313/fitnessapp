@@ -33,8 +33,19 @@ class WorkoutLog {
       id: documentId,
       exerciseName: map['exerciseName'] ?? '',
       date: (map['date'] as Timestamp).toDate(),
+      // Every set in a log is one that was performed. Older standalone logs
+      // were saved with the completed flag off, so read them as completed.
       sets: (map['sets'] as List<dynamic>?)
               ?.map((s) => WorkoutSet.fromMap(s as Map<String, dynamic>))
+              .map((s) => s.isCompleted
+                  ? s
+                  : WorkoutSet(
+                      weight: s.weight,
+                      reps: s.reps,
+                      type: s.type,
+                      rpe: s.rpe,
+                      isCompleted: true,
+                    ))
               .toList() ??
           [],
       notes: map['notes'],

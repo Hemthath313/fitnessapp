@@ -16,7 +16,7 @@ class MuscleAnalyticsPage extends StatelessWidget {
           'Muscle Distribution',
           style: TextStyle(
             color: ColorManager.white,
-            fontSize: SizeManager.s20.sp,
+            fontSize: 20.sp,
             fontWeight: FontWeight.bold,
           ),
         ),

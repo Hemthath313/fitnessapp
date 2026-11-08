@@ -32,7 +32,7 @@ class TextFieldWidget extends StatelessWidget {
         color: ColorManager.surface,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: ColorManager.surfaceLight.withOpacity(0.3),
+          color: ColorManager.surfaceLight.withValues(alpha: 0.3),
           width: 1,
         ),
       ),

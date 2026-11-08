@@ -1,18 +1,22 @@
-import 'package:carousel_slider/carousel_slider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitness_app/data/challenge_data.dart';
 import 'package:fitness_app/presentation/home/widgets/carousel_home_box.dart';
-import 'package:fitness_app/utils/managers/asset_manager.dart';
+import 'package:fitness_app/presentation/home/widgets/mini_challenge_cards.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
-import 'package:fitness_app/utils/managers/string_manager.dart';
-import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 
+/// Horizontal shelf for the dashboard Challenges section: [leading] cards
+/// (e.g. the recommended programme), then the 30-Day Six-Pack, then [middle]
+/// cards (other programmes), then the weekly technique. The next card peeks in
+/// at the edge so the shelf reads as swipeable.
 class CarouselSliderHomeWidget extends StatefulWidget {
-  const CarouselSliderHomeWidget({super.key});
+  const CarouselSliderHomeWidget({
+    super.key,
+    this.leading = const [],
+    this.middle = const [],
+  });
+
+  final List<Widget> leading;
+  final List<Widget> middle;
 
   @override
   State<CarouselSliderHomeWidget> createState() => _CarouselSliderHomeWidgetState();
@@ -20,123 +24,58 @@ class CarouselSliderHomeWidget extends StatefulWidget {
 
 class _CarouselSliderHomeWidgetState extends State<CarouselSliderHomeWidget> {
   int _currentIndex = 0;
-  Future<Map<String, dynamic>>? _sixPackProgressFuture;
+  final PageController _pageController = PageController(viewportFraction: 0.88);
 
   @override
-  void initState() {
-    super.initState();
-    _sixPackProgressFuture = _fetchSixPackProgress();
-  }
-
-  Future<Map<String, dynamic>> _fetchSixPackProgress() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return {};
-      final snapshot =
-          await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-      return snapshot.data()?['progress']?['sixPackChallenge'] ?? {};
-    } catch (_) {
-      return {};
-    }
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final deviceWidth = MediaQuery.of(context).size.width;
-    final weeklyExercise = ChallengeData.weeklyFeaturedExercise;
+    final List<Widget> carouselCards = [
+      ...widget.leading,
+      // 30-Day Six-Pack Challenge (genuine tracked progression challenge)
+      const SixPackChallengeCard(),
+      ...widget.middle,
+      // Weekly Technique (single exercise form & tips)
+      const ExerciseOfWeekCard(),
+    ];
 
-    return FutureBuilder<Map<String, dynamic>>(
-      future: _sixPackProgressFuture,
-      builder: (context, snapshot) {
-        final progress = snapshot.data ?? {};
-        final int lastDay = (progress['lastCompletedDay'] as num?)?.toInt() ?? 0;
-
-        final String sixPackSubtitle = lastDay > 0
-            ? '$lastDay of 30 days completed'
-            : '30-Day progressive core curriculum';
-        final double sixPackProgress = (lastDay / 30.0).clamp(0.0, 1.0);
-        final String sixPackAction = lastDay > 0
-            ? (lastDay >= 30 ? 'Completed 🏆' : 'Continue Day ${lastDay + 1}')
-            : 'Start Day 1';
-
-        final String sixPackBadge;
-        if (lastDay >= 30) {
-          sixPackBadge = 'COMPLETED';
-        } else if (lastDay > 0) {
-          sixPackBadge = 'ACTIVE';
-        } else {
-          sixPackBadge = '30-DAY CHALLENGE';
-        }
-
-        final List<Widget> carouselCards = [
-          // 1. 30-Day Six-Pack Challenge (Genuine tracked progression challenge)
-          CarouselHomeBox(
-            deviceWidth: deviceWidth,
-            image: ImageManager.absWorkout,
-            title: StringsManager.sixPackChallenge,
-            badge: sixPackBadge,
-            subtitle: sixPackSubtitle,
-            progress: sixPackProgress > 0 ? sixPackProgress : null,
-            actionText: sixPackAction,
-            onTap: () {
-              context.push(Routes.sixPackChallengeRoute).then((_) {
-                if (mounted) {
-                  setState(() {
-                    _sixPackProgressFuture = _fetchSixPackProgress();
-                  });
-                }
-              });
-            },
+    return Column(
+      children: [
+        SizedBox(
+          height: CarouselHomeBox.height + 4.h,
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: carouselCards.length,
+            onPageChanged: (index) => setState(() => _currentIndex = index),
+            itemBuilder: (context, index) => Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+              child: carouselCards[index],
+            ),
           ),
-
-          // 2. Weekly Technique Challenge (Single exercise form & tips)
-          CarouselHomeBox(
-            deviceWidth: deviceWidth,
-            image: ImageManager.shoulderWorkout,
-            title: StringsManager.exerciseOfWeek,
-            badge: 'WEEKLY TECHNIQUE',
-            subtitle: '${weeklyExercise.name} • ${weeklyExercise.target}',
-            actionText: 'View Guide',
-            onTap: () => context.push(Routes.exerciseOfTheWeekRoute),
-          ),
-        ];
-
-        return Column(
-          children: [
-            CarouselSlider(
-              items: carouselCards,
-              options: CarouselOptions(
-                height: 150.h,
-                viewportFraction: 1.0,
-                enableInfiniteScroll: false,
-                autoPlay: false,
-                enlargeCenterPage: false,
-                onPageChanged: (index, _) {
-                  setState(() => _currentIndex = index);
-                },
+        ),
+        SizedBox(height: 8.h),
+        // Dot indicators
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(carouselCards.length, (index) {
+            final isSelected = _currentIndex == index;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: isSelected ? 16.w : 6.w,
+              height: 5.h,
+              margin: EdgeInsets.symmetric(horizontal: 3.w),
+              decoration: BoxDecoration(
+                color: isSelected ? ColorManager.primary : Colors.white24,
+                borderRadius: BorderRadius.circular(4.r),
               ),
-            ),
-            SizedBox(height: 6.h),
-            // Smooth Dot Indicators
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(carouselCards.length, (index) {
-                final isSelected = _currentIndex == index;
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  width: isSelected ? 16.w : 6.w,
-                  height: 5.h,
-                  margin: EdgeInsets.symmetric(horizontal: 3.w),
-                  decoration: BoxDecoration(
-                    color: isSelected ? ColorManager.primary : Colors.white24,
-                    borderRadius: BorderRadius.circular(4.r),
-                  ),
-                );
-              }),
-            ),
-          ],
-        );
-      },
+            );
+          }),
+        ),
+      ],
     );
   }
 }

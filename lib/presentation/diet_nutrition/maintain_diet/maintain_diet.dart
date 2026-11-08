@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class MaintainDietScreen extends StatefulWidget {
   const MaintainDietScreen({super.key});
@@ -266,14 +267,14 @@ class _MaintainDietScreenState extends State<MaintainDietScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: ColorManager.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white24),
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: ColorManager.primary.withValues(alpha: 0.4)),
         ),
         child: const Center(
           child: Text(
             '+ Add Custom Meal',
             style: TextStyle(
-              color: Colors.orangeAccent,
+              color: ColorManager.primary,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -300,7 +301,7 @@ class _MaintainDietScreenState extends State<MaintainDietScreen> {
           title: Text(
             'Add Custom Meal',
             style: TextStyle(
-              fontSize: 22,
+              fontSize: 20.sp,
               fontWeight: FontWeight.bold,
               color: ColorManager.limerGreen2,
             ),
@@ -460,7 +461,7 @@ class _MaintainDietScreenState extends State<MaintainDietScreen> {
               ),
               subtitle: Text(
                 '${meal['calories']} kcal | ${meal['protein']}g Protein',
-                style: const TextStyle(color: Colors.orangeAccent),
+                style: const TextStyle(color: ColorManager.primary),
               ),
               onTap: () => _swapMeal(mealIndex, meal),
             );
@@ -497,16 +498,22 @@ class _MaintainDietScreenState extends State<MaintainDietScreen> {
       backgroundColor: ColorManager.background,
       appBar: AppBar(
           backgroundColor: ColorManager.background,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          centerTitle: true,
           title:  Text(
             'Maintain Diet Plan',
-            style: TextStyle(color: ColorManager.white),
+            style: TextStyle(
+                color: ColorManager.white,
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w600),
           )),
       body: meals.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: loadMealPlan,
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
                 child: Column(
                   children: [
                     _buildSummaryCard(),

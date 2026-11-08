@@ -179,10 +179,10 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                       child: Container(
                         padding: const EdgeInsets.all(PaddingManager.p12),
                         decoration: BoxDecoration(
-                          color: ColorManager.limerGreen2.withOpacity(0.1),
+                          color: ColorManager.limerGreen2.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(SizeManager.s8.r),
                           border: Border.all(
-                            color: ColorManager.limerGreen2.withOpacity(0.3),
+                            color: ColorManager.limerGreen2.withValues(alpha: 0.3),
                           ),
                         ),
                         child: Row(
@@ -198,7 +198,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                                 'Since you signed in with Google, you only need to confirm your email address.',
                                 style: StyleManager.settingsOptionTiteTextStyle
                                     .copyWith(
-                                  fontSize: SizeManager.s12.sp,
+                                  fontSize: 12.sp,
                                 ),
                               ),
                             ),

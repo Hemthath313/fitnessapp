@@ -90,9 +90,9 @@ class _MonthlyComparisonPageState extends State<MonthlyComparisonPage> {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: ColorManager.primary.withOpacity(0.1),
+        color: ColorManager.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: ColorManager.primary.withOpacity(0.3)),
+        border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [

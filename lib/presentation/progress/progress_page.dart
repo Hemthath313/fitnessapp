@@ -214,7 +214,7 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                 'Progress',
                 style: TextStyle(
                   color: ColorManager.white,
-                  fontSize: SizeManager.s26.sp,
+                  fontSize: 24.sp,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -223,7 +223,7 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                 'Visualize your transformation and celebrate every win.',
                 style: TextStyle(
                   color: ColorManager.textSecondary,
-                  fontSize: SizeManager.s14.sp,
+                  fontSize: 14.sp,
                 ),
               ),
               SizedBox(height: 24.h),
@@ -247,11 +247,11 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                 child: TabBar(
                   controller: _tabController,
                   indicator: BoxDecoration(
-                    color: ColorManager.primary,
+                    gradient: ColorManager.mintGradient,
                     borderRadius: BorderRadius.circular(22.r),
                   ),
                   indicatorSize: TabBarIndicatorSize.tab,
-                  labelColor: Colors.white,
+                  labelColor: ColorManager.onMint,
                   unselectedLabelColor: ColorManager.textSecondary,
                   labelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
                   unselectedLabelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
@@ -297,7 +297,7 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                                   spots.isNotEmpty ? spots.last.y.toStringAsFixed(1) : currentWeight.toStringAsFixed(1),
                                   style: TextStyle(
                                     color: ColorManager.white,
-                                    fontSize: 34.sp,
+                                    fontSize: 32.sp,
                                     fontWeight: FontWeight.w800,
                                   ),
                                 ),
@@ -324,11 +324,11 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                                   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                                   decoration: BoxDecoration(
                                     color: weightDelta <= 0
-                                        ? ColorManager.primary.withOpacity(0.12)
-                                        : Colors.orange.withOpacity(0.12),
+                                        ? ColorManager.primary.withValues(alpha: 0.12)
+                                        : Colors.orange.withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(12.r),
                                     border: Border.all(
-                                      color: weightDelta <= 0 ? ColorManager.primary.withOpacity(0.3) : Colors.orange.withOpacity(0.3),
+                                      color: weightDelta <= 0 ? ColorManager.primary.withValues(alpha: 0.3) : Colors.orange.withValues(alpha: 0.3),
                                     ),
                                   ),
                                   child: Text(
@@ -346,10 +346,10 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                                   child: Container(
                                     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                                     decoration: BoxDecoration(
-                                      color: ColorManager.primary.withOpacity(0.12),
+                                      color: ColorManager.primary.withValues(alpha: 0.12),
                                       borderRadius: BorderRadius.circular(12.r),
                                       border: Border.all(
-                                        color: ColorManager.primary.withOpacity(0.3),
+                                        color: ColorManager.primary.withValues(alpha: 0.3),
                                       ),
                                     ),
                                     child: Row(
@@ -402,7 +402,7 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                                     if (val >= 0 && val < 12 && value == value.toInt().toDouble()) {
                                       // Only show alternate months to keep it clean
                                       if (val % 2 == 0) {
-                                        return Text(months[val], style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp));
+                                        return Text(months[val], style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
                                       }
                                     }
                                   } else if (_selectedTabIndex == 2) {
@@ -414,22 +414,22 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                                     final m4 = currentMonth;
                                     
                                     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                                    if (value == 1.0) return Text(months[m1-1], style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp));
-                                    if (value == 2.0) return Text(months[m2-1], style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp));
-                                    if (value == 3.0) return Text(months[m3-1], style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp));
-                                    if (value == 4.0) return Text(months[m4-1], style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp));
+                                    if (value == 1.0) return Text(months[m1-1], style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
+                                    if (value == 2.0) return Text(months[m2-1], style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
+                                    if (value == 3.0) return Text(months[m3-1], style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
+                                    if (value == 4.0) return Text(months[m4-1], style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
                                   } else if (_selectedTabIndex == 1) {
                                     // Month
-                                    if (value == 1.0) return Text('Week 1', style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp));
-                                    if (value == 2.0) return Text('Week 2', style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp));
-                                    if (value == 3.0) return Text('Week 3', style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp));
-                                    if (value == 4.0) return Text('Week 4', style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp));
+                                    if (value == 1.0) return Text('Week 1', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
+                                    if (value == 2.0) return Text('Week 2', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
+                                    if (value == 3.0) return Text('Week 3', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
+                                    if (value == 4.0) return Text('Week 4', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
                                   } else {
                                     // Week
                                     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
                                     int val = value.toInt() - 1;
                                     if (val >= 0 && val < 7) {
-                                      return Text(days[val], style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp));
+                                      return Text(days[val], style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
                                     }
                                   }
                                   return const Text('');
@@ -461,8 +461,8 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                                 show: true,
                                 gradient: LinearGradient(
                                   colors: [
-                                    ColorManager.primary.withOpacity(0.25),
-                                    ColorManager.primary.withOpacity(0.0),
+                                    ColorManager.primary.withValues(alpha: 0.25),
+                                    ColorManager.primary.withValues(alpha: 0.0),
                                   ],
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
@@ -615,7 +615,7 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
             name,
             style: TextStyle(
               color: ColorManager.textPrimary,
-              fontSize: 15.sp,
+              fontSize: 14.sp,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -624,7 +624,7 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
             value > 0 ? '${value.toStringAsFixed(1)} cm' : 'N/A',
             style: TextStyle(
               color: ColorManager.white,
-              fontSize: 15.sp,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -653,14 +653,14 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
         decoration: BoxDecoration(
           color: ColorManager.surface,
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: color.withOpacity(0.2)),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
         child: Column(
           children: [
             Container(
               padding: EdgeInsets.all(10.w),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: color, size: 24.sp),

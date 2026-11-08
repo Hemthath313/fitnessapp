@@ -28,7 +28,7 @@ class StringsManager {
   static const String nameHint = 'Name';
   static const String surnameHint = 'Surname';
   static const String settingsABtitle = 'SETTINGS';
-  static const String addMealABtitle = 'ADD MEAL';
+  static const String addMealABtitle = 'Add Meal';
   static const String workoutsABtitle = 'MY WORKOUT';
   static const String consumptionABtitle = 'CONSUMPTION';
   static const String signOut = 'Sign Out';
@@ -87,7 +87,7 @@ class StringsManager {
   static const String activityHighHint = 'HIGH';
   static const String activityVeryHighHint = 'VERY HIGH';
   static const String activityHint = 'Physical activity';
-  static const String enterData = 'Please provide\nfollwing information';
+  static const String enterData = 'Tell us about you\nto build your plan';
   static const String kcalConsumption = 'Calorie Consumption';
   static const String kcalPerDay = 'Calories/Day';
   static const String waterHint = 'Water in liters';

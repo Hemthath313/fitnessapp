@@ -1,7 +1,7 @@
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
-import 'package:fitness_app/utils/managers/value_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -33,13 +33,6 @@ class _HomePageAppBarWidgetState extends State<HomePageAppBarWidget> {
     if (hour < 12) return 'Good Morning';
     if (hour < 17) return 'Good Afternoon';
     return 'Good Evening';
-  }
-
-  String _getGreetingEmoji() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return '☀️';
-    if (hour < 17) return '💪';
-    return '🌙';
   }
 
   @override
@@ -74,162 +67,155 @@ class _HomePageAppBarWidgetState extends State<HomePageAppBarWidget> {
   }
 
   Widget _buildAppBar(BuildContext context, String displayName, int streak) {
+    final initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'U';
+
     return AppBar(
-          actions: [
-            // Streak badge wrapped in RepaintBoundary to isolate shimmer animation repaints
-            RepaintBoundary(
-              child: GestureDetector(
-                onTap: () => context.push(Routes.workoutHistoryRoute),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  margin: EdgeInsets.only(right: 8.w),
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                  decoration: BoxDecoration(
-                    gradient: streak > 0
-                        ? LinearGradient(
-                            colors: streak >= 7
-                                ? [const Color(0xFFFF6B35), const Color(0xFFFF8C42)]
-                                : [Colors.orange.shade600, Colors.amber],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          )
-                        : null,
-                    color: streak == 0 ? ColorManager.surfaceLight : null,
-                    borderRadius: BorderRadius.circular(20.r),
-                    boxShadow: streak > 0
-                        ? [
-                            BoxShadow(
-                              color: Colors.orange.withValues(alpha: 0.4),
-                              blurRadius: 8,
-                              spreadRadius: 0,
-                            )
-                          ]
-                        : null,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.local_fire_department_rounded,
-                        color: streak > 0 ? Colors.white : ColorManager.textTertiary,
-                        size: 18.sp,
-                      ),
-                      SizedBox(width: 4.w),
-                      Text(
-                        '$streak',
-                        style: TextStyle(
-                          color: streak > 0 ? Colors.white : ColorManager.textTertiary,
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (streak > 0) ...[
-                        SizedBox(width: 2.w),
-                        Text(
-                          'day${streak == 1 ? '' : 's'}',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+      automaticallyImplyLeading: false,
+      centerTitle: false,
+      backgroundColor: Colors.transparent,
+      scrolledUnderElevation: 0,
+      elevation: 0,
+      titleSpacing: 20.w,
+      title: Row(
+        children: [
+          // Avatar -> profile / body data
+          GestureDetector(
+            key: const Key('appbar_profile_button'),
+            onTap: () => context.push(Routes.addDataRoute),
+            child: Container(
+              width: 44.w,
+              height: 44.w,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [ColorManager.primaryDark, ColorManager.primary],
                 ),
-              ).animate(
-                onPlay: (c) {
-                  if (streak > 0) {
-                    c.repeat(reverse: true);
-                  }
-                },
-              ).shimmer(
-                duration: 2000.ms,
-                delay: 1000.ms,
-                color: Colors.white.withValues(alpha: 0.2),
               ),
-            ),
-            // Premium icon
-            IconButton(
-              onPressed: () => context.push(Routes.premiumScreen),
-              icon: Icon(
-                Icons.workspace_premium_rounded,
-                color: Colors.amber,
-                size: SizeManager.s26,
-              ),
-            ),
-            // Profile access button
-            GestureDetector(
-              key: const Key('appbar_profile_button'),
-              onTap: () => context.push(Routes.addDataRoute),
-              child: Container(
-                margin: EdgeInsets.only(right: 6.w),
-                width: 32.w,
-                height: 32.w,
-                decoration: BoxDecoration(
-                  color: ColorManager.primary.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: ColorManager.primary.withValues(alpha: 0.3),
-                    width: 1.2,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    displayName.isNotEmpty ? displayName[0].toUpperCase() : 'U',
-                    style: TextStyle(
-                      color: ColorManager.primary,
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
+              child: Center(
+                child: Text(
+                  initial,
+                  style: TextStyle(
+                    color: const Color(0xFF06201B),
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
             ),
-            SizedBox(width: 4.w),
-          ],
-          centerTitle: false,
-          backgroundColor: Colors.transparent,
-          scrolledUnderElevation: 0,
-          automaticallyImplyLeading: false,
-          elevation: 0,
-          title: Padding(
-            padding:
-                EdgeInsets.only(left: 8.w, top: 4.h, bottom: 4.h),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    '${_getGreeting()}, $displayName ${_getGreetingEmoji()}',
-                    style: TextStyle(
-                      color: ColorManager.textPrimary,
-                      fontSize: 17.sp,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.3,
-                    ),
+                Text(
+                  '${_getGreeting()},',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: ColorManager.textSecondary,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                SizedBox(height: 2.h),
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Your daily fitness companion',
+                    displayName,
+                    maxLines: 1,
                     style: TextStyle(
-                      color: ColorManager.textSecondary,
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w500,
+                      color: ColorManager.textPrimary,
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.2,
                     ),
                   ),
                 ),
               ],
             ),
           ),
-        ).animate().fadeIn(duration: 500.ms);
+        ],
+      ),
+      actions: [
+        // Streak chip (static: no looping animation)
+        RepaintBoundary(
+          child: Semantics(
+            button: true,
+            excludeSemantics: true,
+            label: streak > 0
+                ? '$streak day streak. Opens workout history'
+                : 'No streak yet. Opens workout history',
+            child: GestureDetector(
+          onTap: () => context.push(Routes.workoutHistoryRoute),
+          behavior: HitTestBehavior.opaque,
+          child: SizedBox(
+            height: 44.h,
+            child: Center(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
+                decoration: BoxDecoration(
+                  color: ColorManager.iconChip,
+                  borderRadius: BorderRadius.circular(AppRadius.pill.r),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.local_fire_department_rounded,
+                      color: streak > 0
+                          ? ColorManager.ringAmber
+                          : ColorManager.textTertiary,
+                      size: 18.sp,
+                    ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      '$streak',
+                      style: TextStyle(
+                        color: streak > 0
+                            ? ColorManager.textPrimary
+                            : ColorManager.textTertiary,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    if (streak > 0) ...[
+                      SizedBox(width: 3.w),
+                      Text(
+                        'day${streak == 1 ? '' : 's'}',
+                        style: TextStyle(
+                          color: ColorManager.textSecondary,
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+        )),
+        ),
+        SizedBox(width: 8.w),
+        // Premium
+        IconButton(tooltip: 'Go Premium', 
+          onPressed: () => context.push(Routes.premiumScreen),
+          style: IconButton.styleFrom(
+            backgroundColor: ColorManager.iconChip,
+            minimumSize: Size(44.w, 44.w),
+          ),
+          icon: Icon(
+            Icons.workspace_premium_rounded,
+            color: ColorManager.ringAmber,
+            size: 22.sp,
+          ),
+        ),
+        SizedBox(width: 20.w),
+      ],
+    ).animate().fadeIn(duration: 500.ms);
   }
 }

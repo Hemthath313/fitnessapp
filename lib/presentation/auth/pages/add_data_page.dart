@@ -1,3 +1,4 @@
+import 'package:fitness_app/presentation/auth/pages/plan_ready_screen.dart';
 import 'package:fitness_app/presentation/auth/widgets/add_data_widgets.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
@@ -6,6 +7,7 @@ import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:fitness_app/utils/widgets/lime_green_rounded_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -30,6 +32,43 @@ class _AddDataPageState extends State<AddDataPage> {
   String? _valueActivity;
   String? _valueGoal;
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    for (final c in [
+      _nameController,
+      _surnameController,
+      _ageController,
+      _heightController,
+      _weightController,
+    ]) {
+      c.addListener(_onFieldChanged);
+    }
+  }
+
+  void _onFieldChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// Share of the eight required answers that are filled in (drives the
+  /// progress bar; validation itself is unchanged).
+  double get _progress {
+    var done = 0;
+    for (final c in [
+      _nameController,
+      _surnameController,
+      _ageController,
+      _heightController,
+      _weightController,
+    ]) {
+      if (c.text.trim().isNotEmpty) done++;
+    }
+    if (_valueGender != null) done++;
+    if (_valueActivity != null) done++;
+    if (_valueGoal != null) done++;
+    return done / 8;
+  }
 
   @override
   void dispose() {
@@ -172,7 +211,17 @@ class _AddDataPageState extends State<AddDataPage> {
           await AuthProvider.setCachedOnboardingStatus(uid, true);
         }
         if (mounted) {
-          context.go(Routes.mainRoute);
+          final homeProvider =
+              Provider.of<HomeProvider>(context, listen: false);
+          // Show the personal plan first; the screen leads on to the dashboard.
+          context.go(
+            Routes.planReadyRoute,
+            extra: PlanReadyArgs(
+              name: name,
+              goal: _valueGoal!,
+              calories: homeProvider.userBMRwithGoal,
+            ),
+          );
         }
       }
     } catch (e) {
@@ -255,13 +304,40 @@ class _AddDataPageState extends State<AddDataPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Padding(
-                padding: const EdgeInsets.only(bottom: PaddingManager.p28),
+                padding: const EdgeInsets.only(bottom: PaddingManager.p12),
                 child: Center(
                   child: Text(
                     StringsManager.enterData,
                     textAlign: TextAlign.center,
                     style: StyleManager.addDataTitleTextStyle,
                   ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(28.w, 0, 28.w, 20.h),
+                child: Column(
+                  children: [
+                    Text(
+                      'About a minute. We use this to set your daily calorie target.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: ColorManager.textSecondary,
+                        fontSize: 13.sp,
+                      ),
+                    ),
+                    SizedBox(height: 14.h),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4.r),
+                      child: LinearProgressIndicator(
+                        key: const Key('add_data_progress'),
+                        value: _progress,
+                        minHeight: 6.h,
+                        backgroundColor: ColorManager.divider,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                            ColorManager.primary),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               AddDataWidgets(
@@ -280,7 +356,7 @@ class _AddDataPageState extends State<AddDataPage> {
               LimeGreenRoundedButtonWidget(
                 isLoading: _isSubmitting,
                 onTap: validateAndSubmit,
-                title: StringsManager.next,
+                title: 'Build my plan',
               ),
             ],
           ),

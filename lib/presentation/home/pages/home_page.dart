@@ -5,11 +5,15 @@ import 'package:fitness_app/presentation/home/widgets/achievements_widget.dart';
 import 'package:fitness_app/presentation/home/widgets/dashboard_ai_workout_generator_card.dart';
 import 'package:fitness_app/presentation/home/widgets/fitness_data_widget.dart';
 import 'package:fitness_app/presentation/home/widgets/home_ai_routine_card.dart';
+import 'package:fitness_app/presentation/home/widgets/next_badge_card.dart';
 import 'package:fitness_app/presentation/home/widgets/quick_actions_widget.dart';
 import 'package:fitness_app/presentation/home/widgets/recent_prs_widget.dart';
 import 'package:fitness_app/presentation/home/widgets/streak_calendar_widget.dart';
 import 'package:fitness_app/presentation/home/widgets/today_health_snapshot_widget.dart';
+import 'package:fitness_app/presentation/home/widgets/weekly_activity_bars.dart';
+import 'package:fitness_app/presentation/home/widgets/weekly_recap_card.dart';
 import 'package:fitness_app/presentation/transformation_plans/widgets/dashboard_challenge_section.dart';
+import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -61,6 +65,20 @@ class _HomePageState extends State<HomePage> {
     return _buildOptionAFocusedCompanionLayout();
   }
 
+  Widget _sectionHeader(String title) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 10.h),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: ColorManager.textPrimary,
+          fontSize: 18.sp,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
   /// Option A: Focused Daily Companion Dashboard
   Widget _buildOptionAFocusedCompanionLayout() {
     return SafeArea(
@@ -72,19 +90,32 @@ class _HomePageState extends State<HomePage> {
           children: [
             SizedBox(height: SizeManager.s8.h),
 
-            // 1. Single Dynamic Workout Hero — Answers "What do I need to do today?"
-            const HomeAiRoutineCard(),
-            SizedBox(height: SizeManager.s12.h),
-
-            // 2. Compact Quick Actions — Fast utilities: Water, Log Meal, Log Lift, AI Plan
-            const QuickActionsWidget(),
-            SizedBox(height: SizeManager.s12.h),
-
-            // 3. Today's Health Snapshot — Calories consumed vs valid target & Water vs goal
+            // 1. Today's snapshot — progress rings (calories & water)
             const TodayHealthSnapshotWidget(),
+            SizedBox(height: SizeManager.s12.h),
+
+            // 2. Workout plan — the single hero answering "what do I do today?"
+            _sectionHeader('Workout Plan'),
+            const HomeAiRoutineCard(),
+            SizedBox(height: SizeManager.s8.h),
+
+            // 2a. Sunday/Monday week in review (renders nothing other days)
+            const WeeklyRecapCard(),
+
+            // 2b. Next badge — a near goal to pull the user back tomorrow.
+            // (The streak itself stays in the app-bar chip: one indicator.)
+            const NextBadgeCard(),
+            SizedBox(height: SizeManager.s8.h),
+
+            // 3. Weekly activity bars — progress at a glance
+            const WeeklyActivityBars(),
+            SizedBox(height: SizeManager.s8.h),
+
+            // 4. Compact Quick Actions — Log Meal, Log Lift, AI Plan
+            const QuickActionsWidget(),
             SizedBox(height: SizeManager.s16.h),
 
-            // 4. Discovery Shelf — Transformation Challenges & Technique Hub
+            // 5. Discovery Shelf — Transformation Challenges & Technique Hub
             const DashboardChallengeSection(),
             SizedBox(height: SizeManager.s16.h),
 

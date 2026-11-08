@@ -82,7 +82,7 @@ class WeeklyProgressCard extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: isCompleted 
                           ? ColorManager.limerGreen2 
-                          : (isToday ? ColorManager.primary.withOpacity(0.2) : Colors.white10),
+                          : (isToday ? ColorManager.primary.withValues(alpha: 0.2) : Colors.white10),
                       border: isToday 
                           ? Border.all(color: ColorManager.primary, width: 2)
                           : null,
@@ -91,7 +91,7 @@ class WeeklyProgressCard extends StatelessWidget {
                       child: isCompleted
                           ? Icon(Icons.check, color: Colors.black, size: 20.sp)
                           : (isToday 
-                              ? Text("${now.day}", style: TextStyle(color: ColorManager.primary, fontSize: 10.sp))
+                              ? Text("${now.day}", style: TextStyle(color: ColorManager.primary, fontSize: 11.sp))
                               : null),
                     ),
                   ),

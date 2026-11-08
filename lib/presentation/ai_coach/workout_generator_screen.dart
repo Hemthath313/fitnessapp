@@ -470,7 +470,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                 style: TextStyle(
                   color: ColorManager.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 17.sp,
+                  fontSize: 16.sp,
                 ),
               ),
             ),
@@ -512,7 +512,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
               context.push(Routes.premiumScreen);
             },
             style: ElevatedButton.styleFrom(backgroundColor: ColorManager.primary),
-            child: const Text('Go Premium', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: const Text('Go Premium', style: TextStyle(color: ColorManager.onMint, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -809,7 +809,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2),
+                          color: ColorManager.onMint, strokeWidth: 2),
                     )
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -1065,7 +1065,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                       exercise.name,
                       style: TextStyle(
                         color: ColorManager.textPrimary,
-                        fontSize: 28.sp,
+                        fontSize: 24.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1136,7 +1136,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                       'How to Perform',
                       style: TextStyle(
                         color: ColorManager.primary,
-                        fontSize: 22.sp,
+                        fontSize: 20.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1180,7 +1180,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                                 entry.value,
                                 style: TextStyle(
                                   color: ColorManager.textPrimary,
-                                  fontSize: 15.sp,
+                                  fontSize: 14.sp,
                                   height: 1.5,
                                 ),
                               ),

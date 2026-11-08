@@ -101,13 +101,13 @@ class _BoardingPageState extends State<BoardingPage> {
                   height: SizeManager.s270.h,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.65), // Sleek dark glass overlay
+                    color: Colors.black.withValues(alpha: 0.65), // Sleek dark glass overlay
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(RadiusManager.r30.r),
                       topRight: Radius.circular(RadiusManager.r30.r),
                     ),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       width: 1.5,
                     ),
                   ),
@@ -125,13 +125,13 @@ class _BoardingPageState extends State<BoardingPage> {
                             dotDecoration: DotDecoration(
                               width: SizeManager.s8.w,
                               height: SizeManager.s8.h,
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(
                                 RadiusManager.r24.r,
                               ),
                               dotBorder: DotBorder(
                                 width: SizeManager.s1.w,
-                                color: Colors.white.withOpacity(0.5),
+                                color: Colors.white.withValues(alpha: 0.5),
                               ),
                             ),
                             activeDotDecoration: DotDecoration(
@@ -161,7 +161,7 @@ class _BoardingPageState extends State<BoardingPage> {
                             textList[_pageController.page?.round() ?? 0],
                             style: TextStyle(
                               color: Colors.white, // Highly visible constant white text
-                              fontSize: SizeManager.s20.sp, // Elegant sizing
+                              fontSize: 20.sp, // Elegant sizing
                               fontWeight: FontWeight.bold,
                             ),
                             textAlign: TextAlign.center,

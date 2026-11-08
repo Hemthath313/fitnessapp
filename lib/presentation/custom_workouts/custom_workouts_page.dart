@@ -119,12 +119,12 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
               // Header
               Text(
                 'My Progress',
-                style: TextStyle(color: ColorManager.white, fontSize: SizeManager.s24.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(color: ColorManager.white, fontSize: 24.sp, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: SizeManager.s4.h),
               Text(
                 'Track your journey and analyze your data',
-                style: TextStyle(color: ColorManager.textSecondary, fontSize: SizeManager.s14.sp),
+                style: TextStyle(color: ColorManager.textSecondary, fontSize: 14.sp),
               ),
               SizedBox(height: SizeManager.s24.h),
 
@@ -139,7 +139,7 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
               SizedBox(height: SizeManager.s32.h),
 
               // Calendar Section
-              Text('Activity Calendar', style: TextStyle(color: ColorManager.white, fontSize: SizeManager.s18.sp, fontWeight: FontWeight.bold)),
+              Text('Activity Calendar', style: TextStyle(color: ColorManager.white, fontSize: 18.sp, fontWeight: FontWeight.bold)),
               SizedBox(height: SizeManager.s16.h),
               StreamBuilder<List<WorkoutLog>>(
                 stream: _logsStream,
@@ -233,7 +233,7 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
 
               SizedBox(height: SizeManager.s32.h),
 
-              Text('Analytics & Logs', style: TextStyle(color: ColorManager.white, fontSize: SizeManager.s18.sp, fontWeight: FontWeight.bold)),
+              Text('Analytics & Logs', style: TextStyle(color: ColorManager.white, fontSize: 18.sp, fontWeight: FontWeight.bold)),
               SizedBox(height: SizeManager.s16.h),
 
               // Deep Dive Cards

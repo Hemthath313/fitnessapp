@@ -268,7 +268,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.5),
+            color: Colors.black.withValues(alpha: 0.5),
             blurRadius: 20,
             spreadRadius: 5,
           ),
@@ -308,7 +308,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
                       Container(
                         padding: EdgeInsets.all(8.w),
                         decoration: BoxDecoration(
-                          color: ColorManager.primary.withOpacity(0.15),
+                          color: ColorManager.primary.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(Icons.fitness_center_rounded, color: ColorManager.primary, size: 20.sp),
@@ -338,7 +338,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
                     ],
                   ),
                 ),
-                IconButton(
+                IconButton(tooltip: 'Close', 
                   key: const Key('plate_calculator_close_button'),
                   icon: const Icon(Icons.close_rounded, color: Colors.white54),
                   onPressed: () => Navigator.pop(context),
@@ -357,7 +357,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
               decoration: BoxDecoration(
                 color: ColorManager.surface,
                 borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(color: ColorManager.divider.withOpacity(0.4)),
+                border: Border.all(color: ColorManager.divider.withValues(alpha: 0.4)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -388,7 +388,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
                   return Container(
                     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.2),
+                      color: color.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20.r),
                       border: Border.all(color: color, width: 1.5),
                     ),
@@ -452,7 +452,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
                   decoration: BoxDecoration(
                     color: ColorManager.surface,
                     borderRadius: BorderRadius.circular(14.r),
-                    border: Border.all(color: ColorManager.divider.withOpacity(0.5)),
+                    border: Border.all(color: ColorManager.divider.withValues(alpha: 0.5)),
                   ),
                   child: Row(
                     children: [
@@ -577,7 +577,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
                   child: Center(
                     child: Text(
                       'No Plates (Bar Only)',
-                      style: TextStyle(color: Colors.white38, fontSize: 10.sp),
+                      style: TextStyle(color: Colors.white38, fontSize: 11.sp),
                     ),
                   ),
                 )
@@ -597,13 +597,13 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
                       borderRadius: BorderRadius.circular(4.r),
                       boxShadow: [
                         BoxShadow(
-                          color: color.withOpacity(0.4),
+                          color: color.withValues(alpha: 0.4),
                           blurRadius: 4,
                           offset: const Offset(1, 1),
                         ),
                       ],
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),
@@ -614,7 +614,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
                           _formatWeight(plate),
                           style: TextStyle(
                             color: isLightColor ? Colors.black : Colors.white,
-                            fontSize: 9.sp,
+                            fontSize: 11.sp,
                             fontWeight: FontWeight.w900,
                           ),
                         ),
@@ -649,7 +649,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
       children: [
         Text(label, textAlign: TextAlign.center, style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp)),
         SizedBox(height: 4.h),
-        Text(value, textAlign: TextAlign.center, style: TextStyle(color: valueColor, fontSize: 15.sp, fontWeight: FontWeight.bold)),
+        Text(value, textAlign: TextAlign.center, style: TextStyle(color: valueColor, fontSize: 14.sp, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -702,7 +702,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
         decoration: BoxDecoration(
           color: ColorManager.surface,
           borderRadius: BorderRadius.circular(10.r),
-          border: Border.all(color: ColorManager.divider.withOpacity(0.5)),
+          border: Border.all(color: ColorManager.divider.withValues(alpha: 0.5)),
         ),
         child: Text(
           label,
@@ -733,10 +733,10 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 6.h),
           decoration: BoxDecoration(
-            color: isSelected ? ColorManager.primary.withOpacity(0.2) : ColorManager.surface,
+            color: isSelected ? ColorManager.primary.withValues(alpha: 0.2) : ColorManager.surface,
             borderRadius: BorderRadius.circular(8.r),
             border: Border.all(
-              color: isSelected ? ColorManager.primary : ColorManager.divider.withOpacity(0.4),
+              color: isSelected ? ColorManager.primary : ColorManager.divider.withValues(alpha: 0.4),
             ),
           ),
           child: Center(
@@ -744,7 +744,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
               label,
               style: TextStyle(
                 color: isSelected ? ColorManager.primary : ColorManager.textSecondary,
-                fontSize: 10.sp,
+                fontSize: 11.sp,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),

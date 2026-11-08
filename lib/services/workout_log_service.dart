@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/model/workout_log.dart';
 import 'package:fitness_app/model/workout_session_model.dart';
+import 'package:fitness_app/services/session_edit.dart';
 
 class WorkoutLogService {
   FirebaseFirestore get _db => FirebaseFirestore.instance;
@@ -255,6 +256,86 @@ class WorkoutLogService {
 
   Future<void> deleteSession(String id) async {
     await _sessionsCollection.doc(id).delete();
+  }
+
+  /// Saves a corrected [edited] version of [original] and keeps the data that
+  /// was mirrored from it in step: the per-exercise logs (used by progression,
+  /// analytics and the plan hints) and the legacy finished-workout entry.
+  Future<void> updateSession(
+      WorkoutSession original, WorkoutSession edited) async {
+    final date = original.completedAt ?? original.startedAt;
+    final keepNames =
+        edited.exercises.map((e) => e.exerciseName).toSet();
+
+    // In-memory copies (offline / signed-out use).
+    final li = _localSessions.indexWhere((s) => s.id == original.id);
+    if (li >= 0) _localSessions[li] = edited;
+    for (final ex in original.exercises) {
+      final idx = _localLogs.indexWhere(
+          (l) => l.exerciseName == ex.exerciseName && l.date == date);
+      if (idx < 0) continue;
+      final match = edited.exercises
+          .where((e) => e.exerciseName == ex.exerciseName)
+          .toList();
+      final sets = match.isEmpty ? <WorkoutSet>[] : SessionEdit.loggedSets(match.first);
+      if (sets.isEmpty) {
+        _localLogs.removeAt(idx);
+      } else {
+        final old = _localLogs[idx];
+        final updated = WorkoutLog(
+          id: old.id,
+          exerciseName: old.exerciseName,
+          date: old.date,
+          sets: sets,
+          notes: old.notes,
+          category: old.category,
+        );
+        _localLogs[idx] = updated;
+        seedLastLogCache(updated.exerciseName, updated);
+      }
+    }
+
+    if (_uid == null) return;
+
+    // Read what has to change first, then write everything in one batch.
+    final logSnaps = <String, QuerySnapshot>{};
+    for (final ex in original.exercises) {
+      logSnaps[ex.exerciseName] = await _logsCollection
+          .where('exerciseName', isEqualTo: ex.exerciseName)
+          .where('date', isEqualTo: Timestamp.fromDate(date))
+          .get();
+    }
+    final finishedSnap = await _db
+        .collection('finishedWorkouts')
+        .doc(_uid)
+        .collection('finishedWorkoutsData')
+        .where('id', isEqualTo: original.id)
+        .get();
+
+    final batch = _db.batch();
+    batch.set(_sessionsCollection.doc(original.id), edited.toMap());
+
+    for (final entry in logSnaps.entries) {
+      final match =
+          edited.exercises.where((e) => e.exerciseName == entry.key).toList();
+      final sets = match.isEmpty ? <WorkoutSet>[] : SessionEdit.loggedSets(match.first);
+      for (final doc in entry.value.docs) {
+        if (sets.isEmpty || !keepNames.contains(entry.key)) {
+          batch.delete(doc.reference);
+        } else {
+          batch.update(doc.reference, {
+            'sets': sets.map((s) => s.toMap()).toList(),
+          });
+        }
+      }
+    }
+    for (final doc in finishedSnap.docs) {
+      batch.update(doc.reference, {
+        'setNumber': edited.exercises.where((e) => e.isCompleted).length,
+        'totalVolume': edited.totalVolume,
+      });
+    }
+    await batch.commit();
   }
 }
 

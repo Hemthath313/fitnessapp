@@ -1,6 +1,7 @@
 import 'package:fitness_app/data/food_data.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ProteinChartPage extends StatelessWidget {
   const ProteinChartPage({super.key});
@@ -61,7 +62,7 @@ class ProteinChartPage extends StatelessWidget {
             title,
             style: TextStyle(
               color: ColorManager.textPrimary,
-              fontSize: 20,
+              fontSize: 20.sp,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -100,7 +101,7 @@ class ProteinChartPage extends StatelessWidget {
                   item.name,
                   style: TextStyle(
                     color: ColorManager.textPrimary,
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -109,7 +110,7 @@ class ProteinChartPage extends StatelessWidget {
                 '${item.calories} cal ${item.quantity}',
                 style: TextStyle(
                   color: ColorManager.textTertiary,
-                  fontSize: 12,
+                  fontSize: 12.sp,
                 ),
               ),
             ],
@@ -133,9 +134,9 @@ class ProteinChartPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -144,7 +145,7 @@ class ProteinChartPage extends StatelessWidget {
             '$label: ',
             style: TextStyle(
               color: color,
-              fontSize: 11,
+              fontSize: 11.sp,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -152,7 +153,7 @@ class ProteinChartPage extends StatelessWidget {
             value,
             style: TextStyle(
               color: color,
-              fontSize: 12,
+              fontSize: 12.sp,
               fontWeight: FontWeight.w600,
             ),
           ),

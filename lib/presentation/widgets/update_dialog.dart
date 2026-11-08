@@ -230,14 +230,14 @@ class UpdateDialog extends StatelessWidget {
                       Container(
                         padding: EdgeInsets.all(10.w),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: ColorManager.onMint.withValues(alpha: 0.12),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           isForceUpdate
                               ? Icons.system_update_rounded
                               : Icons.system_update_alt_rounded,
-                          color: Colors.white,
+                          color: ColorManager.onMint,
                           size: 32.w,
                         ),
                       ),
@@ -248,8 +248,8 @@ class UpdateDialog extends StatelessWidget {
                             : (isRecommended ? 'Update Recommended' : 'Update Available'),
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 17.sp,
+                          color: ColorManager.onMint,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.1,
                         ),
@@ -390,7 +390,7 @@ class UpdateDialog extends StatelessWidget {
                                   child: Text(
                                     'UPDATE NOW',
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: ColorManager.onMint,
                                       fontSize: 13.sp,
                                       fontWeight: FontWeight.bold,
                                       letterSpacing: 0.8,

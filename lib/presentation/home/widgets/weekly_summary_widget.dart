@@ -68,14 +68,14 @@ class _WeeklySummaryWidgetState extends State<WeeklySummaryWidget> {
                 padding:
                     EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                 decoration: BoxDecoration(
-                  color: ColorManager.primary.withOpacity(0.12),
+                  color: ColorManager.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Text(
                   'Past 7 days',
                   style: TextStyle(
                     color: ColorManager.primary,
-                    fontSize: 10.sp,
+                    fontSize: 11.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -145,9 +145,9 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 10.w),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: color.withOpacity(0.2), width: 1.5),
+        border: Border.all(color: color.withValues(alpha: 0.2), width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,7 +167,7 @@ class _StatCard extends StatelessWidget {
             label,
             style: TextStyle(
               color: ColorManager.textSecondary,
-              fontSize: 10.sp,
+              fontSize: 11.sp,
             ),
           ),
         ],

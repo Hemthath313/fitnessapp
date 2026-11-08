@@ -117,7 +117,7 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
                     ),
                     Text(
                       _activeTab == 1 ? 'Epley 1RM Guardrails Active' : '',
-                      style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp),
+                      style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
                     ),
                   ],
                 ),
@@ -140,9 +140,9 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
                             width: 80.w,
                             padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 6.w),
                             decoration: BoxDecoration(
-                              color: ColorManager.accent.withOpacity(0.12),
+                              color: ColorManager.accent.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(12.r),
-                              border: Border.all(color: ColorManager.accent.withOpacity(0.3)),
+                              border: Border.all(color: ColorManager.accent.withValues(alpha: 0.3)),
                             ),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -159,7 +159,7 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
                                 SizedBox(height: 2.h),
                                 Text(
                                   DateFormat('yyyy').format(log.date),
-                                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp),
+                                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
                                 ),
                               ],
                             ),
@@ -264,7 +264,7 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
         style: TextStyle(
           color: ColorManager.textTertiary,
           fontWeight: FontWeight.bold,
-          fontSize: 10.sp,
+          fontSize: 11.sp,
         ),
       ),
     );
@@ -345,7 +345,7 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
                 if (dateLabels.containsKey(idx)) {
                   return Text(
                     dateLabels[idx]!,
-                    style: TextStyle(color: ColorManager.textTertiary, fontSize: 9.sp),
+                    style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
                   );
                 }
                 return const Text('');
@@ -359,7 +359,7 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
               getTitlesWidget: (value, meta) {
                 return Text(
                   value.toStringAsFixed(0),
-                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 9.sp),
+                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
                 );
               },
             ),
@@ -385,7 +385,7 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
             barWidth: 3.w,
             belowBarData: BarAreaData(
               show: true,
-              color: ColorManager.accent.withOpacity(0.1),
+              color: ColorManager.accent.withValues(alpha: 0.1),
             ),
           )
         ],

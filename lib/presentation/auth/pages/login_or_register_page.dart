@@ -1,5 +1,7 @@
 import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
 import 'package:fitness_app/presentation/auth/widgets/login_or_register_view.dart';
+import 'package:fitness_app/services/auth_error_messages.dart';
+import 'package:fitness_app/utils/app_feedback.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
@@ -57,20 +59,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void _showSnackBar(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: TextStyle(fontSize: 14.sp),
-        ),
-        backgroundColor: ColorManager.error,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        margin: EdgeInsets.all(16.w),
-      ),
-    );
+    AppFeedback.error(context, message);
   }
 
   bool _validateFields() {
@@ -106,7 +95,7 @@ class _LoginPageState extends State<LoginPage> {
         context: context,
       );
     } catch (e) {
-      _handleAuthError(e.toString());
+      _handleAuthError(e);
     }
   }
 
@@ -118,21 +107,12 @@ class _LoginPageState extends State<LoginPage> {
         context: context,
       );
     } catch (e) {
-      _handleAuthError(e.toString());
+      _handleAuthError(e);
     }
   }
 
-  void _handleAuthError(String error) {
-    if (error.contains('The supplied auth credential is incorrect')) {
-      _showSnackBar(
-          'The credentials are incorrect or no account exists for this email.');
-    } else if (error.contains('wrong-password')) {
-      _showSnackBar('Invalid password. Please try again.');
-    } else if (error.contains('email-already-in-use')) {
-      _showSnackBar('This email is already registered. Please sign in.');
-    } else {
-      _showSnackBar('Authentication failed: $error');
-    }
+  void _handleAuthError(Object error) {
+    _showSnackBar(AuthErrorMessages.from(error));
   }
 
   void _handleAuthAction(AuthProvider authProvider) {
@@ -184,8 +164,8 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              ColorManager.primary.withOpacity(0.2),
-                              ColorManager.secondary.withOpacity(0.1),
+                              ColorManager.primary.withValues(alpha: 0.2),
+                              ColorManager.secondary.withValues(alpha: 0.1),
                             ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
@@ -203,7 +183,7 @@ class _LoginPageState extends State<LoginPage> {
                         isLoginView ? 'Welcome Back!' : 'Create Account',
                         style: TextStyle(
                           color: ColorManager.textPrimary,
-                          fontSize: 26.sp,
+                          fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.5,
                         ),
@@ -216,7 +196,7 @@ class _LoginPageState extends State<LoginPage> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 15.sp,
+                          fontSize: 14.sp,
                           height: 1.5,
                         ),
                       ),
@@ -270,7 +250,7 @@ class _LoginPageState extends State<LoginPage> {
                     borderRadius: BorderRadius.circular(16.r),
                     boxShadow: [
                       BoxShadow(
-                        color: ColorManager.primary.withOpacity(0.3),
+                        color: ColorManager.primary.withValues(alpha: 0.3),
                         blurRadius: 12,
                         offset: Offset(0, 4.h),
                       ),
@@ -289,7 +269,7 @@ class _LoginPageState extends State<LoginPage> {
                                 width: 24.w,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2.5,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(ColorManager.onMint),
                                 ),
                               )
                             : Text(
@@ -297,10 +277,10 @@ class _LoginPageState extends State<LoginPage> {
                                     ? StringsManager.signIn
                                     : StringsManager.signUp,
                                 style: TextStyle(
-                                  fontSize: 17.sp,
+                                  fontSize: 16.sp,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 0.8,
-                                  color: Colors.white,
+                                  color: ColorManager.onMint,
                                 ),
                               ),
                       ),
@@ -320,7 +300,7 @@ class _LoginPageState extends State<LoginPage> {
                           gradient: LinearGradient(
                             colors: [
                               Colors.transparent,
-                              ColorManager.textTertiary.withOpacity(0.2),
+                              ColorManager.textTertiary.withValues(alpha: 0.2),
                             ],
                           ),
                         ),
@@ -343,7 +323,7 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              ColorManager.textTertiary.withOpacity(0.2),
+                              ColorManager.textTertiary.withValues(alpha: 0.2),
                               Colors.transparent,
                             ],
                           ),

@@ -116,9 +116,9 @@ class _ChangeWeightPageState extends State<ChangeWeightPage> {
                 width: 120.w,
                 height: 120.w,
                 decoration: BoxDecoration(
-                  color: ColorManager.primary.withOpacity(0.08),
+                  color: ColorManager.primary.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
-                  border: Border.all(color: ColorManager.primary.withOpacity(0.15), width: 2),
+                  border: Border.all(color: ColorManager.primary.withValues(alpha: 0.15), width: 2),
                 ),
                 child: Icon(
                   Icons.scale,

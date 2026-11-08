@@ -1,6 +1,6 @@
 import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/model/workout_log.dart';
-import 'package:fitness_app/presentation/custom_workouts/day_workout_session_page.dart';
+import 'package:fitness_app/presentation/home/widgets/gradient_hero_card.dart';
 import 'package:fitness_app/presentation/widgets/interactive_exercise_detail.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/services/workout_log_service.dart';
@@ -14,6 +14,8 @@ import 'package:go_router/go_router.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/services/notification_service.dart';
+import 'package:fitness_app/services/plan_today.dart';
+import 'package:fitness_app/services/progression_service.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -25,11 +27,6 @@ class WeeklyScheduleWidget extends StatefulWidget {
 }
 
 class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
-  final Map<String, int> _dayOrder = {
-    'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4,
-    'Friday': 5, 'Saturday': 6, 'Sunday': 7,
-  };
-
   @override
   void initState() {
     super.initState();
@@ -102,7 +99,7 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
                       'AI Workout Plan',
                       style: TextStyle(
                         color: ColorManager.white,
-                        fontSize: SizeManager.s20.sp,
+                        fontSize: 20.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -117,11 +114,34 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
                     tooltip: 'Reset Plan',
                   )
                 else 
-                  ElevatedButton.icon(
-                    onPressed: () => context.push(Routes.workoutGeneratorRoute),
-                    icon: const Icon(Icons.auto_awesome, color: Colors.white),
-                    label: const Text('AI Build', style: TextStyle(color: Colors.white)),
-                    style: ElevatedButton.styleFrom(backgroundColor: ColorManager.primary),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: ColorManager.mintGradient,
+                      borderRadius: BorderRadius.circular(20.r),
+                    ),
+                    child: ElevatedButton.icon(
+                      onPressed: () => context.push(Routes.workoutGeneratorRoute),
+                      icon: Icon(Icons.auto_awesome, size: 16.sp, color: ColorManager.onMint),
+                      label: Text(
+                        'AI Build',
+                        style: TextStyle(
+                          color: ColorManager.onMint,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13.sp,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        elevation: 0,
+                        minimumSize: Size(0, 36.h),
+                        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20.r),
+                        ),
+                      ),
+                    ),
                   ),
               ],
             ),
@@ -175,71 +195,38 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
       );
     }
 
-    final sortedDays = groupedMap.keys.toList()
-      ..sort((a, b) => (_dayOrder[a] ?? 99).compareTo(_dayOrder[b] ?? 99));
+    final split = splitPlanDays(groupedMap.keys, DateTime.now());
+    final hasWeekdayGroup = groupedMap.keys.any(kWeekdayNames.contains);
 
     return StreamBuilder<List<WorkoutLog>>(
       stream: WorkoutLogService().getLogs(),
       builder: (context, snap) {
         final logs = snap.data ?? [];
         final latestLogMap = _buildLatestLogMap(logs);
+        final today = split.today;
 
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ...sortedDays.map((day) {
-              final workouts = groupedMap[day]!;
-
-              return Card(
-                margin: EdgeInsets.only(bottom: 16.h),
-                color: ColorManager.surface,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  side: BorderSide(
-                    color: ColorManager.divider,
+            if (today != null)
+              _buildDayCard(today, groupedMap[today]!, latestLogMap, isToday: true)
+            else if (hasWeekdayGroup && split.nextUp != null)
+              _buildRestDayBanner(split.nextUp!, groupedMap[split.nextUp!]!),
+            if (split.later.isNotEmpty) ...[
+              Padding(
+                padding: EdgeInsets.only(top: 4.h, bottom: 10.h),
+                child: Text(
+                  'Coming up',
+                  style: TextStyle(
+                    color: ColorManager.textSecondary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.sp,
                   ),
                 ),
-                elevation: 0,
-                clipBehavior: Clip.antiAlias,
-                child: Theme(
-                  data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                  child: ExpansionTile(
-                    initiallyExpanded: true,
-                    title: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                day,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.bold, fontSize: 18.sp),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(width: 8.w),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => DayWorkoutSessionPage(dayName: day, workouts: workouts)));
-                          },
-                          icon: Icon(Icons.play_arrow, size: 16.sp, color: Colors.white),
-                          label: Text('Start Day', style: TextStyle(fontSize: 12.sp, color: Colors.white, fontWeight: FontWeight.bold)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: ColorManager.gradientStart,
-                            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                        ),
-                      ],
-                    ),
-                    subtitle: Text('${workouts.length} Exercises', style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp)),
-                    children: workouts.map((w) => _buildWorkoutCard(workout: w, onStart: () => _showWorkoutTimerDialog(context, w), isGrouped: true, latestLogMap: latestLogMap)).toList(),
-                  ),
-                ),
-              );
-            }),
+              ),
+              ...split.later.map((day) =>
+                  _buildDayCard(day, groupedMap[day]!, latestLogMap, isToday: false)),
+            ],
             if (otherWorkouts.isNotEmpty) ...[
               Padding(padding: EdgeInsets.symmetric(vertical: 12.h), child: Text('Other Workouts', style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold))),
               ...otherWorkouts.map((w) => _buildWorkoutCard(workout: w, onStart: () => _showWorkoutTimerDialog(context, w), isGrouped: false, latestLogMap: latestLogMap)),
@@ -247,6 +234,175 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
           ],
         );
       },
+    );
+  }
+
+  /// Opens the guided day session through the router (same entry as Home).
+  void _startDay(String day, List<dynamic> workouts) {
+    context.push(
+      Routes.dayWorkoutSessionRoute,
+      extra: {'dayName': day, 'workouts': workouts},
+    );
+  }
+
+  bool _doneToday(BuildContext context) {
+    try {
+      return Provider.of<StatisticsProvider>(context).hasWorkoutToday;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Widget _buildRestDayBanner(String nextDay, List<dynamic> nextWorkouts) {
+    return Container(
+      key: const Key('rest_day_banner'),
+      margin: EdgeInsets.only(bottom: 16.h),
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: ColorManager.surface,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: ColorManager.divider),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.self_improvement, color: ColorManager.primary, size: 24.sp),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Rest day today',
+                  style: TextStyle(
+                    color: ColorManager.textPrimary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16.sp,
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  'Next up: $nextDay',
+                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 8.w),
+          OutlinedButton(
+            key: const Key('rest_day_start_button'),
+            onPressed: () => _startDay(nextDay, nextWorkouts),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: ColorManager.primary,
+              side: BorderSide(color: ColorManager.primary),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text('Train anyway', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDayCard(
+    String day,
+    List<dynamic> workouts,
+    Map<String, WorkoutLog> latestLogMap, {
+    required bool isToday,
+  }) {
+    final done = isToday && _doneToday(context);
+    final subtitle = done
+        ? '${workouts.length} Exercises · Done today'
+        : '${workouts.length} Exercises';
+
+    return Card(
+      key: isToday ? const Key('today_plan_card') : null,
+      margin: EdgeInsets.only(bottom: 16.h),
+      color: ColorManager.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.r),
+        side: BorderSide(
+          color: isToday ? ColorManager.primary : ColorManager.divider,
+          width: isToday ? 1.5 : 1,
+        ),
+      ),
+      elevation: 0,
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              initiallyExpanded: isToday,
+              title: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (isToday)
+                          Text(
+                            'TODAY',
+                            style: TextStyle(
+                              color: ColorManager.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11.sp,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        Text(
+                          day,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.bold, fontSize: 18.sp),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (!isToday) ...[
+                    SizedBox(width: 8.w),
+                    ElevatedButton.icon(
+                      onPressed: () => _startDay(day, workouts),
+                      icon: Icon(Icons.play_arrow, size: 16.sp, color: ColorManager.onMint),
+                      label: Text('Start Day', style: TextStyle(fontSize: 12.sp, color: ColorManager.onMint, fontWeight: FontWeight.bold)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ColorManager.gradientStart,
+                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              subtitle: Text(subtitle, style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp)),
+              children: workouts.map((w) => _buildWorkoutCard(workout: w, onStart: () => _showWorkoutTimerDialog(context, w), isGrouped: true, latestLogMap: latestLogMap)).toList(),
+            ),
+          ),
+          if (isToday)
+            Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 14.h),
+              child: SizedBox(
+                width: double.infinity,
+                height: 44.h,
+                child: ElevatedButton.icon(
+                  key: const Key('today_start_button'),
+                  onPressed: () => _startDay(day, workouts),
+                  icon: Icon(Icons.play_arrow, size: 18.sp, color: ColorManager.onMint),
+                  label: Text(
+                    done ? 'Train again' : "Start today's workout",
+                    style: TextStyle(fontSize: 14.sp, color: ColorManager.onMint, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColorManager.gradientStart,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22.r)),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -258,75 +414,109 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
     final statsProvider =
         Provider.of<StatisticsProvider>(context, listen: false);
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(24.w),
-      decoration: BoxDecoration(
-        color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: ColorManager.divider),
-      ),
+    return GradientHeroCard(
+      key: const Key('no_plan_active_hero'),
+      imageAsset: HeroImages.forKey('chest'),
+      imageSize: 130.w,
+      padding: EdgeInsets.all(20.w),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.calendar_month_rounded, size: 64.sp, color: ColorManager.primary.withValues(alpha: 0.2)),
-          SizedBox(height: 16.h),
-          Text('No Plan Active', style: TextStyle(color: ColorManager.textPrimary, fontSize: 18.sp, fontWeight: FontWeight.bold)),
-          SizedBox(height: 8.h),
-          Text(
-            isPremium
-                ? 'Use AI to generate a full weekly schedule instantly.'
-                : 'Activate your free 3-day starter routine (Mon, Wed, Fri) or upgrade to Pro for custom AI splits.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: ColorManager.textSecondary, fontSize: 14.sp),
+          Padding(
+            padding: EdgeInsets.only(right: GradientHeroCard.textInset),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const HeroBadge(
+                  text: 'WEEKLY PLAN',
+                  icon: Icons.calendar_month_rounded,
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  'No Plan Active',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  isPremium
+                      ? 'Use AI to generate a full weekly schedule instantly.'
+                      : 'Activate your free 3-day starter routine (Mon, Wed, Fri) or upgrade to Pro for custom AI splits.',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.92),
+                    fontSize: 14.sp,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
           ),
-          SizedBox(height: 20.h),
-          ElevatedButton.icon(
-            onPressed: () => context.push(Routes.workoutGeneratorRoute),
-            icon: const Icon(Icons.auto_awesome, color: Colors.white),
-            label: const Text('Generate Plan with AI', style: TextStyle(color: Colors.white)),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ColorManager.primary,
-              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+          SizedBox(height: 18.h),
+          SizedBox(
+            width: double.infinity,
+            height: 48.h,
+            child: ElevatedButton.icon(
+              onPressed: () => context.push(Routes.workoutGeneratorRoute),
+              icon: Icon(Icons.auto_awesome, size: 18.sp, color: ColorManager.onMint),
+              label: Text(
+                'Generate Plan with AI',
+                style: TextStyle(
+                  color: ColorManager.onMint,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14.sp,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24.r),
+                ),
+              ),
             ),
           ),
           if (!isPremium) ...[
-            SizedBox(height: 10.h),
-            TextButton.icon(
-              onPressed: () async {
-                try {
-                  await workoutProvider.restoreDefaultThreeDaySplit();
-                  await statsProvider.updateScheduledDays(
-                    const ['Monday', 'Wednesday', 'Friday'],
-                    effectiveDate: DateTime.now(),
-                  );
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text(
-                          '3-Day Starter Routine activated! Ready for your workout.',
-                          style: TextStyle(fontWeight: FontWeight.w600),
+            SizedBox(height: 6.h),
+            Center(
+              child: TextButton.icon(
+                onPressed: () async {
+                  try {
+                    await workoutProvider.restoreDefaultThreeDaySplit();
+                    await statsProvider.updateScheduledDays(
+                      const ['Monday', 'Wednesday', 'Friday'],
+                      effectiveDate: DateTime.now(),
+                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text(
+                            '3-Day Starter Routine activated! Ready for your workout.',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          backgroundColor: ColorManager.success,
+                          behavior: SnackBarBehavior.floating,
                         ),
-                        backgroundColor: ColorManager.success,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Failed to activate starter plan: $e'),
+                          backgroundColor: ColorManager.error,
+                        ),
+                      );
+                    }
                   }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Failed to activate starter plan: $e'),
-                        backgroundColor: ColorManager.error,
-                      ),
-                    );
-                  }
-                }
-              },
-              icon: const Icon(Icons.fitness_center_rounded, color: Colors.white70, size: 16),
-              label: const Text(
-                'Or Activate Free 3-Day Starter Routine',
-                style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+                },
+                icon: const Icon(Icons.fitness_center_rounded, color: Colors.white, size: 16),
+                label: const Text(
+                  'Or Activate Free 3-Day Starter Routine',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                ),
               ),
             ),
           ],
@@ -361,8 +551,7 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
       final date = DateFormat('MMM d').format(prevLog.date);
       final topSet = prevLog.sets.reduce((a, b) => a.weight >= b.weight ? a : b);
       lastSessionText = '${prevLog.sets.length} sets · ${topSet.weight.toInt()}kg × ${topSet.reps} reps · $date';
-      final suggestedWeight = topSet.weight + 2.5;
-      nudgeText = '🔺 Try ${suggestedWeight.toStringAsFixed(1)}kg today';
+      nudgeText = ProgressionService.nudgeFor(displayName, prevLog);
     }
 
     return Container(
@@ -378,7 +567,7 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
         children: [
           Container(
             padding: EdgeInsets.all(8.w),
-            decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), shape: BoxShape.circle),
+            decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), shape: BoxShape.circle),
             child: Icon(Icons.fitness_center, color: Colors.blue, size: 16.sp),
           ),
           SizedBox(width: 12.w),
@@ -400,7 +589,7 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
                   if (nudgeText != null)
                     Padding(
                       padding: EdgeInsets.only(top: 2.h),
-                      child: Text(nudgeText, style: TextStyle(color: Colors.orange, fontSize: 10.sp, fontWeight: FontWeight.w500)),
+                      child: Text(nudgeText, style: TextStyle(color: Colors.orange, fontSize: 11.sp, fontWeight: FontWeight.w500)),
                     ),
                 ],
               ],
@@ -409,47 +598,57 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              IconButton(onPressed: onStart, icon: const Icon(Icons.play_circle_fill, color: ColorManager.gradientStart), iconSize: 32.sp, padding: EdgeInsets.zero, constraints: const BoxConstraints()),
-              SizedBox(width: 12.w),
-              IconButton(
-                onPressed: () async {
-                  final confirm = await showDialog<bool>(
-                    context: context,
-                    builder: (c) => AlertDialog(
-                      backgroundColor: ColorManager.background,
-                      title: Text('Delete Workout?', style: TextStyle(color: ColorManager.textPrimary)),
-                      content: Text('Delete "$displayName"?', style: TextStyle(color: ColorManager.textSecondary)),
-                      actions: [
-                        TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancel')),
-                        TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
-                      ],
-                    ),
-                  );
-                  if (confirm == true) {
-                    if (!mounted) return;
-                    LoadingOverlay.show(context, message: 'Deleting...');
-                    try {
-                      await Provider.of<WorkoutProvider>(context, listen: false).deleteWorkoutByNameAndAllWorkoutId(name: workout.name, allWorkoutId: workout.id);
-                      if (!mounted) return;
-                      await Provider.of<WorkoutProvider>(context, listen: false).fetchAndSetWorkouts();
-                    } catch (e) {
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
-                    } finally {
-                      if (mounted) LoadingOverlay.hide(context);
-                    }
-                  }
-                },
-                icon: const Icon(Icons.delete_outline, color: Colors.grey),
-                iconSize: 20.sp,
+              IconButton(tooltip: 'Start workout', onPressed: onStart, icon: const Icon(Icons.play_circle_fill, color: ColorManager.gradientStart), iconSize: 32.sp, padding: EdgeInsets.zero, constraints: const BoxConstraints()),
+              SizedBox(width: 4.w),
+              PopupMenuButton<String>(
+                tooltip: 'More options',
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
+                color: ColorManager.surface,
+                icon: Icon(Icons.more_vert, color: ColorManager.textTertiary, size: 20.sp),
+                onSelected: (value) {
+                  if (value == 'delete') _confirmDeleteWorkout(workout, displayName);
+                },
+                itemBuilder: (_) => const [
+                  PopupMenuItem<String>(
+                    value: 'delete',
+                    child: Text('Delete exercise', style: TextStyle(color: Colors.red)),
+                  ),
+                ],
               ),
             ],
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _confirmDeleteWorkout(dynamic workout, String displayName) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        backgroundColor: ColorManager.background,
+        title: Text('Delete Workout?', style: TextStyle(color: ColorManager.textPrimary)),
+        content: Text('Delete "$displayName"?', style: TextStyle(color: ColorManager.textSecondary)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      if (!mounted) return;
+      LoadingOverlay.show(context, message: 'Deleting...');
+      try {
+        await Provider.of<WorkoutProvider>(context, listen: false).deleteWorkoutByNameAndAllWorkoutId(name: workout.name, allWorkoutId: workout.id);
+        if (!mounted) return;
+        await Provider.of<WorkoutProvider>(context, listen: false).fetchAndSetWorkouts();
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      } finally {
+        if (mounted) LoadingOverlay.hide(context);
+      }
+    }
   }
 
   void _showWorkoutTimerDialog(BuildContext context, dynamic workout) {

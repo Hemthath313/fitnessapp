@@ -63,7 +63,7 @@ class _RatingPromptDialogState extends State<RatingPromptDialog> {
             Container(
               padding: EdgeInsets.all(SizeManager.s16.w),
               decoration: BoxDecoration(
-                color: ColorManager.primary.withOpacity(0.1),
+                color: ColorManager.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -79,7 +79,7 @@ class _RatingPromptDialogState extends State<RatingPromptDialog> {
               'Enjoying GymBuddy?',
               style: TextStyle(
                 color: ColorManager.textPrimary,
-                fontSize: SizeManager.s18.sp,
+                fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
@@ -91,7 +91,7 @@ class _RatingPromptDialogState extends State<RatingPromptDialog> {
               'How would you rate your workout experience with us?',
               style: TextStyle(
                 color: ColorManager.textSecondary,
-                fontSize: SizeManager.s14.sp,
+                fontSize: 14.sp,
                 height: 1.4,
               ),
               textAlign: TextAlign.center,
@@ -115,7 +115,7 @@ class _RatingPromptDialogState extends State<RatingPromptDialog> {
                     child: Icon(
                       isSelected ? Icons.star_rounded : Icons.star_border_rounded,
                       size: SizeManager.s48.sp,
-                      color: isSelected ? Colors.amber : ColorManager.textSecondary.withOpacity(0.5),
+                      color: isSelected ? Colors.amber : ColorManager.textSecondary.withValues(alpha: 0.5),
                     ),
                   ),
                 );
@@ -132,7 +132,7 @@ class _RatingPromptDialogState extends State<RatingPromptDialog> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ColorManager.primary,
                     disabledBackgroundColor: ColorManager.divider,
-                    foregroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF06201B),
                     disabledForegroundColor: ColorManager.textSecondary,
                     padding: EdgeInsets.symmetric(vertical: SizeManager.s14.h),
                     shape: RoundedRectangleBorder(
@@ -142,7 +142,7 @@ class _RatingPromptDialogState extends State<RatingPromptDialog> {
                   child: Text(
                     'Submit',
                     style: TextStyle(
-                      fontSize: SizeManager.s16.sp,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -156,7 +156,7 @@ class _RatingPromptDialogState extends State<RatingPromptDialog> {
                     'Maybe Later',
                     style: TextStyle(
                       color: ColorManager.textSecondary,
-                      fontSize: SizeManager.s14.sp,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

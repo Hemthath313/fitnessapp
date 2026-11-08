@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fitness_app/services/notification_copy.dart';
 
 class HomeProvider with ChangeNotifier {
   final Map<String, dynamic> _userData = {};
@@ -22,6 +23,8 @@ class HomeProvider with ChangeNotifier {
         if (userDataSnapshot.exists && userDataSnapshot.data() != null) {
           final data = userDataSnapshot.data() as Map<String, dynamic>;
           _userData['first name'] = data['first name'] ?? '';
+          // Cache for personalised notification copy (service has no context).
+          NotificationProfile.saveName(data['first name']?.toString());
           _userData['surname'] = data['surname'] ?? '';
           _userData['age'] = data['age'] ?? 0;
           _userData['height'] = (data['height'] ?? 0).toDouble();

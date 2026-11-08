@@ -126,6 +126,12 @@ void main() {
             path: '/add_data',
             builder: (context, state) => const AddDataPage(),
           ),
+          // After saving, the app shows the "plan ready" screen. These tests
+          // are about data integrity, so the stub continues straight to Home.
+          GoRoute(
+            path: Routes.planReadyRoute,
+            redirect: (context, state) => Routes.mainRoute,
+          ),
           GoRoute(
             path: Routes.mainRoute,
             builder: (context, state) {
@@ -211,6 +217,27 @@ void main() {
       expect(persistCalled, isFalse);
       expect(navigatedToHome, isFalse);
       expect(find.text('Name is required'), findsOneWidget);
+    });
+
+    testWidgets('Progress bar and section headers guide the form', (tester) async {
+      _configureTestViewport(tester);
+      await _pumpAddDataPage(tester, authProvider: authProvider, homeProvider: homeProvider, router: testRouter);
+
+      double progress() => tester
+          .widget<LinearProgressIndicator>(find.byKey(const Key('add_data_progress')))
+          .value!;
+
+      expect(find.text('ABOUT YOU'), findsOneWidget);
+      expect(progress(), 0);
+
+      await tester.ensureVisible(find.byType(TextField).at(0));
+      await tester.enterText(find.byType(TextField).at(0), 'Alice');
+      await tester.pump();
+      expect(progress(), closeTo(1 / 8, 0.0001));
+
+      await _fillOnboardingForm(tester);
+      expect(progress(), 1.0);
+      expect(find.text('Build my plan'), findsOneWidget);
     });
 
     testWidgets('Scenario 3: Invalid numeric input does not crash the app', (tester) async {

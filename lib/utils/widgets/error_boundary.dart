@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ErrorBoundary extends StatelessWidget {
   final Widget child;
@@ -37,7 +38,7 @@ class ErrorBoundary extends StatelessWidget {
                   fallbackMessage ?? 'Something went wrong',
                   style:  TextStyle(
                     color: ColorManager.white,
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
                   ),
                   textAlign: TextAlign.center,
@@ -47,7 +48,7 @@ class ErrorBoundary extends StatelessWidget {
                   'Please try refreshing the page',
                   style: TextStyle(
                     color: ColorManager.grey2,
-                    fontSize: 14,
+                    fontSize: 14.sp,
                   ),
                   textAlign: TextAlign.center,
                 ),

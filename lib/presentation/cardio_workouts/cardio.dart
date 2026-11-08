@@ -2,6 +2,7 @@ import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 typedef CardioExercise = Exercise;
 
@@ -34,7 +35,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                 style: TextStyle(
                   color: ColorManager.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 24,
+                  fontSize: 24.sp,
                 ),
               ),
               centerTitle: true,
@@ -54,7 +55,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                   child: Icon(
                     Icons.directions_run,
                     size: 80,
-                    color: ColorManager.limerGreen2.withOpacity(0.3),
+                    color: ColorManager.limerGreen2.withValues(alpha: 0.3),
                   ),
                 ),
               ),
@@ -73,7 +74,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                     'Boost Your Cardio',
                     style: TextStyle(
                       color: ColorManager.limerGreen2,
-                      fontSize: 28,
+                      fontSize: 24.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -82,7 +83,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                     'Premium video workouts',
                     style: TextStyle(
                       color: ColorManager.textSecondary,
-                      fontSize: 16,
+                      fontSize: 16.sp,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -116,7 +117,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: ColorManager.limerGreen2.withOpacity(0.05),
+            color: ColorManager.limerGreen2.withValues(alpha: 0.05),
             blurRadius: 8,
             spreadRadius: 1,
           ),
@@ -159,7 +160,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: ColorManager.textPrimary,
-                          fontSize: 15.5,
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.bold,
                           height: 1.25,
                         ),
@@ -171,7 +172,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: ColorManager.limerGreen2,
-                          fontSize: 12.5,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -191,8 +192,8 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  color: ColorManager.textPrimary.withOpacity(0.85),
-                                  fontSize: 12,
+                                  color: ColorManager.textPrimary.withValues(alpha: 0.85),
+                                  fontSize: 12.sp,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -207,7 +208,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                               decoration: BoxDecoration(
-                                color: ColorManager.limerGreen2.withOpacity(0.12),
+                                color: ColorManager.limerGreen2.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -216,7 +217,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   color: ColorManager.limerGreen2,
-                                  fontSize: 10,
+                                  fontSize: 11.sp,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -230,7 +231,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: ColorManager.textSecondary,
-                                fontSize: 11,
+                                fontSize: 11.sp,
                               ),
                             ),
                           ),
@@ -284,7 +285,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: ColorManager.limerGreen2.withOpacity(0.3),
+                            color: ColorManager.limerGreen2.withValues(alpha: 0.3),
                             blurRadius: 20,
                             spreadRadius: 5,
                           ),
@@ -307,7 +308,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                       exercise.name,
                       style: TextStyle(
                         color: ColorManager.textPrimary,
-                        fontSize: 28,
+                        fontSize: 24.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -324,7 +325,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                         exercise.description,
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 16,
+                          fontSize: 16.sp,
                           height: 1.6,
                         ),
                       ),
@@ -378,7 +379,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                       'How to Perform',
                       style: TextStyle(
                         color: ColorManager.limerGreen2,
-                        fontSize: 22,
+                        fontSize: 20.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -391,7 +392,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                           color: ColorManager.surface,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: ColorManager.limerGreen2.withOpacity(0.2),
+                            color: ColorManager.limerGreen2.withValues(alpha: 0.2),
                             width: 1,
                           ),
                         ),
@@ -408,10 +409,10 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                               child: Center(
                                 child: Text(
                                   '${entry.key + 1}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style:  TextStyle(
+                                    color: ColorManager.onMint,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                                    fontSize: 16.sp,
                                   ),
                                 ),
                               ),
@@ -422,7 +423,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                                 entry.value,
                                 style: TextStyle(
                                   color: ColorManager.textPrimary,
-                                  fontSize: 15,
+                                  fontSize: 14.sp,
                                   height: 1.5,
                                 ),
                               ),
@@ -451,11 +452,11 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                     ),
                   ),
                   onPressed: () => Navigator.pop(context),
-                  child: const Text(
+                  child:  Text(
                     'Close',
                     style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
+                      color: ColorManager.onMint,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -475,7 +476,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
         color: ColorManager.surface,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(
-          color: ColorManager.limerGreen2.withOpacity(0.3),
+          color: ColorManager.limerGreen2.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -490,7 +491,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                 label,
                 style: TextStyle(
                   color: ColorManager.textSecondary,
-                  fontSize: 12,
+                  fontSize: 12.sp,
                 ),
               ),
             ],
@@ -500,7 +501,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
             value,
             style: TextStyle(
               color: ColorManager.textPrimary,
-              fontSize: 16,
+              fontSize: 16.sp,
               fontWeight: FontWeight.bold,
             ),
           ),

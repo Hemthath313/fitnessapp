@@ -83,14 +83,17 @@ class _PainZoneCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: ColorManager.divider),
       ),
-      child: Theme(
+      // Transparent Material so the tile's ink paints above the card colour.
+      child: Material(
+        type: MaterialType.transparency,
+        child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           tilePadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
           leading: Container(
             padding: EdgeInsets.all(10.w),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 24.sp),
@@ -110,6 +113,7 @@ class _PainZoneCard extends StatelessWidget {
           children: routines.map((item) {
             return _StretchTile(name: item['name'], duration: item['duration']);
           }).toList(),
+        ),
         ),
       ),
     );
@@ -241,7 +245,7 @@ class _StretchTileState extends State<_StretchTile> {
               ],
             ),
           ),
-          IconButton(
+          IconButton(tooltip: _isRunning ? 'Pause' : 'Start', 
             onPressed: _toggleTimer,
             icon: Icon(
               _isRunning ? Icons.pause_circle_filled : Icons.play_circle_fill,

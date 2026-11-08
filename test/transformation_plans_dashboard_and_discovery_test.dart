@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/data/transformation_plans_data.dart';
 import 'package:fitness_app/model/transformation_plan_model.dart';
 import 'package:fitness_app/presentation/home/widgets/carousel_slider_home_widget.dart';
@@ -67,7 +68,6 @@ void main() {
       expect(find.byKey(const Key('explore_challenge_cta')), findsOneWidget);
 
       // Preserved carousel
-      expect(find.text('Mini Challenges & Technique'), findsOneWidget);
       expect(find.byType(CarouselSliderHomeWidget), findsOneWidget);
     });
 
@@ -199,6 +199,28 @@ void main() {
       );
       expect(find.text('Specialised Programmes (1)'), findsOneWidget);
       expect(find.text('12-Week Strength Building Challenge'), findsOneWidget);
+
+      // View All also lists the mini challenges from the dashboard shelf
+      await tester.scrollUntilVisible(
+        find.text('Mini Challenges (2)'),
+        300,
+      );
+      expect(find.text('Mini Challenges (2)'), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.text(StringsManager.sixPackChallenge),
+        300,
+      );
+      expect(find.text(StringsManager.sixPackChallenge), findsOneWidget);
+      expect(find.text('30-DAY CHALLENGE'), findsOneWidget);
+      expect(find.text('Start Day 1'), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.text(StringsManager.exerciseOfWeek),
+        300,
+      );
+      expect(find.text(StringsManager.exerciseOfWeek), findsOneWidget);
+      expect(find.text('WEEKLY TECHNIQUE'), findsOneWidget);
     });
 
     testWidgets('TransformationPlanDetailScreen renders dynamic programme curriculum',

@@ -103,7 +103,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
             Text(
               exercise.name,
               style: TextStyle(
-                  fontSize: 22.sp,
+                  fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
                   color: ColorManager.white),
             ),
@@ -420,7 +420,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
 
   Widget _buildPremiumLockOverlay(BuildContext context) {
     return Container(
-      color: ColorManager.background.withOpacity(0.8),
+      color: ColorManager.background.withValues(alpha: 0.8),
       child: Center(
         child: Padding(
           padding: EdgeInsets.all(SizeManager.s24.w),
@@ -430,7 +430,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
               Container(
                 padding: EdgeInsets.all(SizeManager.s20.w),
                 decoration: BoxDecoration(
-                  color: ColorManager.primary.withOpacity(0.1),
+                  color: ColorManager.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(

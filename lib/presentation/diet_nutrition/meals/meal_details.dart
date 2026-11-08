@@ -21,8 +21,8 @@ class MealDetailsSheet extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: ColorManager.darkGrey,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+        color: ColorManager.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -59,6 +59,7 @@ class MealDetailsSheet extends StatelessWidget {
                 ),
               ),
               IconButton(
+                tooltip: 'Add food',
                 onPressed: () => _showAddFoodDialog(context),
                 icon: Icon(Icons.add_circle, color: ColorManager.limerGreen2, size: 24.sp),
               ),
@@ -168,13 +169,13 @@ class MealDetailsSheet extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(Icons.lightbulb_outline, color: Colors.orangeAccent, size: 18.sp),
+            Icon(Icons.lightbulb_outline, color: ColorManager.primary, size: 18.sp),
             SizedBox(width: 8.w),
             Text(
               'Substitutions:',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.orangeAccent,
+                color: ColorManager.primary,
                 fontSize: 14.sp,
               ),
             ),

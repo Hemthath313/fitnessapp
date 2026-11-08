@@ -91,14 +91,14 @@ class StreakBannerWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(20.r),
               border: Border.all(
                 color: streak > 0
-                    ? color.withOpacity(0.5)
+                    ? color.withValues(alpha: 0.5)
                     : ColorManager.divider,
                 width: 1.5,
               ),
               boxShadow: streak > 0
                   ? [
                       BoxShadow(
-                        color: color.withOpacity(0.25),
+                        color: color.withValues(alpha: 0.25),
                         blurRadius: 16,
                         spreadRadius: 0,
                         offset: const Offset(0, 4),
@@ -129,7 +129,7 @@ class StreakBannerWidget extends StatelessWidget {
                             color: streak > 0
                                 ? Colors.white
                                 : ColorManager.textTertiary,
-                            fontSize: 36.sp,
+                            fontSize: 32.sp,
                             fontWeight: FontWeight.w900,
                             height: 1,
                           ),
@@ -157,7 +157,7 @@ class StreakBannerWidget extends StatelessWidget {
                           horizontal: 10.w, vertical: 4.h),
                       decoration: BoxDecoration(
                         color: streak > 0
-                            ? Colors.white.withOpacity(0.1)
+                            ? Colors.white.withValues(alpha: 0.1)
                             : ColorManager.surfaceDark,
                         borderRadius: BorderRadius.circular(12.r),
                       ),
@@ -169,7 +169,7 @@ class StreakBannerWidget extends StatelessWidget {
                               color: streak > 0
                                   ? Colors.white54
                                   : ColorManager.textTertiary,
-                              fontSize: 10.sp,
+                              fontSize: 11.sp,
                             ),
                           ),
                           Row(
@@ -254,8 +254,8 @@ class _MilestoneDot extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: item.reached
-                ? activeColor.withOpacity(0.2)
-                : Colors.white.withOpacity(0.05),
+                ? activeColor.withValues(alpha: 0.2)
+                : Colors.white.withValues(alpha: 0.05),
             border: Border.all(
               color: item.reached ? activeColor : Colors.white12,
               width: 2,
@@ -269,7 +269,7 @@ class _MilestoneDot extends StatelessWidget {
                     item.label,
                     style: TextStyle(
                       color: Colors.white30,
-                      fontSize: 10.sp,
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -280,7 +280,7 @@ class _MilestoneDot extends StatelessWidget {
           item.label,
           style: TextStyle(
             color: item.reached ? activeColor : Colors.white30,
-            fontSize: 10.sp,
+            fontSize: 11.sp,
             fontWeight:
                 item.reached ? FontWeight.bold : FontWeight.normal,
           ),

@@ -1,9 +1,7 @@
-import 'package:fitness_app/presentation/home/providers/home_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fitness_app/utils/managers/value_manager.dart';
 
 class SummaryCard extends StatelessWidget {
   final int totalCalories;
@@ -27,27 +25,39 @@ class SummaryCard extends StatelessWidget {
     required this.remainingFats,
   }) : super(key: key);
 
+  // Macro arcs: one mint family plus warm accents (functional, not decorative).
+  static const Color _carbsColor = Color(0xFFF4B03E);
+  static const Color _fatsColor = Color(0xFFE58B6E);
+
+  static double _progress(int consumed, int total) =>
+      total <= 0 ? 0.0 : (consumed / total).clamp(0.0, 1.0);
+
   @override
   Widget build(BuildContext context) {
-    // Logic moved to parent
-
     return Container(
-      padding: EdgeInsets.all(SizeManager.s16.w),
+      padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(SizeManager.s20.r),
-        border: Border.all(color: ColorManager.primary.withOpacity(0.1)),
+        borderRadius: BorderRadius.circular(AppRadius.card.r),
       ),
       child: Column(
         children: [
           _buildMainCalorieCircle(totalCalories, remainingCalories),
-          SizedBox(height: SizeManager.s20.h),
+          SizedBox(height: 18.h),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildMacroItem('Protein', totalProtein, remainingProtein, Colors.orangeAccent),
-              _buildMacroItem('Carbs', totalCarbs, remainingCarbs, Colors.blueAccent),
-              _buildMacroItem('Fats', totalFats, remainingFats, Colors.amberAccent),
+              Expanded(
+                child: _buildMacroItem(
+                    'Protein', totalProtein, remainingProtein, ColorManager.primary),
+              ),
+              Expanded(
+                child: _buildMacroItem(
+                    'Carbs', totalCarbs, remainingCarbs, _carbsColor),
+              ),
+              Expanded(
+                child: _buildMacroItem(
+                    'Fats', totalFats, remainingFats, _fatsColor),
+              ),
             ],
           ),
         ],
@@ -56,8 +66,10 @@ class SummaryCard extends StatelessWidget {
   }
 
   Widget _buildMainCalorieCircle(int total, int remaining) {
-    int consumed = total - remaining;
-    double progress = (consumed / total).clamp(0.0, 1.0);
+    final int consumed =
+        (total - remaining).clamp(0, total < 0 ? 0 : total).toInt();
+    final double progress = _progress(consumed, total);
+    final int left = remaining < 0 ? 0 : remaining;
 
     return Row(
       children: [
@@ -65,19 +77,20 @@ class SummaryCard extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             SizedBox(
-              height: 70.w,
-              width: 70.w,
+              height: 76.w,
+              width: 76.w,
               child: CircularProgressIndicator(
                 value: progress,
                 strokeWidth: 8,
-                backgroundColor: ColorManager.background,
+                strokeCap: StrokeCap.round,
+                backgroundColor: ColorManager.iconChip,
                 color: ColorManager.primary,
               ),
             ),
-            Icon(Icons.bolt, color: ColorManager.primary, size: 24.w),
+            Icon(Icons.bolt_rounded, color: ColorManager.primary, size: 26.w),
           ],
         ),
-        SizedBox(width: SizeManager.s20.w),
+        SizedBox(width: 18.w),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,26 +98,40 @@ class SummaryCard extends StatelessWidget {
               Text(
                 'Daily Calories',
                 style: TextStyle(
-                  color: ColorManager.white70,
-                  fontSize: SizeManager.s14.sp,
+                  color: ColorManager.textSecondary,
+                  fontSize: 14.sp,
                 ),
               ),
-              Text(
-                '${consumed.clamp(0, total)} / $total kcal',
-                style: TextStyle(
-                  color: ColorManager.white,
-                  fontSize: SizeManager.s20.sp,
-                  fontWeight: FontWeight.bold,
+              SizedBox(height: 2.h),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '$consumed / $total kcal',
+                  style: TextStyle(
+                    color: ColorManager.textPrimary,
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
-              SizedBox(height: SizeManager.s4.h),
+              SizedBox(height: 8.h),
               ClipRRect(
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(6.r),
                 child: LinearProgressIndicator(
                   value: progress,
-                  backgroundColor: ColorManager.background,
+                  backgroundColor: ColorManager.iconChip,
                   color: ColorManager.primary,
-                  minHeight: 4,
+                  minHeight: 6.h,
+                ),
+              ),
+              SizedBox(height: 6.h),
+              Text(
+                '$left kcal left',
+                style: TextStyle(
+                  color: ColorManager.primary,
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
@@ -115,43 +142,49 @@ class SummaryCard extends StatelessWidget {
   }
 
   Widget _buildMacroItem(String label, int total, int remaining, Color color) {
-    int consumed = total - remaining;
-    double progress = (consumed / total).clamp(0.0, 1.0);
+    final int consumed =
+        (total - remaining).clamp(0, total < 0 ? 0 : total).toInt();
+    final double progress = _progress(consumed, total);
 
     return Column(
       children: [
         Text(
           label,
-          style: TextStyle(color: ColorManager.white70, fontSize: SizeManager.s12.sp),
+          style: TextStyle(
+            color: ColorManager.textSecondary,
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w500,
+          ),
         ),
-        SizedBox(height: SizeManager.s8.h),
+        SizedBox(height: 8.h),
         Stack(
           alignment: Alignment.center,
           children: [
             SizedBox(
-              height: 45.w,
-              width: 45.w,
+              height: 54.w,
+              width: 54.w,
               child: CircularProgressIndicator(
                 value: progress,
-                strokeWidth: 4,
-                backgroundColor: ColorManager.background,
+                strokeWidth: 5,
+                strokeCap: StrokeCap.round,
+                backgroundColor: ColorManager.iconChip,
                 color: color,
               ),
             ),
             Text(
-              '${consumed.clamp(0, total)}g',
+              '${consumed}g',
               style: TextStyle(
-                color: ColorManager.white,
-                fontSize: 10.sp,
-                fontWeight: FontWeight.bold,
+                color: ColorManager.textPrimary,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
         ),
-        SizedBox(height: SizeManager.s4.h),
+        SizedBox(height: 6.h),
         Text(
           'Target: $total g',
-          style: TextStyle(color: color.withOpacity(0.7), fontSize: 8.sp),
+          style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
         ),
       ],
     );

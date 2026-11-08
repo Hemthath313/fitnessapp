@@ -170,7 +170,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
                 child: Text(
                   'AI is typing...',
                   style: TextStyle(
-                      color: ColorManager.primary.withOpacity(0.7),
+                      color: ColorManager.primary.withValues(alpha: 0.7),
                       fontSize: 12.sp,
                       fontStyle: FontStyle.italic),
                 ),
@@ -200,7 +200,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
               backgroundColor: ColorManager.surface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20.r),
-                side: BorderSide(color: ColorManager.primary.withOpacity(0.3)),
+                side: BorderSide(color: ColorManager.primary.withValues(alpha: 0.3)),
               ),
               onPressed: () => _sendMessage(
                 _promptMap[_quickPrompts[index]] ?? _quickPrompts[index],
@@ -240,7 +240,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
               onSubmitted: _sendMessage,
             ),
           ),
-          IconButton(
+          IconButton(tooltip: 'Send', 
             onPressed: () => _sendMessage(_messageController.text),
             icon: Icon(Icons.send_rounded, color: ColorManager.primary),
           ),
@@ -274,7 +274,7 @@ class ChatMessage extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),

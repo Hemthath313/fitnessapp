@@ -3,6 +3,7 @@ import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/presentation/widgets/interactive_exercise_detail.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 typedef BackExercise = Exercise;
 
@@ -67,7 +68,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                 style: TextStyle(
                   color: ColorManager.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 20,
+                  fontSize: 20.sp,
                 ),
               ),
               centerTitle: true,
@@ -87,7 +88,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                   child: Icon(
                     Icons.fitness_center,
                     size: 64,
-                    color: ColorManager.limerGreen2.withOpacity(0.3),
+                    color: ColorManager.limerGreen2.withValues(alpha: 0.3),
                   ),
                 ),
               ),
@@ -106,7 +107,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                     'Build a Powerful Back',
                     style: TextStyle(
                       color: ColorManager.limerGreen2,
-                      fontSize: 24,
+                      fontSize: 24.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -115,7 +116,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                     'Premium video workouts',
                     style: TextStyle(
                       color: ColorManager.textSecondary,
-                      fontSize: 14,
+                      fontSize: 14.sp,
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -159,12 +160,12 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                 key: const Key('exercise_search_field'),
                 controller: _searchController,
                 onChanged: (value) => setState(() => _searchQuery = value),
-                style: TextStyle(color: ColorManager.textPrimary, fontSize: 14),
+                style: TextStyle(color: ColorManager.textPrimary, fontSize: 14.sp),
                 decoration: InputDecoration(
                   hintText: 'Search exercises by name...',
                   hintStyle: TextStyle(
                     color: ColorManager.textSecondary,
-                    fontSize: 14,
+                    fontSize: 14.sp,
                   ),
                   prefixIcon: Icon(
                     Icons.search_rounded,
@@ -172,7 +173,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                     size: 20,
                   ),
                   suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
+                      ? IconButton(tooltip: 'Close', 
                           key: const Key('clear_exercise_search_button'),
                           icon: Icon(
                             Icons.close_rounded,
@@ -269,7 +270,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: ColorManager.textSecondary,
-                  fontSize: 12.5,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -287,7 +288,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                   'Clear filters',
                   style: TextStyle(
                     color: ColorManager.primary,
-                    fontSize: 12,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -338,7 +339,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                           'Filter Exercises',
                           style: TextStyle(
                             color: ColorManager.textPrimary,
-                            fontSize: 18,
+                            fontSize: 18.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -365,7 +366,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                       'DIFFICULTY',
                       style: TextStyle(
                         color: ColorManager.textSecondary,
-                        fontSize: 11.5,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.8,
                       ),
@@ -389,7 +390,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                             color: isSelected
                                 ? ColorManager.primary
                                 : ColorManager.textSecondary,
-                            fontSize: 12,
+                            fontSize: 12.sp,
                             fontWeight:
                                 isSelected ? FontWeight.bold : FontWeight.w500,
                           ),
@@ -410,7 +411,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                       'EQUIPMENT',
                       style: TextStyle(
                         color: ColorManager.textSecondary,
-                        fontSize: 11.5,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.8,
                       ),
@@ -434,7 +435,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                             color: isSelected
                                 ? ColorManager.primary
                                 : ColorManager.textSecondary,
-                            fontSize: 12,
+                            fontSize: 12.sp,
                             fontWeight:
                                 isSelected ? FontWeight.bold : FontWeight.w500,
                           ),
@@ -464,17 +465,17 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: ColorManager.primary,
-                          foregroundColor: Colors.white,
+                          foregroundColor: const Color(0xFF06201B),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 0,
                         ),
-                        child: const Text(
+                        child:  Text(
                           'Apply Filters',
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -513,7 +514,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: ColorManager.textPrimary,
-              fontSize: 15,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -545,7 +546,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: ColorManager.limerGreen2.withOpacity(0.05),
+            color: ColorManager.limerGreen2.withValues(alpha: 0.05),
             blurRadius: 8,
             spreadRadius: 1,
           ),
@@ -588,7 +589,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: ColorManager.textPrimary,
-                          fontSize: 15.5,
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.bold,
                           height: 1.25,
                         ),
@@ -600,7 +601,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: ColorManager.limerGreen2,
-                          fontSize: 12.5,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -620,8 +621,8 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  color: ColorManager.textPrimary.withOpacity(0.85),
-                                  fontSize: 12,
+                                  color: ColorManager.textPrimary.withValues(alpha: 0.85),
+                                  fontSize: 12.sp,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -636,7 +637,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                               decoration: BoxDecoration(
-                                color: ColorManager.limerGreen2.withOpacity(0.12),
+                                color: ColorManager.limerGreen2.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -645,7 +646,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   color: ColorManager.limerGreen2,
-                                  fontSize: 10,
+                                  fontSize: 11.sp,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -659,7 +660,7 @@ class _LatExercisesPageState extends State<LatExercisesPage> {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: ColorManager.textSecondary,
-                                fontSize: 11,
+                                fontSize: 11.sp,
                               ),
                             ),
                           ),

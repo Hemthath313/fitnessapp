@@ -174,7 +174,7 @@ class _WorkoutSessionLauncherPageState
         appBar: AppBar(
           backgroundColor: ColorManager.background,
           elevation: 0,
-          leading: IconButton(
+          leading: IconButton(tooltip: 'Back', 
             icon: Icon(Icons.arrow_back, color: ColorManager.white),
             onPressed: () {
               if (context.canPop()) {

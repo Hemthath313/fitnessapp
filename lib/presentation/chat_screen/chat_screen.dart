@@ -318,7 +318,7 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             margin: const EdgeInsets.only(right: 16),
             decoration: BoxDecoration(
-              color: _limitReached ? Colors.red.withOpacity(0.2) : ColorManager.primary.withOpacity(0.2),
+              color: _limitReached ? Colors.red.withValues(alpha: 0.2) : ColorManager.primary.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: _limitReached ? Colors.red : ColorManager.primary,
@@ -440,12 +440,12 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [ColorManager.primary.withOpacity(0.15), ColorManager.primary.withOpacity(0.05)],
+                colors: [ColorManager.primary.withValues(alpha: 0.15), ColorManager.primary.withValues(alpha: 0.05)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(color: ColorManager.primary.withOpacity(0.2)),
+              border: Border.all(color: ColorManager.primary.withValues(alpha: 0.2)),
             ),
             child: Row(
               children: [
@@ -504,11 +504,11 @@ class _ChatScreenState extends State<ChatScreen> {
                   children: [
                     Container(
                       padding: EdgeInsets.all(10.w),
-                      decoration: const BoxDecoration(
-                        color: Colors.white24,
+                      decoration: BoxDecoration(
+                        color: ColorManager.onMint.withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.analytics_outlined, color: Colors.white, size: 24),
+                      child: const Icon(Icons.analytics_outlined, color: ColorManager.onMint, size: 24),
                     ),
                     SizedBox(width: 14.w),
                     Expanded(
@@ -518,7 +518,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           Text(
                             '🔍 Audit My Workout Plan',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: ColorManager.onMint,
                               fontWeight: FontWeight.bold,
                               fontSize: 14.sp,
                             ),
@@ -527,14 +527,14 @@ class _ChatScreenState extends State<ChatScreen> {
                           Text(
                             'AI reads your active exercises and critiques your weekly splits, muscle balance, and volume.',
                             style: TextStyle(
-                              color: Colors.white70,
+                              color: ColorManager.onMint.withValues(alpha: 0.75),
                               fontSize: 11.sp,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 14),
+                    Icon(Icons.arrow_forward_ios, color: ColorManager.onMint.withValues(alpha: 0.75), size: 14),
                   ],
                 ),
               ),
@@ -601,7 +601,7 @@ class _ChatScreenState extends State<ChatScreen> {
           border: Border.all(color: ColorManager.divider),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
+              color: Colors.black.withValues(alpha: 0.02),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -636,7 +636,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: ColorManager.textSecondary,
-                    fontSize: 10.sp,
+                    fontSize: 11.sp,
                     height: 1.2,
                   ),
                 ),
@@ -663,7 +663,7 @@ class _ChatScreenState extends State<ChatScreen> {
             labelStyle: TextStyle(color: ColorManager.textPrimary, fontSize: 12.sp),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
-              side: BorderSide(color: ColorManager.primary.withOpacity(0.3)),
+              side: BorderSide(color: ColorManager.primary.withValues(alpha: 0.3)),
             ),
             onPressed: () => _sendMessage(text: _suggestions[index]),
           );
@@ -682,7 +682,7 @@ class _ChatScreenState extends State<ChatScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: isUser 
-            ? LinearGradient(colors: [ColorManager.primary, ColorManager.primary.withOpacity(0.8)])
+            ? LinearGradient(colors: [ColorManager.primary, ColorManager.primary.withValues(alpha: 0.8)])
             :  LinearGradient(colors: [ColorManager.surface, ColorManager.surface]),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(20),
@@ -692,7 +692,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             )
@@ -701,8 +701,8 @@ class _ChatScreenState extends State<ChatScreen> {
         child: Text(
           message.message,
           style: TextStyle(
-            color: isUser ? Colors.white : ColorManager.textPrimary,
-            fontSize: 15.sp,
+            color: isUser ? ColorManager.onMint : ColorManager.textPrimary,
+            fontSize: 14.sp,
             fontWeight: isUser ? FontWeight.w500 : FontWeight.normal,
           ),
         ),
@@ -771,7 +771,7 @@ class _ChatScreenState extends State<ChatScreen> {
               color: _limitReached ? Colors.grey : ColorManager.primary,
               shape: BoxShape.circle,
             ),
-            child: IconButton(
+            child: IconButton(tooltip: 'Send', 
               icon: const Icon(Icons.send_rounded, color: Colors.black),
               onPressed: _limitReached ? null : () => _sendMessage(),
             ),

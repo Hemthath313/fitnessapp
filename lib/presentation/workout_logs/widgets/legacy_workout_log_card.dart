@@ -27,7 +27,7 @@ class LegacyWorkoutLogCard extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14.r),
-        side: BorderSide(color: ColorManager.divider.withOpacity(0.6)),
+        side: BorderSide(color: ColorManager.divider.withValues(alpha: 0.6)),
       ),
       child: Padding(
         padding: EdgeInsets.all(14.w),
@@ -50,7 +50,7 @@ class LegacyWorkoutLogCard extends StatelessWidget {
                               style: TextStyle(
                                 color: ColorManager.textPrimary,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 15.sp,
+                                fontSize: 14.sp,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -59,14 +59,14 @@ class LegacyWorkoutLogCard extends StatelessWidget {
                           Container(
                             padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                             decoration: BoxDecoration(
-                              color: Colors.blueGrey.withOpacity(0.15),
+                              color: Colors.blueGrey.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(6.r),
                             ),
                             child: Text(
                               'Legacy Log',
                               style: TextStyle(
                                 color: Colors.blueGrey.shade200,
-                                fontSize: 9.sp,
+                                fontSize: 11.sp,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class UpperLowerPage extends StatelessWidget {
   const UpperLowerPage({super.key});
@@ -105,7 +106,7 @@ class UpperLowerPage extends StatelessWidget {
                         style: TextStyle(
                           color: ColorManager.textPrimary,
                           fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                          fontSize: 18.sp,
                         ),
                       ),
                       subtitle: Text(
@@ -127,8 +128,8 @@ class UpperLowerPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text("View Exercises",
-                  style: TextStyle(color: Colors.black, fontSize: 16)),
+              child:  Text("View Exercises",
+                  style: TextStyle(color: Colors.black, fontSize: 16.sp)),
             ),
           ],
         ),

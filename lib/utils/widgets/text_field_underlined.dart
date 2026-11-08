@@ -44,7 +44,7 @@ class TextFieldWidgetUnderLined extends StatelessWidget {
             labelText: labelHint,
             labelStyle:  TextStyle(
               color: ColorManager.white2,
-              fontSize: FontSize.s14,
+              fontSize: 14.sp,
               letterSpacing: SizeManager.s1_5,
               fontWeight: FontWightManager.semiBold,
             ),

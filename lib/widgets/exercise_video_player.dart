@@ -2,6 +2,7 @@ import 'package:fitness_app/utils/managers/asset_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 typedef VideoControllerFactory = VideoPlayerController Function(
   String assetPath,

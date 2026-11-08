@@ -108,7 +108,7 @@ class _RecoveryCheckInDialogState extends State<RecoveryCheckInDialog> {
                   ),
                 ],
               ),
-              IconButton(
+              IconButton(tooltip: 'Close', 
                 icon: Icon(Icons.close_rounded, color: ColorManager.textSecondary, size: 20.sp),
                 onPressed: () => Navigator.of(context).pop(),
               ),
@@ -227,10 +227,10 @@ class _RecoveryCheckInDialogState extends State<RecoveryCheckInDialog> {
                       height: 16.w,
                       child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                     )
-                  : const Icon(Icons.check_rounded, color: Colors.white, size: 18),
+                  : const Icon(Icons.check_rounded, color: ColorManager.onMint, size: 18),
               label: Text(
                 _isSaving ? 'Saving...' : 'Save Recovery Check-In',
-                style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(color: ColorManager.onMint, fontSize: 14.sp, fontWeight: FontWeight.bold),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.primary,
@@ -271,7 +271,7 @@ class _RecoveryCheckInDialogState extends State<RecoveryCheckInDialog> {
         ),
         child: Row(
           children: [
-            Text(emoji, style: TextStyle(fontSize: 22.sp)),
+            Text(emoji, style: TextStyle(fontSize: 20.sp)),
             SizedBox(width: 12.w),
             Expanded(
               child: Column(

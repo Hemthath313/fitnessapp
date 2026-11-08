@@ -24,7 +24,7 @@ class NewExercisePageAppBar extends StatelessWidget {
               RadiusManager.r40.r,
             ),
           ),
-          child: IconButton(
+          child: IconButton(tooltip: 'Back', 
             splashColor: ColorManager.grey3,
             onPressed: () {
               Navigator.of(context).pop();

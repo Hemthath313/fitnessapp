@@ -33,7 +33,7 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
         backgroundColor: ColorManager.background,
         iconTheme: IconThemeData(color: ColorManager.textPrimary),
         actions: [
-          IconButton(
+          IconButton(tooltip: 'Export', 
             icon: Icon(Icons.file_download, color: ColorManager.primary),
             onPressed: () {
               if (subProvider.isPremium) {
@@ -93,7 +93,7 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push(Routes.workoutLogRoute),
         backgroundColor: ColorManager.primary,
-        child: const Icon(Icons.add, color: Colors.white),
+        child: const Icon(Icons.add, color: ColorManager.onMint),
       ),
     );
   }
@@ -146,7 +146,7 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
                     style: TextStyle(
                       color: ColorManager.textSecondary,
                       fontFamily: 'monospace',
-                      fontSize: 10.sp,
+                      fontSize: 11.sp,
                     ),
                   ),
                 ),
@@ -206,7 +206,7 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
               context.push(Routes.premiumScreen);
             },
             style: ElevatedButton.styleFrom(backgroundColor: ColorManager.primary),
-            child: const Text('Go Premium', style: TextStyle(color: Colors.white)),
+            child: const Text('Go Premium', style: TextStyle(color: ColorManager.onMint)),
           ),
         ],
       ),
@@ -240,7 +240,7 @@ class _WorkoutHistoryCardState extends State<WorkoutHistoryCard> {
       elevation: 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16.r),
-        side: BorderSide(color: ColorManager.divider.withOpacity(0.5)),
+        side: BorderSide(color: ColorManager.divider.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -316,12 +316,12 @@ class _WorkoutHistoryCardState extends State<WorkoutHistoryCard> {
                             children: [
                               CircleAvatar(
                                 radius: 10.r,
-                                backgroundColor: ColorManager.primary.withOpacity(0.15),
+                                backgroundColor: ColorManager.primary.withValues(alpha: 0.15),
                                 child: Text(
                                   '${entry.key + 1}',
                                   style: TextStyle(
                                     color: ColorManager.primary,
-                                    fontSize: 10.sp,
+                                    fontSize: 11.sp,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),

@@ -26,10 +26,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -58,5 +55,17 @@ class DefaultFirebaseOptions {
     messagingSenderId: '661343486324',
     projectId: 'tracking-ed1ba',
     storageBucket: 'tracking-ed1ba.appspot.com',
+  );
+
+  // Values taken from ios/Runner/GoogleService-Info.plist
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyAm8jSQl477kkWHm2V-ZsTeQhylmQsApRE',
+    appId: '1:661343486324:ios:6ed71517e08b841d666c21',
+    messagingSenderId: '661343486324',
+    projectId: 'tracking-ed1ba',
+    storageBucket: 'tracking-ed1ba.firebasestorage.app',
+    iosClientId:
+        '661343486324-dfim5orb83mlnh4n1pe4spci7hcv8ab3.apps.googleusercontent.com',
+    iosBundleId: 'com.example.fitnessApp',
   );
 }

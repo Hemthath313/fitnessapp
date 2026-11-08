@@ -47,7 +47,7 @@ class _TransformationRoadmapScreenState
         backgroundColor: ColorManager.background,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
+        leading: IconButton(tooltip: 'Back', 
           icon: Icon(
             Icons.arrow_back_ios_new_rounded,
             color: ColorManager.textPrimary,
@@ -254,7 +254,7 @@ class _TransformationRoadmapScreenState
                 padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
               ),
-              child: const Text('Explore Transformation Plans', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              child: const Text('Explore Transformation Plans', style: TextStyle(color: ColorManager.onMint, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -338,7 +338,7 @@ class _TransformationRoadmapScreenState
                   color: primaryColor.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Text('⚡', style: TextStyle(fontSize: 14)),
+                child:  Text('⚡', style: TextStyle(fontSize: 14.sp)),
               ),
               SizedBox(width: 8.w),
               Expanded(
@@ -439,7 +439,7 @@ class _TransformationRoadmapScreenState
                   color: primaryColor.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Text('⚡', style: TextStyle(fontSize: 14)),
+                child:  Text('⚡', style: TextStyle(fontSize: 14.sp)),
               ),
               SizedBox(width: 8.w),
               Expanded(
@@ -475,7 +475,7 @@ class _TransformationRoadmapScreenState
                     'Strength Analytics',
                     style: TextStyle(
                       color: primaryColor,
-                      fontSize: 10.5.sp,
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -498,7 +498,7 @@ class _TransformationRoadmapScreenState
                     'Bulking Diet',
                     style: TextStyle(
                       color: primaryColor,
-                      fontSize: 10.5.sp,
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -566,7 +566,7 @@ class _TransformationRoadmapScreenState
                   color: primaryColor.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Text('🏆', style: TextStyle(fontSize: 14)),
+                child:  Text('🏆', style: TextStyle(fontSize: 14.sp)),
               ),
               SizedBox(width: 8.w),
               Expanded(
@@ -602,7 +602,7 @@ class _TransformationRoadmapScreenState
                     'PR Vault & 1RM',
                     style: TextStyle(
                       color: primaryColor,
-                      fontSize: 10.5.sp,
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -625,7 +625,7 @@ class _TransformationRoadmapScreenState
                     'Workout History',
                     style: TextStyle(
                       color: primaryColor,
-                      fontSize: 10.5.sp,
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -687,7 +687,7 @@ class _TransformationRoadmapScreenState
                       'ACTIVE ROADMAP',
                       style: TextStyle(
                         color: primaryColor,
-                        fontSize: 10.sp,
+                        fontSize: 11.sp,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.5,
                       ),
@@ -926,7 +926,7 @@ class _TransformationRoadmapScreenState
                     hasCheckedIn ? 'Logged for this week' : 'Due this week',
                     style: TextStyle(
                       color: hasCheckedIn ? ColorManager.success : ColorManager.textTertiary,
-                      fontSize: 10.sp,
+                      fontSize: 11.sp,
                     ),
                   ),
                 ],
@@ -1098,7 +1098,7 @@ class _TransformationRoadmapScreenState
       children: [
         Text(value, style: TextStyle(color: color, fontSize: 13.sp, fontWeight: FontWeight.bold)),
         SizedBox(height: 2.h),
-        Text(label, style: TextStyle(color: ColorManager.textTertiary, fontSize: 10.sp)),
+        Text(label, style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp)),
       ],
     );
   }
@@ -1134,7 +1134,7 @@ class _TransformationRoadmapScreenState
                 ),
                 Text(
                   '${achieved.length} of ${state.milestones.length} milestones achieved',
-                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 10.sp),
+                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
                 ),
               ],
             ),
@@ -1439,7 +1439,7 @@ class _TransformationRoadmapScreenState
                       : DateFormat('EEE, MMM d').format(scheduledDate),
                   style: TextStyle(
                     color: isRescheduled ? ColorManager.secondary : ColorManager.textSecondary,
-                    fontSize: 10.sp,
+                    fontSize: 11.sp,
                     fontWeight: isRescheduled ? FontWeight.w600 : FontWeight.normal,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -1456,7 +1456,7 @@ class _TransformationRoadmapScreenState
                   statusLabel,
                   style: TextStyle(
                     color: statusColor,
-                    fontSize: 9.sp,
+                    fontSize: 11.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -1501,7 +1501,7 @@ class _TransformationRoadmapScreenState
                           ),
                           child: Text(
                             name,
-                            style: TextStyle(color: ColorManager.textSecondary, fontSize: 10.sp),
+                            style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
                           ),
                         );
                       }).toList(),
@@ -1521,7 +1521,7 @@ class _TransformationRoadmapScreenState
                             '🔥 Warm-up (5-10m)',
                             style: TextStyle(
                               color: primaryColor,
-                              fontSize: 9.sp,
+                              fontSize: 11.sp,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -1536,7 +1536,7 @@ class _TransformationRoadmapScreenState
                             '🧘 Cooldown (5m)',
                             style: TextStyle(
                               color: ColorManager.secondary,
-                              fontSize: 9.sp,
+                              fontSize: 11.sp,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -1552,7 +1552,7 @@ class _TransformationRoadmapScreenState
                               '🏠 Home Adapted',
                               style: TextStyle(
                                 color: ColorManager.success,
-                                fontSize: 9.sp,
+                                fontSize: 11.sp,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

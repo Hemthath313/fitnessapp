@@ -89,6 +89,12 @@ class _MockStatisticsProvider extends ChangeNotifier
   List<String> consumeNewlyUnlocked() => [];
 
   @override
+  int get totalWorkouts => 3;
+
+  @override
+  List<String> get unlockedAchievements => const [];
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 

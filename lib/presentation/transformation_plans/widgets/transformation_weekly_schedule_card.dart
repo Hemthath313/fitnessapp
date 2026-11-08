@@ -70,7 +70,7 @@ class TransformationWeeklyScheduleCard extends StatelessWidget {
                         color: summary.completedWorkouts == summary.plannedWorkouts && summary.plannedWorkouts > 0
                             ? ColorManager.success
                             : ColorManager.textSecondary,
-                        fontSize: 10.sp,
+                        fontSize: 11.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -187,7 +187,7 @@ class TransformationWeeklyScheduleCard extends StatelessWidget {
             label,
             style: TextStyle(
               color: ColorManager.textTertiary,
-              fontSize: 9.sp,
+              fontSize: 11.sp,
             ),
             overflow: TextOverflow.ellipsis,
           ),

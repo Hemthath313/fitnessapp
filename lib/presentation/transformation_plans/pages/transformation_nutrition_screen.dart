@@ -92,7 +92,7 @@ class _TransformationNutritionScreenState
         ),
         backgroundColor: ColorManager.surface,
         elevation: 0,
-        leading: IconButton(
+        leading: IconButton(tooltip: 'Back', 
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: ColorManager.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
@@ -143,7 +143,7 @@ class _TransformationNutritionScreenState
                     active.dietaryPreference ?? 'Personalized',
                     style: TextStyle(
                       color: primaryColor,
-                      fontSize: 10.sp,
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -408,7 +408,7 @@ class _TransformationNutritionScreenState
             label,
             style: TextStyle(
               color: ColorManager.textSecondary,
-              fontSize: 10.sp,
+              fontSize: 11.sp,
             ),
           ),
         ],
@@ -473,7 +473,7 @@ class _TransformationNutritionScreenState
                               meal.timeGuidance,
                               style: TextStyle(
                                 color: ColorManager.textSecondary,
-                                fontSize: 10.sp,
+                                fontSize: 11.sp,
                               ),
                             ),
                           ],
@@ -546,7 +546,7 @@ class _TransformationNutritionScreenState
                                   food.preparationNote,
                                   style: TextStyle(
                                     color: food.isRawWeight ? Colors.amber[800] : Colors.blue[300],
-                                    fontSize: 8.sp,
+                                    fontSize: 11.sp,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -558,7 +558,7 @@ class _TransformationNutritionScreenState
                             '${food.quantity} ${food.unit} • ${food.calories.round()} kcal | ${food.protein}g P | ${food.carbs}g C | ${food.fat}g F',
                             style: TextStyle(
                               color: ColorManager.textSecondary,
-                              fontSize: 10.sp,
+                              fontSize: 11.sp,
                             ),
                           ),
                         ],

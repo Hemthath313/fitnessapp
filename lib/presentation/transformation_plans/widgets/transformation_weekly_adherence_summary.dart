@@ -57,7 +57,7 @@ class TransformationWeeklyAdherenceSummary extends StatelessWidget {
                           'Weekly Habit Consistency',
                           style: TextStyle(
                             color: ColorManager.textPrimary,
-                            fontSize: 15.sp,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.bold,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -205,7 +205,7 @@ class TransformationWeeklyAdherenceSummary extends StatelessWidget {
                   dayLetter,
                   style: TextStyle(
                     color: ColorManager.textSecondary,
-                    fontSize: 10.sp,
+                    fontSize: 11.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -250,7 +250,7 @@ class TransformationWeeklyAdherenceSummary extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 10.sp),
+                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
                 ),
                 Text(
                   value,

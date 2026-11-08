@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fitness_app/services/badge_rules.dart';
+import 'package:fitness_app/services/notification_copy.dart';
 import 'package:fitness_app/services/notification_service.dart';
 import 'package:fitness_app/services/review_service.dart';
 import 'package:home_widget/home_widget.dart';
@@ -776,15 +778,26 @@ class StatisticsProvider with ChangeNotifier {
       // Check for new achievements
       await _checkAchievements();
 
+      // Cache streak values so reminder copy reflects the current run
+      await NotificationProfile.saveStreak(
+          current: _currentStreak, longest: _longestStreak);
+
       // Schedule notification reminder to maintain streak
       await NotificationService().scheduleStreakReminder();
+
+      // Sunday 7 PM "week in review" with this week's real numbers
+      await NotificationService().scheduleWeeklyRecapNotification(
+        workoutsThisWeek: workoutsCompletedThisWeek,
+        target: weeklyTarget,
+        streak: _currentStreak,
+      );
 
       // Advance today's workout day reminder by 7 days if scheduled (without canceling other days)
       await NotificationService().advanceTodayWorkoutReminderIfScheduled(
         scheduledDays: _scheduledWeekdays.isNotEmpty ? scheduledDayNames : null,
       );
 
-      // Schedule water reminder for 6 PM
+      // Schedule water reminder (user-chosen time, default 6 PM)
       await NotificationService().scheduleWaterReminder();
 
       // Reset re-engagement timers (3, 7, 14 days)
@@ -929,36 +942,12 @@ class StatisticsProvider with ChangeNotifier {
   }
 
   Future<void> _checkAchievements() async {
-    final newAchievements = <String>[];
-
-    // First Workout
-    if (_totalWorkouts == 1 &&
-        !_unlockedAchievements.contains('First Workout')) {
-      newAchievements.add('First Workout');
-    }
-
-    // 7 Day Streak
-    if (_currentStreak >= 7 &&
-        !_unlockedAchievements.contains('7 Day Streak')) {
-      newAchievements.add('7 Day Streak');
-    }
-
-    // Monthly Warrior
-    if (_currentStreak >= 30 &&
-        !_unlockedAchievements.contains('Monthly Warrior')) {
-      newAchievements.add('Monthly Warrior');
-    }
-
-    // Strong Start
-    if (_totalWorkouts >= 10 &&
-        !_unlockedAchievements.contains('Strong Start')) {
-      newAchievements.add('Strong Start');
-    }
-
-    // Centurion
-    if (_totalWorkouts >= 100 && !_unlockedAchievements.contains('Centurion')) {
-      newAchievements.add('Centurion');
-    }
+    // Rules live in badge_rules.dart (shared with the next-badge UI)
+    final newAchievements = badgesToUnlock(
+      alreadyUnlocked: _unlockedAchievements,
+      totalWorkouts: _totalWorkouts,
+      currentStreak: _currentStreak,
+    );
 
     if (newAchievements.isNotEmpty) {
       _unlockedAchievements.addAll(newAchievements);

@@ -1,4 +1,5 @@
 import 'package:fitness_app/model/workout_session_model.dart';
+import 'package:fitness_app/presentation/workout_logs/widgets/repeat_workout_widgets.dart';
 import 'package:fitness_app/services/strength_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
@@ -91,10 +92,10 @@ class WorkoutSessionCard extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                     decoration: BoxDecoration(
-                      color: isPartial ? Colors.orange.withOpacity(0.12) : Colors.green.withOpacity(0.12),
+                      color: isPartial ? Colors.orange.withValues(alpha: 0.12) : Colors.green.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8.r),
                       border: Border.all(
-                        color: isPartial ? Colors.orange.withOpacity(0.35) : Colors.green.withOpacity(0.35),
+                        color: isPartial ? Colors.orange.withValues(alpha: 0.35) : Colors.green.withValues(alpha: 0.35),
                       ),
                     ),
                     child: Text(
@@ -145,7 +146,7 @@ class WorkoutSessionCard extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: ColorManager.surfaceDark,
                             borderRadius: BorderRadius.circular(6.r),
-                            border: Border.all(color: ColorManager.divider.withOpacity(0.5)),
+                            border: Border.all(color: ColorManager.divider.withValues(alpha: 0.5)),
                           ),
                           child: Text(
                             name,
@@ -174,6 +175,11 @@ class WorkoutSessionCard extends StatelessWidget {
                   ],
                 ),
               ],
+              SizedBox(height: 10.h),
+              Align(
+                alignment: Alignment.centerRight,
+                child: RepeatWorkoutButton(session: session),
+              ),
             ],
           ),
         ),
@@ -189,7 +195,7 @@ class WorkoutSessionCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8.r),
       ),
       child: Row(

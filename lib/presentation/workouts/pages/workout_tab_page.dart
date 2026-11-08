@@ -116,7 +116,7 @@ class _WorkoutTabPageState extends State<WorkoutTabPage>
                           'Hello, $firstName 👋',
                           style: TextStyle(
                             color: ColorManager.white,
-                            fontSize: SizeManager.s24.sp,
+                            fontSize: 24.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -124,23 +124,43 @@ class _WorkoutTabPageState extends State<WorkoutTabPage>
                         Text(
                           'Ready to crush your goals today?',
                           style: TextStyle(
-                            color: ColorManager.textSecondary,
-                            fontSize: SizeManager.s14.sp,
+                            color: ColorManager.textMuted,
+                            fontSize: 14.sp,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () => context.push(Routes.workoutGeneratorRoute),
-                    child: Container(
-                      padding: EdgeInsets.all(10.w),
-                      decoration: BoxDecoration(
-                        color: ColorManager.primary.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: ColorManager.primary.withValues(alpha: 0.2)),
+                  Semantics(
+                    button: true,
+                    label: 'Build a workout plan with AI',
+                    child: InkWell(
+                      key: const Key('ai_plan_button'),
+                      onTap: () => context.push(Routes.workoutGeneratorRoute),
+                      borderRadius: BorderRadius.circular(20.r),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                        decoration: BoxDecoration(
+                          color: ColorManager.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20.r),
+                          border: Border.all(color: ColorManager.primary.withValues(alpha: 0.2)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.auto_awesome_rounded, color: ColorManager.primary, size: 16.sp),
+                            SizedBox(width: 6.w),
+                            Text(
+                              'AI Plan',
+                              style: TextStyle(
+                                color: ColorManager.primary,
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      child: Icon(Icons.auto_awesome_rounded, color: ColorManager.primary, size: 24.sp),
                     ),
                   ),
                 ],
@@ -161,12 +181,12 @@ class _WorkoutTabPageState extends State<WorkoutTabPage>
                 child: TabBar(
                   controller: _tabController,
                   indicator: BoxDecoration(
-                    color: ColorManager.primary,
+                    gradient: ColorManager.mintGradient,
                     borderRadius: BorderRadius.circular(22.r),
                   ),
                   indicatorSize: TabBarIndicatorSize.tab,
-                  labelColor: Colors.white,
-                  unselectedLabelColor: ColorManager.textSecondary,
+                  labelColor: ColorManager.onMint,
+                  unselectedLabelColor: ColorManager.textMuted,
                   labelStyle: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,

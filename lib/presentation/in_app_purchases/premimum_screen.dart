@@ -150,7 +150,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                           Flexible(
                             child: Text(
                               'Secure checkout with App Store/Play Store',
-                              style: TextStyle(fontSize: 10.sp, color: ColorManager.textSecondary),
+                              style: TextStyle(fontSize: 11.sp, color: ColorManager.textSecondary),
                             ),
                           ),
                         ],
@@ -158,11 +158,11 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     ),
                   ),
                   SizedBox(height: SizeManager.s24.h),
-                  const Center(
+                   Center(
                     child: Text(
                       'Cancel anytime. By subscribing, you agree to our\nTerms and Privacy Policy.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 10, color: Colors.white38),
+                      style: TextStyle(fontSize: 11.sp, color: Colors.white38),
                     ),
                   ),
                 ],
@@ -320,9 +320,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
                       color: ColorManager.secondary,
                       borderRadius: BorderRadius.circular(4.r),
                     ),
-                    child: const Text(
+                    child:  Text(
                       'LIFETIME ACCESS',
-                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black),
+                      style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: Colors.black),
                     ),
                   )
                 else if (isYearly)
@@ -335,7 +335,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     ),
                     child: Text(
                       'BEST VALUE',
-                      style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: ColorManager.onMint),
                     ),
                   ),
                 Text(

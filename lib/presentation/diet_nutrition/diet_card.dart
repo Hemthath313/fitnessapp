@@ -1,5 +1,6 @@
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 Widget buildDietCard(
     BuildContext context, String title, String imagePath, VoidCallback onTap) {
@@ -10,7 +11,7 @@ Widget buildDietCard(
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 8,
             spreadRadius: 2,
           ),
@@ -32,14 +33,14 @@ Widget buildDietCard(
             width: double.infinity,
             height: 180,
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.4),
+              color: Colors.black.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(12),
             ),
             alignment: Alignment.center,
             child: Text(
               title,
               style: TextStyle(
-                fontSize: 26, // Removed SizeManager.s26 for direct value
+                fontSize: 24.sp, // Removed SizeManager.s26 for direct value
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),

@@ -11,6 +11,7 @@ import 'package:fitness_app/utils/managers/asset_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class BodyPartsScreen extends StatefulWidget {
   const BodyPartsScreen({super.key});
@@ -101,7 +102,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
         backgroundColor: ColorManager.background,
         elevation: 0,
         scrolledUnderElevation: 0,
-        leading: IconButton(
+        leading: IconButton(tooltip: 'Back', 
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: ColorManager.textPrimary, size: 22),
           onPressed: () => Navigator.pop(context),
         ),
@@ -121,7 +122,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                       'Body Focus',
                       style: TextStyle(
                         color: ColorManager.textPrimary,
-                        fontSize: 32,
+                        fontSize: 32.sp,
                         fontWeight: FontWeight.bold,
                         letterSpacing: -0.5,
                       ),
@@ -131,7 +132,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                       'Select a muscle group to target and begin your training session',
                       style: TextStyle(
                         color: ColorManager.textSecondary,
-                        fontSize: 15,
+                        fontSize: 14.sp,
                         height: 1.3,
                       ),
                     ),
@@ -245,9 +246,9 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                                         children: [
                                           Text(
                                             bodyPart,
-                                            style: const TextStyle(
+                                            style:  TextStyle(
                                               color: Colors.white,
-                                              fontSize: 20.0,
+                                              fontSize: 20.sp,
                                               fontWeight: FontWeight.bold,
                                               letterSpacing: 0.2,
                                             ),
@@ -259,7 +260,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                                                 'View exercises',
                                                 style: TextStyle(
                                                   color: Colors.white.withValues(alpha: 0.7),
-                                                  fontSize: 12.0,
+                                                  fontSize: 12.sp,
                                                   fontWeight: FontWeight.w500,
                                                 ),
                                               ),
@@ -312,13 +313,13 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                 key: const Key('body_parts_search_field'),
                 controller: _searchController,
                 onChanged: (value) => setState(() => _searchQuery = value),
-                style: TextStyle(color: ColorManager.textPrimary, fontSize: 14),
+                style: TextStyle(color: ColorManager.textPrimary, fontSize: 14.sp),
                 decoration: InputDecoration(
                   hintText: 'Search all strength exercises...',
-                  hintStyle: TextStyle(color: ColorManager.textSecondary, fontSize: 14),
+                  hintStyle: TextStyle(color: ColorManager.textSecondary, fontSize: 14.sp),
                   prefixIcon: Icon(Icons.search_rounded, color: ColorManager.primary, size: 20),
                   suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
+                      ? IconButton(tooltip: 'Close', 
                           key: const Key('clear_body_parts_search_button'),
                           icon: Icon(Icons.close_rounded, color: ColorManager.textSecondary, size: 18),
                           onPressed: () {
@@ -407,7 +408,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: ColorManager.textSecondary,
-                      fontSize: 12.5,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -420,7 +421,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: ColorManager.limerGreen2,
-                      fontSize: 12.5,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -437,7 +438,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                   'Clear filters',
                   style: TextStyle(
                     color: ColorManager.primary,
-                    fontSize: 12,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -488,7 +489,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                           'Filter Exercises',
                           style: TextStyle(
                             color: ColorManager.textPrimary,
-                            fontSize: 18,
+                            fontSize: 18.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -515,7 +516,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                       'DIFFICULTY',
                       style: TextStyle(
                         color: ColorManager.textSecondary,
-                        fontSize: 11.5,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.8,
                       ),
@@ -537,7 +538,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                           visualDensity: VisualDensity.compact,
                           labelStyle: TextStyle(
                             color: isSelected ? ColorManager.primary : ColorManager.textSecondary,
-                            fontSize: 12,
+                            fontSize: 12.sp,
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                           ),
                           side: BorderSide(
@@ -553,7 +554,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                       'EQUIPMENT',
                       style: TextStyle(
                         color: ColorManager.textSecondary,
-                        fontSize: 11.5,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.8,
                       ),
@@ -575,7 +576,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                           visualDensity: VisualDensity.compact,
                           labelStyle: TextStyle(
                             color: isSelected ? ColorManager.primary : ColorManager.textSecondary,
-                            fontSize: 12,
+                            fontSize: 12.sp,
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                           ),
                           side: BorderSide(
@@ -600,17 +601,17 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: ColorManager.primary,
-                          foregroundColor: Colors.white,
+                          foregroundColor: const Color(0xFF06201B),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 0,
                         ),
-                        child: const Text(
+                        child:  Text(
                           'Apply Filters',
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -649,7 +650,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
             textAlign: TextAlign.center,
             style: TextStyle(
               color: ColorManager.textPrimary,
-              fontSize: 15,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -740,7 +741,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: ColorManager.textPrimary,
-                          fontSize: 15.5,
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.bold,
                           height: 1.25,
                         ),
@@ -752,7 +753,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: ColorManager.limerGreen2,
-                          fontSize: 12.5,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -773,7 +774,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   color: ColorManager.textPrimary.withValues(alpha: 0.85),
-                                  fontSize: 12,
+                                  fontSize: 12.sp,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -797,7 +798,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   color: ColorManager.limerGreen2,
-                                  fontSize: 10,
+                                  fontSize: 11.sp,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -811,7 +812,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: ColorManager.textSecondary,
-                                fontSize: 11,
+                                fontSize: 11.sp,
                               ),
                             ),
                           ),

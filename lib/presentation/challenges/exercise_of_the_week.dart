@@ -52,7 +52,7 @@ class ExerciseOfTheWeekScreen extends StatelessWidget {
         color: Colors.black,
         boxShadow: [
           BoxShadow(
-            color: ColorManager.primary.withOpacity(0.2),
+            color: ColorManager.primary.withValues(alpha: 0.2),
             blurRadius: 20,
             spreadRadius: 5,
           ),
@@ -83,7 +83,7 @@ class ExerciseOfTheWeekScreen extends StatelessWidget {
                 'FEATURED',
                 style: TextStyle(
                     color: Colors.black,
-                    fontSize: 10.sp,
+                    fontSize: 11.sp,
                     fontWeight: FontWeight.bold),
               ),
             ),
@@ -96,7 +96,7 @@ class ExerciseOfTheWeekScreen extends StatelessWidget {
           exercise.name,
           style: TextStyle(
             color: ColorManager.textPrimary,
-            fontSize: 28.sp,
+            fontSize: 24.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -137,9 +137,9 @@ class ExerciseOfTheWeekScreen extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.1),
+        color: Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: Colors.red.withOpacity(0.3)),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

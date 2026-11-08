@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness_app/services/auth_error_messages.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
@@ -313,7 +314,7 @@ class AuthProvider with ChangeNotifier {
                     style: StyleManager.forgotPWErrorTextStyle,
                   ),
                   content: Text(
-                    e.message.toString(),
+                    AuthErrorMessages.from(e),
                     textAlign: TextAlign.center,
                     style: StyleManager.forgotPWErrorContentTextStyle,
                   ),

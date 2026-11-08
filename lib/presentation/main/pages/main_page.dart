@@ -292,13 +292,13 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      const Text(
+                       Text(
                         'Update Required',
                         key: Key('main_update_required_title'),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 20,
+                          fontSize: 20.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -311,7 +311,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 14,
+                          fontSize: 14.sp,
                           height: 1.4,
                         ),
                       ),
@@ -338,14 +338,14 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                           icon: const Icon(Icons.open_in_new_rounded, size: 18),
                           label: Text(
                             isAndroid ? 'Update on Google Play' : 'Update App',
-                            style: const TextStyle(
-                              fontSize: 15,
+                            style:  TextStyle(
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: ColorManager.primary,
-                            foregroundColor: Colors.white,
+                            foregroundColor: const Color(0xFF06201B),
                             padding: const EdgeInsets.symmetric(
                               horizontal: 24,
                               vertical: 14,
@@ -382,11 +382,16 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
               child: appBar()!,
             )
           : null,
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: SafeArea(
+        minimum: EdgeInsets.fromLTRB(16.w, 0, 16.w, 10.h),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(32.r),
+          child: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: ontap,
+        height: 66.h,
         backgroundColor: ColorManager.surface,
-        indicatorColor: ColorManager.primary.withValues(alpha: 0.15),
+        indicatorColor: ColorManager.background,
         surfaceTintColor: Colors.transparent,
         shadowColor: Colors.transparent,
         elevation: 0,
@@ -395,30 +400,32 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
         destinations: [
           NavigationDestination(
             icon: Icon(Icons.home_outlined, color: ColorManager.textTertiary),
-            selectedIcon: Icon(Icons.home_rounded, color: ColorManager.primary),
+            selectedIcon: Icon(Icons.home_rounded, color: ColorManager.textPrimary),
             label: 'Home',
           ),
           NavigationDestination(
             icon: Icon(Icons.fitness_center_outlined, color: ColorManager.textTertiary),
-            selectedIcon: Icon(Icons.fitness_center_rounded, color: ColorManager.primary),
+            selectedIcon: Icon(Icons.fitness_center_rounded, color: ColorManager.textPrimary),
             label: 'Workouts',
           ),
           NavigationDestination(
             icon: Icon(Icons.calendar_month_outlined, color: ColorManager.textTertiary),
-            selectedIcon: Icon(Icons.calendar_month_rounded, color: ColorManager.primary),
+            selectedIcon: Icon(Icons.calendar_month_rounded, color: ColorManager.textPrimary),
             label: 'History',
           ),
           NavigationDestination(
             icon: Icon(Icons.insights_outlined, color: ColorManager.textTertiary),
-            selectedIcon: Icon(Icons.insights_rounded, color: ColorManager.primary),
+            selectedIcon: Icon(Icons.insights_rounded, color: ColorManager.textPrimary),
             label: 'Progress',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline_rounded, color: ColorManager.textTertiary),
-            selectedIcon: Icon(Icons.person_rounded, color: ColorManager.primary),
+            selectedIcon: Icon(Icons.person_rounded, color: ColorManager.textPrimary),
             label: 'Profile',
           ),
         ],
+          ),
+        ),
       ),
       body: SafeArea(
         top: false,

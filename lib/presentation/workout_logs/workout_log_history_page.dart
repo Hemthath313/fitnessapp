@@ -1,13 +1,18 @@
+import 'dart:convert';
+
 import 'package:fitness_app/model/workout_log.dart';
 import 'package:fitness_app/model/workout_session_model.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/workout_logs/widgets/legacy_workout_log_card.dart';
+import 'package:fitness_app/presentation/workout_logs/widgets/repeat_workout_widgets.dart';
+import 'package:fitness_app/presentation/widgets/skeleton.dart';
 import 'package:fitness_app/presentation/workout_logs/widgets/workout_session_card.dart';
 import 'package:fitness_app/presentation/workout_tools/plate_calculator_sheet.dart';
 import 'package:fitness_app/services/strength_service.dart';
 import 'package:fitness_app/services/workout_export_service.dart';
 import 'package:fitness_app/services/workout_log_service.dart';
+import 'package:fitness_app/utils/app_feedback.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +21,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class WorkoutHistoryFeedData {
@@ -37,10 +43,15 @@ class WorkoutLogHistoryPage extends StatefulWidget {
   final Stream<List<WorkoutSession>>? sessionsStream;
   final Stream<List<WorkoutLog>>? logsStream;
 
+  /// True when pushed as its own screen (shortcuts from other pages) instead
+  /// of living in the bottom-nav History tab: adds a back button.
+  final bool showBackButton;
+
   const WorkoutLogHistoryPage({
     super.key,
     this.sessionsStream,
     this.logsStream,
+    this.showBackButton = false,
   });
 
   static DateTime normalizeDate(DateTime date) {
@@ -140,6 +151,45 @@ class WorkoutLogHistoryPage extends StatefulWidget {
     );
   }
 
+  /// Narrows [feed] to entries whose workout name or any exercise name
+  /// contains [query] (case-insensitive; every word must match somewhere).
+  /// An empty query returns [feed] untouched.
+  static WorkoutHistoryFeedData filterFeed(
+    WorkoutHistoryFeedData feed,
+    String query,
+  ) {
+    final words = query
+        .toLowerCase()
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .toList();
+    if (words.isEmpty) return feed;
+
+    bool matches(String haystack) {
+      final h = haystack.toLowerCase();
+      return words.every(h.contains);
+    }
+
+    final sessions = feed.displayedSessions.where((s) {
+      final text = [
+        s.workoutName,
+        s.dayName,
+        ...s.exercises.map((e) => ExerciseIdentity.cleanDisplayName(e.exerciseName)),
+      ].join(' ');
+      return matches(text);
+    }).toList();
+
+    final logs = feed.displayedLegacyLogs
+        .where((l) => matches(ExerciseIdentity.cleanDisplayName(l.exerciseName)))
+        .toList();
+
+    return WorkoutHistoryFeedData(
+      displayedSessions: sessions,
+      displayedLegacyLogs: logs,
+      activeDates: feed.activeDates,
+    );
+  }
+
   @override
   State<WorkoutLogHistoryPage> createState() => _WorkoutLogHistoryPageState();
 }
@@ -153,7 +203,15 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
 
   late DateTime _focusedDay;
   DateTime? _selectedDay;
-  bool _isCalendarExpanded = true;
+  bool _isCalendarExpanded = false;
+  final TextEditingController _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -167,13 +225,35 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
   DateTime _normalizeDate(DateTime date) =>
       WorkoutLogHistoryPage.normalizeDate(date);
 
+  Future<void> _shareCsv(BuildContext boxContext, String csv) async {
+    final box = boxContext.findRenderObject() as RenderBox?;
+    try {
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [
+            XFile.fromData(
+              Uint8List.fromList(utf8.encode(csv)),
+              mimeType: 'text/csv',
+            ),
+          ],
+          fileNameOverrides: [WorkoutExportService.fileName(DateTime.now())],
+          subject: 'Gym Buddy workout export',
+          sharePositionOrigin:
+              box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+        ),
+      );
+    } catch (_) {
+      if (mounted) {
+        AppFeedback.error(context, "Couldn't open the share sheet. Try Copy instead.");
+      }
+    }
+  }
+
   void _exportLogs(BuildContext context) async {
     final logs = await _logService.getLogs().first;
     if (logs.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No workout logs to export!')),
-        );
+        AppFeedback.info(context, 'No workout logs to export!');
       }
       return;
     }
@@ -197,7 +277,7 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'CSV generated with ${logs.length} workouts. Copy and paste into Excel or Google Sheets.',
+                'CSV ready with ${logs.length} workouts. Share it to Sheets, Drive or email, or copy it to paste into a spreadsheet.',
                 style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp),
               ),
               SizedBox(height: 12.h),
@@ -215,7 +295,7 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                     style: TextStyle(
                       color: ColorManager.textSecondary,
                       fontFamily: 'monospace',
-                      fontSize: 10.sp,
+                      fontSize: 11.sp,
                     ),
                   ),
                 ),
@@ -227,18 +307,26 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
               onPressed: () => Navigator.pop(dialogCtx),
               child: Text('Close', style: TextStyle(color: ColorManager.textTertiary)),
             ),
-            ElevatedButton.icon(
+            OutlinedButton.icon(
+              key: const Key('export_copy_button'),
               onPressed: () async {
                 await Clipboard.setData(ClipboardData(text: csv));
                 if (mounted) {
                   Navigator.pop(dialogCtx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('CSV copied to clipboard!')),
-                  );
+                  AppFeedback.success(context, 'CSV copied to clipboard!');
                 }
               },
-              icon: const Icon(Icons.copy, size: 16),
-              label: const Text('Copy CSV'),
+              icon: Icon(Icons.copy, size: 16, color: ColorManager.primary),
+              label: Text('Copy', style: TextStyle(color: ColorManager.primary)),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: ColorManager.primary.withValues(alpha: 0.5)),
+              ),
+            ),
+            ElevatedButton.icon(
+              key: const Key('export_share_button'),
+              onPressed: () => _shareCsv(dialogCtx, csv),
+              icon: Icon(Icons.ios_share_rounded, size: 16, color: ColorManager.onMint),
+              label: Text('Share', style: TextStyle(color: ColorManager.onMint)),
               style: ElevatedButton.styleFrom(backgroundColor: ColorManager.primary),
             ),
           ],
@@ -275,7 +363,7 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
               context.push(Routes.premiumScreen);
             },
             style: ElevatedButton.styleFrom(backgroundColor: ColorManager.primary),
-            child: const Text('Go Premium', style: TextStyle(color: Colors.white)),
+            child: const Text('Go Premium', style: TextStyle(color: ColorManager.onMint)),
           ),
         ],
       ),
@@ -306,10 +394,13 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                   allLogs: allLogs,
                   selectedDay: _selectedDay,
                 );
+                final filteredFeed =
+                    WorkoutLogHistoryPage.filterFeed(feedData, _query);
                 final activeDates = feedData.activeDates;
-                final displayedSessions = feedData.displayedSessions;
-                final displayedLegacyLogs = feedData.displayedLegacyLogs;
-                final totalDisplayCount = feedData.totalDisplayCount;
+                final displayedSessions = filteredFeed.displayedSessions;
+                final displayedLegacyLogs = filteredFeed.displayedLegacyLogs;
+                final totalDisplayCount = filteredFeed.totalDisplayCount;
+                final isSearching = _query.trim().isNotEmpty;
 
                 return CustomScrollView(
                   slivers: [
@@ -323,6 +414,20 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      if (widget.showBackButton) ...[
+                                        IconButton(
+                                          tooltip: 'Back',
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
+                                          icon: Icon(Icons.arrow_back_rounded,
+                                              color: ColorManager.textPrimary),
+                                          onPressed: () => context.pop(),
+                                        ),
+                                        SizedBox(width: 12.w),
+                                      ],
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -330,7 +435,7 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                                       'Workout History',
                                       style: TextStyle(
                                         color: ColorManager.white,
-                                        fontSize: 26.sp,
+                                        fontSize: 24.sp,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -343,6 +448,9 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                                       ),
                                     ),
                                   ],
+                                ),
+                                    ],
+                                  ),
                                 ),
                                 Row(
                                   children: [
@@ -389,62 +497,50 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                             ),
                             SizedBox(height: 16.h),
 
-                            // Record New Workout CTA Card
+                            // Last workout strip: one-tap repeat of the latest session
+                            LastWorkoutStrip(sessions: allSessions),
+                            if (allSessions.isNotEmpty) SizedBox(height: 12.h),
+
+                            // Secondary entry for sessions done off-app
                             InkWell(
+                              key: const Key('log_past_workout_button'),
                               onTap: () => context.push(Routes.workoutLogRoute),
                               borderRadius: BorderRadius.circular(16.r),
                               child: Container(
                                 width: double.infinity,
-                                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [ColorManager.primary, ColorManager.primary.withOpacity(0.8)],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
+                                  color: ColorManager.surface,
                                   borderRadius: BorderRadius.circular(16.r),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: ColorManager.primary.withOpacity(0.3),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
+                                  border: Border.all(color: ColorManager.divider),
                                 ),
                                 child: Row(
                                   children: [
-                                    Container(
-                                      padding: EdgeInsets.all(8.w),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.2),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(Icons.add_rounded, color: Colors.white, size: 22.sp),
-                                    ),
-                                    SizedBox(width: 14.w),
+                                    Icon(Icons.edit_note_rounded, color: ColorManager.primary, size: 22.sp),
+                                    SizedBox(width: 12.w),
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            'Record New Workout',
+                                            'Log a past workout',
                                             style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16.sp,
+                                              color: ColorManager.textPrimary,
+                                              fontSize: 14.sp,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                           Text(
-                                            'Log exercises, sets, reps & weight',
+                                            "Add sets you've already done",
                                             style: TextStyle(
-                                              color: Colors.white70,
+                                              color: ColorManager.textTertiary,
                                               fontSize: 12.sp,
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    Icon(Icons.arrow_forward_ios_rounded, color: Colors.white70, size: 16.sp),
+                                    Icon(Icons.arrow_forward_ios_rounded, color: ColorManager.textTertiary, size: 14.sp),
                                   ],
                                 ),
                               ),
@@ -505,13 +601,14 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                                             'Activity Calendar',
                                             style: TextStyle(
                                               color: ColorManager.textPrimary,
-                                              fontSize: 15.sp,
+                                              fontSize: 14.sp,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                         ],
                                       ),
                                       IconButton(
+                                        tooltip: _isCalendarExpanded ? 'Collapse calendar' : 'Expand calendar',
                                         icon: Icon(
                                           _isCalendarExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                                           color: ColorManager.textTertiary,
@@ -559,13 +656,13 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                                       calendarStyle: CalendarStyle(
                                         defaultTextStyle: TextStyle(color: ColorManager.textPrimary, fontSize: 13.sp),
                                         weekendTextStyle: TextStyle(color: ColorManager.textPrimary, fontSize: 13.sp),
-                                        outsideTextStyle: TextStyle(color: ColorManager.textTertiary.withOpacity(0.5)),
+                                        outsideTextStyle: TextStyle(color: ColorManager.textTertiary.withValues(alpha: 0.5)),
                                         selectedDecoration: BoxDecoration(
                                           color: ColorManager.primary,
                                           shape: BoxShape.circle,
                                         ),
                                         todayDecoration: BoxDecoration(
-                                          color: ColorManager.primary.withOpacity(0.3),
+                                          color: ColorManager.primary.withValues(alpha: 0.3),
                                           shape: BoxShape.circle,
                                         ),
                                       ),
@@ -595,14 +692,57 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                             ),
                             SizedBox(height: 20.h),
 
+                            // Search by workout or exercise name
+                            TextField(
+                              key: const Key('history_search_field'),
+                              controller: _searchController,
+                              onChanged: (v) => setState(() => _query = v),
+                              textInputAction: TextInputAction.search,
+                              style: TextStyle(color: ColorManager.textPrimary, fontSize: 14.sp),
+                              decoration: InputDecoration(
+                                hintText: 'Search workouts or exercises',
+                                hintStyle: TextStyle(color: ColorManager.textTertiary, fontSize: 14.sp),
+                                prefixIcon: Icon(Icons.search_rounded, color: ColorManager.textTertiary, size: 20.sp),
+                                suffixIcon: _query.isEmpty
+                                    ? null
+                                    : IconButton(
+                                        key: const Key('history_search_clear'),
+                                        tooltip: 'Clear search',
+                                        icon: Icon(Icons.close_rounded, color: ColorManager.textTertiary, size: 18.sp),
+                                        onPressed: () {
+                                          _searchController.clear();
+                                          setState(() => _query = '');
+                                        },
+                                      ),
+                                filled: true,
+                                fillColor: ColorManager.surface,
+                                contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14.r),
+                                  borderSide: BorderSide(color: ColorManager.divider),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14.r),
+                                  borderSide: BorderSide(color: ColorManager.divider),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14.r),
+                                  borderSide: BorderSide(color: ColorManager.primary),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 16.h),
+
                             // Feed Header Row
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  _selectedDay == null
-                                      ? 'Recent Sessions ($totalDisplayCount)'
-                                      : 'Workouts on ${DateFormat('MMM d').format(_selectedDay!)} ($totalDisplayCount)',
+                                  isSearching
+                                      ? 'Matches ($totalDisplayCount)'
+                                      : _selectedDay == null
+                                          ? 'Recent Sessions ($totalDisplayCount)'
+                                          : 'Workouts on ${DateFormat('MMM d').format(_selectedDay!)} ($totalDisplayCount)',
                                   style: TextStyle(
                                     color: ColorManager.white,
                                     fontSize: 16.sp,
@@ -631,9 +771,8 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
 
                     // History Feed / Empty States
                     if (isLoading)
-                      const SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: Center(child: CircularProgressIndicator()),
+                      const SliverToBoxAdapter(
+                        child: SkeletonList(itemCount: 4),
                       )
                     else if (totalDisplayCount == 0)
                       SliverFillRemaining(
@@ -644,15 +783,19 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                _selectedDay == null ? Icons.fitness_center_outlined : Icons.event_busy_rounded,
+                                isSearching
+                                    ? Icons.search_off_rounded
+                                    : (_selectedDay == null ? Icons.fitness_center_outlined : Icons.event_busy_rounded),
                                 size: 64.sp,
                                 color: ColorManager.textTertiary,
                               ),
                               SizedBox(height: 16.h),
                               Text(
-                                _selectedDay == null
-                                    ? 'No workout sessions yet'
-                                    : 'No workouts found on ${DateFormat('MMM d, yyyy').format(_selectedDay!)}',
+                                isSearching
+                                    ? 'No matches for "${_query.trim()}"'
+                                    : _selectedDay == null
+                                        ? 'No workout sessions yet'
+                                        : 'No workouts found on ${DateFormat('MMM d, yyyy').format(_selectedDay!)}',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: ColorManager.textSecondary,
@@ -662,9 +805,13 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                               ),
                               SizedBox(height: 8.h),
                               Text(
-                                _selectedDay == null
-                                    ? 'Hit "+ Record New Workout" above to start logging!'
-                                    : 'Pick another date or tap "Clear Filter" to view all.',
+                                isSearching
+                                    ? (_selectedDay == null
+                                        ? 'Try a different word, like an exercise or workout name.'
+                                        : 'Try a different word, or tap "Clear Filter" to search all days.')
+                                    : _selectedDay == null
+                                        ? 'Start a workout from the Workouts tab, or tap "Log a past workout".'
+                                        : 'Pick another date or tap "Clear Filter" to view all.',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: ColorManager.textTertiary,

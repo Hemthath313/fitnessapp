@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:in_app_update/in_app_update.dart' as play;
 import 'package:provider/provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -453,7 +454,7 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
+                       Text(
                         'No internet connection',
                         key: Key('splash_offline_title'),
                         textAlign: TextAlign.center,
@@ -512,7 +513,7 @@ class _SplashScreenState extends State<SplashScreen>
                       ],
                       if (_hasRetryError && !_isRetrying) ...[
                         const SizedBox(height: 14),
-                        const Text(
+                         Text(
                           'Verification failed. Tap Retry to try again.',
                           key: Key('splash_retry_error_text'),
                           textAlign: TextAlign.center,
@@ -526,7 +527,7 @@ class _SplashScreenState extends State<SplashScreen>
                           key: const Key('splash_offline_retry_button'),
                           onPressed: _retryVerification,
                           icon: const Icon(Icons.refresh_rounded, size: 18),
-                          label: const Text(
+                          label:  Text(
                             'Retry Now',
                             style: TextStyle(
                               fontSize: 13,
@@ -535,7 +536,7 @@ class _SplashScreenState extends State<SplashScreen>
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: ColorManager.primary,
-                            foregroundColor: Colors.white,
+                            foregroundColor: const Color(0xFF06201B),
                             padding: const EdgeInsets.symmetric(
                               horizontal: 20,
                               vertical: 10,
@@ -577,7 +578,7 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
+                       Text(
                         'Update Required',
                         key: Key('splash_update_required_title'),
                         textAlign: TextAlign.center,
@@ -610,7 +611,7 @@ class _SplashScreenState extends State<SplashScreen>
                           await UpdateService().openStore(customUrl: _mandatoryUpdateInfo?.updateUrl);
                         },
                         icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                        label: const Text(
+                        label:  Text(
                           'Update on Google Play',
                           style: TextStyle(
                             fontSize: 13,
@@ -619,7 +620,7 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: ColorManager.primary,
-                          foregroundColor: Colors.white,
+                          foregroundColor: const Color(0xFF06201B),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,
                             vertical: 10,

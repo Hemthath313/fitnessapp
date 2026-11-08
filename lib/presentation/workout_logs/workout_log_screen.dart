@@ -186,7 +186,11 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
       final weight = double.tryParse(_weightControllers[i].text.trim()) ?? 0.0;
       final reps = int.tryParse(_repControllers[i].text.trim()) ?? 0;
       if (reps > 0) hasValidSet = true;
-      finalSets.add(WorkoutSet(weight: weight, reps: reps));
+      // Only sets with reps are real sets; they are stored as completed so
+      // progress charts and strength insights count them.
+      if (reps > 0) {
+        finalSets.add(WorkoutSet(weight: weight, reps: reps, isCompleted: true));
+      }
     }
 
     if (!hasValidSet) {
@@ -298,7 +302,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                         padding: EdgeInsets.symmetric(vertical: 4.h),
                         shrinkWrap: true,
                         itemCount: options.length,
-                        separatorBuilder: (context, _) => Divider(color: ColorManager.divider.withOpacity(0.3), height: 1),
+                        separatorBuilder: (context, _) => Divider(color: ColorManager.divider.withValues(alpha: 0.3), height: 1),
                         itemBuilder: (BuildContext context, int index) {
                           final String option = options.elementAt(index);
                           return InkWell(
@@ -345,7 +349,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                       backgroundColor: _exerciseController.text == chip ? ColorManager.primary : ColorManager.surface,
-                      side: BorderSide(color: ColorManager.divider.withOpacity(0.5)),
+                      side: BorderSide(color: ColorManager.divider.withValues(alpha: 0.5)),
                       onPressed: () {
                         _selectExerciseAndSeedWeight(chip);
                       },
@@ -436,7 +440,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                                 child: Center(
                                   child: CircleAvatar(
                                     radius: 12.r,
-                                    backgroundColor: ColorManager.primary.withOpacity(0.15),
+                                    backgroundColor: ColorManager.primary.withValues(alpha: 0.15),
                                     child: Text(
                                       '${index + 1}',
                                       style: TextStyle(
@@ -463,7 +467,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                                       decoration: InputDecoration(
                                         contentPadding: EdgeInsets.zero,
                                         filled: true,
-                                        fillColor: ColorManager.divider.withOpacity(0.3),
+                                        fillColor: ColorManager.divider.withValues(alpha: 0.3),
                                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r), borderSide: BorderSide.none),
                                         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r), borderSide: BorderSide.none),
                                         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r), borderSide: BorderSide.none),
@@ -487,7 +491,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                                       decoration: InputDecoration(
                                         contentPadding: EdgeInsets.zero,
                                         filled: true,
-                                        fillColor: ColorManager.divider.withOpacity(0.3),
+                                        fillColor: ColorManager.divider.withValues(alpha: 0.3),
                                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r), borderSide: BorderSide.none),
                                         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r), borderSide: BorderSide.none),
                                         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r), borderSide: BorderSide.none),
@@ -500,6 +504,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                               Expanded(
                                 child: Center(
                                   child: IconButton(
+                                    tooltip: 'Remove set',
                                     icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent),
                                     onPressed: () => _removeSet(index),
                                   ),
@@ -544,8 +549,8 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                 onPressed: _isSaving ? null : _saveLog,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorManager.primary,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: ColorManager.primary.withOpacity(0.6),
+                  foregroundColor: const Color(0xFF06201B),
+                  disabledBackgroundColor: ColorManager.primary.withValues(alpha: 0.6),
                   padding: EdgeInsets.symmetric(vertical: 15.h),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                   elevation: 4,
@@ -556,10 +561,10 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                         width: 20.h,
                         child: const CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: ColorManager.onMint,
                         ),
                       )
-                    : const Text('Save Workout', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    :  Text('Save Workout', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp)),
               ),
             ),
           ],

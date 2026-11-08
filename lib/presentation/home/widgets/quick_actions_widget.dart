@@ -1,11 +1,11 @@
 import 'package:fitness_app/utils/managers/color_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fitness_app/utils/router/router.dart';
 
-import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/presentation/transformation_plans/providers/transformation_provider.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
@@ -342,29 +342,16 @@ class QuickActionsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector2<ConsumptionProvider, StatisticsProvider,
-        ({bool waterDoneToday, bool workoutDoneToday})>(
-      selector: (_, consumption, stats) => (
-        waterDoneToday: consumption.waterADay > 0,
-        workoutDoneToday: stats.hasWorkoutToday,
-      ),
-      builder: (context, data, _) {
-        final bool waterDoneToday = data.waterDoneToday;
-        final bool workoutDoneToday = data.workoutDoneToday;
-
+    // Water logging lives on the Today's Snapshot water card, so it is not
+    // repeated here.
+    return Selector<StatisticsProvider, bool>(
+      selector: (_, stats) => stats.hasWorkoutToday,
+      builder: (context, workoutDoneToday, _) {
         final List<Map<String, dynamic>> actions = [
-          {
-            'icon': Icons.water_drop_rounded,
-            'label': 'Water',
-            'color': Colors.blue,
-            'isCompleted': waterDoneToday,
-            'onTap': () => context.push(Routes.addWaterRoute),
-          },
           {
             'icon': Icons.restaurant_menu_rounded,
             'label': 'Log Meal',
             'alias': 'Diet Plans',
-            'color': Colors.green,
             'isCompleted': false,
             'onTap': () {
               final transformationProvider =
@@ -380,7 +367,6 @@ class QuickActionsWidget extends StatelessWidget {
           {
             'icon': Icons.fitness_center_rounded,
             'label': 'Log Lift',
-            'color': Colors.orange,
             'isCompleted': workoutDoneToday,
             'onTap': () => _handleLogLift(context),
           },
@@ -388,7 +374,6 @@ class QuickActionsWidget extends StatelessWidget {
             'icon': Icons.auto_awesome_rounded,
             'label': 'AI Plan',
             'alias': 'AI Routine',
-            'color': Colors.purpleAccent,
             'isCompleted': false,
             'onTap': () {
               context.push(Routes.workoutGeneratorRoute);
@@ -396,126 +381,133 @@ class QuickActionsWidget extends StatelessWidget {
           },
         ];
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.only(left: 4.w, bottom: 12.h),
-            child: Text(
-              'Quick Actions',
-              style: TextStyle(
-                color: ColorManager.textPrimary,
-                fontSize: 16.sp,
-                fontWeight: FontWeight.bold,
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(left: 4.w, bottom: 12.h),
+                child: Text(
+                  'Quick Actions',
+                  style: TextStyle(
+                    color: ColorManager.textPrimary,
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
-            ),
+              Row(
+                children: [
+                  for (var i = 0; i < actions.length; i++) ...[
+                    if (i > 0) SizedBox(width: 10.w),
+                    Expanded(child: _buildActionTile(actions[i])),
+                  ],
+                ],
+              ),
+            ],
           ),
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 10.w),
-            decoration: BoxDecoration(
-              color: ColorManager.surfaceLight,
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: ColorManager.divider),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: actions.map((act) {
-                final Color baseColor = act['color'] as Color;
-                final bool isCompleted = act['isCompleted'] as bool? ?? false;
-                final String? alias = act['alias'] as String?;
-                return Expanded(
-                  child: GestureDetector(
-                    onTap: act['onTap'] as VoidCallback,
-                    behavior: HitTestBehavior.opaque,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Circular Icon wrapper with optional completion badge
-                            Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                Container(
-                                  width: 52.w,
-                                  height: 52.w,
-                                  decoration: BoxDecoration(
-                                    color: isCompleted
-                                        ? const Color(0xFF4CAF50).withValues(alpha: 0.15)
-                                        : baseColor.withValues(alpha: 0.12),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: isCompleted
-                                          ? const Color(0xFF4CAF50).withValues(alpha: 0.4)
-                                          : baseColor.withValues(alpha: 0.25),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  child: Icon(
-                                    act['icon'] as IconData,
-                                    color: isCompleted ? const Color(0xFF4CAF50) : baseColor,
-                                    size: 24.sp,
-                                  ),
-                                ),
-                                if (isCompleted)
-                                  Positioned(
-                                    top: -2,
-                                    right: -2,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(3),
-                                      decoration: const BoxDecoration(
-                                        color: Color(0xFF4CAF50),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        Icons.check,
-                                        color: Colors.white,
-                                        size: 10.sp,
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            SizedBox(height: 8.h),
-                            Text(
-                              act['label'] as String,
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: ColorManager.textSecondary,
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+        );
+      },
+    );
+  }
+
+  /// One quick-action tile: its own surface card with a ringed icon chip.
+  Widget _buildActionTile(Map<String, dynamic> act) {
+    final bool isCompleted = act['isCompleted'] as bool? ?? false;
+    final String? alias = act['alias'] as String?;
+    final String label = act['label'] as String;
+
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(
+        onTap: act['onTap'] as VoidCallback,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          constraints: BoxConstraints(minHeight: 96.h),
+          padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 6.w),
+          decoration: BoxDecoration(
+            color: ColorManager.surface,
+            borderRadius: BorderRadius.circular(AppRadius.card.r),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        width: 48.w,
+                        height: 48.w,
+                        decoration: BoxDecoration(
+                          color: ColorManager.iconChip,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isCompleted
+                                ? ColorManager.primary
+                                : Colors.transparent,
+                            width: 1.5,
+                          ),
                         ),
-                        if (alias != null)
-                          Positioned.fill(
-                            child: Opacity(
-                              opacity: 0.0,
-                              child: Center(
-                                child: Text(
-                                  alias,
-                                  style: TextStyle(fontSize: 12.sp),
-                                ),
-                              ),
+                        child: Icon(
+                          act['icon'] as IconData,
+                          color: ColorManager.primary,
+                          size: 22.sp,
+                        ),
+                      ),
+                      if (isCompleted)
+                        Positioned(
+                          top: -2,
+                          right: -2,
+                          child: Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              color: ColorManager.primary,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.check,
+                              color: const Color(0xFF06201B),
+                              size: 10.sp,
                             ),
                           ),
-                      ],
+                        ),
+                    ],
+                  ),
+                  SizedBox(height: 10.h),
+                  Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: ColorManager.textPrimary,
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                );
-            }).toList(),
-            ),
+                ],
+              ),
+              if (alias != null)
+                Positioned.fill(
+                  child: Opacity(
+                    opacity: 0.0,
+                    child: Center(
+                      child: Text(
+                        alias,
+                        style: TextStyle(fontSize: 12.sp),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
-        ],
+        ),
       ),
-    );
-      },
     );
   }
 }

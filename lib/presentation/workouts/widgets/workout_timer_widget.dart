@@ -147,7 +147,7 @@ class _WorkoutTimerWidgetState extends State<WorkoutTimerWidget> {
           Text(
             widget.isRestTimer ? 'Rest Timer' : 'Workout Timer',
             style: StyleManager.appbarTitleTextStyle.copyWith(
-              fontSize: SizeManager.s14.sp,
+              fontSize: 14.sp,
               color: ColorManager.white70,
             ),
           ),
@@ -184,7 +184,7 @@ class _WorkoutTimerWidgetState extends State<WorkoutTimerWidget> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Play/Pause button
-              IconButton(
+              IconButton(tooltip: _isRunning ? 'Pause' : 'Start', 
                 icon: Icon(
                   _isRunning ? Icons.pause : Icons.play_arrow,
                   color: ColorManager.limerGreen2,
@@ -195,7 +195,7 @@ class _WorkoutTimerWidgetState extends State<WorkoutTimerWidget> {
               SizedBox(width: SizeManager.s16.w),
 
               // Reset button
-              IconButton(
+              IconButton(tooltip: 'Reset timer', 
                 icon: Icon(Icons.stop, color: Colors.red),
                 onPressed: _resetTimer,
                 iconSize: SizeManager.s28.sp,
@@ -220,7 +220,7 @@ class _WorkoutTimerWidgetState extends State<WorkoutTimerWidget> {
       child: Text(
         label,
         style:
-            TextStyle(color: ColorManager.white, fontSize: SizeManager.s12.sp),
+            TextStyle(color: ColorManager.white, fontSize: 12.sp),
       ),
     );
   }
