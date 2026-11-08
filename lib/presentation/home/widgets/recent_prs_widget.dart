@@ -9,24 +9,68 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-class RecentPRsWidget extends StatelessWidget {
-  const RecentPRsWidget({super.key});
+/// Optimized RecentPRsWidget with persistent stream subscription caching.
+/// Avoids re-creating Firestore snapshot listeners on every Dashboard rebuild.
+class RecentPRsWidget extends StatefulWidget {
+  final Stream<List<WorkoutSession>>? sessionsStream;
+  final Stream<List<WorkoutLog>>? logsStream;
+
+  const RecentPRsWidget({
+    super.key,
+    this.sessionsStream,
+    this.logsStream,
+  });
+
+  @override
+  State<RecentPRsWidget> createState() => _RecentPRsWidgetState();
+}
+
+class _RecentPRsWidgetState extends State<RecentPRsWidget> {
+  late Stream<List<WorkoutSession>> _sessionsStream;
+  late Stream<List<WorkoutLog>> _logsStream;
+  final WorkoutLogService _logService = WorkoutLogService();
+  final StrengthService _strengthService = StrengthService();
+
+  @override
+  void initState() {
+    super.initState();
+    _initStreams();
+  }
+
+  void _initStreams() {
+    _sessionsStream = widget.sessionsStream ?? _logService.getSessions();
+    _logsStream = widget.logsStream ?? _logService.getLogs();
+  }
+
+  @override
+  void didUpdateWidget(RecentPRsWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.sessionsStream != oldWidget.sessionsStream ||
+        widget.logsStream != oldWidget.logsStream) {
+      _initStreams();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final logService = WorkoutLogService();
-    final strengthService = StrengthService();
-
     return StreamBuilder<List<WorkoutSession>>(
-      stream: logService.getSessions(),
+      stream: _sessionsStream,
       builder: (context, sessionSnapshot) {
         return StreamBuilder<List<WorkoutLog>>(
-          stream: logService.getLogs(),
+          stream: _logsStream,
           builder: (context, logSnapshot) {
+            final bool hasError =
+                sessionSnapshot.hasError || logSnapshot.hasError;
+            final bool isLoading =
+                (sessionSnapshot.connectionState == ConnectionState.waiting &&
+                        !sessionSnapshot.hasData) ||
+                    (logSnapshot.connectionState == ConnectionState.waiting &&
+                        !logSnapshot.hasData);
+
             final sessions = sessionSnapshot.data ?? [];
             final logs = logSnapshot.data ?? [];
 
-            final prMap = strengthService.getAllTimePRs(
+            final prMap = _strengthService.getAllTimePRs(
               sessions: sessions,
               legacyLogs: logs,
             );
@@ -42,12 +86,12 @@ class RecentPRsWidget extends StatelessWidget {
                   color: ColorManager.surface,
                   borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(
-                    color: ColorManager.divider.withOpacity(0.4),
+                    color: ColorManager.divider.withValues(alpha: 0.4),
                     width: 1.2,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
+                      color: Colors.black.withValues(alpha: 0.15),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -67,7 +111,7 @@ class RecentPRsWidget extends StatelessWidget {
                               Container(
                                 padding: EdgeInsets.all(6.w),
                                 decoration: BoxDecoration(
-                                  color: Colors.amber.withOpacity(0.15),
+                                  color: Colors.amber.withValues(alpha: 0.15),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
@@ -92,10 +136,12 @@ class RecentPRsWidget extends StatelessWidget {
                           ),
                         ),
                         InkWell(
-                          onTap: () => context.push(Routes.strengthAnalyticsRoute),
+                          onTap: () =>
+                              context.push(Routes.strengthAnalyticsRoute),
                           borderRadius: BorderRadius.circular(8.r),
                           child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 6.w, vertical: 4.h),
                             child: Row(
                               children: [
                                 Text(
@@ -120,23 +166,69 @@ class RecentPRsWidget extends StatelessWidget {
                     ),
                     SizedBox(height: 12.h),
 
-                    // Content: Real PR data or clean empty state
-                    if (prList.isNotEmpty) ...[
+                    // Content: Error, Loading, Real PR data, or clean empty state
+                    if (hasError) ...[
+                      // Error State
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            vertical: 14.h, horizontal: 12.w),
+                        decoration: BoxDecoration(
+                          color: ColorManager.surfaceLight,
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                              color: ColorManager.error.withValues(alpha: 0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.cloud_off_rounded,
+                                color: ColorManager.error, size: 20.sp),
+                            SizedBox(width: 12.w),
+                            Expanded(
+                              child: Text(
+                                'Unable to load recent personal records. Tap PR Vault to view your strength history.',
+                                style: TextStyle(
+                                  color: ColorManager.textSecondary,
+                                  fontSize: 11.sp,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ] else if (isLoading) ...[
+                      // Subtle Loading State
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                        child: Center(
+                          child: SizedBox(
+                            width: 20.w,
+                            height: 20.w,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: ColorManager.primary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ] else if (prList.isNotEmpty) ...[
                       // Display top 3 most recent PRs
                       ...prList.take(3).map((pr) {
                         final formattedWeight = pr.weight % 1 == 0
                             ? pr.weight.toInt().toString()
                             : pr.weight.toStringAsFixed(1);
-                        final dateStr = DateFormat('MMM d').format(pr.achievedAt);
+                        final dateStr =
+                            DateFormat('MMM d').format(pr.achievedAt);
 
                         return Container(
                           margin: EdgeInsets.only(bottom: 8.h),
-                          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 12.w, vertical: 10.h),
                           decoration: BoxDecoration(
                             color: ColorManager.surfaceLight,
                             borderRadius: BorderRadius.circular(12.r),
                             border: Border.all(
-                              color: ColorManager.divider.withOpacity(0.3),
+                              color: ColorManager.divider.withValues(alpha: 0.3),
                             ),
                           ),
                           child: Row(
@@ -145,7 +237,7 @@ class RecentPRsWidget extends StatelessWidget {
                                 width: 34.w,
                                 height: 34.w,
                                 decoration: BoxDecoration(
-                                  color: ColorManager.primary.withOpacity(0.12),
+                                  color: ColorManager.primary.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(8.r),
                                 ),
                                 child: Icon(
@@ -182,12 +274,14 @@ class RecentPRsWidget extends StatelessWidget {
                               ),
                               SizedBox(width: 8.w),
                               Container(
-                                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 8.w, vertical: 4.h),
                                 decoration: BoxDecoration(
-                                  color: ColorManager.primary.withOpacity(0.15),
+                                  color: ColorManager.primary.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(6.r),
                                   border: Border.all(
-                                    color: ColorManager.primary.withOpacity(0.3),
+                                    color:
+                                        ColorManager.primary.withValues(alpha: 0.3),
                                   ),
                                 ),
                                 child: Text(
@@ -206,9 +300,10 @@ class RecentPRsWidget extends StatelessWidget {
                     ] else ...[
                       // Clean Empty State
                       Container(
-                        padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 12.w),
+                        padding: EdgeInsets.symmetric(
+                            vertical: 14.h, horizontal: 12.w),
                         decoration: BoxDecoration(
-                          color: ColorManager.surfaceLight.withOpacity(0.5),
+                          color: ColorManager.surfaceLight.withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(12.r),
                         ),
                         child: Row(
@@ -216,7 +311,7 @@ class RecentPRsWidget extends StatelessWidget {
                             Container(
                               padding: EdgeInsets.all(8.w),
                               decoration: BoxDecoration(
-                                color: ColorManager.primary.withOpacity(0.1),
+                                color: ColorManager.primary.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(

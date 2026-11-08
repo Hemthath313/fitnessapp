@@ -59,13 +59,22 @@ class _CarouselSliderHomeWidgetState extends State<CarouselSliderHomeWidget> {
             ? (lastDay >= 30 ? 'Completed 🏆' : 'Continue Day ${lastDay + 1}')
             : 'Start Day 1';
 
+        final String sixPackBadge;
+        if (lastDay >= 30) {
+          sixPackBadge = 'COMPLETED';
+        } else if (lastDay > 0) {
+          sixPackBadge = 'ACTIVE';
+        } else {
+          sixPackBadge = '30-DAY CHALLENGE';
+        }
+
         final List<Widget> carouselCards = [
           // 1. 30-Day Six-Pack Challenge (Genuine tracked progression challenge)
           CarouselHomeBox(
             deviceWidth: deviceWidth,
             image: ImageManager.absWorkout,
             title: StringsManager.sixPackChallenge,
-            badge: 'ACTIVE CHALLENGE',
+            badge: sixPackBadge,
             subtitle: sixPackSubtitle,
             progress: sixPackProgress > 0 ? sixPackProgress : null,
             actionText: sixPackAction,

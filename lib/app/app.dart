@@ -15,6 +15,7 @@ import '../presentation/home/providers/statistics_provider.dart';
 import '../presentation/workouts/providers/workout_provider.dart';
 import '../presentation/progress_photos/providers/progress_photo_provider.dart';
 import '../presentation/theme/providers/theme_provider.dart';
+import '../presentation/transformation_plans/providers/transformation_provider.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -449,6 +450,12 @@ class _MyAppState extends State<MyApp> {
         ),
         ChangeNotifierProvider(
           create: (_) => ProgressPhotoProvider(),
+        ),
+        ChangeNotifierProxyProvider<SubscriptionProvider, TransformationProvider>(
+          create: (_) => TransformationProvider(),
+          update: (_, sub, transformation) =>
+              (transformation ?? TransformationProvider())
+                ..attachSubscriptionProvider(sub),
         ),
         ChangeNotifierProvider(
           create: (_) => ThemeProvider(),

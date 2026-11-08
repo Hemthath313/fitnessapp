@@ -515,6 +515,26 @@ class SubscriptionProvider with ChangeNotifier {
       }
     }
     
+    // Sort plans: Monthly first (0), Yearly second (1), Lifetime at last (2)
+    newPlans.sort((a, b) {
+      int getRank(SubscriptionPlan plan) {
+        if (plan.isLifetime ||
+            plan.id.toLowerCase().contains('lifetime') ||
+            plan.title.toLowerCase().contains('lifetime')) {
+          return 2;
+        }
+        if (plan.isYearly ||
+            plan.id.toLowerCase().contains('yearly') ||
+            plan.title.toLowerCase().contains('yearly') ||
+            plan.title.toLowerCase().contains('annual')) {
+          return 1;
+        }
+        return 0; // monthly
+      }
+
+      return getRank(a).compareTo(getRank(b));
+    });
+
     _plans = newPlans;
   }
 
@@ -560,4 +580,6 @@ class SubscriptionPlan {
     required this.productDetails,
     this.offerToken,
   });
+
+  bool get isMonthly => !isYearly && !isLifetime;
 }

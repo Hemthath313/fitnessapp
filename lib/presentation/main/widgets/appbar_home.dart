@@ -9,8 +9,24 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fitness_app/utils/router/router.dart';
 
-class HomePageAppBarWidget extends StatelessWidget {
+class HomePageAppBarWidget extends StatefulWidget {
   const HomePageAppBarWidget({super.key});
+
+  @override
+  State<HomePageAppBarWidget> createState() => _HomePageAppBarWidgetState();
+}
+
+class _HomePageAppBarWidgetState extends State<HomePageAppBarWidget> {
+  Future<Map<String, dynamic>>? _userDataFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+    if (homeProvider.userData.isEmpty) {
+      _userDataFuture = homeProvider.fetchUserData();
+    }
+  }
 
   String _getGreeting() {
     final hour = DateTime.now().hour;
@@ -28,84 +44,111 @@ class HomePageAppBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
-    final statisticsProvider = Provider.of<StatisticsProvider>(context);
-    final streak = statisticsProvider.currentStreak;
-
-    return FutureBuilder<Map<String, dynamic>>(
-      future: homeProvider.fetchUserData(),
-      builder: (context, snapshot) {
+    return Selector2<HomeProvider, StatisticsProvider,
+        ({String displayName, int streak})>(
+      selector: (_, homeProvider, statsProvider) {
         final firstName =
             (homeProvider.userData['first name'] ?? 'Champ') as String;
         final displayName = firstName.isNotEmpty ? firstName : 'Champ';
+        return (displayName: displayName, streak: statsProvider.currentStreak);
+      },
+      builder: (context, data, _) {
+        final displayName = data.displayName;
+        final streak = data.streak;
 
-        return AppBar(
+        final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+        if (homeProvider.userData.isNotEmpty || _userDataFuture == null) {
+          return _buildAppBar(context, displayName, streak);
+        }
+
+        return FutureBuilder<Map<String, dynamic>>(
+          future: _userDataFuture,
+          builder: (context, snapshot) {
+            final fetchedName = (snapshot.data?['first name'] ?? displayName) as String;
+            final name = fetchedName.isNotEmpty ? fetchedName : displayName;
+            return _buildAppBar(context, name, streak);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildAppBar(BuildContext context, String displayName, int streak) {
+    return AppBar(
           actions: [
-            // Streak badge
-            GestureDetector(
-              onTap: () => context.push(Routes.workoutHistoryRoute),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                margin: EdgeInsets.only(right: 8.w),
-                padding:
-                    EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                decoration: BoxDecoration(
-                  gradient: streak > 0
-                      ? LinearGradient(
-                          colors: streak >= 7
-                              ? [const Color(0xFFFF6B35), const Color(0xFFFF8C42)]
-                              : [Colors.orange.shade600, Colors.amber],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        )
-                      : null,
-                  color: streak == 0 ? ColorManager.surfaceLight : null,
-                  borderRadius: BorderRadius.circular(20.r),
-                  boxShadow: streak > 0
-                      ? [
-                          BoxShadow(
-                            color: Colors.orange.withOpacity(0.4),
-                            blurRadius: 8,
-                            spreadRadius: 0,
+            // Streak badge wrapped in RepaintBoundary to isolate shimmer animation repaints
+            RepaintBoundary(
+              child: GestureDetector(
+                onTap: () => context.push(Routes.workoutHistoryRoute),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: EdgeInsets.only(right: 8.w),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                  decoration: BoxDecoration(
+                    gradient: streak > 0
+                        ? LinearGradient(
+                            colors: streak >= 7
+                                ? [const Color(0xFFFF6B35), const Color(0xFFFF8C42)]
+                                : [Colors.orange.shade600, Colors.amber],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           )
-                        ]
-                      : null,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.local_fire_department_rounded,
-                      color: streak > 0 ? Colors.white : ColorManager.textTertiary,
-                      size: 18.sp,
-                    ),
-                    SizedBox(width: 4.w),
-                    Text(
-                      '$streak',
-                      style: TextStyle(
+                        : null,
+                    color: streak == 0 ? ColorManager.surfaceLight : null,
+                    borderRadius: BorderRadius.circular(20.r),
+                    boxShadow: streak > 0
+                        ? [
+                            BoxShadow(
+                              color: Colors.orange.withValues(alpha: 0.4),
+                              blurRadius: 8,
+                              spreadRadius: 0,
+                            )
+                          ]
+                        : null,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.local_fire_department_rounded,
                         color: streak > 0 ? Colors.white : ColorManager.textTertiary,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.bold,
+                        size: 18.sp,
                       ),
-                    ),
-                    if (streak > 0) ...[
-                      SizedBox(width: 2.w),
+                      SizedBox(width: 4.w),
                       Text(
-                        'day${streak == 1 ? '' : 's'}',
+                        '$streak',
                         style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w500,
+                          color: streak > 0 ? Colors.white : ColorManager.textTertiary,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
+                      if (streak > 0) ...[
+                        SizedBox(width: 2.w),
+                        Text(
+                          'day${streak == 1 ? '' : 's'}',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
-                ),
-              ).animate(onPlay: (c) => c.repeat(reverse: true)).shimmer(
-                    duration: 2000.ms,
-                    delay: 1000.ms,
-                    color: Colors.white.withOpacity(0.2),
                   ),
+                ),
+              ).animate(
+                onPlay: (c) {
+                  if (streak > 0) {
+                    c.repeat(reverse: true);
+                  }
+                },
+              ).shimmer(
+                duration: 2000.ms,
+                delay: 1000.ms,
+                color: Colors.white.withValues(alpha: 0.2),
+              ),
             ),
             // Premium icon
             IconButton(
@@ -156,7 +199,5 @@ class HomePageAppBarWidget extends StatelessWidget {
             ),
           ),
         ).animate().fadeIn(duration: 500.ms);
-      },
-    );
   }
 }

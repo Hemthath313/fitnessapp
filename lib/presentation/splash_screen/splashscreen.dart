@@ -1,13 +1,17 @@
+import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
-import 'package:fitness_app/services/connectivity_service.dart';
-import 'package:fitness_app/utils/managers/color_manager.dart';
-import 'dart:async';
 import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
+import 'package:fitness_app/presentation/widgets/update_dialog.dart';
+import 'package:fitness_app/services/connectivity_service.dart';
 import 'package:fitness_app/services/notification_service.dart';
+import 'package:fitness_app/services/update_service.dart';
+import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:in_app_update/in_app_update.dart' as play;
 import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -36,7 +40,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
@@ -44,6 +48,8 @@ class _SplashScreenState extends State<SplashScreen>
   bool _isOfflineBlocked = false;
   bool _isRetrying = false;
   bool _hasRetryError = false;
+  bool _isMandatoryUpdateBlocked = false;
+  AppUpdateInfo? _mandatoryUpdateInfo;
   Timer? _navigationTimer;
   Timer? _offlineRetryTimer;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
@@ -51,6 +57,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     // Request notification permission immediately on app launch
     try {
@@ -211,11 +218,103 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (!mounted) return;
 
+    // Check whether an update is required before proceeding
+    try {
+      final updateInfo = await UpdateService().checkForUpdates();
+      if (!mounted) return;
+
+      final bool isAndroid = UpdateService().isAndroidPlatform;
+
+      if (updateInfo.isForceUpdate) {
+        if (isAndroid) {
+          // Android: Native Google Play immediate update (AppUpdateType.immediate)
+          // No custom UpdateDialog on Android!
+          if (updateInfo.canUsePlayStoreImmediateUpdate) {
+            final result = await UpdateService().performNativeImmediateUpdate();
+            if (result == play.AppUpdateResult.success) {
+              return; // Update was applied
+            }
+          }
+          // If immediate update was not allowed, failed, or canceled by user:
+          // Fallback to update_url_android and keep mandatory restriction in place
+          await UpdateService().openStore(customUrl: updateInfo.updateUrl);
+
+          if (mounted) {
+            setState(() {
+              _isMandatoryUpdateBlocked = true;
+              _mandatoryUpdateInfo = updateInfo;
+            });
+          }
+          return; // Block navigation completely while mandatory update is pending
+        } else {
+          // iOS: Show existing custom UpdateDialog
+          if (!UpdateService().isDialogOpen) {
+            UpdateService().isDialogOpen = true;
+            await showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (BuildContext dialogContext) {
+                return UpdateDialog(
+                  isForceUpdate: true,
+                  releaseNotes: updateInfo.releaseNotes,
+                  updateUrl: updateInfo.updateUrl,
+                  canUsePlayStoreImmediateUpdate: false,
+                  canUsePlayStoreFlexibleUpdate: false,
+                );
+              },
+            );
+            UpdateService().isDialogOpen = false;
+          }
+          return; // Block navigation completely while mandatory update is pending
+        }
+      } else if (updateInfo.hasUpdate) {
+        if (isAndroid) {
+          // Android: Native Google Play flexible update (AppUpdateType.flexible)
+          // Do NOT show custom UpdateDialog on Android!
+          // Optional updates must NOT block startup or Dashboard navigation!
+          if (updateInfo.canUsePlayStoreFlexibleUpdate && UpdateService().shouldPromptOptionalUpdate) {
+            UpdateService().markOptionalUpdateAttempted();
+            unawaited(UpdateService().startNativeFlexibleUpdate(
+              fallbackUrl: updateInfo.updateUrl,
+            ));
+          }
+          // Proceed to normal navigation without blocking!
+        } else {
+          // iOS: Show existing custom UpdateDialog if not dismissed this session
+          if (UpdateService().shouldPromptOptionalUpdate && !UpdateService().isDialogOpen) {
+            UpdateService().markOptionalUpdateAttempted();
+            UpdateService().isDialogOpen = true;
+            await showDialog(
+              context: context,
+              barrierDismissible: true,
+              builder: (BuildContext dialogContext) {
+                return UpdateDialog(
+                  isForceUpdate: false,
+                  isRecommended: updateInfo.isRecommended,
+                  releaseNotes: updateInfo.releaseNotes,
+                  updateUrl: updateInfo.updateUrl,
+                  canUsePlayStoreImmediateUpdate: false,
+                  canUsePlayStoreFlexibleUpdate: false,
+                );
+              },
+            );
+            UpdateService().isDialogOpen = false;
+            UpdateService().markOptionalUpdateDismissed();
+          }
+          if (!mounted) return;
+        }
+      }
+    } catch (e) {
+      debugPrint('SplashScreen update check skipped: $e');
+    }
+
     final user = authProvider.user;
     final hasAgeParameter = authProvider.hasAgeParameter;
     final emailIsVerified = user?.emailVerified ?? false;
     
     debugPrint('SplashScreen: Final state - user: ${user?.uid}, hasAge: $hasAgeParameter, verified: $emailIsVerified');
+
+    if (!mounted) return;
 
     // Case 1: Unauthenticated user -> boarding
     if (user == null) {
@@ -258,7 +357,36 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _isMandatoryUpdateBlocked) {
+      _checkMandatoryUpdateOnResume();
+    }
+  }
+
+  Future<void> _checkMandatoryUpdateOnResume() async {
+    try {
+      final info = await UpdateService().checkForUpdates();
+      if (!info.isForceUpdate) {
+        if (mounted) {
+          setState(() {
+            _isMandatoryUpdateBlocked = false;
+            _mandatoryUpdateInfo = null;
+          });
+          navigate();
+        }
+      } else {
+        if (UpdateService().isAndroidPlatform && info.canUsePlayStoreImmediateUpdate) {
+          await UpdateService().performNativeImmediateUpdate(fallbackUrl: info.updateUrl);
+        }
+      }
+    } catch (e) {
+      debugPrint('SplashScreen: Error rechecking update on resume: $e');
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _navigationTimer?.cancel();
     _offlineRetryTimer?.cancel();
     _connectivitySubscription?.cancel();
@@ -418,6 +546,89 @@ class _SplashScreenState extends State<SplashScreen>
                           ),
                         ),
                       ],
+                    ],
+                  ),
+                ),
+              ],
+              if (_isMandatoryUpdateBlocked) ...[
+                const SizedBox(height: 28),
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: ColorManager.darkSurface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: ColorManager.primary.withValues(alpha: 0.3),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: ColorManager.primary.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.system_update_rounded,
+                          color: ColorManager.primary,
+                          size: 36,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Update Required',
+                        key: Key('splash_update_required_title'),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        'A mandatory update is required to continue using Gym Buddy. Please update on Google Play.',
+                        key: const Key('splash_update_required_message'),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: ColorManager.textSecondary,
+                          fontSize: 13,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        key: const Key('splash_update_store_button'),
+                        onPressed: () async {
+                          final info = _mandatoryUpdateInfo;
+                          if (info != null && info.canUsePlayStoreImmediateUpdate) {
+                            final res = await UpdateService().performNativeImmediateUpdate();
+                            if (res == play.AppUpdateResult.success) return;
+                          }
+                          await UpdateService().openStore(customUrl: _mandatoryUpdateInfo?.updateUrl);
+                        },
+                        icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                        label: const Text(
+                          'Update on Google Play',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ColorManager.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

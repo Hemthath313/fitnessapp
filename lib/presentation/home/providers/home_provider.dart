@@ -40,6 +40,11 @@ class HomeProvider with ChangeNotifier {
           _userData['hips'] = (data['hips'] ?? 0).toDouble();
           _userData['thigh'] = (data['thigh'] ?? 0).toDouble();
           _userData['calf'] = (data['calf'] ?? 0).toDouble();
+          if (data['experience'] != null) _userData['experience'] = data['experience'];
+          if (data['experienceLevel'] != null) _userData['experienceLevel'] = data['experienceLevel'];
+          if (data['fitness_level'] != null) _userData['fitness_level'] = data['fitness_level'];
+          if (data['fitnessLevel'] != null) _userData['fitnessLevel'] = data['fitnessLevel'];
+          if (data['level'] != null) _userData['level'] = data['level'];
         } else {
           // Return empty data if document doesn't exist
           _userData.clear();

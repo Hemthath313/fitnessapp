@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
+import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/presentation/custom_workouts/day_workout_session_page.dart';
 import 'package:fitness_app/utils/router/router.dart';
@@ -14,11 +15,15 @@ import 'package:fitness_app/utils/router/router.dart';
 class WorkoutSessionLauncherPage extends StatefulWidget {
   final String dayName;
   final List<dynamic>? initialWorkouts;
+  final String? planId;
+  final int? planDay;
 
   const WorkoutSessionLauncherPage({
     super.key,
     required this.dayName,
     this.initialWorkouts,
+    this.planId,
+    this.planDay,
   });
 
   @override
@@ -46,6 +51,16 @@ class _WorkoutSessionLauncherPageState
   @override
   void initState() {
     super.initState();
+    if (widget.planId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final sub = Provider.of<SubscriptionProvider?>(context, listen: false);
+        if (sub != null && !sub.isPremium) {
+          context.pushReplacement(Routes.premiumScreen);
+          return;
+        }
+      });
+    }
     _resolveAndLoadSession();
   }
 
@@ -224,6 +239,8 @@ class _WorkoutSessionLauncherPageState
     return DayWorkoutSessionPage(
       dayName: _resolvedDay,
       workouts: _workouts!,
+      planId: widget.planId,
+      planDay: widget.planDay,
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:fitness_app/data/workout_splits_data.dart';
+import 'package:fitness_app/model/transformation_plan_model.dart';
 import 'package:fitness_app/presentation/auth/pages/add_data_page.dart';
 import 'package:fitness_app/presentation/auth/pages/auth_page.dart';
 import 'package:fitness_app/presentation/auth/pages/forgot_password_page.dart';
@@ -7,7 +8,14 @@ import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
 import 'package:fitness_app/presentation/boarding/pages/boarding_page.dart';
 import 'package:fitness_app/presentation/chat_screen/chat_screen.dart';
 import 'package:fitness_app/presentation/in_app_purchases/premimum_screen.dart';
-import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
+import 'package:fitness_app/presentation/transformation_plans/pages/transformation_hub_screen.dart';
+import 'package:fitness_app/presentation/transformation_plans/pages/transformation_onboarding_screen.dart';
+import 'package:fitness_app/presentation/transformation_plans/pages/transformation_plan_detail_screen.dart';
+import 'package:fitness_app/presentation/transformation_plans/pages/transformation_roadmap_screen.dart';
+import 'package:fitness_app/presentation/transformation_plans/pages/transformation_progress_screen.dart';
+import 'package:fitness_app/presentation/transformation_plans/pages/transformation_weekly_check_in_screen.dart';
+import 'package:fitness_app/presentation/transformation_plans/pages/transformation_completion_screen.dart';
+import 'package:fitness_app/presentation/transformation_plans/pages/transformation_nutrition_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_app/presentation/body_parts/pages/abs.dart';
 import 'package:fitness_app/presentation/body_parts/pages/biceps.dart';
@@ -120,6 +128,14 @@ class Routes {
   static const String muscleAnalyticsRoute = '/muscleAnalytics';
   static const String workoutSessionDetailRoute = '/workoutSessionDetail';
   static const String dayWorkoutSessionRoute = '/dayWorkoutSession';
+  static const String transformationPlansRoute = '/transformation-plans';
+  static const String transformationPlanDetailRoute = '/transformation-plans/detail';
+  static const String transformationOnboardingRoute = '/transformation-plans/onboarding';
+  static const String transformationRoadmapRoute = '/transformation-plans/roadmap';
+  static const String transformationProgressRoute = '/transformation-plans/progress';
+  static const String transformationCompletionRoute = '/transformation-plans/completion';
+  static const String transformationCheckInRoute = '/transformation-plans/check-in';
+  static const String transformationNutritionRoute = '/transformation-plans/nutrition';
 }
 
 final GoRouter router = GoRouter(
@@ -476,11 +492,96 @@ final GoRouter router = GoRouter(
               extraDay ??
               'today';
           final workouts = extraMap?['workouts'] as List<dynamic>?;
+          final planId = state.uri.queryParameters['planId'] ??
+              extraMap?['planId']?.toString();
+          final planDay = int.tryParse(state.uri.queryParameters['planDay'] ?? '') ??
+              (extraMap?['planDay'] as num?)?.toInt();
           return PageTransitions.buildPageWithSlideTransition(
               state.pageKey,
               WorkoutSessionLauncherPage(
                 dayName: day,
                 initialWorkouts: workouts,
+                planId: planId,
+                planDay: planDay,
+              ));
+        }),
+    GoRoute(
+        path: Routes.transformationPlansRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const TransformationHubScreen())),
+    GoRoute(
+        path: Routes.transformationPlanDetailRoute,
+        pageBuilder: (context, state) {
+          final plan = state.extra is TransformationPlanBlueprint
+              ? state.extra as TransformationPlanBlueprint
+              : null;
+          final planId = state.uri.queryParameters['planId'];
+          return PageTransitions.buildPageWithSlideTransition(
+              state.pageKey,
+              TransformationPlanDetailScreen(
+                plan: plan,
+                planId: planId,
+              ));
+        }),
+    GoRoute(
+        path: Routes.transformationOnboardingRoute,
+        pageBuilder: (context, state) {
+          final plan = state.extra is TransformationPlanBlueprint
+              ? state.extra as TransformationPlanBlueprint
+              : null;
+          final planId = state.uri.queryParameters['planId'];
+          return PageTransitions.buildPageWithSlideTransition(
+              state.pageKey,
+              TransformationOnboardingScreen(
+                plan: plan,
+                planId: planId,
+              ));
+        }),
+    GoRoute(
+        path: Routes.transformationRoadmapRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const TransformationRoadmapScreen())),
+    GoRoute(
+        path: Routes.transformationProgressRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const TransformationProgressScreen())),
+    GoRoute(
+        path: Routes.transformationCompletionRoute,
+        pageBuilder: (context, state) {
+          final completedState = state.extra is UserTransformationState
+              ? state.extra as UserTransformationState
+              : null;
+          return PageTransitions.buildPageWithSlideTransition(
+              state.pageKey,
+              TransformationCompletionScreen(
+                completedState: completedState,
+              ));
+        }),
+    GoRoute(
+        path: Routes.transformationCheckInRoute,
+        pageBuilder: (context, state) {
+          final weekNumber = state.extra is int
+              ? state.extra as int
+              : int.tryParse(state.uri.queryParameters['week'] ?? '');
+          return PageTransitions.buildPageWithSlideTransition(
+              state.pageKey,
+              TransformationWeeklyCheckInScreen(
+                weekNumber: weekNumber,
+              ));
+        }),
+    GoRoute(
+        path: Routes.transformationNutritionRoute,
+        pageBuilder: (context, state) {
+          final dayNumber = state.extra is int
+              ? state.extra as int
+              : int.tryParse(state.uri.queryParameters['day'] ?? '');
+          return PageTransitions.buildPageWithSlideTransition(
+              state.pageKey,
+              TransformationNutritionScreen(
+                initialDayNumber: dayNumber,
               ));
         }),
   ],

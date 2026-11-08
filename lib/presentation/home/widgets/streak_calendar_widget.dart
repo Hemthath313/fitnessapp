@@ -50,12 +50,12 @@ class StreakCalendarWidget extends StatelessWidget {
             color: ColorManager.surface,
             borderRadius: BorderRadius.circular(24.r),
             border: Border.all(
-              color: ColorManager.divider.withOpacity(0.4),
+              color: ColorManager.divider.withValues(alpha: 0.4),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.02),
+                color: Colors.black.withValues(alpha: 0.02),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -74,7 +74,7 @@ class StreakCalendarWidget extends StatelessWidget {
                         Container(
                           padding: EdgeInsets.all(6.w),
                           decoration: BoxDecoration(
-                            color: Colors.orange.withOpacity(0.15),
+                            color: Colors.orange.withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -212,7 +212,7 @@ class StreakCalendarWidget extends StatelessWidget {
                                         ? ColorManager.primary
                                         : isFuture
                                             ? ColorManager.textSecondary
-                                                .withOpacity(0.5)
+                                                .withValues(alpha: 0.5)
                                             : ColorManager.textSecondary,
                                     fontSize: 13.sp,
                                     fontWeight: isToday
@@ -231,7 +231,7 @@ class StreakCalendarWidget extends StatelessWidget {
               // Divider
               Container(
                 height: 1.h,
-                color: ColorManager.divider.withOpacity(0.4),
+                color: ColorManager.divider.withValues(alpha: 0.4),
               ),
               SizedBox(height: 16.h),
 

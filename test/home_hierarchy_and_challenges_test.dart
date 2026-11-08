@@ -110,9 +110,9 @@ void main() {
       expect(find.text(StringsManager.workoutsplit), findsNothing);
       expect(find.text('EXPLORE SPLITS'), findsNothing);
 
-      // Page 0: Genuine 30-Day Six-Pack Challenge
+      // Page 0: Genuine 30-Day Six-Pack Challenge (Not started badge)
       expect(find.text(StringsManager.sixPackChallenge), findsOneWidget);
-      expect(find.text('ACTIVE CHALLENGE'), findsOneWidget);
+      expect(find.text('30-DAY CHALLENGE'), findsOneWidget);
 
       // Verify viewport fraction is 1.0 (no awkward peeking clutter)
       final carouselFinder = find.byType(CarouselSlider);

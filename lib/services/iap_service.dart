@@ -13,7 +13,7 @@ class IAPService {
 
   final List<String> _productIds = [
     'gymbuddy_premium_monthly',
-    // 'premium_yearly', // Hidden for now as per request
+    'premium_yearly',
   ];
   List<ProductDetails> _products = [];
   List<ProductDetails> get products => _products;

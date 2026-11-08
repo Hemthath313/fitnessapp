@@ -9,6 +9,7 @@ import 'package:fitness_app/presentation/workout_tools/plate_calculator_sheet.da
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/services/exercise_substitution_service.dart';
 import 'package:fitness_app/services/progression_service.dart';
+import 'package:fitness_app/services/update_service.dart';
 import 'package:fitness_app/services/workout_log_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
@@ -19,10 +20,14 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fitness_app/presentation/transformation_plans/providers/transformation_provider.dart';
+import 'package:fitness_app/presentation/transformation_plans/utils/transformation_equipment_adapter.dart';
 
 class DayWorkoutSessionPage extends StatefulWidget {
   final String dayName;
   final List<dynamic> workouts; // List of WorkoutModel, Exercise, or maps
+  final String? planId;
+  final int? planDay;
   final VideoControllerFactory? videoControllerFactory;
   final VideoViewBuilder? videoViewBuilder;
 
@@ -30,6 +35,8 @@ class DayWorkoutSessionPage extends StatefulWidget {
     super.key,
     required this.dayName,
     required this.workouts,
+    this.planId,
+    this.planDay,
     this.videoControllerFactory,
     this.videoViewBuilder,
   });
@@ -57,16 +64,28 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
   int _restSecondsRemaining = 0;
   bool _isRestTimerActive = false;
 
+  // Warm-up & Cooldown Routines (Non-volume-contributing preparation & recovery)
+  late final List<String> _warmupRoutines;
+  late final List<String> _cooldownRoutines;
+  final Set<int> _completedWarmups = {};
+  final Set<int> _completedCooldowns = {};
+  bool _isWarmupExpanded = true;
+  bool _isCooldownExpanded = true;
+
   @override
   void initState() {
     super.initState();
+    UpdateService().setWorkoutSessionActive(true);
     _startSessionTimer();
+    _warmupRoutines = TransformationEquipmentAdapter.getWarmupExercises(widget.dayName);
+    _cooldownRoutines = TransformationEquipmentAdapter.getCooldownExercises(widget.dayName);
     _initExercises();
     _loadHistoryAndProgression();
   }
 
   @override
   void dispose() {
+    UpdateService().setWorkoutSessionActive(false);
     _sessionTimer?.cancel();
     _restTimer?.cancel();
     for (var ex in _exercises) {
@@ -588,6 +607,8 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
         status: isPartial ? 'partial' : 'completed',
         totalVolume: _totalSessionVolume,
         exercises: sessionExercises,
+        planId: widget.planId,
+        planDay: widget.planDay,
       );
 
       // Atomic Batch Save
@@ -612,11 +633,29 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
             ?.markWorkoutDayCompleted(widget.dayName, completedAt: now);
       }
 
+      // If this session is part of an active Transformation Plan, synchronize day completion
+      if (mounted && widget.planDay != null) {
+        try {
+          final transformationProvider =
+              Provider.of<TransformationProvider?>(context, listen: false);
+          if (transformationProvider != null &&
+              transformationProvider.hasActiveTransformation) {
+            final active = transformationProvider.activeTransformation!;
+            if (widget.planId == null || active.planId == widget.planId) {
+              await transformationProvider.markDayCompleted(widget.planDay!);
+            }
+          }
+        } catch (tpError) {
+          debugPrint('TransformationProvider synchronization error: $tpError');
+        }
+      }
+
       setState(() {
         _isSaving = false;
         _isSessionFinished = true;
         _finishedSession = session;
       });
+      UpdateService().setWorkoutSessionActive(false);
     } catch (e) {
       print('Error saving workout session: $e');
       if (mounted) {
@@ -791,7 +830,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
         ),
         body: Stack(
           children: [
-            // Single Scrollable Table of All Exercises
+            // Single Scrollable Table of Warmup, Exercises, and Cooldown
             ListView.builder(
               padding: EdgeInsets.only(
                 left: 14.w,
@@ -799,9 +838,15 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
                 top: 14.h,
                 bottom: _isRestTimerActive ? 90.h : 30.h,
               ),
-              itemCount: _exercises.length,
+              itemCount: _exercises.length + 2,
               itemBuilder: (context, index) {
-                return _buildExerciseCard(_exercises[index], index);
+                if (index == 0) {
+                  return _buildWarmupCard();
+                } else if (index <= _exercises.length) {
+                  return _buildExerciseCard(_exercises[index - 1], index - 1);
+                } else {
+                  return _buildCooldownCard();
+                }
               },
             ),
 
@@ -1413,6 +1458,242 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Dynamic Warm-up Routine Card (5–10 min)
+  Widget _buildWarmupCard() {
+    return Container(
+      key: const Key('session_warmup_card'),
+      margin: EdgeInsets.only(bottom: 16.h),
+      decoration: BoxDecoration(
+        color: ColorManager.surface,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: const Color(0xFFFFA500).withValues(alpha: 0.35),
+          width: 1.2,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: () => setState(() => _isWarmupExpanded = !_isWarmupExpanded),
+            borderRadius: BorderRadius.circular(16.r),
+            child: Padding(
+              padding: EdgeInsets.all(14.w),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(6.w),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFA500).withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.whatshot_rounded, color: Color(0xFFFFA500), size: 16),
+                  ),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Dynamic Warm-Up (5–10 min)',
+                          style: TextStyle(
+                            color: ColorManager.textPrimary,
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          'Prepare muscles, activate joint capsules & raise core temp',
+                          style: TextStyle(
+                            color: ColorManager.textSecondary,
+                            fontSize: 10.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    _isWarmupExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                    color: ColorManager.textSecondary,
+                    size: 20.sp,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_isWarmupExpanded) ...[
+            Divider(height: 1, color: ColorManager.divider),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+              child: Column(
+                children: _warmupRoutines.asMap().entries.map((entry) {
+                  final idx = entry.key;
+                  final routine = entry.value;
+                  final isDone = _completedWarmups.contains(idx);
+
+                  return InkWell(
+                    onTap: () {
+                      setState(() {
+                        if (isDone) {
+                          _completedWarmups.remove(idx);
+                        } else {
+                          _completedWarmups.add(idx);
+                        }
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(8.r),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 5.h),
+                      child: Row(
+                        children: [
+                          Icon(
+                            isDone ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                            color: isDone ? ColorManager.success : ColorManager.textTertiary,
+                            size: 18.sp,
+                          ),
+                          SizedBox(width: 10.w),
+                          Expanded(
+                            child: Text(
+                              routine,
+                              style: TextStyle(
+                                color: isDone ? ColorManager.textTertiary : ColorManager.textPrimary,
+                                fontSize: 11.sp,
+                                decoration: isDone ? TextDecoration.lineThrough : null,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  // Cool-Down & Recovery Card (5 min)
+  Widget _buildCooldownCard() {
+    return Container(
+      key: const Key('session_cooldown_card'),
+      margin: EdgeInsets.only(bottom: 20.h),
+      decoration: BoxDecoration(
+        color: ColorManager.surface,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: const Color(0xFF2F6BFF).withValues(alpha: 0.35),
+          width: 1.2,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: () => setState(() => _isCooldownExpanded = !_isCooldownExpanded),
+            borderRadius: BorderRadius.circular(16.r),
+            child: Padding(
+              padding: EdgeInsets.all(14.w),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(6.w),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2F6BFF).withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.self_improvement_rounded, color: Color(0xFF2F6BFF), size: 16),
+                  ),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Cool-Down & Recovery (5 min)',
+                          style: TextStyle(
+                            color: ColorManager.textPrimary,
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          'Gentle stretching, parasympathetic reset & stiffness reduction',
+                          style: TextStyle(
+                            color: ColorManager.textSecondary,
+                            fontSize: 10.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    _isCooldownExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                    color: ColorManager.textSecondary,
+                    size: 20.sp,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_isCooldownExpanded) ...[
+            Divider(height: 1, color: ColorManager.divider),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+              child: Column(
+                children: _cooldownRoutines.asMap().entries.map((entry) {
+                  final idx = entry.key;
+                  final routine = entry.value;
+                  final isDone = _completedCooldowns.contains(idx);
+
+                  return InkWell(
+                    onTap: () {
+                      setState(() {
+                        if (isDone) {
+                          _completedCooldowns.remove(idx);
+                        } else {
+                          _completedCooldowns.add(idx);
+                        }
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(8.r),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 5.h),
+                      child: Row(
+                        children: [
+                          Icon(
+                            isDone ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                            color: isDone ? ColorManager.success : ColorManager.textTertiary,
+                            size: 18.sp,
+                          ),
+                          SizedBox(width: 10.w),
+                          Expanded(
+                            child: Text(
+                              routine,
+                              style: TextStyle(
+                                color: isDone ? ColorManager.textTertiary : ColorManager.textPrimary,
+                                fontSize: 11.sp,
+                                decoration: isDone ? TextDecoration.lineThrough : null,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

@@ -1002,4 +1002,262 @@ class NotificationService {
       }
     }
   }
+
+  /// Schedule weekly check-in reminder for transformation programmes
+  Future<void> scheduleTransformationWeeklyCheckIn({
+    required int weekNumber,
+    required DateTime scheduledDate,
+  }) async {
+    try {
+      final hasPermission = await hasNotificationPermission();
+      if (!hasPermission) return;
+
+      const androidDetails = AndroidNotificationDetails(
+        'transformation_reminders',
+        'Transformation Reminders',
+        channelDescription: 'Reminders for weekly transformation check-ins and milestones',
+        importance: Importance.high,
+        priority: Priority.high,
+      );
+      const iosDetails = DarwinNotificationDetails();
+      const platformChannelSpecifics = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      final scheduleMode = _scheduleModeResolver != null
+          ? await _scheduleModeResolver!()
+          : AndroidScheduleMode.exactAllowWhileIdle;
+
+      final tzScheduled = tz.TZDateTime.from(scheduledDate, tz.local);
+
+      await _localNotificationsPlugin.zonedSchedule(
+        id: 40,
+        title: '📋 Week $weekNumber Check-In Due!',
+        body: 'Log your weekly weight and measurements to keep your transformation on track.',
+        scheduledDate: tzScheduled,
+        notificationDetails: platformChannelSpecifics,
+        payload: Routes.transformationRoadmapRoute,
+        androidScheduleMode: scheduleMode,
+      );
+    } catch (e) {
+      if (kDebugMode) print('Failed to schedule transformation check-in reminder: $e');
+    }
+  }
+
+  /// Schedule photo check-in reminder
+  Future<void> scheduleTransformationPhotoCheckIn({
+    required int dayNumber,
+    required DateTime scheduledDate,
+  }) async {
+    try {
+      final hasPermission = await hasNotificationPermission();
+      if (!hasPermission) return;
+
+      const androidDetails = AndroidNotificationDetails(
+        'transformation_reminders',
+        'Transformation Reminders',
+        channelDescription: 'Reminders for transformation progress photos and milestones',
+        importance: Importance.high,
+        priority: Priority.high,
+      );
+      const iosDetails = DarwinNotificationDetails();
+      const platformChannelSpecifics = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      final scheduleMode = _scheduleModeResolver != null
+          ? await _scheduleModeResolver!()
+          : AndroidScheduleMode.exactAllowWhileIdle;
+
+      final tzScheduled = tz.TZDateTime.from(scheduledDate, tz.local);
+
+      await _localNotificationsPlugin.zonedSchedule(
+        id: 41,
+        title: '📸 Transformation Photo Check-In (Day $dayNumber)',
+        body: 'Take a progress photo today to celebrate your visual physique changes!',
+        scheduledDate: tzScheduled,
+        notificationDetails: platformChannelSpecifics,
+        payload: Routes.progressPhotosRoute,
+        androidScheduleMode: scheduleMode,
+      );
+    } catch (e) {
+      if (kDebugMode) print('Failed to schedule photo check-in reminder: $e');
+    }
+  }
+
+  /// Schedule transformation milestone reminder
+  Future<void> scheduleTransformationMilestoneReminder({
+    required String milestoneTitle,
+    required DateTime scheduledDate,
+  }) async {
+    try {
+      final hasPermission = await hasNotificationPermission();
+      if (!hasPermission) return;
+
+      const androidDetails = AndroidNotificationDetails(
+        'transformation_reminders',
+        'Transformation Reminders',
+        channelDescription: 'Milestone notifications for transformation programmes',
+        importance: Importance.high,
+        priority: Priority.high,
+      );
+      const iosDetails = DarwinNotificationDetails();
+      const platformChannelSpecifics = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      final scheduleMode = _scheduleModeResolver != null
+          ? await _scheduleModeResolver!()
+          : AndroidScheduleMode.exactAllowWhileIdle;
+
+      final tzScheduled = tz.TZDateTime.from(scheduledDate, tz.local);
+
+      await _localNotificationsPlugin.zonedSchedule(
+        id: 42,
+        title: '🎯 Milestone Approaching: $milestoneTitle',
+        body: 'Keep pushing! You are almost at your next transformation milestone.',
+        scheduledDate: tzScheduled,
+        notificationDetails: platformChannelSpecifics,
+        payload: Routes.transformationRoadmapRoute,
+        androidScheduleMode: scheduleMode,
+      );
+    } catch (e) {
+      if (kDebugMode) print('Failed to schedule milestone reminder: $e');
+    }
+  }
+
+  /// Schedules a daily accountability reminder for the transformation programme
+  Future<void> scheduleTransformationDailyAccountabilityReminder({
+    TimeOfDay reminderTime = const TimeOfDay(hour: 20, minute: 0),
+    String planTitle = 'Transformation Programme',
+  }) async {
+    try {
+      final now = _nowProvider != null ? _nowProvider!() : DateTime.now();
+
+      tz.TZDateTime scheduledDate = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        reminderTime.hour,
+        reminderTime.minute,
+      );
+
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
+
+      const androidDetails = AndroidNotificationDetails(
+        'transformation_reminders',
+        'Transformation Reminders',
+        channelDescription: 'Daily accountability reminders for transformation programmes',
+        importance: Importance.high,
+        priority: Priority.high,
+      );
+      const iosDetails = DarwinNotificationDetails();
+      const platformChannelSpecifics = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      final scheduleMode = _scheduleModeResolver != null
+          ? await _scheduleModeResolver!()
+          : AndroidScheduleMode.exactAllowWhileIdle;
+
+      await _localNotificationsPlugin.zonedSchedule(
+        id: 43,
+        title: '📋 Daily Check-In: $planTitle',
+        body: 'Check in on your daily workout, nutrition targets and recovery habits today!',
+        scheduledDate: scheduledDate,
+        notificationDetails: platformChannelSpecifics,
+        payload: Routes.transformationRoadmapRoute,
+        androidScheduleMode: scheduleMode,
+      );
+    } catch (e) {
+      if (kDebugMode) print('Failed to schedule daily accountability reminder: $e');
+    }
+  }
+
+  /// Cancel transformation daily accountability reminder
+  Future<void> cancelTransformationDailyAccountabilityReminder() async {
+    await _localNotificationsPlugin.cancel(id: 43);
+  }
+
+  /// Schedules a reminder for a specific scheduled or rescheduled transformation workout
+  Future<void> scheduleTransformationWorkoutReminder({
+    required int dayNumber,
+    required DateTime scheduledDate,
+    required String dayName,
+    String planTitle = 'Transformation Programme',
+  }) async {
+    try {
+      final now = _nowProvider != null ? _nowProvider!() : DateTime.now();
+
+      tz.TZDateTime tzScheduled = tz.TZDateTime(
+        tz.local,
+        scheduledDate.year,
+        scheduledDate.month,
+        scheduledDate.day,
+        8,
+        0, // 8:00 AM on scheduled workout morning
+      );
+
+      // If scheduled time has already passed today, don't schedule
+      if (tzScheduled.isBefore(now)) return;
+
+      const androidDetails = AndroidNotificationDetails(
+        'transformation_reminders',
+        'Transformation Reminders',
+        channelDescription: 'Workout reminders for transformation programmes',
+        importance: Importance.high,
+        priority: Priority.high,
+      );
+      const iosDetails = DarwinNotificationDetails();
+      const platformChannelSpecifics = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      final scheduleMode = _scheduleModeResolver != null
+          ? await _scheduleModeResolver!()
+          : AndroidScheduleMode.exactAllowWhileIdle;
+
+      final notificationId = 400 + dayNumber;
+
+      await _localNotificationsPlugin.zonedSchedule(
+        id: notificationId,
+        title: '💪 Transformation Workout: Day $dayNumber',
+        body: 'Today is scheduled for $dayName in $planTitle. Let\'s crush it!',
+        scheduledDate: tzScheduled,
+        notificationDetails: platformChannelSpecifics,
+        payload: Routes.transformationRoadmapRoute,
+        androidScheduleMode: scheduleMode,
+      );
+    } catch (e) {
+      if (kDebugMode) print('Failed to schedule workout reminder for day $dayNumber: $e');
+    }
+  }
+
+  /// Cancels workout reminder for a specific transformation day
+  Future<void> cancelTransformationWorkoutReminder(int dayNumber) async {
+    try {
+      await _localNotificationsPlugin.cancel(id: 400 + dayNumber);
+    } catch (_) {}
+  }
+
+  /// Cancel all transformation reminders
+  Future<void> cancelTransformationReminders() async {
+    try {
+      await _localNotificationsPlugin.cancel(id: 40);
+      await _localNotificationsPlugin.cancel(id: 41);
+      await _localNotificationsPlugin.cancel(id: 42);
+      await _localNotificationsPlugin.cancel(id: 43);
+      for (int i = 1; i <= 100; i++) {
+        await _localNotificationsPlugin.cancel(id: 400 + i);
+      }
+    } catch (_) {}
+  }
 }

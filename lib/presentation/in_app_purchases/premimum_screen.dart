@@ -92,7 +92,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     Container(
                       padding: EdgeInsets.all(SizeManager.s20.w),
                       decoration: BoxDecoration(
-                        color: ColorManager.primary.withOpacity(0.1),
+                        color: ColorManager.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(SizeManager.s16.r),
                         border: Border.all(color: ColorManager.primary),
                       ),
@@ -132,7 +132,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                       ),
                       SizedBox(height: SizeManager.s12.h),
                     ],
-                    ...subProvider.plans.map((plan) => _buildProductCard(plan, subProvider)),
+                    ..._getSortedPlans(subProvider.plans).map((plan) => _buildProductCard(plan, subProvider)),
                   ],
                   SizedBox(height: SizeManager.s12.h),
                   Center(
@@ -147,9 +147,11 @@ class _PremiumScreenState extends State<PremiumScreen> {
                         children: [
                           Icon(Icons.security, color: ColorManager.primary, size: 14.sp),
                           SizedBox(width: 6.w),
-                          Text(
-                            'Secure checkout with App Store/Play Store',
-                            style: TextStyle(fontSize: 10.sp, color: ColorManager.textSecondary),
+                          Flexible(
+                            child: Text(
+                              'Secure checkout with App Store/Play Store',
+                              style: TextStyle(fontSize: 10.sp, color: ColorManager.textSecondary),
+                            ),
                           ),
                         ],
                       ),
@@ -167,6 +169,29 @@ class _PremiumScreenState extends State<PremiumScreen> {
               ),
             ),
     );
+  }
+
+  List<SubscriptionPlan> _getSortedPlans(List<SubscriptionPlan> plans) {
+    final list = List<SubscriptionPlan>.from(plans);
+    list.sort((a, b) {
+      int getRank(SubscriptionPlan plan) {
+        if (plan.isLifetime ||
+            plan.id.toLowerCase().contains('lifetime') ||
+            plan.title.toLowerCase().contains('lifetime')) {
+          return 2;
+        }
+        if (plan.isYearly ||
+            plan.id.toLowerCase().contains('yearly') ||
+            plan.title.toLowerCase().contains('yearly') ||
+            plan.title.toLowerCase().contains('annual')) {
+          return 1;
+        }
+        return 0; // monthly
+      }
+
+      return getRank(a).compareTo(getRank(b));
+    });
+    return list;
   }
 
   Widget _buildFeatureSection() {
@@ -221,7 +246,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
           Container(
             padding: EdgeInsets.all(SizeManager.s10.w),
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
+              color: iconColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Icon(icon, color: iconColor, size: 22.sp),
@@ -275,7 +300,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
         boxShadow: [
           if (isYearly || isLifetime)
             BoxShadow(
-              color: highlightColor.withOpacity(0.2),
+              color: highlightColor.withValues(alpha: 0.2),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -334,7 +359,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
               try {
                 await provider.buyPlan(plan);
               } catch (e) {
-                if (context.mounted) {
+                if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Could not complete purchase: ${e.toString().replaceAll('Exception:', '').trim()}'),

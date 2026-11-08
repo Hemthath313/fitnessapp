@@ -1,6 +1,5 @@
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
-import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -97,6 +96,61 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
             },
           );
         },
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+          decoration: BoxDecoration(
+            color: ColorManager.surface,
+            border: Border(top: BorderSide(color: ColorManager.divider)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(6.w),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF5E36).withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Text('🔥', style: TextStyle(fontSize: 16)),
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Core vs. Fat Loss Tip',
+                      style: TextStyle(
+                        color: ColorManager.textPrimary,
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'Combine abs training with overall fat loss.',
+                      style: TextStyle(
+                        color: ColorManager.textSecondary,
+                        fontSize: 10.sp,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              TextButton(
+                key: const Key('sixpack_to_weight_loss_button'),
+                onPressed: () => context.push(
+                  '${Routes.transformationPlanDetailRoute}?planId=weight_loss_60',
+                ),
+                child: const Text(
+                  'Explore 60-Day',
+                  style: TextStyle(color: Color(0xFFFF5E36), fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

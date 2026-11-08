@@ -81,6 +81,8 @@ class WorkoutSession {
   final String status; // 'completed' or 'partial'
   final double totalVolume;
   final List<SessionExercise> exercises;
+  final String? planId;
+  final int? planDay;
 
   WorkoutSession({
     required this.id,
@@ -93,6 +95,8 @@ class WorkoutSession {
     this.status = 'completed',
     required this.totalVolume,
     required this.exercises,
+    this.planId,
+    this.planDay,
   });
 
   bool get isPartial => status == 'partial';
@@ -109,6 +113,8 @@ class WorkoutSession {
       'status': status,
       'totalVolume': totalVolume,
       'exercises': exercises.map((e) => e.toMap()).toList(),
+      if (planId != null) 'planId': planId,
+      if (planDay != null) 'planDay': planDay,
     };
   }
 
@@ -127,6 +133,8 @@ class WorkoutSession {
               ?.map((e) => SessionExercise.fromMap(e as Map<String, dynamic>))
               .toList() ??
           [],
+      planId: map['planId'] as String?,
+      planDay: (map['planDay'] as num?)?.toInt(),
     );
   }
 }
