@@ -1,22 +1,27 @@
+import 'package:fitness_app/data/challenge_data.dart';
+import 'package:fitness_app/presentation/challenges/challenge_progress.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class SixPackChallengeSelectionScreen extends StatefulWidget {
-  const SixPackChallengeSelectionScreen({super.key});
+  const SixPackChallengeSelectionScreen({super.key, this.store});
+
+  /// Storage seam; defaults to Firestore. Overridden in tests.
+  final SixPackProgressStore? store;
 
   @override
   State<SixPackChallengeSelectionScreen> createState() => _SixPackChallengeSelectionScreenState();
 }
 
 class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelectionScreen> {
-  Future<Map<String, dynamic>>? _progressFuture;
+  Future<ChallengeProgress>? _progressFuture;
+  late final SixPackProgressStore _store =
+      widget.store ?? const FirestoreSixPackProgressStore();
 
   @override
   void initState() {
@@ -26,21 +31,56 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
 
   void _refreshProgress() {
     setState(() {
-      _progressFuture = _fetchProgress();
+      _progressFuture = _store.load();
     });
   }
 
-  Future<Map<String, dynamic>> _fetchProgress() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return {};
-    final snapshot =
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-    return snapshot.data()?['progress']?['sixPackChallenge'] ?? {};
+  Widget _buildLoadError() {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(24.w),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.cloud_off, size: 48.sp, color: ColorManager.textTertiary),
+            SizedBox(height: 12.h),
+            Text(
+              "Couldn't load your challenge progress",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: ColorManager.textPrimary,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 6.h),
+            Text(
+              'Check your connection and try again.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: ColorManager.textSecondary,
+                fontSize: 13.sp,
+              ),
+            ),
+            SizedBox(height: 16.h),
+            ElevatedButton(
+              key: const Key('sixpack_retry_button'),
+              onPressed: _refreshProgress,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorManager.primary,
+                foregroundColor: ColorManager.onMint,
+              ),
+              child: const Text('Try again'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final sub = Provider.of<SubscriptionProvider>(context);
+    final sub = Provider.of<SubscriptionProvider?>(context);
 
     return Scaffold(
       backgroundColor: ColorManager.background,
@@ -50,25 +90,19 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
         elevation: 0,
         iconTheme: IconThemeData(color: ColorManager.textPrimary),
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
+      body: FutureBuilder<ChallengeProgress>(
         future: _progressFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final progress = snapshot.data ?? {};
-          final lastDay = progress['lastCompletedDay'] ?? 0;
-          final completionDateStr = progress['completionDate'] ?? '';
-          final completionDate = DateTime.tryParse(completionDateStr)?.toLocal();
-          
-          final today = DateTime.now();
-          final isCompletedToday = completionDate != null &&
-              completionDate.year == today.year &&
-              completionDate.month == today.month &&
-              completionDate.day == today.day;
+          if (snapshot.hasError) return _buildLoadError();
 
-          final currentDay = lastDay + 1;
+          final progress = snapshot.data ?? const ChallengeProgress();
+          final lastDay = progress.lastCompletedDay;
+          final isCompletedToday = progress.isCompletedToday(DateTime.now());
+          final currentDay = progress.currentDay;
 
           return GridView.builder(
             padding: EdgeInsets.all(20.w),
@@ -83,7 +117,7 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
               final day = index + 1;
               final isCompleted = day <= lastDay;
               final isLocked = day > currentDay || (day == currentDay && isCompletedToday);
-              final isPremiumLocked = day > 3 && !sub.isPremium;
+              final isPremiumLocked = day > 3 && !(sub?.isPremium ?? false);
 
               return _buildDayTile(
                 context, 
@@ -91,7 +125,8 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
                 isCompleted, 
                 isLocked, 
                 isPremiumLocked, 
-                isCompletedToday && day == currentDay
+                isCompletedToday && day == currentDay,
+                progress,
               );
             },
           );
@@ -156,7 +191,8 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
   }
 
   Widget _buildDayTile(BuildContext context, int day, bool isCompleted,
-      bool isLocked, bool isPremiumLocked, bool isWaitDay) {
+      bool isLocked, bool isPremiumLocked, bool isWaitDay,
+      ChallengeProgress progress) {
     Color bgColor = ColorManager.surface;
     Color borderColor = Colors.transparent;
     Widget icon = Text('$day',
@@ -180,13 +216,27 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
     return InkWell(
       onTap: () {
         if (isPremiumLocked) {
-          context.push(Routes.premiumScreen);
+          final membership =
+              Provider.of<SubscriptionProvider?>(context, listen: false);
+          if (membership?.isLoading ?? false) {
+            // Don't send a Pro member to the paywall while we're still
+            // confirming their membership.
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Checking your membership… try again in a moment.'),
+              ),
+            );
+          } else {
+            _showProPreview(context, day);
+          }
         } else if (isWaitDay) {
           _showWaitDialog(context);
         } else if (isLocked && !isCompleted) {
-          // If locked because it's in the future and not the 1-per-day slot
+          // Future day: say which day is next instead of a generic refusal.
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Complete previous days first!')),
+            SnackBar(
+              content: Text(progress.lockedMessage(day, DateTime.now())),
+            ),
           );
         } else {
           context.push('${Routes.dailyExerciseRoute}?day=$day').then((_) {
@@ -206,6 +256,106 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
     );
   }
 
+  /// Shows what a Pro day contains before sending the user to the paywall.
+  void _showProPreview(BuildContext context, int day) {
+    final exercises = ChallengeData.sixPackCurriculum[day] ?? const [];
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: ColorManager.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 16.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.lock, color: ColorManager.premium, size: 20.sp),
+                  SizedBox(width: 8.w),
+                  Text(
+                    'Day $day is a Pro day',
+                    style: TextStyle(
+                      color: ColorManager.textPrimary,
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 6.h),
+              Text(
+                'Days 1–3 are free. Pro unlocks all 30 days. Here is what '
+                'you will do:',
+                style: TextStyle(
+                  color: ColorManager.textSecondary,
+                  fontSize: 13.sp,
+                ),
+              ),
+              SizedBox(height: 12.h),
+              for (final exercise in exercises)
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 4.h),
+                  child: Row(
+                    children: [
+                      Icon(Icons.fitness_center,
+                          size: 16.sp, color: ColorManager.primary),
+                      SizedBox(width: 10.w),
+                      Expanded(
+                        child: Text(
+                          exercise.name,
+                          style: TextStyle(
+                            color: ColorManager.textPrimary,
+                            fontSize: 14.sp,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        exercise.setsReps,
+                        style: TextStyle(
+                          color: ColorManager.textSecondary,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              SizedBox(height: 16.h),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  key: const Key('sixpack_pro_preview_cta'),
+                  onPressed: () {
+                    Navigator.of(sheetContext).pop();
+                    context.push(Routes.premiumScreen);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColorManager.primary,
+                    foregroundColor: ColorManager.onMint,
+                    padding: EdgeInsets.symmetric(vertical: 14.h),
+                  ),
+                  child: const Text('See Pro plans'),
+                ),
+              ),
+              Center(
+                child: TextButton(
+                  onPressed: () => Navigator.of(sheetContext).pop(),
+                  child: Text(
+                    'Not now',
+                    style: TextStyle(color: ColorManager.textSecondary),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showWaitDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -214,14 +364,15 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
         title: Text('Come back tomorrow!',
             style: TextStyle(color: ColorManager.textPrimary)),
         content: Text(
-          'You have already completed a workout today. Rest up and come back tomorrow to keep the streak alive!',
+          "You've finished today's workout. Rest up: the next day unlocks "
+          'tomorrow, and finishing it keeps your streak alive.',
           style: TextStyle(color: ColorManager.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child:
-                Text('OK', style: TextStyle(color: ColorManager.primary)),
+                Text('OK', style: TextStyle(color: ColorManager.primaryText)),
           ),
         ],
       ),

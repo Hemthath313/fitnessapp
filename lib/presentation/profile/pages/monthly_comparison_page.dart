@@ -1,3 +1,5 @@
+import 'package:fitness_app/utils/managers/layout_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/presentation/profile/providers/profile_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
@@ -74,7 +76,8 @@ class _MonthlyComparisonPageState extends State<MonthlyComparisonPage> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: EdgeInsets.all(16.w),
+              padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.gutter, vertical: 16.h),
               child: Column(
                 children: [
                   _buildMonthSelectors(),
@@ -103,7 +106,7 @@ class _MonthlyComparisonPageState extends State<MonthlyComparisonPage> {
           ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 12.w),
-            child: Icon(Icons.compare_arrows, color: ColorManager.primary, size: 28.sp),
+            child: Icon(Icons.compare_arrows, color: ColorManager.primaryText, size: 28.sp),
           ),
           Expanded(
             child: _buildDropdown('Month 2', _selectedMonth2, (val) {
@@ -126,7 +129,7 @@ class _MonthlyComparisonPageState extends State<MonthlyComparisonPage> {
           decoration: BoxDecoration(
             color: ColorManager.background,
             borderRadius: BorderRadius.circular(8.r),
-            border: Border.all(color: Colors.white24),
+            border: Border.all(color: ColorManager.divider),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<int>(
@@ -135,7 +138,7 @@ class _MonthlyComparisonPageState extends State<MonthlyComparisonPage> {
               dropdownColor: ColorManager.background,
               icon: Icon(Icons.arrow_drop_down, color: ColorManager.textPrimary),
               style: TextStyle(color: ColorManager.textPrimary, fontSize: 14.sp),
-              hint: Text('Select', style: TextStyle(color: Colors.white54)),
+              hint: Text('Select', style: TextStyle(color: ColorManager.textTertiary)),
               items: List.generate(12, (index) {
                 final monthIndex = index + 1;
                 return DropdownMenuItem(
@@ -156,7 +159,7 @@ class _MonthlyComparisonPageState extends State<MonthlyComparisonPage> {
       return Center(
         child: Text(
           'Please select two months to compare',
-          style: TextStyle(color: Colors.white54),
+          style: TextStyle(color: ColorManager.textTertiary),
         ),
       );
     }
@@ -170,7 +173,7 @@ class _MonthlyComparisonPageState extends State<MonthlyComparisonPage> {
             padding: EdgeInsets.only(top: 40.h),
             child: Text(
             'No data available for selected months',
-            style: TextStyle(color: Colors.white54),
+            style: TextStyle(color: ColorManager.textTertiary),
             ),
         ),
       );
@@ -179,7 +182,8 @@ class _MonthlyComparisonPageState extends State<MonthlyComparisonPage> {
     return Container(
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Column(
@@ -245,7 +249,7 @@ class _MonthlyComparisonPageState extends State<MonthlyComparisonPage> {
           Expanded(
             child: Text(
               val1 != null ? val1.toStringAsFixed(1) : '-',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: ColorManager.textSecondary),
               textAlign: TextAlign.center,
             ),
           ),

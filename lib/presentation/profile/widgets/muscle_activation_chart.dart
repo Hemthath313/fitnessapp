@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/model/workout_log.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/services/workout_log_service.dart';
@@ -92,7 +93,8 @@ class _MuscleActivationChartState extends State<MuscleActivationChart> {
                   width: deviceWidth,
                   decoration: BoxDecoration(
                     color: ColorManager.surface,
-                    borderRadius: BorderRadius.circular(16.r),
+                    boxShadow: ColorManager.cardShadow,
+                    borderRadius: BorderRadius.circular(AppRadius.tile.r),
                     border: Border.all(color: ColorManager.divider),
                   ),
                   child: Center(
@@ -137,7 +139,8 @@ class _MuscleActivationChartState extends State<MuscleActivationChart> {
                     padding: EdgeInsets.all(16.w),
                     decoration: BoxDecoration(
                       color: ColorManager.surface,
-                      borderRadius: BorderRadius.circular(16.r),
+                      boxShadow: ColorManager.cardShadow,
+                      borderRadius: BorderRadius.circular(AppRadius.tile.r),
                       border: Border.all(color: ColorManager.divider),
                     ),
                     child: Column(
@@ -285,7 +288,7 @@ class _MuscleActivationChartState extends State<MuscleActivationChart> {
                               onPressed: () => context.push(Routes.premiumScreen),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: ColorManager.primary,
-                                foregroundColor: Colors.black,
+                                foregroundColor: ColorManager.onMint,
                                 padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
                                 elevation: 3,

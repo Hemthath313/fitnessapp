@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'dart:async';
 import 'package:fitness_app/presentation/auth/providers/auth_provider.dart';
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
@@ -48,12 +49,12 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     });
   }
 
-  List<Widget> pages = const [
-    HomePage(),
-    WorkoutTabPage(),
-    WorkoutLogHistoryPage(),
-    ProgressPage(),
-    MorePage(),
+  late final List<Widget> pages = [
+    const HomePage(),
+    const WorkoutTabPage(),
+    WorkoutLogHistoryPage(onStartWorkout: () => ontap(1)),
+    const ProgressPage(),
+    const MorePage(),
   ];
 
   appBar() {
@@ -154,20 +155,13 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       }
 
       final workouts = workoutsProvider.workouts;
-      final meals = consumptionProvider.meals;
       bool isNewDay(DateTime now, DateTime lastDate) {
         final today = DateTime(now.year, now.month, now.day);
         final lastDay = DateTime(lastDate.year, lastDate.month, lastDate.day);
         return today.isAfter(lastDay);
       }
 
-      if (meals.isNotEmpty) {
-        final lastMealDateTime = meals.last.dateTime;
-        if (isNewDay(DateTime.now(), lastMealDateTime)) {
-          await consumptionProvider.clearMealsIfNeeded();
-          await consumptionProvider.fetchAndSetMeals();
-        }
-      }
+      // Logged meals are history and are no longer wiped on a new day.
 
       if (workouts.isNotEmpty) {
         final lastWorkoutDateTime = workouts.last.dateTime;
@@ -351,7 +345,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                               vertical: 14,
                             ),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(AppRadius.button),
                             ),
                           ),
                         ),

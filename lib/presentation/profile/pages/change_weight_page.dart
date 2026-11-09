@@ -1,7 +1,9 @@
+import 'package:fitness_app/utils/managers/layout_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
 import 'package:fitness_app/presentation/profile/providers/profile_provider.dart';
+import 'package:fitness_app/presentation/progress/progress_data.dart';
 import 'package:fitness_app/presentation/settings/widgets/change_password_app_bar.dart';
-import 'package:fitness_app/utils/managers/asset_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
@@ -26,68 +28,396 @@ class _ChangeWeightPageState extends State<ChangeWeightPage> {
   final TextEditingController _weightController = TextEditingController();
 
   @override
-  void initState() {
-    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
-    _weightController.text = homeProvider.userData['weight'].toString();
-    super.initState();
-  }
-
-  @override
   void dispose() {
     _weightController.dispose();
     super.dispose();
   }
 
+  bool _saving = false;
+  DateTime _date = DateTime.now();
+
+  bool get _isToday =>
+      ProgressData.dayKey(_date) == ProgressData.dayKey(DateTime.now());
+
+  @override
+  void initState() {
+    super.initState();
+    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+    _weightController.text = ProgressData.prefill(homeProvider.userData['weight']);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        await Provider.of<ProfileProvider>(context, listen: false)
+            .fetchAndSetFlSpots();
+      } catch (e) {
+        debugPrint('Error loading weigh-ins: $e');
+      }
+    });
+  }
+
+  TimedValue? _entryOn(DateTime day) {
+    final entries =
+        Provider.of<ProfileProvider>(context, listen: false).weightEntries;
+    final key = ProgressData.dayKey(day);
+    for (final e in entries.reversed) {
+      if (ProgressData.dayKey(e.date) == key) return e;
+    }
+    return null;
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _date.isAfter(now) ? now : _date,
+      firstDate: DateTime(now.year - 5),
+      lastDate: now,
+      helpText: 'Date of weigh-in',
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _date = picked);
+    // Logging a day that already has a reading edits it - show its value.
+    final existing = _entryOn(picked);
+    if (existing != null) {
+      _weightController.text = ProgressData.prefill(existing.value);
+    }
+  }
+
+  void _toast(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
   Future<void> changeWeight() async {
+    final error = ProgressData.validateWeight(_weightController.text);
+    if (error != null) {
+      _toast(error);
+      return;
+    }
+    final weight = ProgressData.parseNumber(_weightController.text)!;
+    final existing = _entryOn(_date);
+    await _persist(
+      weight,
+      ProgressData.entryTimestamp(_date, DateTime.now()),
+      entryId: existing?.id,
+      closePage: true,
+    );
+  }
+
+  /// Saves one weigh-in (new, same-day correction or an edit of [entryId]).
+  Future<void> _persist(
+    double weight,
+    DateTime when, {
+    String? entryId,
+    required bool closePage,
+  }) async {
+    if (_saving) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    final profileProvider =
+        Provider.of<ProfileProvider>(context, listen: false);
+    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+
+    _saving = true;
     LoadingOverlay.show(context, message: 'Updating weight...');
-    
+    try {
+      await homeProvider.getUsersBMI(
+        height: homeProvider.userData['height'],
+        weight: weight,
+      );
+      await homeProvider.getUsersBMR(
+        gender: homeProvider.userData['gender'],
+        weight: weight,
+        height: homeProvider.userData['height'],
+        age: homeProvider.userData['age'],
+        activity: homeProvider.userData['activity'],
+        goal: homeProvider.userData['goal'],
+      );
+      if (!mounted) return;
+      await profileProvider.changeUsersWeight(
+        bmi: homeProvider.usersBMI,
+        bmr: homeProvider.userBMRwithGoal,
+        weight: weight,
+        weightDateTime: when.month,
+        context: context,
+        date: when,
+        entryId: entryId,
+      );
+      await homeProvider.fetchUserData();
+
+      if (mounted) {
+        LoadingOverlay.hide(context);
+        if (closePage) Navigator.of(context).pop();
+      }
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(content: Text('Weight logged: ${weight.toStringAsFixed(1)} kg')),
+        );
+    } catch (e) {
+      debugPrint('Error saving weight: $e');
+      if (mounted) {
+        LoadingOverlay.hide(context);
+      }
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text("Couldn't save your weight. Check your connection and try again."),
+          ),
+        );
+    } finally {
+      _saving = false;
+    }
+  }
+
+  Future<void> _editEntry(TimedValue entry) async {
+    final result = await showDialog<(bool, double?)>(
+      context: context,
+      builder: (_) => _NumberDialog(
+        title: 'Edit weigh-in · ${ProgressData.formatDay(entry.date)}',
+        initialText: ProgressData.prefill(entry.value),
+        validate: ProgressData.validateWeight,
+      ),
+    );
+    final newValue = result?.$2;
+    if (newValue == null || !mounted) return;
+    await _persist(newValue, entry.date, entryId: entry.id, closePage: false);
+  }
+
+  Future<void> _deleteEntry(TimedValue entry) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete this weigh-in?'),
+        content: Text(
+          '${entry.value.toStringAsFixed(1)} kg on ${ProgressData.formatDay(entry.date)} '
+          'will be removed from your progress.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted || _saving) return;
+
+    final profileProvider =
+        Provider.of<ProfileProvider>(context, listen: false);
+    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+    _saving = true;
+    LoadingOverlay.show(context, message: 'Deleting weigh-in...');
+    try {
+      final newLatest = await profileProvider.deleteWeightEntry(entry);
+      if (newLatest != null) {
+        // The newest reading changed, so the current weight, BMI and calorie
+        // target must follow it.
+        await homeProvider.getUsersBMI(
+          height: homeProvider.userData['height'],
+          weight: newLatest.value,
+        );
+        await homeProvider.getUsersBMR(
+          gender: homeProvider.userData['gender'],
+          weight: newLatest.value,
+          height: homeProvider.userData['height'],
+          age: homeProvider.userData['age'],
+          activity: homeProvider.userData['activity'],
+          goal: homeProvider.userData['goal'],
+        );
+        await profileProvider.updateProfileWeight(
+          weight: newLatest.value,
+          bmi: homeProvider.usersBMI,
+          bmr: homeProvider.userBMRwithGoal,
+        );
+        await homeProvider.fetchUserData();
+      }
+      if (mounted) {
+        LoadingOverlay.hide(context);
+        _toast('Weigh-in deleted');
+      }
+    } catch (e) {
+      debugPrint('Error deleting weigh-in: $e');
+      if (mounted) {
+        LoadingOverlay.hide(context);
+        _toast("Couldn't delete that weigh-in. Please try again.");
+      }
+    } finally {
+      _saving = false;
+    }
+  }
+
+  double? get _goalWeight {
+    final v = Provider.of<HomeProvider>(context, listen: false)
+        .userData['goalWeight'];
+    return v is num && v > 0 ? v.toDouble() : null;
+  }
+
+  Future<void> _editGoal() async {
+    final current = _goalWeight;
+    final result = await showDialog<(bool, double?)>(
+      context: context,
+      builder: (_) => _NumberDialog(
+        title: 'Goal weight',
+        initialText: ProgressData.prefill(current),
+        validate: ProgressData.validateGoalWeight,
+        allowRemove: current != null,
+      ),
+    );
+    if (result == null || !mounted) return;
+
     final profileProvider =
         Provider.of<ProfileProvider>(context, listen: false);
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
     try {
-      await homeProvider
-          .getUsersBMI(
-            height: homeProvider.userData['height'],
-            weight: double.parse(_weightController.text),
-          )
-          .then((_) => homeProvider.getUsersBMR(
-                gender: homeProvider.userData['gender'],
-                weight: double.parse(_weightController.text),
-                height: homeProvider.userData['height'],
-                age: homeProvider.userData['age'],
-                activity: homeProvider.userData['activity'],
-                goal: homeProvider.userData['goal'],
-              ))
-          .then(
-            (_) => profileProvider.changeUsersWeight(
-              bmi: homeProvider.usersBMI,
-              bmr: homeProvider.userBMRwithGoal,
-              weight: double.parse(_weightController.text),
-              weightDateTime: DateTime.now().month,
-              context: context,
-            ),
-          )
-          .then(
-            (_) => homeProvider.fetchUserData(),
-          )
-          .then(
-            (_) {
-              if (context.mounted) {
-                LoadingOverlay.hide(context);
-                Navigator.of(context).pop();
-              }
-            },
-          );
-    } catch (e) {
-      if (context.mounted) {
-        LoadingOverlay.hide(context);
+      await profileProvider.updateGoalWeight(result.$1 ? null : result.$2);
+      await homeProvider.fetchUserData();
+      if (mounted) {
+        setState(() {});
+        _toast(result.$1 ? 'Goal weight removed' : 'Goal weight saved');
       }
-      rethrow;
+    } catch (e) {
+      debugPrint('Error saving goal weight: $e');
+      if (mounted) _toast("Couldn't save your goal weight. Please try again.");
     }
+  }
+
+  Widget _buildGoalChip() {
+    final goal = _goalWeight;
+    return InkWell(
+      onTap: _editGoal,
+      borderRadius: BorderRadius.circular(14.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: ColorManager.surface,
+          borderRadius: BorderRadius.circular(AppRadius.tile.r),
+          border: Border.all(color: ColorManager.divider),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.flag_rounded, color: ColorManager.primaryText, size: 18.sp),
+            SizedBox(width: 8.w),
+            Text(
+              goal == null
+                  ? 'Set a goal weight'
+                  : 'Goal · ${goal.toStringAsFixed(1)} kg',
+              style: TextStyle(
+                color: ColorManager.textPrimary,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(width: 6.w),
+            Icon(Icons.edit_outlined, color: ColorManager.textSecondary, size: 16.sp),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateChip() {
+    return InkWell(
+      onTap: _pickDate,
+      borderRadius: BorderRadius.circular(14.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: ColorManager.surface,
+          borderRadius: BorderRadius.circular(AppRadius.tile.r),
+          border: Border.all(color: ColorManager.divider),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.calendar_today_rounded, color: ColorManager.primaryText, size: 18.sp),
+            SizedBox(width: 8.w),
+            Text(
+              _isToday
+                  ? 'Today · ${ProgressData.formatDay(_date)}'
+                  : ProgressData.formatDay(_date),
+              style: TextStyle(
+                color: ColorManager.textPrimary,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(width: 4.w),
+            Icon(Icons.arrow_drop_down_rounded, color: ColorManager.textSecondary, size: 22.sp),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecentEntries(List<TimedValue> entries) {
+    if (entries.isEmpty) return const SizedBox.shrink();
+    final recent = entries.reversed.take(10).toList();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 40.h),
+        Text(
+          'Recent weigh-ins',
+          style: TextStyle(
+            color: ColorManager.textPrimary,
+            fontSize: 16.sp,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 4.h),
+        Text(
+          'Tap a reading to edit it.',
+          style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
+        ),
+        SizedBox(height: 12.h),
+        for (final e in recent)
+          Container(
+            margin: EdgeInsets.only(bottom: 8.h),
+            decoration: BoxDecoration(
+              color: ColorManager.surface,
+              boxShadow: ColorManager.cardShadow,
+              borderRadius: BorderRadius.circular(AppRadius.tile.r),
+              border: Border.all(color: ColorManager.divider),
+            ),
+            child: Material(
+              type: MaterialType.transparency,
+              child: ListTile(
+              onTap: () => _editEntry(e),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+              title: Text(
+                '${e.value.toStringAsFixed(1)} kg',
+                style: TextStyle(
+                  color: ColorManager.textPrimary,
+                  fontSize: AppText.body,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              subtitle: Text(
+                ProgressData.formatDay(e.date),
+                style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
+              ),
+              trailing: IconButton(
+                tooltip: 'Delete weigh-in',
+                icon: Icon(Icons.delete_outline_rounded, color: ColorManager.textSecondary),
+                onPressed: () => _deleteEntry(e),
+              ),
+            ),
+            ),
+          ),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final profileProvider = Provider.of<ProfileProvider>(context);
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: AppBar(
@@ -106,7 +436,7 @@ class _ChangeWeightPageState extends State<ChangeWeightPage> {
       body: SafeArea(
         bottom: true,
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: 20.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -122,7 +452,7 @@ class _ChangeWeightPageState extends State<ChangeWeightPage> {
                 ),
                 child: Icon(
                   Icons.scale,
-                  color: ColorManager.primary,
+                  color: ColorManager.primaryText,
                   size: 56.sp,
                 ),
               ),
@@ -146,7 +476,8 @@ class _ChangeWeightPageState extends State<ChangeWeightPage> {
                   padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                   decoration: BoxDecoration(
                     color: ColorManager.surface,
-                    borderRadius: BorderRadius.circular(20.r),
+                    boxShadow: ColorManager.cardShadow,
+                    borderRadius: BorderRadius.circular(AppRadius.card.r),
                     border: Border.all(color: ColorManager.divider),
                   ),
                   child: Row(
@@ -187,8 +518,12 @@ class _ChangeWeightPageState extends State<ChangeWeightPage> {
                   ),
                 ),
               ),
+              SizedBox(height: 16.h),
+              _buildDateChip(),
+              SizedBox(height: 10.h),
+              _buildGoalChip(),
               SizedBox(height: 24.h),
-              
+
               // Detailed Tip Text
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -209,6 +544,7 @@ class _ChangeWeightPageState extends State<ChangeWeightPage> {
                 onTap: changeWeight,
                 title: StringsManager.next,
               ),
+              _buildRecentEntries(profileProvider.weightEntries),
             ],
           ),
         ),
@@ -216,5 +552,83 @@ class _ChangeWeightPageState extends State<ChangeWeightPage> {
     ).animate().fadeIn(
           duration: 500.ms,
         );
+  }
+}
+
+/// Single-number entry dialog. It owns its [TextEditingController], so the
+/// controller is disposed only after the dialog has fully left the tree.
+/// (Disposing it right after `showDialog` returns, while the close animation
+/// is still building the text field, throws "used after being disposed".)
+///
+/// Pops `(remove, value)`; null means the user cancelled.
+class _NumberDialog extends StatefulWidget {
+  const _NumberDialog({
+    required this.title,
+    required this.initialText,
+    required this.validate,
+    this.allowRemove = false,
+  });
+
+  final String title;
+  final String initialText;
+  final String? Function(String?) validate;
+  final bool allowRemove;
+
+  @override
+  State<_NumberDialog> createState() => _NumberDialogState();
+}
+
+class _NumberDialogState extends State<_NumberDialog> {
+  late final TextEditingController _controller;
+  String? _errorText;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialText);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final error = widget.validate(_controller.text);
+    if (error != null) {
+      setState(() => _errorText = error);
+      return;
+    }
+    Navigator.of(context).pop((false, ProgressData.parseNumber(_controller.text)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.title),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+        ],
+        decoration: InputDecoration(suffixText: 'kg', errorText: _errorText),
+        onSubmitted: (_) => _save(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        if (widget.allowRemove)
+          TextButton(
+            onPressed: () => Navigator.of(context).pop((true, null)),
+            child: const Text('Remove'),
+          ),
+        TextButton(onPressed: _save, child: const Text('Save')),
+      ],
+    );
   }
 }

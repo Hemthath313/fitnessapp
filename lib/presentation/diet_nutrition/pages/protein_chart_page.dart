@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/data/food_data.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
@@ -56,7 +57,7 @@ class ProteinChartPage extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Icon(icon, color: ColorManager.primary, size: 24),
+          Icon(icon, color: ColorManager.primaryText, size: 24),
           const SizedBox(width: 12),
           Text(
             title,
@@ -75,7 +76,8 @@ class ProteinChartPage extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Column(

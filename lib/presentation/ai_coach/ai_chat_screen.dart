@@ -242,7 +242,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
           ),
           IconButton(tooltip: 'Send', 
             onPressed: () => _sendMessage(_messageController.text),
-            icon: Icon(Icons.send_rounded, color: ColorManager.primary),
+            icon: Icon(Icons.send_rounded, color: ColorManager.primaryText),
           ),
         ],
       ),
@@ -283,7 +283,7 @@ class ChatMessage extends StatelessWidget {
         child: Text(
           text,
           style: TextStyle(
-            color: isUser ? Colors.white : ColorManager.textPrimary,
+            color: isUser ? ColorManager.onMint : ColorManager.textPrimary,
             fontSize: 14.sp,
           ),
         ),

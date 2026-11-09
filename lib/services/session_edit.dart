@@ -6,12 +6,12 @@ class SessionEdit {
   const SessionEdit._();
 
   /// Total volume the way the guided session computes it: completed sets only,
-  /// weight × reps (warm-ups included).
+  /// weight × reps, with warm-up sets left out.
   static double volumeOf(Iterable<SessionExercise> exercises) {
     var vol = 0.0;
     for (final ex in exercises) {
       for (final s in ex.sets) {
-        if (s.isCompleted) vol += s.weight * s.reps;
+        if (s.isCompleted && s.type != SetType.warmup) vol += s.weight * s.reps;
       }
     }
     return vol;

@@ -1,6 +1,6 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
-import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/presentation/home/widgets/fitness_data_widget.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
@@ -14,7 +14,6 @@ import 'package:provider/provider.dart';
 /// Combines:
 /// 1. Calories consumed vs valid calorie target (never BMR).
 /// 2. Water consumed vs user's configured dynamic water goal.
-/// 3. Compact 7-day workout consistency indicator.
 class TodayHealthSnapshotWidget extends StatefulWidget {
   const TodayHealthSnapshotWidget({super.key});
 
@@ -30,15 +29,19 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
   void initState() {
     super.initState();
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
-    _userDataFuture = homeProvider.fetchUserData();
+    // Only hit Firestore when nothing is cached yet (the app bar does the
+    // same); every edit screen refreshes the shared user data itself.
+    _userDataFuture = homeProvider.userData.isNotEmpty
+        ? Future<Map<String, dynamic>>.value(homeProvider.userData)
+        : homeProvider.fetchUserData();
   }
 
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    return Consumer2<ConsumptionProvider, StatisticsProvider>(
-      builder: (context, consumptionProvider, statsProvider, _) {
+    return Consumer<ConsumptionProvider>(
+      builder: (context, consumptionProvider, _) {
         return FutureBuilder<Map<String, dynamic>>(
           future: _userDataFuture,
           builder: (context, snapshot) {
@@ -81,41 +84,28 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header: Section title + compact weekly consistency dots
+                    // Header: Section title
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Flexible(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.insights_rounded,
-                                color: ColorManager.primary,
-                                size: 16.sp,
-                              ),
-                              SizedBox(width: 6.w),
-                              Flexible(
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    "Today's Snapshot",
-                                    style: TextStyle(
-                                      color: ColorManager.textPrimary,
-                                      fontSize: 18.sp,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                        Icon(
+                          Icons.insights_rounded,
+                          color: ColorManager.primaryText,
+                          size: 16.sp,
                         ),
                         SizedBox(width: 6.w),
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: _buildWeeklyConsistencyDots(statsProvider),
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              "Today's Snapshot",
+                              style: TextStyle(
+                                color: ColorManager.textPrimary,
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -137,7 +127,8 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
                                 padding: EdgeInsets.all(14.w),
                                 decoration: BoxDecoration(
                                   color: ColorManager.surface,
-                                  borderRadius: BorderRadius.circular(22.r),
+                                  boxShadow: ColorManager.cardShadow,
+                                  borderRadius: BorderRadius.circular(AppRadius.card.r),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,13 +195,13 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
                                       child: Text(
                                         hasTarget
                                             ? '${remainingCalories.toStringAsFixed(0)} left'
-                                            : 'Set in profile',
+                                            : 'Set a goal',
                                         style: TextStyle(
                                           color: hasTarget
                                               ? (remainingCalories > 0
-                                                  ? ColorManager.primary
-                                                  : Colors.green)
-                                              : ColorManager.ringAmber,
+                                                  ? ColorManager.primaryText
+                                                  : ColorManager.successText)
+                                              : ColorManager.warningText,
                                               fontSize: 11.sp,
                                               fontWeight: FontWeight.w600,
                                         ),
@@ -232,7 +223,8 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
                                 padding: EdgeInsets.all(14.w),
                                 decoration: BoxDecoration(
                                   color: ColorManager.surface,
-                                  borderRadius: BorderRadius.circular(22.r),
+                                  boxShadow: ColorManager.cardShadow,
+                                  borderRadius: BorderRadius.circular(AppRadius.card.r),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -311,8 +303,8 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
                                         '${(waterPercent * 100).toInt()}% of goal',
                                         style: TextStyle(
                                           color: waterPercent >= 1.0
-                                              ? Colors.green
-                                              : ColorManager.primary,
+                                              ? ColorManager.successText
+                                              : ColorManager.primaryText,
                                           fontSize: 11.sp,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -333,74 +325,6 @@ class _TodayHealthSnapshotWidgetState extends State<TodayHealthSnapshotWidget> {
           },
         );
       },
-    );
-  }
-
-  /// Compact 7-day indicator showing workout consistency for the current week.
-  Widget _buildWeeklyConsistencyDots(StatisticsProvider statsProvider) {
-    const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-    final now = DateTime.now();
-    final currentWeekday = now.weekday;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(7, (index) {
-        final dayIndex = index + 1;
-        final isPastOrToday = dayIndex <= currentWeekday;
-        final isToday = dayIndex == currentWeekday;
-
-        bool isDone = false;
-        if (dayIndex == currentWeekday) {
-          isDone = statsProvider.hasWorkoutToday;
-        } else if (dayIndex < currentWeekday) {
-          final targetDate = now.subtract(Duration(days: currentWeekday - dayIndex));
-          isDone = statsProvider.completedWorkoutDates.any((d) =>
-              d.year == targetDate.year &&
-              d.month == targetDate.month &&
-              d.day == targetDate.day);
-        }
-
-        return Container(
-          margin: EdgeInsets.symmetric(horizontal: 1.5.w),
-          width: 17.w,
-          height: 17.w,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isDone
-                ? const Color(0xFF4CAF50)
-                : (isToday
-                    ? ColorManager.primary.withValues(alpha: 0.3)
-                    : (isPastOrToday
-                        ? ColorManager.surface
-                        : ColorManager.surface.withValues(alpha: 0.4))),
-            border: Border.all(
-              color: isToday
-                  ? ColorManager.primary
-                  : (isDone ? const Color(0xFF4CAF50) : ColorManager.divider),
-              width: isToday ? 1.0 : 0.8,
-            ),
-          ),
-          child: Center(
-            child: isDone
-                ? Icon(
-                    Icons.check,
-                    color: Colors.white,
-                    size: 10.sp,
-                  )
-                : Text(
-                    days[index],
-                    style: TextStyle(
-                      color: isToday
-                          ? ColorManager.primary
-                          : ColorManager.textSecondary,
-                      fontSize: 11.sp,
-                      fontWeight:
-                          isToday ? FontWeight.bold : FontWeight.normal,
-                    ),
-                  ),
-          ),
-        );
-      }),
     );
   }
 }

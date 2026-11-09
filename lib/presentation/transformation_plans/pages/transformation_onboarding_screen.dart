@@ -1,3 +1,5 @@
+import 'package:fitness_app/utils/managers/layout_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -176,7 +178,7 @@ class _TransformationOnboardingScreenState
           'Personalize Your Challenge',
           style: TextStyle(
             color: ColorManager.textPrimary,
-            fontSize: 16.sp,
+            fontSize: AppText.appBarTitle,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -290,7 +292,7 @@ class _TransformationOnboardingScreenState
       children: [
         Row(
           children: [
-            Icon(Icons.verified_user_rounded, color: ColorManager.primary, size: 20.sp),
+            Icon(Icons.verified_user_rounded, color: ColorManager.primaryText, size: 20.sp),
             SizedBox(width: 8.w),
             Text(
               'Profile & Metrics',
@@ -675,7 +677,8 @@ class _TransformationOnboardingScreenState
           padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
             color: ColorManager.surface,
-            borderRadius: BorderRadius.circular(16.r),
+            boxShadow: ColorManager.cardShadow,
+            borderRadius: BorderRadius.circular(AppRadius.tile.r),
             border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
           ),
           child: Column(
@@ -688,7 +691,7 @@ class _TransformationOnboardingScreenState
                     child: Text(
                       'CALIBRATED NUTRITION TARGET',
                       style: TextStyle(
-                        color: ColorManager.primary,
+                        color: ColorManager.primaryText,
                         fontSize: 11.sp,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.5,
@@ -757,7 +760,7 @@ class _TransformationOnboardingScreenState
           padding: EdgeInsets.all(14.w),
           decoration: BoxDecoration(
             color: ColorManager.surfaceDark,
-            borderRadius: BorderRadius.circular(14.r),
+            borderRadius: BorderRadius.circular(AppRadius.tile.r),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -871,7 +874,7 @@ class _TransformationOnboardingScreenState
           label,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: isSelected ? Colors.white : ColorManager.textPrimary,
+            color: isSelected ? ColorManager.onMint : ColorManager.textPrimary,
             fontSize: 12.sp,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
           ),
@@ -936,7 +939,7 @@ class _TransformationOnboardingScreenState
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: ColorManager.divider),
                   padding: EdgeInsets.symmetric(vertical: 12.h),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
                 ),
                 child: Text('Back', style: TextStyle(color: ColorManager.textPrimary)),
               ),
@@ -950,7 +953,7 @@ class _TransformationOnboardingScreenState
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.primary,
                 padding: EdgeInsets.symmetric(vertical: 12.h),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
                 elevation: 0,
               ),
               child: Text(

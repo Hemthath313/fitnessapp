@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
@@ -53,7 +54,8 @@ class WeeklyActivityBars extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 14.h),
             decoration: BoxDecoration(
               color: ColorManager.surface,
-              borderRadius: BorderRadius.circular(22.r),
+              boxShadow: ColorManager.cardShadow,
+              borderRadius: BorderRadius.circular(AppRadius.card.r),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,14 +182,14 @@ class WeeklyActivityBars extends StatelessWidget {
                           Text(
                             'Start',
                             style: TextStyle(
-                              color: ColorManager.primary,
+                              color: ColorManager.primaryText,
                               fontSize: 12.sp,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Icon(
                             Icons.chevron_right_rounded,
-                            color: ColorManager.primary,
+                            color: ColorManager.primaryText,
                             size: 16.sp,
                           ),
                         ],

@@ -79,7 +79,7 @@ class WorkoutSplitListPage extends StatelessWidget {
                         color: ColorManager.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.fitness_center_rounded, color: ColorManager.primary, size: 24.sp),
+                      child: Icon(Icons.fitness_center_rounded, color: ColorManager.primaryText, size: 24.sp),
                     ),
                     title: Text(
                       split.name,
@@ -103,7 +103,7 @@ class WorkoutSplitListPage extends StatelessWidget {
                         Text(
                           '${split.recommendedDays}',
                           style: TextStyle(
-                            color: ColorManager.primary,
+                            color: ColorManager.primaryText,
                             fontWeight: FontWeight.bold,
                             fontSize: 18.sp,
                           ),

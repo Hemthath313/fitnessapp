@@ -50,6 +50,20 @@ class NetworkService {
 
       if (!hasInterface) return false;
 
+      return _probeUplink();
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Checks for a real uplink (DNS / TCP), independent of what the OS reports
+  /// about network interfaces. Used to double-check before telling the user
+  /// they are offline, because the OS can briefly report "none" at cold start.
+  static Future<bool> _probeUplink() async {
+    if (internetAccessCheckerForTesting != null) {
+      return internetAccessCheckerForTesting!();
+    }
+    try {
       // Distinguish actual internet access from merely having Wi-Fi or mobile data enabled
       try {
         final lookup = await InternetAddress.lookup('google.com')
@@ -87,30 +101,70 @@ class NetworkService {
     }
   }
 
-  // Initialize the network check
+  static StreamSubscription<List<ConnectivityResult>>? _toastSubscription;
+  static Timer? _offlineConfirmTimer;
+
+  /// How long we wait, and re-verify, before telling the user they are offline.
+  /// The OS often reports "no connection" for a moment right after launch or
+  /// while switching between Wi-Fi and mobile data; that is not a real outage.
+  @visibleForTesting
+  static Duration offlineConfirmDelay = const Duration(seconds: 3);
+
+  // Initialize the network check. Safe to call more than once: it replaces the
+  // previous listener instead of stacking another one.
   static Future<void> initialize() async {
-    // Perform an initial connectivity check
+    await _toastSubscription?.cancel();
+    _toastSubscription = null;
+    _offlineConfirmTimer?.cancel();
+
     final List<ConnectivityResult> initialResults =
-        await _connectivity.checkConnectivity();
+        connectivityCheckerForTesting != null
+            ? await connectivityCheckerForTesting!()
+            : await _connectivity.checkConnectivity();
 
     if (!_hasInternet(initialResults)) {
-      _showNoConnectionToast();
+      _confirmOfflineThenToast();
     }
 
-    // Listen for connectivity changes
-    _connectivity.onConnectivityChanged
-        .listen((List<ConnectivityResult> results) {
-      if (!_hasInternet(results)) {
-        _showNoConnectionToast();
+    _toastSubscription = onConnectivityChanged.listen((results) {
+      if (_hasInternet(results)) {
+        // Back online (or never really left): drop any pending warning.
+        _offlineConfirmTimer?.cancel();
+      } else {
+        _confirmOfflineThenToast();
       }
     });
   }
 
-  // Utility to check internet presence
+  @visibleForTesting
+  static Future<void> disposeForTesting() async {
+    await _toastSubscription?.cancel();
+    _toastSubscription = null;
+    _offlineConfirmTimer?.cancel();
+    _offlineConfirmTimer = null;
+    _isToastVisible = false;
+    offlineConfirmDelay = const Duration(seconds: 3);
+  }
+
+  /// Waits a moment, then verifies there is genuinely no uplink before showing
+  /// the toast. A transient "none" at startup is ignored.
+  static void _confirmOfflineThenToast() {
+    _offlineConfirmTimer?.cancel();
+    _offlineConfirmTimer = Timer(offlineConfirmDelay, () async {
+      final reachable = await _probeUplink();
+      if (!reachable) _showNoConnectionToast();
+    });
+  }
+
+  // Utility to check internet presence. VPN / "other" transports are treated
+  // as connected here: they are real routes and the OS reports them instead of
+  // wifi/mobile on some devices and emulators.
   static bool _hasInternet(List<ConnectivityResult> results) {
     return results.contains(ConnectivityResult.mobile) ||
         results.contains(ConnectivityResult.wifi) ||
-        results.contains(ConnectivityResult.ethernet);
+        results.contains(ConnectivityResult.ethernet) ||
+        results.contains(ConnectivityResult.vpn) ||
+        results.contains(ConnectivityResult.other);
   }
 
   static void _showNoConnectionToast() {

@@ -1,7 +1,8 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
+import 'package:fitness_app/utils/managers/card_size_manager.dart';
 import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/model/workout_log.dart';
 import 'package:fitness_app/presentation/home/widgets/gradient_hero_card.dart';
-import 'package:fitness_app/presentation/widgets/interactive_exercise_detail.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/services/workout_log_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
@@ -43,7 +44,7 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
         backgroundColor: ColorManager.background,
         title: Text('Reset Weekly Plan?', style: TextStyle(color: ColorManager.textPrimary)),
         content: Text(
-          'This will delete all AI-generated exercises from your schedule.',
+          'This will delete all generated exercises from your schedule.',
           style: TextStyle(color: ColorManager.textSecondary),
         ),
         actions: [
@@ -96,7 +97,7 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'AI Workout Plan',
+                      'Weekly Plan',
                       style: TextStyle(
                         color: ColorManager.white,
                         fontSize: 20.sp,
@@ -186,7 +187,7 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
           return Column(
             children: otherWorkouts.map((w) => _buildWorkoutCard(
               workout: w,
-              onStart: () => _showWorkoutTimerDialog(context, w),
+              onStart: () => _startSingleExercise(context, w),
               isGrouped: false,
               latestLogMap: latestLogMap,
             )).toList(),
@@ -229,7 +230,7 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
             ],
             if (otherWorkouts.isNotEmpty) ...[
               Padding(padding: EdgeInsets.symmetric(vertical: 12.h), child: Text('Other Workouts', style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold))),
-              ...otherWorkouts.map((w) => _buildWorkoutCard(workout: w, onStart: () => _showWorkoutTimerDialog(context, w), isGrouped: false, latestLogMap: latestLogMap)),
+              ...otherWorkouts.map((w) => _buildWorkoutCard(workout: w, onStart: () => _startSingleExercise(context, w), isGrouped: false, latestLogMap: latestLogMap)),
             ],
           ],
         );
@@ -260,7 +261,8 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.small.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Row(
@@ -376,7 +378,7 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
                 ],
               ),
               subtitle: Text(subtitle, style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp)),
-              children: workouts.map((w) => _buildWorkoutCard(workout: w, onStart: () => _showWorkoutTimerDialog(context, w), isGrouped: true, latestLogMap: latestLogMap)).toList(),
+              children: workouts.map((w) => _buildWorkoutCard(workout: w, onStart: () => _startSingleExercise(context, w), isGrouped: true, latestLogMap: latestLogMap)).toList(),
             ),
           ),
           if (isToday)
@@ -417,8 +419,8 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
     return GradientHeroCard(
       key: const Key('no_plan_active_hero'),
       imageAsset: HeroImages.forKey('chest'),
-      imageSize: 130.w,
-      padding: EdgeInsets.all(20.w),
+      imageSize: AppCardSize.heroImageSize,
+      padding: EdgeInsets.all(AppCardSize.heroPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -444,7 +446,7 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
                 Text(
                   isPremium
                       ? 'Use AI to generate a full weekly schedule instantly.'
-                      : 'Activate your free 3-day starter routine (Mon, Wed, Fri) or upgrade to Pro for custom AI splits.',
+                      : 'Activate your free 3-day starter routine (Mon, Wed, Fri) or upgrade to Pro for custom splits.',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.92),
                     fontSize: 14.sp,
@@ -462,7 +464,7 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
               onPressed: () => context.push(Routes.workoutGeneratorRoute),
               icon: Icon(Icons.auto_awesome, size: 18.sp, color: ColorManager.onMint),
               label: Text(
-                'Generate Plan with AI',
+                'Build a Plan',
                 style: TextStyle(
                   color: ColorManager.onMint,
                   fontWeight: FontWeight.bold,
@@ -559,7 +561,7 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       decoration: isGrouped ? null : BoxDecoration(
         color: ColorManager.surfaceDark,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(AppRadius.small.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Row(
@@ -651,22 +653,13 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
     }
   }
 
-  void _showWorkoutTimerDialog(BuildContext context, dynamic workout) {
+  /// The play button on a single exercise starts a one-exercise guided
+  /// session (rest timer, last-time values, reward screen, History entry)
+  /// instead of opening the loose-log sheet.
+  void _startSingleExercise(BuildContext context, dynamic workout) {
     final cleanName = ExerciseData.normalizeExerciseName(workout.name);
-    final foundExercise = ExerciseData.findByName(workout.name);
-    final category = ExerciseData.categoryFor(workout.name) ?? 'Chest';
-
-    final exerciseToUse = foundExercise ?? Exercise(
-      name: cleanName, videoPath: '', description: 'Custom exercise routine.', target: 'N/A', equipment: 'N/A', instructions: const ['Perform the custom exercise as scheduled.'], difficulty: 'Intermediate', setsReps: '${workout.setNumber} sets x ${workout.repNumber} reps',
-    );
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => InteractiveExerciseDetailWidget(
-        name: exerciseToUse.name, videoPath: exerciseToUse.videoPath, description: exerciseToUse.description, target: exerciseToUse.target, equipment: exerciseToUse.equipment, instructions: exerciseToUse.instructions, difficulty: exerciseToUse.difficulty, setsReps: exerciseToUse.setsReps, category: category,
-      ),
-    );
+    // The exercise name stands in for the day name, so finishing it never
+    // marks a weekday of the plan as done.
+    _startDay(cleanName, [workout]);
   }
 }

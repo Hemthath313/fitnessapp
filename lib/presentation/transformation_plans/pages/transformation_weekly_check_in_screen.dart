@@ -1,3 +1,5 @@
+import 'package:fitness_app/utils/managers/layout_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -168,7 +170,7 @@ class _TransformationWeeklyCheckInScreenState
           'Week $_targetWeek Check-In',
           style: TextStyle(
             color: ColorManager.textPrimary,
-            fontSize: 18.sp,
+            fontSize: AppText.appBarTitle,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -186,7 +188,8 @@ class _TransformationWeeklyCheckInScreenState
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
                 color: ColorManager.surface,
-                borderRadius: BorderRadius.circular(16.r),
+                boxShadow: ColorManager.cardShadow,
+                borderRadius: BorderRadius.circular(AppRadius.tile.r),
                 border: Border.all(color: ColorManager.divider),
               ),
               child: Column(
@@ -445,7 +448,7 @@ class _TransformationWeeklyCheckInScreenState
                   backgroundColor: ColorManager.primary,
                   padding: EdgeInsets.symmetric(vertical: 14.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.r),
+                    borderRadius: BorderRadius.circular(AppRadius.button.r),
                   ),
                   elevation: 0,
                 ),
@@ -461,7 +464,7 @@ class _TransformationWeeklyCheckInScreenState
                     : Text(
                         'Submit Week $_targetWeek Check-In',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: ColorManager.onMint,
                           fontSize: 14.sp,
                           fontWeight: FontWeight.bold,
                         ),

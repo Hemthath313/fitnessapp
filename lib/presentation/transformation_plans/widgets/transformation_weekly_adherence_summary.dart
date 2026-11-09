@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -37,7 +38,8 @@ class TransformationWeeklyAdherenceSummary extends StatelessWidget {
           padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
             color: ColorManager.surface,
-            borderRadius: BorderRadius.circular(20.r),
+            boxShadow: ColorManager.cardShadow,
+            borderRadius: BorderRadius.circular(AppRadius.card.r),
             border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
           ),
           child: Column(
@@ -94,7 +96,7 @@ class TransformationWeeklyAdherenceSummary extends StatelessWidget {
                   padding: EdgeInsets.all(14.w),
                   decoration: BoxDecoration(
                     color: ColorManager.surfaceDark,
-                    borderRadius: BorderRadius.circular(12.r),
+                    borderRadius: BorderRadius.circular(AppRadius.small.r),
                   ),
                   child: Text(
                     'No historical data recorded yet. Complete daily workouts and nutrition check-ins to build your weekly consistency score.',

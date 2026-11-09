@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/layout_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
 import 'package:flutter/material.dart';
@@ -43,7 +44,7 @@ class NewMealPageAppBar extends StatelessWidget {
         StringsManager.addMealABtitle,
         style: TextStyle(
           color: ColorManager.textPrimary,
-          fontSize: 18.sp,
+          fontSize: AppText.appBarTitle,
           fontWeight: FontWeight.w600,
         ),
       ),

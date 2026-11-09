@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
@@ -140,7 +141,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
                       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                       decoration: BoxDecoration(
                         color: ColorManager.surface,
-                        borderRadius: BorderRadius.circular(20.r),
+                        boxShadow: ColorManager.cardShadow,
+                        borderRadius: BorderRadius.circular(AppRadius.card.r),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -199,7 +201,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
       children: [
         _buildFeatureItem(
           Icons.auto_awesome, 
-          'AI Workout Generator', 
+          'Plan Builder', 
           'Build, customize & save unlimited personalized weekly workout splits.',
           Colors.tealAccent,
         ),
@@ -292,7 +294,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
       padding: EdgeInsets.all(SizeManager.s16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(SizeManager.s16.r),
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(
           color: highlightColor,
           width: 2,
@@ -373,7 +375,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: (isYearly || isLifetime) ? highlightColor : ColorManager.surfaceLight,
               foregroundColor: (isYearly || isLifetime) 
-                  ? (isLifetime ? Colors.black : Colors.white) 
+                  ? (isLifetime ? ColorManager.onMint : ColorManager.textPrimary) 
                   : ColorManager.textPrimary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
               elevation: 0,

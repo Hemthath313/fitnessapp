@@ -114,7 +114,7 @@ class ExerciseWidget extends StatelessWidget {
                     Expanded(
                       child: Row(
                         children: [
-                          Icon(Icons.play_circle_fill, color: ColorManager.primary, size: 30.sp),
+                          Icon(Icons.play_circle_fill, color: ColorManager.primaryText, size: 30.sp),
                           SizedBox(width: 12.w),
                           Expanded(
                             child: Text(

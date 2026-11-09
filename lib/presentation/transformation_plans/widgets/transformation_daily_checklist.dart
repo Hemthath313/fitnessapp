@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -79,7 +80,7 @@ class TransformationDailyChecklist extends StatelessWidget {
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: ColorManager.surfaceDark,
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: primaryColor.withValues(alpha: 0.2)),
       ),
       child: Column(
@@ -242,7 +243,8 @@ class TransformationDailyChecklist extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.card.r),
         border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
       ),
       child: Column(
@@ -393,7 +395,7 @@ class TransformationDailyChecklist extends StatelessWidget {
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: ColorManager.surfaceDark,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(AppRadius.small.r),
         border: Border.all(
           color: isDone
               ? ColorManager.success.withValues(alpha: 0.5)
@@ -487,7 +489,7 @@ class TransformationDailyChecklist extends StatelessWidget {
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: ColorManager.surfaceDark,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(AppRadius.small.r),
         border: Border.all(
           color: isDone ? ColorManager.success.withValues(alpha: 0.5) : ColorManager.divider,
         ),
@@ -595,7 +597,7 @@ class TransformationDailyChecklist extends StatelessWidget {
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: ColorManager.surfaceDark,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(AppRadius.small.r),
         border: Border.all(
           color: isDone ? ColorManager.success.withValues(alpha: 0.5) : ColorManager.divider,
         ),
@@ -692,7 +694,7 @@ class TransformationDailyChecklist extends StatelessWidget {
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: ColorManager.surfaceDark,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(AppRadius.small.r),
         border: Border.all(
           color: isDone ? ColorManager.success.withValues(alpha: 0.5) : ColorManager.divider,
         ),
@@ -844,7 +846,7 @@ class TransformationDailyChecklist extends StatelessWidget {
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: ColorManager.surfaceDark,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(AppRadius.small.r),
         border: Border.all(
           color: isRecorded ? levelColor.withValues(alpha: 0.4) : ColorManager.divider,
         ),

@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/presentation/transformation_plans/providers/transformation_provider.dart';
@@ -189,7 +190,7 @@ class _ConfigureWaterGoalDialogState extends State<ConfigureWaterGoalDialog> {
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
                   ),
                   child: Text(
                     _isSaving ? 'Saving...' : 'Set Goal',

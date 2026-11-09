@@ -30,6 +30,7 @@ class TextFieldWidget extends StatelessWidget {
       height: height ?? 56.h,
       decoration: BoxDecoration(
         color: ColorManager.surface,
+        boxShadow: ColorManager.cardShadow,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
           color: ColorManager.surfaceLight.withValues(alpha: 0.3),
@@ -57,7 +58,7 @@ class TextFieldWidget extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
           floatingLabelStyle: TextStyle(
-            color: ColorManager.primary,
+            color: ColorManager.primaryText,
             fontSize: 14.sp,
             fontWeight: FontWeight.w600,
           ),

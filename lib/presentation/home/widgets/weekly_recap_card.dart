@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/services/weekly_recap.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
@@ -49,7 +50,7 @@ class WeeklyRecapView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = recap.goalHit ? ColorManager.primary : ColorManager.textSecondary;
+    final accent = recap.goalHit ? ColorManager.primaryText : ColorManager.textSecondary;
     final chips = <String>[
       if (recap.deltaText != null) recap.deltaText!,
       if (recap.streakText != null) recap.streakText!,
@@ -62,7 +63,8 @@ class WeeklyRecapView extends StatelessWidget {
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
           color: ColorManager.surface,
-          borderRadius: BorderRadius.circular(22.r),
+          boxShadow: ColorManager.cardShadow,
+          borderRadius: BorderRadius.circular(AppRadius.card.r),
           border: recap.goalHit
               ? Border.all(color: ColorManager.primary.withValues(alpha: 0.4))
               : null,
@@ -176,7 +178,7 @@ class _Chip extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          color: ColorManager.primary,
+          color: ColorManager.primaryText,
           fontSize: 12.sp,
           fontWeight: FontWeight.w600,
         ),

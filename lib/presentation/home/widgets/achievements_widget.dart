@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/utils/haptics.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
@@ -171,7 +172,7 @@ class AchievementsWidget extends StatelessWidget {
                       child: Text(
                         '${unlocked.length}/${allAchievements.length}',
                         style: TextStyle(
-                          color: ColorManager.primary,
+                          color: ColorManager.primaryText,
                           fontSize: 11.sp,
                           fontWeight: FontWeight.bold,
                         ),
@@ -372,7 +373,7 @@ void showAchievementUnlockDialog(
                 padding:
                     EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.r)),
+                    borderRadius: BorderRadius.circular(AppRadius.button.r)),
               ),
               child: Text(
                 'Awesome!',

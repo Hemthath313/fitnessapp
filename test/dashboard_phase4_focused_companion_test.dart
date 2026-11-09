@@ -23,6 +23,7 @@ import 'package:fitness_app/presentation/home/widgets/streak_calendar_widget.dar
 import 'package:fitness_app/presentation/home/widgets/today_health_snapshot_widget.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/main/widgets/appbar_home.dart';
+import 'package:fitness_app/presentation/progress/progress_data.dart';
 import 'package:fitness_app/presentation/progress/progress_page.dart';
 import 'package:fitness_app/presentation/profile/providers/profile_provider.dart';
 import 'package:fitness_app/presentation/transformation_plans/providers/transformation_provider.dart';
@@ -52,8 +53,13 @@ class _MockHomeProvider extends ChangeNotifier implements HomeProvider {
     notifyListeners();
   }
 
+  int userDataLoads = 0;
+
   @override
-  Future<Map<String, dynamic>> fetchUserData() async => _userData;
+  Future<Map<String, dynamic>> fetchUserData() async {
+    userDataLoads++;
+    return _userData;
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -105,8 +111,18 @@ class _MockConsumptionProvider extends ChangeNotifier
     notifyListeners();
   }
 
+  int caloriesLoads = 0;
+  int waterLoads = 0;
+
   @override
-  Future<void> getConsumedCalories() async {}
+  Future<void> getConsumedCalories() async {
+    caloriesLoads++;
+  }
+
+  @override
+  Future fetchAndSetWater() async {
+    waterLoads++;
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -163,8 +179,13 @@ class _MockStatisticsProvider extends ChangeNotifier
   @override
   List<String> consumeNewlyUnlocked() => [];
 
+  int weeklyStatsLoads = 0;
+
   @override
-  Future<Map<String, dynamic>> getWeeklyStats() async => {};
+  Future<Map<String, dynamic>> getWeeklyStats() async {
+    weeklyStatsLoads++;
+    return {};
+  }
 
   @override
   int get totalWorkouts => 3;
@@ -185,6 +206,15 @@ class _MockProfileProvider extends ChangeNotifier implements ProfileProvider {
 
   @override
   Future<void> fetchAndSetFlSpots() async {}
+
+  @override
+  List<TimedValue> get weightEntries => const [];
+
+  @override
+  Map<String, List<TimedValue>> get measurementHistory => const {};
+
+  @override
+  Future<void> loadMeasurementHistory() async {}
 
   @override
   Future<List<FlSpot>> fetchMeasurementSpots(String type) async => [];
@@ -295,6 +325,11 @@ Widget _buildOptionATestDashboard({
             path: Routes.addDataRoute,
             builder: (context, state) =>
                 const Scaffold(body: Text('Add Data Profile Screen')),
+          ),
+          GoRoute(
+            path: Routes.editProfileRoute,
+            builder: (context, state) =>
+                const Scaffold(body: Text('Edit Profile Screen')),
           ),
           GoRoute(
             path: Routes.addWaterRoute,
@@ -429,6 +464,42 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
       expect(find.text('Premium Screen'), findsOneWidget);
+    });
+
+    // -------------------------------------------------------------------------
+    // Test 1b: Avatar opens Edit Profile, never the sign-up data screen
+    // -------------------------------------------------------------------------
+    testWidgets('1b. Home avatar opens Edit Profile, not the sign-up data screen',
+        (tester) async {
+      _configureTestViewport(tester, width: 390);
+
+      final transProvider = TransformationProvider(autoLoad: false);
+      transProvider.userIdOverrideForTesting = 'p4_u1b';
+      transProvider.activeDocFetcherForTesting = (_) => null;
+
+      final workoutProvider = WorkoutProvider()..setAllWorkoutsForTesting([]);
+      final subProvider = _MockSubscriptionProvider()..setPremium(true);
+      final homeProvider = _MockHomeProvider();
+      final consumption = _MockConsumptionProvider();
+      final stats = _MockStatisticsProvider();
+
+      await tester.pumpWidget(_buildOptionATestDashboard(
+        transformationProvider: transProvider,
+        workoutProvider: workoutProvider,
+        subscriptionProvider: subProvider,
+        homeProvider: homeProvider,
+        consumptionProvider: consumption,
+        statsProvider: stats,
+      ));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      await tester.tap(find.byKey(const Key('appbar_profile_button')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(find.text('Edit Profile Screen'), findsOneWidget);
+      expect(find.text('Add Data Profile Screen'), findsNothing);
     });
 
     // -------------------------------------------------------------------------
@@ -612,7 +683,7 @@ void main() {
 
       // Priority 2 AI Routine card is displayed
       expect(find.byType(HomeAiRoutineCard), findsOneWidget);
-      expect(find.text('AI Workout Schedule'), findsOneWidget);
+      expect(find.text('Workout Schedule'), findsOneWidget);
       expect(find.text('Monday Routine'), findsOneWidget);
     });
 
@@ -718,8 +789,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
-      expect(find.text('AI Plan'), findsOneWidget);
-      await tester.tap(find.text('AI Plan'));
+      expect(find.text('Plan Builder'), findsOneWidget);
+      await tester.tap(find.text('Plan Builder'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
       expect(find.text('Workout Generator Screen'), findsOneWidget);
@@ -937,7 +1008,8 @@ void main() {
 
       expect(find.text('Not Set'), findsOneWidget);
       expect(find.text('500 kcal'), findsOneWidget);
-      expect(find.text('Set in profile'), findsOneWidget);
+      expect(find.text('Set a goal'), findsOneWidget);
+      expect(find.text('Set in profile'), findsNothing);
 
       await tester.tap(find.byKey(const Key('snapshot_calorie_card')));
       await tester.pump();
@@ -1113,6 +1185,166 @@ void main() {
       // Detailed Streak Calendar is present in Progress tab
       expect(find.byType(StreakCalendarWidget), findsOneWidget);
       expect(find.text('Progress'), findsOneWidget);
+    });
+
+    // -------------------------------------------------------------------------
+    // Test 7b: Today's Snapshot no longer repeats the weekly dots
+    // -------------------------------------------------------------------------
+    testWidgets('7b. Today\'s Snapshot header has no Mon-Sun consistency dots',
+        (tester) async {
+      _configureTestViewport(tester, width: 390);
+
+      final transProvider = TransformationProvider(autoLoad: false);
+      transProvider.userIdOverrideForTesting = 'p4_u7b';
+      transProvider.activeDocFetcherForTesting = (_) => null;
+
+      final workoutProvider = WorkoutProvider()..setAllWorkoutsForTesting([]);
+      final stats = _MockStatisticsProvider()..setHasWorkoutToday(true);
+
+      await tester.pumpWidget(_buildOptionATestDashboard(
+        transformationProvider: transProvider,
+        workoutProvider: workoutProvider,
+        subscriptionProvider: _MockSubscriptionProvider()..setPremium(true),
+        homeProvider: _MockHomeProvider(),
+        consumptionProvider: _MockConsumptionProvider(),
+        statsProvider: stats,
+      ));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      final snapshot = find.byType(TodayHealthSnapshotWidget);
+      expect(snapshot, findsOneWidget);
+      expect(find.descendant(of: snapshot, matching: find.text("Today's Snapshot")),
+          findsOneWidget);
+      expect(find.descendant(of: snapshot, matching: find.byIcon(Icons.check)),
+          findsNothing);
+      expect(find.descendant(of: snapshot, matching: find.text('T')),
+          findsNothing);
+    });
+
+    // -------------------------------------------------------------------------
+    // Test 7c: One Log Lift sheet with consistent wording
+    // -------------------------------------------------------------------------
+    testWidgets('7c. Log Lift without a plan shows one sheet with "Log a Single Lift"',
+        (tester) async {
+      _configureTestViewport(tester, width: 390);
+
+      final transProvider = TransformationProvider(autoLoad: false);
+      transProvider.userIdOverrideForTesting = 'p4_u7c';
+      transProvider.activeDocFetcherForTesting = (_) => null;
+      await transProvider.loadTransformation();
+
+      final workoutProvider = WorkoutProvider()..setAllWorkoutsForTesting([]);
+
+      await tester.pumpWidget(_buildOptionATestDashboard(
+        transformationProvider: transProvider,
+        workoutProvider: workoutProvider,
+        subscriptionProvider: _MockSubscriptionProvider()..setPremium(true),
+        homeProvider: _MockHomeProvider(),
+        consumptionProvider: _MockConsumptionProvider(),
+        statsProvider: _MockStatisticsProvider(),
+      ));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      await tester.tap(find.text('Log Lift'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.text('Ready to Train?'), findsOneWidget);
+      expect(find.text('Build My Adaptive Plan'), findsOneWidget);
+      expect(find.text('Log a Single Lift'), findsOneWidget);
+      expect(find.text('Log a Single Exercise Manually'), findsNothing);
+      expect(find.text('Log a Single Ad-Hoc Lift'), findsNothing);
+
+      // The fallback button logs a lift and closes the sheet.
+      await tester.tap(find.text('Log a Single Lift'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.text('Workout Log Screen'), findsOneWidget);
+      expect(find.text('Ready to Train?'), findsNothing);
+    });
+
+    testWidgets('7d. Log Lift sheet primary action opens the plan builder',
+        (tester) async {
+      _configureTestViewport(tester, width: 390);
+
+      final transProvider = TransformationProvider(autoLoad: false);
+      transProvider.userIdOverrideForTesting = 'p4_u7d';
+      transProvider.activeDocFetcherForTesting = (_) => null;
+      await transProvider.loadTransformation();
+
+      final workoutProvider = WorkoutProvider()..setAllWorkoutsForTesting([]);
+
+      await tester.pumpWidget(_buildOptionATestDashboard(
+        transformationProvider: transProvider,
+        workoutProvider: workoutProvider,
+        subscriptionProvider: _MockSubscriptionProvider()..setPremium(true),
+        homeProvider: _MockHomeProvider(),
+        consumptionProvider: _MockConsumptionProvider(),
+        statsProvider: _MockStatisticsProvider(),
+      ));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      await tester.tap(find.text('Log Lift'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.tap(find.text('Build My Adaptive Plan'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.text('Workout Generator Screen'), findsOneWidget);
+    });
+
+    // -------------------------------------------------------------------------
+    // Test 7e: Pull-to-refresh reloads the Home data
+    // -------------------------------------------------------------------------
+    testWidgets('7e. Pull-to-refresh reloads calories, water, weekly stats and profile',
+        (tester) async {
+      _configureTestViewport(tester, width: 390);
+
+      final transProvider = TransformationProvider(autoLoad: false);
+      transProvider.userIdOverrideForTesting = 'p4_u7e';
+      transProvider.activeDocFetcherForTesting = (_) => null;
+
+      final workoutProvider = WorkoutProvider()..setAllWorkoutsForTesting([]);
+      final homeProvider = _MockHomeProvider();
+      final consumption = _MockConsumptionProvider();
+      final stats = _MockStatisticsProvider();
+
+      await tester.pumpWidget(_buildOptionATestDashboard(
+        transformationProvider: transProvider,
+        workoutProvider: workoutProvider,
+        subscriptionProvider: _MockSubscriptionProvider()..setPremium(true),
+        homeProvider: homeProvider,
+        consumptionProvider: consumption,
+        statsProvider: stats,
+      ));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      final caloriesBefore = consumption.caloriesLoads;
+      final statsBefore = stats.weeklyStatsLoads;
+      final userBefore = homeProvider.userDataLoads;
+      expect(consumption.waterLoads, 0);
+
+      final scroll = find
+          .descendant(
+            of: find.byType(RefreshIndicator),
+            matching: find.byType(SingleChildScrollView),
+          )
+          .first;
+      await tester.drag(scroll, const Offset(0, 400));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(consumption.caloriesLoads, caloriesBefore + 1);
+      expect(consumption.waterLoads, 1);
+      expect(stats.weeklyStatsLoads, statsBefore + 1);
+      expect(homeProvider.userDataLoads, userBefore + 1);
+      expect(tester.takeException(), isNull);
     });
 
     // -------------------------------------------------------------------------

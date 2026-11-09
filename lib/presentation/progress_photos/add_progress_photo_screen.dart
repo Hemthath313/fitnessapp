@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/presentation/progress_photos/providers/progress_photo_provider.dart';
@@ -94,7 +95,7 @@ class _AddProgressPhotoScreenState extends State<AddProgressPhotoScreen> {
               ),
               SizedBox(height: 16.h),
               ListTile(
-                leading: Icon(Icons.camera_alt, color: ColorManager.primary),
+                leading: Icon(Icons.camera_alt, color: ColorManager.primaryText),
                 title: Text('Camera', style: TextStyle(color: ColorManager.textPrimary)),
                 onTap: () {
                   Navigator.pop(context);
@@ -102,7 +103,7 @@ class _AddProgressPhotoScreenState extends State<AddProgressPhotoScreen> {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.photo_library, color: ColorManager.primary),
+                leading: Icon(Icons.photo_library, color: ColorManager.primaryText),
                 title: Text('Gallery', style: TextStyle(color: ColorManager.textPrimary)),
                 onTap: () {
                   Navigator.pop(context);
@@ -178,7 +179,8 @@ class _AddProgressPhotoScreenState extends State<AddProgressPhotoScreen> {
                 height: 300.h,
                 decoration: BoxDecoration(
                   color: ColorManager.surface,
-                  borderRadius: BorderRadius.circular(SizeManager.s16.r),
+                  boxShadow: ColorManager.cardShadow,
+                  borderRadius: BorderRadius.circular(AppRadius.tile.r),
                   border: Border.all(color: ColorManager.primary, width: 2),
                 ),
                 child: _selectedImage == null
@@ -271,14 +273,14 @@ class _AddProgressPhotoScreenState extends State<AddProgressPhotoScreen> {
                 onPressed: _isUploading ? null : _uploadPhoto,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorManager.primary,
-                  foregroundColor: Colors.black,
+                  foregroundColor: ColorManager.onMint,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
+                    borderRadius: BorderRadius.circular(AppRadius.button.r),
                   ),
                   elevation: 5,
                 ),
                 child: _isUploading
-                    ? const CircularProgressIndicator(color: Colors.black)
+                    ? const CircularProgressIndicator(color: ColorManager.onMint)
                     : Text(
                         'Upload Photo',
                         style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
@@ -310,14 +312,14 @@ class _AddProgressPhotoScreenState extends State<AddProgressPhotoScreen> {
             children: [
               Icon(
                 icon,
-                color: isSelected ? Colors.black : Colors.white,
+                color: isSelected ? ColorManager.onMint : ColorManager.textPrimary,
                 size: 24.sp,
               ),
               SizedBox(height: 4.h),
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? Colors.black : Colors.white,
+                  color: isSelected ? ColorManager.onMint : ColorManager.textPrimary,
                   fontSize: 12.sp,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),

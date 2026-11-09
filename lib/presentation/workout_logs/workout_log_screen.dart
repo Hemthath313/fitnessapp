@@ -1,5 +1,9 @@
+import 'package:fitness_app/utils/managers/layout_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/data/exercise_data.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/model/workout_log.dart';
+import 'package:fitness_app/model/workout_session_model.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/presentation/workout_tools/plate_calculator_sheet.dart';
 import 'package:fitness_app/services/progression_service.dart';
@@ -7,7 +11,28 @@ import 'package:fitness_app/services/workout_log_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
+/// One exercise that has been filled in and added to the workout being
+/// logged, waiting for "Save Workout".
+class _DraftExercise {
+  _DraftExercise({
+    required this.name,
+    required this.category,
+    required this.sets,
+    required this.notes,
+  });
+
+  final String name;
+  final String category;
+  final List<WorkoutSet> sets;
+  final String notes;
+  bool saved = false;
+
+  double get volume =>
+      sets.fold(0.0, (sum, s) => sum + s.weight * s.reps);
+}
 
 class WorkoutLogScreen extends StatefulWidget {
   const WorkoutLogScreen({super.key});
@@ -32,6 +57,38 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
   String _category = 'Strength';
   final _logService = WorkoutLogService();
   bool _isSaving = false;
+
+  /// The day the workout happened. Defaults to today; can be moved back.
+  late DateTime _date = _dateOnly(DateTime.now());
+
+  /// Exercises already filled in for this workout.
+  final List<_DraftExercise> _added = [];
+
+  static DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
+  bool get _isToday => _dateOnly(_date) == _dateOnly(DateTime.now());
+
+  String get _dateLabel {
+    final today = _dateOnly(DateTime.now());
+    final diff = today.difference(_dateOnly(_date)).inDays;
+    if (diff == 0) return 'Today';
+    if (diff == 1) return 'Yesterday';
+    return DateFormat('EEE, MMM d, yyyy').format(_date);
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _date.isAfter(now) ? now : _date,
+      firstDate: DateTime(2020, 1, 1),
+      lastDate: _dateOnly(now),
+      helpText: 'When did you train?',
+    );
+    if (picked != null && mounted) {
+      setState(() => _date = _dateOnly(picked));
+    }
+  }
 
   List<String> get _suggestedExercises => WorkoutLogScreen.suggestedExercises;
 
@@ -170,63 +227,170 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
     }
   }
 
-  Future<void> _saveLog() async {
-    if (_isSaving) return;
-
-    if (_exerciseController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter an exercise name')),
-      );
-      return;
-    }
-
+  /// Reads the form. Returns null when the sets have no reps.
+  _DraftExercise? _readForm() {
     final List<WorkoutSet> finalSets = [];
-    bool hasValidSet = false;
     for (int i = 0; i < _sets.length; i++) {
       final weight = double.tryParse(_weightControllers[i].text.trim()) ?? 0.0;
       final reps = int.tryParse(_repControllers[i].text.trim()) ?? 0;
-      if (reps > 0) hasValidSet = true;
       // Only sets with reps are real sets; they are stored as completed so
       // progress charts and strength insights count them.
       if (reps > 0) {
         finalSets.add(WorkoutSet(weight: weight, reps: reps, isCompleted: true));
       }
     }
+    if (finalSets.isEmpty) return null;
+    return _DraftExercise(
+      name: _exerciseController.text.trim(),
+      category: _category,
+      sets: finalSets,
+      notes: _notesController.text.trim(),
+    );
+  }
 
-    if (!hasValidSet) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter at least 1 rep for your sets')),
-      );
-      return;
+  void _resetForm() {
+    for (final c in _weightControllers) {
+      c.dispose();
+    }
+    for (final c in _repControllers) {
+      c.dispose();
+    }
+    _sets
+      ..clear()
+      ..add(WorkoutSet(weight: 0, reps: 0));
+    _weightControllers
+      ..clear()
+      ..add(TextEditingController());
+    _repControllers
+      ..clear()
+      ..add(TextEditingController());
+    _isWeightUserEdited
+      ..clear()
+      ..add(false);
+    _lastWeightTexts
+      ..clear()
+      ..add('');
+    _attachWeightListener(0);
+    _notesController.clear();
+    _exerciseController.clear();
+    _autocompleteController?.clear();
+  }
+
+  void _toast(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// Validates the form and moves it into the "added" list. Returns false
+  /// (after telling the user why) when the form is not ready.
+  bool _commitCurrentExercise() {
+    if (_exerciseController.text.trim().isEmpty) {
+      _toast('Please enter an exercise name');
+      return false;
+    }
+    final draft = _readForm();
+    if (draft == null) {
+      _toast('Please enter at least 1 rep for your sets');
+      return false;
+    }
+    setState(() {
+      _added.add(draft);
+      _resetForm();
+    });
+    return true;
+  }
+
+  Future<void> _saveLog() async {
+    if (_isSaving) return;
+
+    // Anything typed into the form counts as the last exercise. An empty form
+    // is fine when exercises were already added.
+    final formHasName = _exerciseController.text.trim().isNotEmpty;
+    if (formHasName || _added.isEmpty) {
+      if (!_commitCurrentExercise()) return;
     }
 
     setState(() => _isSaving = true);
 
-    final log = WorkoutLog(
-      id: '',
-      exerciseName: _exerciseController.text.trim(),
-      date: DateTime.now(),
-      sets: finalSets,
-      notes: _notesController.text.trim(),
-      category: _category,
-    );
-
     try {
-      await _logService.addLog(log);
+      final pending = _added.where((e) => !e.saved).toList();
+      final now = DateTime.now();
+      final when = _isToday
+          ? now
+          : DateTime(_date.year, _date.month, _date.day, now.hour, now.minute);
+
+      // Two or more strength exercises become one session so History shows a
+      // single card. Everything else is saved as its own quick log.
+      final strength = pending.where((e) => e.category == 'Strength').toList();
+      final asSession = strength.length >= 2;
+
+      if (asSession) {
+        String uid = '';
+        try {
+          uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+        } catch (_) {}
+        final exercises = <SessionExercise>[
+          for (int i = 0; i < strength.length; i++)
+            SessionExercise(
+              exerciseName: strength[i].name,
+              order: i,
+              sets: strength[i].sets,
+              notes: strength[i].notes.isEmpty ? null : strength[i].notes,
+              isCompleted: true,
+            ),
+        ];
+        final volume = exercises.fold<double>(0, (sum, e) => sum + e.totalVolume);
+        await _logService.saveWorkoutSession(WorkoutSession(
+          id: 'session_${when.millisecondsSinceEpoch}',
+          userId: uid,
+          workoutName: 'Logged Workout',
+          dayName: 'Logged Workout',
+          startedAt: when,
+          completedAt: when,
+          durationSeconds: 0,
+          status: 'completed',
+          totalVolume: volume,
+          exercises: exercises,
+        ));
+        for (final e in strength) {
+          e.saved = true;
+        }
+      }
+
+      for (final e in pending.where((e) => !e.saved)) {
+        await _logService.addLog(WorkoutLog(
+          id: '',
+          exerciseName: e.name,
+          date: when,
+          sets: e.sets,
+          notes: e.notes,
+          category: e.category,
+        ));
+        e.saved = true;
+      }
+
+      // Refresh streak and counts. Today uses the usual path. A past date
+      // must not credit today, so it reloads from the saved history instead.
+      try {
+        if (mounted) {
+          final stats = Provider.of<StatisticsProvider>(context, listen: false);
+          if (_isToday) {
+            await stats.updateStreak();
+          } else {
+            await stats.loadStreakData();
+          }
+        }
+      } catch (_) {}
+
       if (mounted) {
-        // Trigger streak recalculation immediately
-        Provider.of<StatisticsProvider>(context, listen: false).updateStreak();
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Workout saved & streak updated!')),
-        );
+        _toast(_isToday
+            ? 'Workout saved & streak updated!'
+            : 'Workout saved for $_dateLabel');
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving log: $e')),
-        );
+        _toast('Error saving log: $e');
       }
     }
   }
@@ -236,15 +400,123 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: AppBar(
-        title: Text('Log Workout', style: TextStyle(color: ColorManager.textPrimary)),
+        title: Text('Log a workout', style: TextStyle(color: ColorManager.textPrimary)),
         backgroundColor: ColorManager.background,
         iconTheme: IconThemeData(color: ColorManager.textPrimary),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.w),
+        padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.gutter, vertical: 16.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            InkWell(
+              key: const Key('log_date_row'),
+              onTap: _isSaving ? null : _pickDate,
+              borderRadius: BorderRadius.circular(12.r),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                decoration: BoxDecoration(
+                  color: ColorManager.surface,
+                  boxShadow: ColorManager.cardShadow,
+                  borderRadius: BorderRadius.circular(AppRadius.small.r),
+                  border: Border.all(color: ColorManager.divider),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.event_rounded, color: ColorManager.primary),
+                    SizedBox(width: 10.w),
+                    Text(
+                      'When',
+                      style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp),
+                    ),
+                    const Spacer(),
+                    Text(
+                      _dateLabel,
+                      key: const Key('log_date_label'),
+                      style: TextStyle(
+                        color: ColorManager.textPrimary,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(width: 6.w),
+                    Icon(Icons.chevron_right_rounded, color: ColorManager.textTertiary, size: 20.sp),
+                  ],
+                ),
+              ),
+            ),
+            if (_added.isNotEmpty) ...[
+              SizedBox(height: 12.h),
+              Container(
+                key: const Key('log_added_list'),
+                width: double.infinity,
+                padding: EdgeInsets.all(12.w),
+                decoration: BoxDecoration(
+                  color: ColorManager.surface,
+                  boxShadow: ColorManager.cardShadow,
+                  borderRadius: BorderRadius.circular(AppRadius.small.r),
+                  border: Border.all(color: ColorManager.divider),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'In this workout (${_added.length})',
+                      style: TextStyle(
+                        color: ColorManager.textTertiary,
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    for (int i = 0; i < _added.length; i++)
+                      Padding(
+                        key: Key('log_added_$i'),
+                        padding: EdgeInsets.only(top: 6.h),
+                        child: Row(
+                          children: [
+                            Icon(Icons.check_circle_rounded,
+                                color: ColorManager.primary, size: 18.sp),
+                            SizedBox(width: 8.w),
+                            Expanded(
+                              child: Text(
+                                _added[i].name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: ColorManager.textPrimary,
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              '${_added[i].sets.length} sets'
+                              '${_added[i].volume > 0 ? ' · ${_added[i].volume.toInt()} kg' : ''}',
+                              style: TextStyle(
+                                color: ColorManager.textTertiary,
+                                fontSize: 12.sp,
+                              ),
+                            ),
+                            if (!_added[i].saved)
+                              IconButton(
+                                key: Key('log_added_remove_$i'),
+                                tooltip: 'Remove exercise',
+                                visualDensity: VisualDensity.compact,
+                                icon: Icon(Icons.close_rounded,
+                                    color: ColorManager.textTertiary, size: 18.sp),
+                                onPressed: _isSaving
+                                    ? null
+                                    : () => setState(() => _added.removeAt(i)),
+                              ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+            SizedBox(height: 16.h),
             Autocomplete<String>(
               initialValue: TextEditingValue(text: _exerciseController.text),
               optionsBuilder: (TextEditingValue textEditingValue) {
@@ -542,17 +814,40 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 30.h),
+            SizedBox(height: 16.h),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                key: const Key('log_add_another_button'),
+                onPressed: _isSaving ? null : _commitCurrentExercise,
+                icon: const Icon(Icons.add_rounded, color: ColorManager.primary),
+                label: Text(
+                  'Add another exercise',
+                  style: TextStyle(
+                    color: ColorManager.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.sp,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 13.h),
+                  side: BorderSide(color: ColorManager.primary.withValues(alpha: 0.6)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
+                ),
+              ),
+            ),
+            SizedBox(height: 14.h),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
+                key: const Key('log_save_button'),
                 onPressed: _isSaving ? null : _saveLog,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorManager.primary,
                   foregroundColor: const Color(0xFF06201B),
                   disabledBackgroundColor: ColorManager.primary.withValues(alpha: 0.6),
                   padding: EdgeInsets.symmetric(vertical: 15.h),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
                   elevation: 4,
                 ),
                 child: _isSaving
@@ -564,7 +859,16 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                           color: ColorManager.onMint,
                         ),
                       )
-                    :  Text('Save Workout', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp)),
+                    : Text(
+                        () {
+                          final total = _added.length +
+                              (_exerciseController.text.trim().isNotEmpty ? 1 : 0);
+                          return total > 1
+                              ? 'Save Workout ($total exercises)'
+                              : 'Save Workout';
+                        }(),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
+                      ),
               ),
             ),
           ],

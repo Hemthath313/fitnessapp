@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +49,7 @@ class StreakCalendarWidget extends StatelessWidget {
           padding: EdgeInsets.all(18.w),
           decoration: BoxDecoration(
             color: ColorManager.surface,
-            borderRadius: BorderRadius.circular(24.r),
+            borderRadius: BorderRadius.circular(AppRadius.card.r),
             border: Border.all(
               color: ColorManager.divider.withValues(alpha: 0.4),
               width: 1.5,

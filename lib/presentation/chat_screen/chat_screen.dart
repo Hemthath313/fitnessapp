@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/presentation/banner_ads/banner_ad_service.dart';
 import 'dart:async';
 import 'package:fitness_app/utils/managers/color_manager.dart';
@@ -418,7 +419,7 @@ class _ChatScreenState extends State<ChatScreen> {
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : ColorManager.textSecondary,
+            color: isSelected ? ColorManager.onMint : ColorManager.textSecondary,
             fontWeight: FontWeight.bold,
             fontSize: 11.sp,
           ),
@@ -597,7 +598,7 @@ class _ChatScreenState extends State<ChatScreen> {
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
           color: ColorManager.surface,
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(AppRadius.tile.r),
           border: Border.all(color: ColorManager.divider),
           boxShadow: [
             BoxShadow(
@@ -718,7 +719,8 @@ class _ChatScreenState extends State<ChatScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: ColorManager.surface,
-          borderRadius: BorderRadius.circular(20),
+          boxShadow: ColorManager.cardShadow,
+          borderRadius: BorderRadius.circular(AppRadius.card),
         ),
         child: SizedBox(
           width: 35.w,

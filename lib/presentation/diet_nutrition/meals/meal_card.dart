@@ -171,7 +171,7 @@ class MealCard extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          color: ColorManager.primary,
+          color: ColorManager.primaryText,
           fontSize: 11.sp,
           fontWeight: FontWeight.w700,
         ),

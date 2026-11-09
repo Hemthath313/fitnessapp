@@ -1,6 +1,12 @@
+import 'package:fitness_app/utils/managers/layout_manager.dart';
+import 'package:fitness_app/utils/managers/app_font.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/presentation/in_app_purchases/premimum_screen.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/diet_nutrition/diet_card.dart';
+import 'package:fitness_app/presentation/diet_nutrition/nutrition_targets.dart';
+import 'package:fitness_app/presentation/diet_nutrition/summary_card.dart';
+import 'package:fitness_app/presentation/diet_nutrition/widgets/todays_food_log_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fitness_app/utils/managers/asset_manager.dart';
@@ -27,6 +33,15 @@ class _DietMainState extends State<DietMain>
   double _calculatorWeight = 70.0;
   String _calculatorActivity = 'MODERATE';
   bool _isCalculatorExpanded = false;
+
+  /// Until the user moves a slider or chip the estimator shows exactly the
+  /// target Home shows. After that it recalculates from the same formulas.
+  bool _calculatorTouched = false;
+
+  // Slider range (kg). The profile weight is clamped into it so a value
+  // outside the range can never trip the Slider's assertion.
+  static const double _minWeightKg = 30.0;
+  static const double _maxWeightKg = 250.0;
 
   @override
   void initState() {
@@ -57,11 +72,14 @@ class _DietMainState extends State<DietMain>
         final homeProvider = Provider.of<HomeProvider>(context, listen: false);
         final userData = homeProvider.userData;
         setState(() {
-          _calculatorWeight = (userData['weight'] ?? 70.0) as double;
-          _calculatorActivity = userData['activity']?.toString().toUpperCase() ?? 'MODERATE';
-          if (_calculatorWeight <= 0) {
-            _calculatorWeight = 70.0;
-          }
+          final weight = (userData['weight'] as num?)?.toDouble() ?? 0.0;
+          _calculatorWeight =
+              weight <= 0
+                  ? 70.0
+                  : weight.clamp(_minWeightKg, _maxWeightKg).toDouble();
+          final activity =
+              userData['activity']?.toString().trim().toUpperCase() ?? '';
+          _calculatorActivity = activity.isEmpty ? 'MODERATE' : activity;
         });
       }
     });
@@ -105,7 +123,7 @@ class _DietMainState extends State<DietMain>
         ];
         goalIcon = Icons.fitness_center;
         currentPlanImage = ImageManager.bulkingDiet;
-        currentPlanTitle = 'Bulking Protocol';
+        currentPlanTitle = 'Bulking Meal Plan';
         currentPlanAction = () => context.push(Routes.bulkingDietRoute);
         break;
       case 'LOSE':
@@ -117,7 +135,7 @@ class _DietMainState extends State<DietMain>
         ];
         goalIcon = Icons.local_fire_department;
         currentPlanImage = ImageManager.cuttingDiet;
-        currentPlanTitle = 'Shredding Protocol';
+        currentPlanTitle = 'Cutting Meal Plan';
         currentPlanAction = () => context.push(Routes.cuttingDietRoute);
         break;
       case 'MAINTAIN':
@@ -129,7 +147,7 @@ class _DietMainState extends State<DietMain>
         ];
         goalIcon = Icons.balance;
         currentPlanImage = ImageManager.maintainDiet;
-        currentPlanTitle = 'Maintenance Protocol';
+        currentPlanTitle = 'Maintenance Meal Plan';
         currentPlanAction = () => context.push(Routes.maintainDietRoute);
         break;
       default:
@@ -145,7 +163,11 @@ class _DietMainState extends State<DietMain>
         backgroundColor: ColorManager.background,
         title: Text(
           'Nutrition Hub',
-          style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: ColorManager.textPrimary,
+            fontSize: AppText.appBarTitle,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: true,
         elevation: 0,
@@ -153,7 +175,7 @@ class _DietMainState extends State<DietMain>
           if (!isPremium)
             IconButton(
               tooltip: 'Go Premium',
-              icon: const Icon(Icons.star, color: Colors.amber),
+              icon: Icon(Icons.star, color: ColorManager.premium),
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PremiumScreen())),
             )
         ],
@@ -164,7 +186,8 @@ class _DietMainState extends State<DietMain>
           position: _slideAnimation,
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.pageGutter, vertical: AppSpacing.section),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -178,7 +201,7 @@ class _DietMainState extends State<DietMain>
                     'Your Active Plan',
                     style: TextStyle(
                       color: ColorManager.textPrimary,
-                      fontSize: 18.sp,
+                      fontSize: AppText.sectionTitle,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -186,15 +209,15 @@ class _DietMainState extends State<DietMain>
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.amber.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.amber),
+                        color: ColorManager.premium.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(AppRadius.small),
+                        border: Border.all(color: ColorManager.premium),
                       ),
                       child: Row(
                         children:  [
-                          Icon(Icons.lock, color: Colors.amber, size: 12),
+                          Icon(Icons.lock, color: ColorManager.premium, size: 12),
                           SizedBox(width: 4),
-                          Text('PREMIUM', style: TextStyle(color: Colors.amber, fontSize: 11.sp, fontWeight: FontWeight.bold)),
+                          Text('PREMIUM', style: TextStyle(color: ColorManager.premium, fontSize: AppText.caption, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
@@ -220,7 +243,7 @@ class _DietMainState extends State<DietMain>
                           child: Container(
                             decoration: BoxDecoration(
                               color: Colors.black.withValues(alpha: 0.4),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(AppRadius.card),
                             ),
                             child: Center(
                               child: Column(
@@ -231,9 +254,9 @@ class _DietMainState extends State<DietMain>
                                     decoration: BoxDecoration(
                                       color: Colors.black54,
                                       shape: BoxShape.circle,
-                                      border: Border.all(color: Colors.amber, width: 2),
+                                      border: Border.all(color: ColorManager.premium, width: 2),
                                     ),
-                                    child: const Icon(Icons.lock, color: Colors.amber, size: 32),
+                                    child: Icon(Icons.lock, color: ColorManager.premium, size: 32),
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
@@ -255,10 +278,16 @@ class _DietMainState extends State<DietMain>
                     child: Text(
                       'Please set your goal in the Profile tab to unlock your nutrition plan.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: ColorManager.textSecondary, fontSize: 14.sp),
+                      style: TextStyle(color: ColorManager.textSecondary, fontSize: AppText.body),
                     ),
                   ),
                 ),
+
+              // Meal logging is Pro-only: free users do not see this card at all.
+              if (isPremium) ...[
+                const SizedBox(height: 32),
+                const TodaysFoodLogCard(),
+              ],
 
               const SizedBox(height: 32),
               _buildMacroCalculator(goal, Provider.of<HomeProvider>(context).userData['bmr']?.toDouble()),
@@ -268,7 +297,7 @@ class _DietMainState extends State<DietMain>
                 'Strategy Highlights',
                 style: TextStyle(
                   color: ColorManager.textPrimary,
-                  fontSize: 18.sp,
+                  fontSize: AppText.sectionTitle,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -277,7 +306,8 @@ class _DietMainState extends State<DietMain>
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: ColorManager.surface,
-                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: ColorManager.cardShadow,
+                  borderRadius: BorderRadius.circular(AppRadius.tile),
                   border: Border.all(color: ColorManager.divider),
                 ),
                 child: Column(
@@ -290,7 +320,7 @@ class _DietMainState extends State<DietMain>
                 'Tools & Resources',
                 style: TextStyle(
                   color: ColorManager.textPrimary,
-                  fontSize: 18.sp,
+                  fontSize: AppText.sectionTitle,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -298,12 +328,13 @@ class _DietMainState extends State<DietMain>
               
               InkWell(
                 onTap: () => context.push(Routes.proteinChartRoute),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(AppRadius.tile),
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: ColorManager.surface,
-                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: ColorManager.cardShadow,
+                    borderRadius: BorderRadius.circular(AppRadius.tile),
                     border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
                     gradient: LinearGradient(
                       colors: [
@@ -333,7 +364,7 @@ class _DietMainState extends State<DietMain>
                               'Food Library',
                               style: TextStyle(
                                 color: ColorManager.textPrimary,
-                                fontSize: 16.sp,
+                                fontSize: AppText.cardTitle,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -342,7 +373,7 @@ class _DietMainState extends State<DietMain>
                               'Browse protein sources & nutritional info',
                               style: TextStyle(
                                 color: ColorManager.textSecondary,
-                                fontSize: 13.sp,
+                                fontSize: AppType.small.sp,
                               ),
                             ),
                           ],
@@ -374,7 +405,7 @@ class _DietMainState extends State<DietMain>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.card),
       ),
       child: Row(
         children: [
@@ -388,14 +419,14 @@ class _DietMainState extends State<DietMain>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Current Sprint',
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 12.sp),
+                'Current Goal',
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: AppText.secondary),
               ),
               Text(
                 title,
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 20.sp,
+                  fontSize: AppType.headline.sp,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -412,12 +443,12 @@ class _DietMainState extends State<DietMain>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.check_circle_outline, color: ColorManager.primary, size: 18),
+          Icon(Icons.check_circle_outline, color: ColorManager.primaryText, size: 18),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               text,
-              style: TextStyle(color: ColorManager.textSecondary, fontSize: 14.sp, height: 1.4),
+              style: TextStyle(color: ColorManager.textSecondary, fontSize: AppText.body, height: 1.4),
             ),
           ),
         ],
@@ -425,75 +456,58 @@ class _DietMainState extends State<DietMain>
     );
   }
 
+  /// Age can be stored as an int, a double or a string; never assume int.
+  static int _ageOf(Map<String, dynamic> userData) {
+    final a = userData['age'];
+    if (a is num) return a.toInt();
+    return int.tryParse('$a') ?? 0;
+  }
+
+  /// Flex for a macro-bar segment; must be at least 1 or the segment vanishes.
+  static int _flex(double fraction) {
+    final f = (fraction * 100).round();
+    return f < 1 ? 1 : f;
+  }
+
   Widget _buildMacroCalculator(String? goal, double? cachedBMR) {
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
     final userData = homeProvider.userData;
     final gender = userData['gender']?.toString() ?? 'Male';
-    final height = (userData['height'] ?? 170.0) as double;
-    final age = (userData['age'] ?? 25) as int;
+    final height = (userData['height'] as num?)?.toDouble() ?? 0.0;
+    final age = _ageOf(userData);
+    final goalName = goal ?? '';
 
-    double basicBmr;
-    if (gender.toLowerCase() == 'female') {
-      basicBmr = 447.593 + (9.247 * _calculatorWeight) + (3.098 * height) - (4.330 * age);
-    } else {
-      basicBmr = 88.362 + (13.397 * _calculatorWeight) + (4.799 * height) - (5.677 * age);
-    }
+    // One source of truth: the same targets Home and the plan screens use.
+    final NutritionTargetSet targets = _calculatorTouched
+        ? NutritionTargets.estimate(
+            gender: gender,
+            weightKg: _calculatorWeight,
+            heightCm: height,
+            age: age,
+            activity: _calculatorActivity,
+            goal: goalName,
+          )
+        : NutritionTargets.forUser(context, userData);
 
-    double activityFactor = 1.2;
-    if (_calculatorActivity == 'LIGHT') {
-      activityFactor = 1.375;
-    } else if (_calculatorActivity == 'MODERATE') {
-      activityFactor = 1.55;
-    } else if (_calculatorActivity == 'HIGH' || _calculatorActivity == 'VERY HIGH') {
-      activityFactor = 1.725;
-    }
+    final int calculatedCalories = targets.calories;
+    final int calculatedProtein = targets.protein;
+    final int calculatedCarbs = targets.carbs;
+    final int calculatedFats = targets.fats;
 
-    double usersBmr = basicBmr * activityFactor;
-
-    double calculatedCaloriesDouble;
-    if (goal == 'LOSE') {
-      calculatedCaloriesDouble = usersBmr - (usersBmr * 0.2);
-    } else if (goal == 'GAIN') {
-      calculatedCaloriesDouble = usersBmr + (usersBmr * 0.2);
-    } else {
-      calculatedCaloriesDouble = usersBmr;
-    }
-
-    int calculatedCalories = calculatedCaloriesDouble.round();
-    if (calculatedCalories < 1200) {
-      calculatedCalories = 1200;
-    }
-
-    double proteinMultiplier = 1.6;
-    if (goal == 'GAIN') {
-      proteinMultiplier = 2.0;
-    } else if (goal == 'LOSE') {
-      proteinMultiplier = 2.2;
-    }
-    int calculatedProtein = (_calculatorWeight * proteinMultiplier).round();
-
-    int calculatedFats = (_calculatorWeight * 0.9).round();
-    if (calculatedFats < 40) {
-      calculatedFats = 40;
-    }
-
-    int caloriesFromProtein = calculatedProtein * 4;
-    int caloriesFromFats = calculatedFats * 9;
-    int remainingCals = calculatedCalories - (caloriesFromProtein + caloriesFromFats);
-    int calculatedCarbs = (remainingCals / 4).round();
-    if (calculatedCarbs < 50) {
-      calculatedCarbs = 50;
-    }
-
-    int totalGramsCaloric = (calculatedCarbs * 4) + (calculatedProtein * 4) + (calculatedFats * 9);
-    double carbsPercent = totalGramsCaloric > 0 ? (calculatedCarbs * 4) / totalGramsCaloric : 0.0;
-    double proteinPercent = totalGramsCaloric > 0 ? (calculatedProtein * 4) / totalGramsCaloric : 0.0;
-    double fatsPercent = totalGramsCaloric > 0 ? (calculatedFats * 9) / totalGramsCaloric : 0.0;
+    final int totalGramsCaloric =
+        (calculatedCarbs * 4) + (calculatedProtein * 4) + (calculatedFats * 9);
+    final double carbsPercent =
+        totalGramsCaloric > 0 ? (calculatedCarbs * 4) / totalGramsCaloric : 0.0;
+    final double proteinPercent = totalGramsCaloric > 0
+        ? (calculatedProtein * 4) / totalGramsCaloric
+        : 0.0;
+    final double fatsPercent =
+        totalGramsCaloric > 0 ? (calculatedFats * 9) / totalGramsCaloric : 0.0;
 
     return Container(
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.card),
         border: Border.all(color: ColorManager.divider),
         boxShadow: [
           BoxShadow(
@@ -509,7 +523,7 @@ class _DietMainState extends State<DietMain>
             _isCalculatorExpanded = !_isCalculatorExpanded;
           });
         },
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.card),
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -526,7 +540,7 @@ class _DietMainState extends State<DietMain>
                         'Macro & Calorie Estimator',
                         style: TextStyle(
                           color: ColorManager.textPrimary,
-                          fontSize: 14.sp,
+                          fontSize: AppText.body,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -560,11 +574,11 @@ class _DietMainState extends State<DietMain>
                       children: [
                         Text(
                           'Adjust Weight:',
-                          style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp),
+                          style: TextStyle(color: ColorManager.textSecondary, fontSize: AppType.small.sp),
                         ),
                         Text(
                           '${_calculatorWeight.toStringAsFixed(1)} kg',
-                          style: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.bold, fontSize: 14.sp),
+                          style: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.bold, fontSize: AppText.body),
                         ),
                       ],
                     ),
@@ -577,14 +591,17 @@ class _DietMainState extends State<DietMain>
                         valueIndicatorColor: ColorManager.primary,
                       ),
                       child: Slider(
-                        value: _calculatorWeight,
-                        min: 40.0,
-                        max: 150.0,
-                        divisions: 220,
+                        value: _calculatorWeight
+                            .clamp(_minWeightKg, _maxWeightKg)
+                            .toDouble(),
+                        min: _minWeightKg,
+                        max: _maxWeightKg,
+                        divisions: ((_maxWeightKg - _minWeightKg) * 2).round(),
                         label: '${_calculatorWeight.toStringAsFixed(1)} kg',
                         onChanged: (val) {
                           setState(() {
                             _calculatorWeight = val;
+                            _calculatorTouched = true;
                           });
                         },
                       ),
@@ -592,15 +609,18 @@ class _DietMainState extends State<DietMain>
                     
                     Text(
                       'Activity Level:',
-                      style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp),
+                      style: TextStyle(color: ColorManager.textSecondary, fontSize: AppType.small.sp),
                     ),
                     const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
                       children: [
                         _activityChip('LOW', 'Low', 'Low'),
+                        _activityChip('LIGHT', 'Light', 'Light'),
                         _activityChip('MODERATE', 'Moderate', 'Moderate'),
                         _activityChip('HIGH', 'Active', 'Active'),
+                        _activityChip('VERY HIGH', 'Very active', 'Very active'),
                       ],
                     ),
                     
@@ -611,23 +631,21 @@ class _DietMainState extends State<DietMain>
                         children: [
                           Text(
                             'Estimated Daily Caloric Needs',
-                            style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
+                            style: TextStyle(color: ColorManager.textSecondary, fontSize: AppText.secondary),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             '$calculatedCalories kcal',
                             style: TextStyle(
                               color: ColorManager.textPrimary,
-                              fontSize: 24.sp,
+                              fontSize: AppType.display.sp,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            goal == 'GAIN' 
-                                ? 'Includes +300 kcal bulking surplus'
-                                : (goal == 'LOSE' ? 'Includes -400 kcal shredding deficit' : 'Maintenance balance'),
-                            style: TextStyle(color: ColorManager.primary, fontSize: 11.sp, fontStyle: FontStyle.italic),
+                            NutritionTargets.adjustmentLabel(goalName),
+                            style: TextStyle(color: ColorManager.primary, fontSize: AppText.caption, fontStyle: FontStyle.italic),
                           ),
                         ],
                       ),
@@ -636,7 +654,7 @@ class _DietMainState extends State<DietMain>
                     const SizedBox(height: 24),
                     
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppRadius.small),
                       child: SizedBox(
                         height: 12,
                         width: double.infinity,
@@ -644,18 +662,18 @@ class _DietMainState extends State<DietMain>
                           children: [
                             if (carbsPercent > 0)
                               Expanded(
-                                flex: (carbsPercent * 100).round(),
-                                child: Container(color: Colors.teal),
+                                flex: _flex(carbsPercent),
+                                child: Container(color: SummaryCard.carbsColor),
                               ),
                             if (proteinPercent > 0)
                               Expanded(
-                                flex: (proteinPercent * 100).round(),
-                                child: Container(color: Colors.orange),
+                                flex: _flex(proteinPercent),
+                                child: Container(color: ColorManager.primary),
                               ),
                             if (fatsPercent > 0)
                               Expanded(
-                                flex: (fatsPercent * 100).round(),
-                                child: Container(color: Colors.purple),
+                                flex: _flex(fatsPercent),
+                                child: Container(color: SummaryCard.fatsColor),
                               ),
                           ],
                         ),
@@ -666,9 +684,9 @@ class _DietMainState extends State<DietMain>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _macroLabel('Carbs', '${calculatedCarbs}g', Colors.teal, '${(carbsPercent * 100).toInt()}%'),
-                        _macroLabel('Protein', '${calculatedProtein}g', Colors.orange, '${(proteinPercent * 100).toInt()}%'),
-                        _macroLabel('Fats', '${calculatedFats}g', Colors.purple, '${(fatsPercent * 100).toInt()}%'),
+                        _macroLabel('Carbs', '${calculatedCarbs}g', SummaryCard.carbsColor, '${(carbsPercent * 100).toInt()}%'),
+                        _macroLabel('Protein', '${calculatedProtein}g', ColorManager.primary, '${(proteinPercent * 100).toInt()}%'),
+                        _macroLabel('Fats', '${calculatedFats}g', SummaryCard.fatsColor, '${(fatsPercent * 100).toInt()}%'),
                       ],
                     ),
                   ],
@@ -689,14 +707,14 @@ class _DietMainState extends State<DietMain>
       children: [
         Text(
           title,
-          style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+          style: TextStyle(color: ColorManager.textSecondary, fontSize: AppText.caption),
         ),
         const SizedBox(height: 2),
         Text(
           value,
           style: TextStyle(
             color: ColorManager.textPrimary,
-            fontSize: 13.sp,
+            fontSize: AppType.small.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -707,7 +725,7 @@ class _DietMainState extends State<DietMain>
   Widget _activityChip(String code, String label, String tooltip) {
     final isSelected = _calculatorActivity == code;
     return ChoiceChip(
-      label: Text(label, style: TextStyle(fontSize: 12.sp)),
+      label: Text(label, style: TextStyle(fontSize: AppText.secondary)),
       selected: isSelected,
       selectedColor: ColorManager.primary.withValues(alpha: 0.2),
       checkmarkColor: ColorManager.primary,
@@ -721,6 +739,7 @@ class _DietMainState extends State<DietMain>
         if (val) {
           setState(() {
             _calculatorActivity = code;
+            _calculatorTouched = true;
           });
         }
       },
@@ -744,11 +763,11 @@ class _DietMainState extends State<DietMain>
           children: [
             Text(
               '$title ($pct)',
-              style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+              style: TextStyle(color: ColorManager.textSecondary, fontSize: AppText.caption),
             ),
             Text(
               grams,
-              style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold, fontSize: 13.sp),
+              style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold, fontSize: AppType.small.sp),
             ),
           ],
         ),

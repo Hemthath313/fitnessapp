@@ -1,8 +1,10 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/presentation/explore/explore_page.dart';
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/journal/widgets/weekly_schedule_widget.dart';
 import 'package:fitness_app/utils/managers/asset_manager.dart';
+import 'package:fitness_app/utils/managers/card_size_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
@@ -133,7 +135,7 @@ class _WorkoutTabPageState extends State<WorkoutTabPage>
                   ),
                   Semantics(
                     button: true,
-                    label: 'Build a workout plan with AI',
+                    label: 'Build a workout plan',
                     child: InkWell(
                       key: const Key('ai_plan_button'),
                       onTap: () => context.push(Routes.workoutGeneratorRoute),
@@ -151,7 +153,7 @@ class _WorkoutTabPageState extends State<WorkoutTabPage>
                             Icon(Icons.auto_awesome_rounded, color: ColorManager.primary, size: 16.sp),
                             SizedBox(width: 6.w),
                             Text(
-                              'AI Plan',
+                              'Plan Builder',
                               style: TextStyle(
                                 color: ColorManager.primary,
                                 fontSize: 12.sp,
@@ -175,7 +177,8 @@ class _WorkoutTabPageState extends State<WorkoutTabPage>
                 padding: EdgeInsets.all(4.w),
                 decoration: BoxDecoration(
                   color: ColorManager.surface,
-                  borderRadius: BorderRadius.circular(26.r),
+                  boxShadow: ColorManager.cardShadow,
+                  borderRadius: BorderRadius.circular(AppRadius.card.r),
                   border: Border.all(color: ColorManager.divider),
                 ),
                 child: TabBar(
@@ -282,7 +285,7 @@ class _MyPlanTabViewState extends State<_MyPlanTabView>
                 child: Text(
                   'See all',
                   style: TextStyle(
-                    color: ColorManager.primary,
+                    color: ColorManager.primaryText,
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
                   ),
@@ -298,9 +301,9 @@ class _MyPlanTabViewState extends State<_MyPlanTabView>
             itemCount: widget.categories.length,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
-              childAspectRatio: 1.05,
-              crossAxisSpacing: 10.w,
-              mainAxisSpacing: 10.h,
+              childAspectRatio: AppCardSize.gridAspectRatio,
+              crossAxisSpacing: AppCardSize.gridSpacing,
+              mainAxisSpacing: AppCardSize.gridSpacing,
             ),
             itemBuilder: (context, index) {
               final cat = widget.categories[index];
@@ -311,7 +314,8 @@ class _MyPlanTabViewState extends State<_MyPlanTabView>
                 child: Container(
                   decoration: BoxDecoration(
                     color: ColorManager.surface,
-                    borderRadius: BorderRadius.circular(16.r),
+                    boxShadow: ColorManager.cardShadow,
+                    borderRadius: BorderRadius.circular(AppRadius.tile.r),
                     border: Border.all(color: ColorManager.divider),
                   ),
                   child: Column(

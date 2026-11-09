@@ -46,7 +46,7 @@ class _CarouselSliderHomeWidgetState extends State<CarouselSliderHomeWidget> {
     return Column(
       children: [
         SizedBox(
-          height: CarouselHomeBox.height + 4.h,
+          height: CarouselHomeBox.heightOf(context) + 4.h,
           child: PageView.builder(
             controller: _pageController,
             itemCount: carouselCards.length,
@@ -69,7 +69,7 @@ class _CarouselSliderHomeWidgetState extends State<CarouselSliderHomeWidget> {
               height: 5.h,
               margin: EdgeInsets.symmetric(horizontal: 3.w),
               decoration: BoxDecoration(
-                color: isSelected ? ColorManager.primary : Colors.white24,
+                color: isSelected ? ColorManager.primary : ColorManager.textTertiary.withValues(alpha: 0.35),
                 borderRadius: BorderRadius.circular(4.r),
               ),
             );

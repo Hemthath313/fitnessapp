@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -27,7 +28,7 @@ class LimeGreenRoundedButtonWidget extends StatelessWidget {
             foregroundColor: const Color(0xFF06201B),
             elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.r),
+              borderRadius: BorderRadius.circular(AppRadius.button.r),
             ),
             disabledBackgroundColor: ColorManager.primary.withValues(alpha: 0.6),
             padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),

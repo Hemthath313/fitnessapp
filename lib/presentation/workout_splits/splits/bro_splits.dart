@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
@@ -108,13 +109,30 @@ class BroSplitPage extends StatelessWidget {
               ),
             ),
             ElevatedButton(
+              key: const Key('use_this_split_button'),
+              onPressed: () => context.push('${Routes.workoutGeneratorRoute}?days=5'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorManager.limerGreen2,
+                minimumSize: const Size.fromHeight(48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.button),
+                ),
+              ),
+              child: Text('Use this split',
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold)),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
               onPressed: () => _showExerciseDialog(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.limerGreen2,
                 padding:
                     const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(AppRadius.button),
                 ),
               ),
               child:  Text("View Exercises",

@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/model/personal_record_model.dart';
 import 'package:fitness_app/model/workout_session_model.dart';
 import 'package:fitness_app/presentation/home/widgets/achievements_widget.dart';
@@ -20,6 +21,7 @@ class WorkoutRewardData {
     this.workoutsThisWeek = 0,
     this.weeklyTarget = 3,
     this.nextBadge,
+    this.nextUp,
   });
 
   final int streakBefore;
@@ -30,11 +32,14 @@ class WorkoutRewardData {
   final int workoutsThisWeek;
   final int weeklyTarget;
   final BadgeProgress? nextBadge;
+
+  /// What comes next in the plan, e.g. "Wednesday · 5 exercises".
+  final String? nextUp;
 }
 
 /// Finish-line screen shown after a workout is saved: a streak count-up, new
 /// PRs, weekly goal, badge progress and a one-time reminder opt-in. The
-/// "Back to Home" button stays pinned below the scrolling content.
+/// "Done" button stays pinned below the scrolling content.
 class WorkoutRewardView extends StatefulWidget {
   const WorkoutRewardView({
     super.key,
@@ -42,6 +47,7 @@ class WorkoutRewardView extends StatefulWidget {
     required this.dayName,
     required this.data,
     required this.onDone,
+    this.onViewSession,
     this.reminderCard = const ReminderOptInCard(),
     this.playHaptic = true,
   });
@@ -50,6 +56,9 @@ class WorkoutRewardView extends StatefulWidget {
   final String dayName;
   final WorkoutRewardData data;
   final VoidCallback onDone;
+
+  /// Opens the saved session. The link is hidden when this is null.
+  final VoidCallback? onViewSession;
 
   /// Replaceable so tests do not touch notification plugins.
   final Widget reminderCard;
@@ -123,22 +132,36 @@ class _WorkoutRewardViewState extends State<WorkoutRewardView> {
                 ),
               ),
             ),
+            if (widget.onViewSession != null)
+              TextButton(
+                key: const Key('reward_view_session'),
+                onPressed: widget.onViewSession,
+                child: Text(
+                  'View session',
+                  style: TextStyle(
+                    color: ColorManager.primary,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             Padding(
               padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 16.h),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
+                  key: const Key('reward_done_button'),
                   onPressed: widget.onDone,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ColorManager.primary,
                     elevation: 0,
                     padding: EdgeInsets.symmetric(vertical: 14.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r),
+                      borderRadius: BorderRadius.circular(AppRadius.button.r),
                     ),
                   ),
                   child: Text(
-                    'Back to Home',
+                    'Done',
                     style: TextStyle(
                       color: ColorManager.onMint,
                       fontSize: 14.sp,
@@ -219,7 +242,8 @@ class _WorkoutRewardViewState extends State<WorkoutRewardView> {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(22.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.card.r),
         border: Border.all(color: Colors.orange.withValues(alpha: 0.4)),
       ),
       child: Row(
@@ -309,7 +333,8 @@ class _WorkoutRewardViewState extends State<WorkoutRewardView> {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(22.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.card.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Row(
@@ -328,7 +353,7 @@ class _WorkoutRewardViewState extends State<WorkoutRewardView> {
   Widget _metric(String label, String value, IconData icon) {
     return Column(
       children: [
-        Icon(icon, color: ColorManager.primary, size: 20.sp),
+        Icon(icon, color: ColorManager.primaryText, size: 20.sp),
         SizedBox(height: 4.h),
         Text(
           value,
@@ -354,7 +379,8 @@ class _WorkoutRewardViewState extends State<WorkoutRewardView> {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(22.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.card.r),
         border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
       ),
       child: Column(
@@ -423,7 +449,8 @@ class _WorkoutRewardViewState extends State<WorkoutRewardView> {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(22.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.card.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Row(
@@ -452,6 +479,18 @@ class _WorkoutRewardViewState extends State<WorkoutRewardView> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+                if (data.nextUp != null) ...[
+                  SizedBox(height: 4.h),
+                  Text(
+                    'Next up: ${data.nextUp}',
+                    key: const Key('reward_next_up'),
+                    style: TextStyle(
+                      color: ColorManager.primaryText,
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

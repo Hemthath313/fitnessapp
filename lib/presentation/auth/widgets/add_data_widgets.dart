@@ -46,7 +46,7 @@ class AddDataWidgets extends StatelessWidget {
         child: Text(
           text.toUpperCase(),
           style: TextStyle(
-            color: ColorManager.primary,
+            color: ColorManager.primaryText,
             fontSize: 12.sp,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.8,

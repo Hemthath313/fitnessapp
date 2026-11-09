@@ -1,17 +1,12 @@
 import 'package:fitness_app/data/exercise_data.dart';
-import 'package:fitness_app/data/transformation_plans_data.dart';
-import 'package:fitness_app/model/transformation_plan_model.dart';
 import 'package:fitness_app/model/workout_model.dart';
 import 'package:fitness_app/presentation/custom_workouts/day_workout_session_page.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
-import 'package:fitness_app/presentation/home/providers/home_provider.dart';
 import 'package:fitness_app/presentation/home/widgets/gradient_hero_card.dart';
-import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/transformation_plans/providers/transformation_provider.dart';
-import 'package:fitness_app/presentation/transformation_plans/utils/transformation_equipment_adapter.dart';
-import 'package:fitness_app/presentation/workout_tools/plate_calculator_sheet.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/services/notification_service.dart';
+import 'package:fitness_app/utils/managers/card_size_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
@@ -21,6 +16,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fitness_app/presentation/home/widgets/routine_no_plan_card.dart';
+import 'package:fitness_app/presentation/home/widgets/routine_toolkit_cards.dart';
+import 'package:fitness_app/presentation/home/widgets/transformation_hero_card.dart';
 
 class HomeAiRoutineCard extends StatefulWidget {
   const HomeAiRoutineCard({super.key});
@@ -126,9 +124,9 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
       builder: (c) => AlertDialog(
         backgroundColor: ColorManager.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-        title: Text('Reset AI Plan?', style: TextStyle(color: ColorManager.textPrimary)),
+        title: Text('Reset your plan?', style: TextStyle(color: ColorManager.textPrimary)),
         content: Text(
-          'This will clear your current AI workout split so you can build a fresh one.',
+          'This will clear your current workout split so you can build a fresh one.',
           style: TextStyle(color: ColorManager.textSecondary),
         ),
         actions: [
@@ -163,112 +161,6 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
     }
   }
 
-  void _showOneRepMaxDialog(BuildContext context) {
-    final weightController = TextEditingController(text: '80');
-    final repsController = TextEditingController(text: '8');
-    double estimatedMax = 80.0 * (1.0 + 8.0 / 30.0);
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setModalState) {
-          return AlertDialog(
-            backgroundColor: ColorManager.surface,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-            title: Row(
-              children: [
-                Icon(Icons.speed_rounded, color: ColorManager.primary, size: 24.sp),
-                SizedBox(width: 8.w),
-                Text('1-Rep Max Estimator', style: TextStyle(color: ColorManager.textPrimary, fontSize: 16.sp, fontWeight: FontWeight.bold)),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Calculate your maximum single-rep strength using the Epley formula.',
-                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
-                ),
-                SizedBox(height: 16.h),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: weightController,
-                        keyboardType: TextInputType.number,
-                        style: TextStyle(color: ColorManager.textPrimary),
-                        decoration: InputDecoration(
-                          labelText: 'Weight (kg)',
-                          labelStyle: TextStyle(color: ColorManager.textTertiary),
-                          filled: true,
-                          fillColor: ColorManager.surfaceDark,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.r), borderSide: BorderSide.none),
-                        ),
-                        onChanged: (_) {
-                          final w = double.tryParse(weightController.text) ?? 0;
-                          final r = double.tryParse(repsController.text) ?? 1;
-                          setModalState(() {
-                            estimatedMax = w * (1.0 + r / 30.0);
-                          });
-                        },
-                      ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: TextField(
-                        controller: repsController,
-                        keyboardType: TextInputType.number,
-                        style: TextStyle(color: ColorManager.textPrimary),
-                        decoration: InputDecoration(
-                          labelText: 'Reps Completed',
-                          labelStyle: TextStyle(color: ColorManager.textTertiary),
-                          filled: true,
-                          fillColor: ColorManager.surfaceDark,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.r), borderSide: BorderSide.none),
-                        ),
-                        onChanged: (_) {
-                          final w = double.tryParse(weightController.text) ?? 0;
-                          final r = double.tryParse(repsController.text) ?? 1;
-                          setModalState(() {
-                            estimatedMax = w * (1.0 + r / 30.0);
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 18.h),
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
-                  decoration: BoxDecoration(
-                    color: ColorManager.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
-                  ),
-                  child: Column(
-                    children: [
-                      Text('ESTIMATED 1-REP MAX', style: TextStyle(color: ColorManager.primary, fontSize: 11.sp, fontWeight: FontWeight.bold, letterSpacing: 0.6)),
-                      SizedBox(height: 4.h),
-                      Text('${estimatedMax.toStringAsFixed(1)} kg', style: TextStyle(color: ColorManager.white, fontSize: 24.sp, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: Text('Done', style: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.bold)),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final transformationProvider = Provider.of<TransformationProvider?>(context);
@@ -278,7 +170,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
         // Priority 1: Active Transformation Programme
         if (transformationProvider != null &&
             transformationProvider.hasActiveTransformation) {
-          return _buildTransformationHeroCard(context, transformationProvider);
+          return TransformationHeroCard(transformationProvider: transformationProvider);
         }
 
         // Priority 2: Active AI Workout Routine
@@ -313,728 +205,8 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
         }
 
         // Priority 3: No Active Workout Plan
-        return _buildNoPlanCard(context);
+        return const NoPlanCard();
       },
-    );
-  }
-
-  void _launchTransformationWorkout({
-    required BuildContext context,
-    required TransformationDayBlueprint day,
-    required int dayNumber,
-    required String planTitle,
-    required String planId,
-    required TransformationProvider provider,
-  }) {
-    final activeState = provider.activeTransformation;
-    final adaptedExerciseNames =
-        TransformationEquipmentAdapter.adaptExercisesForEnvironment(
-      exerciseNames: day.exerciseNames,
-      workoutLocation: activeState?.workoutLocation,
-      availableEquipment: activeState?.availableEquipment ?? const [],
-      injuries: activeState?.injuries,
-    );
-
-    final resolvedExercises = <dynamic>[];
-    for (final name in adaptedExerciseNames) {
-      final catalogEx = ExerciseData.findByName(name);
-      if (catalogEx != null) {
-        resolvedExercises.add(catalogEx);
-      } else {
-        resolvedExercises.add({
-          'name': name,
-          'setNumber': day.targetSets,
-          'repNumber': 10,
-        });
-      }
-    }
-
-    context.push(
-      Routes.dayWorkoutSessionRoute,
-      extra: {
-        'dayName': '$planTitle • Day $dayNumber',
-        'workouts': resolvedExercises,
-        'planId': planId,
-        'planDay': dayNumber,
-      },
-    );
-  }
-
-  /// Priority 1 Hero Card: Active Transformation Programme
-  Widget _buildTransformationHeroCard(
-    BuildContext context,
-    TransformationProvider transformationProvider,
-  ) {
-    final active = transformationProvider.activeTransformation;
-    if (active == null) return const SizedBox.shrink();
-
-    final subscriptionProvider = Provider.of<SubscriptionProvider?>(context);
-    final bool isPremium = subscriptionProvider?.isPremium ?? false;
-
-    final blueprint = transformationProvider.activeBlueprint ??
-        TransformationPlansData.getById(active.planId);
-
-    final int currentDay = active.currentDay;
-    final int totalDays = active.totalDays;
-    final int currentWeek = active.currentWeekNumber;
-
-    String? phaseName;
-    String? weekFocus;
-    if (blueprint != null) {
-      final weekIndex = (currentDay - 1) ~/ 7;
-      int weekCounter = 0;
-      for (final phase in blueprint.phases) {
-        for (final week in phase.weeks) {
-          if (weekCounter == weekIndex) {
-            phaseName = phase.phaseName;
-            weekFocus = week.focus;
-            break;
-          }
-          weekCounter++;
-        }
-        if (phaseName != null) break;
-      }
-    }
-
-    final todayBlueprint = transformationProvider.currentDayBlueprint ??
-        blueprint?.getDayBlueprint(currentDay);
-    final bool isRestDay = todayBlueprint?.isRestDay ?? false;
-    final bool isActiveRecovery = todayBlueprint?.dayType == 'active_recovery';
-    final bool isTodayCompleted =
-        transformationProvider.isDayCompleted(currentDay);
-    final bool isFinalDay = currentDay == totalDays;
-    final double progress = active.completionPercentage;
-
-    String sessionTitle;
-    String sessionSubtitle;
-    if (isRestDay) {
-      if (isActiveRecovery) {
-        sessionTitle = 'Active Recovery & Mobility';
-        sessionSubtitle =
-            'Light cardio, mobility, or stretching to accelerate muscular recovery.';
-      } else {
-        sessionTitle = 'Rest & Muscle Repair';
-        sessionSubtitle =
-            'Scheduled rest day for nervous system recovery and muscle tissue rebuilding.';
-      }
-    } else {
-      final muscle = todayBlueprint?.muscleGroup;
-      sessionTitle = muscle != null && muscle.isNotEmpty
-          ? '$muscle Focus'
-          : 'Day $currentDay Workout';
-      final exCount = todayBlueprint?.exerciseNames.length ?? 0;
-      final sets = todayBlueprint?.targetSets ?? 3;
-      final reps = todayBlueprint?.targetReps ?? '8-12';
-      sessionSubtitle = '$exCount Exercises · $sets sets ($reps) · ~45 min';
-    }
-
-    final exerciseNames = todayBlueprint != null && !isRestDay
-        ? TransformationEquipmentAdapter.adaptExercisesForEnvironment(
-            exerciseNames: todayBlueprint.exerciseNames,
-            workoutLocation: active.workoutLocation,
-            availableEquipment: active.availableEquipment,
-            injuries: active.injuries,
-          )
-        : (isActiveRecovery
-            ? const ['Dynamic Mobility', 'Foam Rolling', 'Light Walk']
-            : const <String>[]);
-
-    final Color accentColor = isTodayCompleted
-        ? const Color(0xFF4CAF50)
-        : (isRestDay ? Colors.blueAccent : Colors.white);
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: (isTodayCompleted || isRestDay) ? ColorManager.surface : null,
-          gradient: (isTodayCompleted || isRestDay)
-              ? null
-              : LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    ColorManager.heroTealStart,
-                    ColorManager.heroTealMid,
-                    ColorManager.surface,
-                  ],
-                  stops: const [0.0, 0.4, 1.0],
-                ),
-          borderRadius: BorderRadius.circular(24.r),
-          border: (isTodayCompleted || isRestDay)
-              ? Border.all(
-                  color: accentColor
-                      .withValues(alpha: isTodayCompleted ? 0.7 : 0.4),
-                  width: 1.4,
-                )
-              : null,
-          boxShadow: [
-            BoxShadow(
-              color: accentColor.withValues(alpha: 0.08),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Top Row: Status Badge & Roadmap Shortcut Link
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                      decoration: BoxDecoration(
-                        color: isTodayCompleted
-                            ? const Color(0xFF1E4331)
-                            : (isRestDay
-                                ? Colors.blueAccent.withValues(alpha: 0.15)
-                                : Colors.black.withValues(alpha: 0.25)),
-                        borderRadius: BorderRadius.circular(6.r),
-                        border: Border.all(
-                          color: accentColor.withValues(alpha: 0.4),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            isTodayCompleted
-                                ? Icons.check_circle_rounded
-                                : (isRestDay
-                                    ? (isActiveRecovery
-                                        ? Icons.self_improvement_rounded
-                                        : Icons.bedtime_rounded)
-                                    : Icons.fitness_center_rounded),
-                            size: 11.sp,
-                            color: isTodayCompleted
-                                ? const Color(0xFF4CAF50)
-                                : accentColor,
-                          ),
-                          SizedBox(width: 4.w),
-                          Text(
-                            isTodayCompleted
-                                ? 'DAY $currentDay COMPLETED ✓'
-                                : (isActiveRecovery
-                                    ? 'DAY $currentDay • ACTIVE RECOVERY'
-                                    : (isRestDay
-                                        ? 'DAY $currentDay • REST DAY'
-                                        : 'DAY $currentDay OF $totalDays')),
-                            style: TextStyle(
-                              color: isTodayCompleted
-                                  ? const Color(0xFF81C784)
-                                  : accentColor,
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                InkWell(
-                  onTap: () => context.push(Routes.transformationRoadmapRoute),
-                  borderRadius: BorderRadius.circular(6.r),
-                  child: Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Roadmap',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 11.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Icon(
-                          Icons.chevron_right_rounded,
-                          color: Colors.white,
-                          size: 14.sp,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 10.h),
-
-            // Programme Name
-            Text(
-              blueprint?.title ?? active.planTitle,
-              style: TextStyle(
-                color: ColorManager.white,
-                fontSize: 16.sp,
-                fontWeight: FontWeight.bold,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            SizedBox(height: 2.h),
-
-            // Week & Phase Context
-            Text(
-              'Week $currentWeek${phaseName != null ? ' • $phaseName' : ''}${weekFocus != null ? ' ($weekFocus)' : ''}',
-              style: TextStyle(
-                color: ColorManager.textSecondary,
-                fontSize: 11.sp,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            SizedBox(height: 8.h),
-
-            // Session Title & Focus
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
-              decoration: BoxDecoration(
-                color: ColorManager.surfaceDark,
-                borderRadius: BorderRadius.circular(10.r),
-                border: Border.all(color: ColorManager.divider),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        isRestDay
-                            ? (isActiveRecovery
-                                ? Icons.self_improvement_rounded
-                                : Icons.spa_rounded)
-                            : Icons.play_circle_outline_rounded,
-                        color: accentColor,
-                        size: 14.sp,
-                      ),
-                      SizedBox(width: 6.w),
-                      Expanded(
-                        child: Text(
-                          sessionTitle,
-                          style: TextStyle(
-                            color: ColorManager.white,
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 3.h),
-                  Text(
-                    sessionSubtitle,
-                    style: TextStyle(
-                      color: ColorManager.textSecondary,
-                      fontSize: 11.sp,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-
-            // Exercises Preview Pills (if workout or active recovery)
-            if (exerciseNames.isNotEmpty) ...[
-              SizedBox(height: 8.h),
-              Wrap(
-                spacing: 5.w,
-                runSpacing: 4.h,
-                children: [
-                  ...exerciseNames.take(3).map((name) => Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
-                        decoration: BoxDecoration(
-                          color: isTodayCompleted
-                              ? const Color(0xFF1E4331)
-                              : ColorManager.surfaceDark,
-                          borderRadius: BorderRadius.circular(6.r),
-                          border: Border.all(color: ColorManager.divider),
-                        ),
-                        child: Text(
-                          name,
-                          style: TextStyle(
-                            color: isTodayCompleted
-                                ? const Color(0xFFE8F5E9)
-                                : ColorManager.textSecondary,
-                            fontSize: 11.sp,
-                          ),
-                        ),
-                      )),
-                  if (exerciseNames.length > 3)
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
-                      decoration: BoxDecoration(
-                        color: ColorManager.surfaceDark,
-                        borderRadius: BorderRadius.circular(6.r),
-                      ),
-                      child: Text(
-                        '+${exerciseNames.length - 3} more',
-                        style: TextStyle(
-                          color: ColorManager.primary,
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ],
-
-            // Progress Bar & Day Counter
-            SizedBox(height: 10.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Text(
-                    '${(progress * 100).toInt()}% Complete',
-                    style: TextStyle(
-                      color: ColorManager.textSecondary,
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                Flexible(
-                  child: Text(
-                    '${active.completedDayIndices.length}/$totalDays Days Done',
-                    style: TextStyle(
-                      color: ColorManager.textTertiary,
-                      fontSize: 11.sp,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.end,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 4.h),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(3.r),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 4.h,
-                backgroundColor: ColorManager.divider,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  isTodayCompleted ? const Color(0xFF4CAF50) : ColorManager.primary,
-                ),
-              ),
-            ),
-            SizedBox(height: 12.h),
-
-            // Bottom Action CTA
-            SizedBox(
-              width: double.infinity,
-              height: 38.h,
-              child: isFinalDay && isTodayCompleted
-                  ? ElevatedButton.icon(
-                      onPressed: () =>
-                          context.push(Routes.transformationCompletionRoute),
-                      icon: Icon(
-                        Icons.emoji_events_rounded,
-                        size: 16.sp,
-                        color: Colors.black,
-                      ),
-                      label: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          'VIEW PROGRAMME GRADUATION',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 11.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.amber,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                      ),
-                    )
-                  : (isRestDay && !isActiveRecovery
-                      ? OutlinedButton.icon(
-                          onPressed: () =>
-                              context.push(Routes.transformationRoadmapRoute),
-                          icon: Icon(
-                            Icons.map_rounded,
-                            size: 16.sp,
-                            color: Colors.blueAccent,
-                          ),
-                          label: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              'VIEW PROGRAMME ROADMAP',
-                              style: TextStyle(
-                                color: Colors.blueAccent,
-                                fontSize: 11.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color: Colors.blueAccent.withValues(alpha: 0.5),
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.r),
-                            ),
-                          ),
-                        )
-                      : ElevatedButton.icon(
-                          onPressed: () {
-                            if (!isPremium) {
-                              context.push(Routes.premiumScreen);
-                              return;
-                            }
-
-                            if (todayBlueprint != null) {
-                              _launchTransformationWorkout(
-                                context: context,
-                                day: todayBlueprint,
-                                dayNumber: currentDay,
-                                planTitle:
-                                    blueprint?.title ?? active.planTitle,
-                                planId: active.planId,
-                                provider: transformationProvider,
-                              );
-                            } else {
-                              context.push(Routes.transformationRoadmapRoute);
-                            }
-                          },
-                          icon: Icon(
-                            isTodayCompleted
-                                ? Icons.refresh_rounded
-                                : (isActiveRecovery
-                                    ? Icons.self_improvement_rounded
-                                    : (!isPremium
-                                        ? Icons.lock_outline_rounded
-                                        : Icons.play_arrow_rounded)),
-                            size: 16.sp,
-                            color: isTodayCompleted
-                                ? Colors.white
-                                : Colors.black,
-                          ),
-                          label: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              isTodayCompleted
-                                  ? 'REPEAT DAY $currentDay WORKOUT'
-                                  : (isActiveRecovery
-                                      ? 'START ACTIVE RECOVERY'
-                                      : 'START DAY $currentDay WORKOUT'),
-                              style: TextStyle(
-                                color: isTodayCompleted
-                                    ? Colors.white
-                                    : Colors.black,
-                                fontSize: 11.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isTodayCompleted
-                                ? const Color(0xFF1E4331)
-                                : ColorManager.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.r),
-                              side: isTodayCompleted
-                                  ? const BorderSide(color: Color(0xFF4CAF50))
-                                  : BorderSide.none,
-                            ),
-                          ),
-                        )),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _activateFreeStarterPlan(BuildContext context) async {
-    try {
-      final workoutProvider =
-          Provider.of<WorkoutProvider>(context, listen: false);
-      final statsProvider =
-          Provider.of<StatisticsProvider>(context, listen: false);
-      await workoutProvider.restoreDefaultThreeDaySplit();
-      final now = workoutProvider.currentNow;
-      await statsProvider.updateScheduledDays(
-        const ['Monday', 'Wednesday', 'Friday'],
-        effectiveDate: now,
-      );
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text(
-              '3-Day Starter Routine activated! Ready for your workout.',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-            backgroundColor: ColorManager.success,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to activate starter plan: $e'),
-            backgroundColor: ColorManager.error,
-          ),
-        );
-      }
-    }
-  }
-
-  /// Empty State: No Plan Active -> Invite user to review and activate their personalized plan
-  Widget _buildNoPlanCard(BuildContext context) {
-    final homeProvider = Provider.of<HomeProvider?>(context);
-    final stats = Provider.of<StatisticsProvider?>(context);
-    final subscriptionProvider = Provider.of<SubscriptionProvider?>(context);
-    final isPremium = subscriptionProvider?.isPremium ?? false;
-    final userGoal = homeProvider?.userData['goal']?.toString();
-    final bool hasOnboardingGoal = userGoal != null && userGoal.isNotEmpty;
-    final bool hasExistingSchedule = stats != null && stats.hasActiveSchedule;
-
-    final String title = hasOnboardingGoal
-        ? 'Activate 3-Day $userGoal Plan'
-        : 'Build Your AI Workout Plan';
-    final String subtitle = hasOnboardingGoal
-        ? 'We prepared an adaptive starter split tailored to your goal ($userGoal). Review your schedule and tap to customize.'
-        : 'Choose 3 to 6 days per week with smart exercises, rest timers, and video guides.';
-    final String buttonLabel = hasOnboardingGoal
-        ? 'Review & Customize Plan'
-        : 'Build My Plan with AI';
-    const Color onLight = Color(0xFF06201B);
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: GradientHeroCard(
-        key: const Key('no_plan_hero_card'),
-        imageAsset: HeroImages.forGoal(userGoal),
-        imageSize: 150.w,
-        padding: EdgeInsets.all(18.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            HeroBadge(
-              text: hasOnboardingGoal
-                  ? 'PERSONALIZED FOR YOU'
-                  : 'AI WORKOUT ROUTINE',
-              icon: Icons.auto_awesome,
-            ),
-            SizedBox(height: 14.h),
-            Padding(
-              padding: EdgeInsets.only(right: GradientHeroCard.textInset),
-              child: Text(
-                title,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20.sp,
-                  height: 1.2,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Padding(
-              padding: EdgeInsets.only(right: GradientHeroCard.textInset),
-              child: Text(
-                subtitle,
-                maxLines: 4,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
-                  fontSize: 12.sp,
-                  height: 1.4,
-                ),
-              ),
-            ),
-            SizedBox(height: 12.h),
-            Wrap(
-              spacing: 6.w,
-              runSpacing: 6.h,
-              children: [
-                HeroMetaChip(
-                  icon: Icons.calendar_today_rounded,
-                  text: hasExistingSchedule
-                      ? '${stats.scheduledDayNames.length}-Day Schedule'
-                      : '3-6 days / week',
-                ),
-                const HeroMetaChip(icon: Icons.timer_outlined, text: '~45 min'),
-                const HeroMetaChip(
-                    icon: Icons.play_circle_outline_rounded,
-                    text: 'Video guides'),
-              ],
-            ),
-            SizedBox(height: 16.h),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => context.push(Routes.workoutGeneratorRoute),
-                icon: const Icon(Icons.auto_awesome, size: 18, color: onLight),
-                label: Text(
-                  buttonLabel,
-                  style: TextStyle(
-                    color: onLight,
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 13.h),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r)),
-                  elevation: 0,
-                ),
-              ),
-            ),
-            if (!isPremium) ...[
-              SizedBox(height: 6.h),
-              Center(
-                child: TextButton.icon(
-                  onPressed: () => _activateFreeStarterPlan(context),
-                  icon: const Icon(Icons.bolt_rounded,
-                      color: Colors.white, size: 16),
-                  label:  Text(
-                    'Or tap to activate Free 3-Day Starter Plan',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
     );
   }
 
@@ -1109,13 +281,13 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
     }
 
     // Card: AI Split Customizer & Quick Modifier
-    scrollerCards.add(_buildAiCustomizerCard(context, sortedDays));
+    scrollerCards.add(RoutineCustomizerCard(activeDays: sortedDays));
 
     // Card: Pro Workout Toolkit (Plate Math + 1RM)
-    scrollerCards.add(_buildProToolkitCard(context));
+    scrollerCards.add(const ProToolkitCard());
 
     // Card: Adaptive Strength Partner & PR Vault
-    scrollerCards.add(_buildStrengthPartnerCard(context));
+    scrollerCards.add(const StrengthPartnerCard());
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1131,11 +303,11 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.auto_awesome, color: ColorManager.primary, size: 16.sp),
+                        Icon(Icons.auto_awesome, color: ColorManager.primaryText, size: 16.sp),
                         SizedBox(width: 6.w),
                         Flexible(
                           child: Text(
-                            'AI Workout Schedule',
+                            'Workout Schedule',
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: ColorManager.white,
@@ -1159,11 +331,11 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
               ),
               ElevatedButton.icon(
                 onPressed: () => context.push(Routes.workoutGeneratorRoute),
-                icon: Icon(Icons.refresh_rounded, size: 13.sp, color: Colors.black),
+                icon: Icon(Icons.refresh_rounded, size: 13.sp, color: ColorManager.onMint),
                 label: Text(
                   'Re-plan',
                   style: TextStyle(
-                    color: Colors.black,
+                    color: ColorManager.onMint,
                     fontSize: 11.sp,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1201,9 +373,9 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
         ),
         SizedBox(height: 12.h),
 
-        // 3. Compact Horizontal Scroller Deck (~204.h)
+        // 3. Compact Horizontal Scroller Deck (same height as the Challenges shelf)
         SizedBox(
-          height: 204.h,
+          height: AppCardSize.shelfHeight(context),
           child: PageView.builder(
             controller: _pageController,
             itemCount: scrollerCards.length,
@@ -1257,7 +429,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
         padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
         decoration: BoxDecoration(
           color: ColorManager.surfaceDark,
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(AppRadius.small.r),
           border: Border.all(color: ColorManager.divider),
         ),
         child: Row(
@@ -1278,21 +450,21 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
             if (isToday) {
               bgColor = hasWorkout && isCompletedToday
                   ? const Color(0xFF1E4331)
-                  : Colors.blueAccent.withValues(alpha: 0.18);
+                  : ColorManager.infoText.withValues(alpha: 0.14);
               textColor = hasWorkout && isCompletedToday
                   ? const Color(0xFF81C784)
-                  : Colors.blueAccent;
+                  : ColorManager.infoText;
               border = Border.all(
-                color: hasWorkout && isCompletedToday ? const Color(0xFF4CAF50) : Colors.blueAccent,
+                color: hasWorkout && isCompletedToday ? const Color(0xFF4CAF50) : ColorManager.infoText,
                 width: 1,
               );
             } else if (isDayDone) {
-              bgColor = const Color(0xFF1E4331).withValues(alpha: 0.5);
-              textColor = const Color(0xFF81C784);
-              border = Border.all(color: const Color(0xFF4CAF50).withValues(alpha: 0.6), width: 1);
+              bgColor = ColorManager.successText.withValues(alpha: 0.14);
+              textColor = ColorManager.successText;
+              border = Border.all(color: ColorManager.successText.withValues(alpha: 0.6), width: 1);
             } else if (isNext) {
               bgColor = ColorManager.primary.withValues(alpha: 0.15);
-              textColor = ColorManager.primary;
+              textColor = ColorManager.primaryText;
               border = Border.all(color: ColorManager.primary.withValues(alpha: 0.6), width: 1);
             } else if (hasWorkout) {
               textColor = ColorManager.textPrimary;
@@ -1329,15 +501,15 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                     ),
                     SizedBox(height: 2.h),
                     if (isToday && !hasWorkout)
-                      Text('REST', style: TextStyle(color: Colors.blueAccent, fontSize: 11.sp, fontWeight: FontWeight.bold))
+                      Text('REST', style: TextStyle(color: ColorManager.infoText, fontSize: 11.sp, fontWeight: FontWeight.bold))
                     else if (isDayDone)
-                      Text('DONE', style: TextStyle(color: const Color(0xFF81C784), fontSize: 11.sp, fontWeight: FontWeight.bold))
+                      Text('DONE', style: TextStyle(color: ColorManager.successText, fontSize: 11.sp, fontWeight: FontWeight.bold))
                     else if (isNext)
-                      Text('NEXT', style: TextStyle(color: ColorManager.primary, fontSize: 11.sp, fontWeight: FontWeight.bold))
+                      Text('NEXT', style: TextStyle(color: ColorManager.primaryText, fontSize: 11.sp, fontWeight: FontWeight.bold))
                     else if (hasWorkout)
                       Text('${grouped[day]!.length}ex', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp))
                     else
-                      Text('—', style: TextStyle(color: Colors.white24, fontSize: 11.sp)),
+                      Text('—', style: TextStyle(color: ColorManager.textDisabled, fontSize: 11.sp)),
                   ],
                 ),
               ),
@@ -1640,7 +812,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: isCompleted ? const Color(0xFF2E7D32) : Colors.black.withValues(alpha: 0.35),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
                 padding: EdgeInsets.zero,
               ),
             ),
@@ -1744,7 +916,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
               ),
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: Colors.white24),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
                 padding: EdgeInsets.zero,
               ),
             ),
@@ -1754,218 +926,4 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
     );
   }
 
-  /// Card 3: AI Split Customizer & Re-plan Card
-  Widget _buildAiCustomizerCard(BuildContext context, List<String> activeDays) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            ColorManager.surfaceDark,
-            ColorManager.surface,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
-      ),
-      padding: EdgeInsets.all(14.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.auto_awesome, color: ColorManager.primary, size: 16.sp),
-              SizedBox(width: 6.w),
-              Text(
-                'AI Routine Customizer',
-                style: TextStyle(color: ColorManager.primary, fontSize: 13.sp, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          Text(
-            'Change frequency, target goal, or equipment in seconds.',
-            style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
-          ),
-          Wrap(
-            spacing: 6.w,
-            children: [
-              _buildFeatureBadge('${activeDays.length} Days Active'),
-              _buildFeatureBadge('Full Equipment'),
-              _buildFeatureBadge('Hypertrophy'),
-            ],
-          ),
-          SizedBox(
-            width: double.infinity,
-            height: 36.h,
-            child: ElevatedButton.icon(
-              onPressed: () => context.push(Routes.workoutGeneratorRoute),
-              icon: Icon(Icons.flash_on_rounded, size: 14.sp, color: Colors.black),
-              label: Text('Re-generate Split with AI', style: TextStyle(color: Colors.black, fontSize: 11.sp, fontWeight: FontWeight.bold)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColorManager.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                padding: EdgeInsets.zero,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Card 4: Pro Lifting Tools Card (Plate Calculator + 1RM Estimator)
-  Widget _buildProToolkitCard(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: Colors.amber.withValues(alpha: 0.4)),
-      ),
-      padding: EdgeInsets.all(14.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.star_rounded, color: Colors.amber, size: 18.sp),
-              SizedBox(width: 6.w),
-              Text(
-                'Lifting Tools & Calculators',
-                style: TextStyle(color: Colors.amber, fontSize: 13.sp, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          Text(
-            'Avoid gym math. Visual barbell loading and 1-rep max calculator.',
-            style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: InkWell(
-                  onTap: () => PlateCalculatorSheet.show(context),
-                  borderRadius: BorderRadius.circular(10.r),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 8.w),
-                    decoration: BoxDecoration(
-                      color: ColorManager.surfaceDark,
-                      borderRadius: BorderRadius.circular(10.r),
-                      border: Border.all(color: ColorManager.divider),
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(Icons.fitness_center_rounded, color: ColorManager.primary, size: 16.sp),
-                        SizedBox(height: 3.h),
-                        Text('Plate Math', style: TextStyle(color: ColorManager.white, fontSize: 11.sp, fontWeight: FontWeight.bold)),
-                        Text('Olympic Bar', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp)),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: InkWell(
-                  onTap: () => _showOneRepMaxDialog(context),
-                  borderRadius: BorderRadius.circular(10.r),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 8.w),
-                    decoration: BoxDecoration(
-                      color: ColorManager.surfaceDark,
-                      borderRadius: BorderRadius.circular(10.r),
-                      border: Border.all(color: ColorManager.divider),
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(Icons.speed_rounded, color: Colors.amber, size: 16.sp),
-                        SizedBox(height: 3.h),
-                        Text('1RM Calc', style: TextStyle(color: ColorManager.white, fontSize: 11.sp, fontWeight: FontWeight.bold)),
-                        Text('Max Strength', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp)),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Card 5: Strength & PR Vault Partner
-  Widget _buildStrengthPartnerCard(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: ColorManager.primary.withValues(alpha: 0.35)),
-      ),
-      padding: EdgeInsets.all(14.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.emoji_events_rounded, color: Colors.amber, size: 18.sp),
-                  SizedBox(width: 6.w),
-                  Text(
-                    'Strength Partner & PRs',
-                    style: TextStyle(color: ColorManager.white, fontSize: 13.sp, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              Icon(Icons.arrow_forward_ios_rounded, color: ColorManager.textTertiary, size: 12.sp),
-            ],
-          ),
-          Text(
-            'Track your Estimated 1RMs, progressive overload benchmarks, and PR vault.',
-            style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
-          ),
-          InkWell(
-            onTap: () => context.push(Routes.strengthAnalyticsRoute),
-            borderRadius: BorderRadius.circular(10.r),
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
-              decoration: BoxDecoration(
-                color: ColorManager.primary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10.r),
-                border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.analytics_outlined, color: ColorManager.primary, size: 14.sp),
-                  SizedBox(width: 6.w),
-                  Text(
-                    'Open PR Vault & Analytics',
-                    style: TextStyle(color: ColorManager.primary, fontSize: 11.sp, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFeatureBadge(String text) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
-      decoration: BoxDecoration(
-        color: ColorManager.surfaceDark,
-        borderRadius: BorderRadius.circular(6.r),
-        border: Border.all(color: ColorManager.divider),
-      ),
-      child: Text(text, style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp)),
-    );
-  }
 }

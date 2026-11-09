@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -216,11 +217,11 @@ class _WorkoutSessionLauncherPageState
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ColorManager.primary,
-                    foregroundColor: Colors.black,
+                    foregroundColor: ColorManager.onMint,
                     padding: EdgeInsets.symmetric(
                         horizontal: 24.w, vertical: 12.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
+                      borderRadius: BorderRadius.circular(AppRadius.button.r),
                     ),
                   ),
                   onPressed: () => context.go(Routes.mainRoute),

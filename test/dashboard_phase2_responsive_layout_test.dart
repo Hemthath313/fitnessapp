@@ -325,9 +325,9 @@ void main() {
 
       expect(overflowErrors, isEmpty,
           reason: 'No RenderFlex overflow on 360dp AI Generator card');
-      expect(find.text('AI WORKOUT GENERATOR'), findsOneWidget);
+      expect(find.text('PLAN BUILDER'), findsOneWidget);
       expect(find.text('3–6 Day Custom Splits'), findsOneWidget);
-      expect(find.text('Build Your AI Workout Routine'), findsOneWidget);
+      expect(find.text('Build Your Workout Routine'), findsOneWidget);
 
       await _captureRepaintBoundary(tester, key, 'phase2_ai_generator_360dp.png');
     });
@@ -348,7 +348,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(overflowErrors, isEmpty);
-      expect(find.text('AI WORKOUT GENERATOR'), findsOneWidget);
+      expect(find.text('PLAN BUILDER'), findsOneWidget);
       expect(find.text('3–6 Day Custom Splits'), findsOneWidget);
 
       await _captureRepaintBoundary(tester, key, 'phase2_ai_generator_390dp.png');
@@ -370,7 +370,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(overflowErrors, isEmpty);
-      expect(find.text('AI WORKOUT GENERATOR'), findsOneWidget);
+      expect(find.text('PLAN BUILDER'), findsOneWidget);
       expect(find.text('3–6 Day Custom Splits'), findsOneWidget);
 
       await _captureRepaintBoundary(tester, key, 'phase2_ai_generator_430dp.png');

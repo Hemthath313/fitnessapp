@@ -19,6 +19,10 @@ class ExerciseVideoPlayer extends StatefulWidget {
   final BoxFit fit;
   final bool autoPlay; // Only auto-play in detail views, not in lists
   final bool showThumbnailOnly; // Show static thumbnail preview only (for list views)
+
+  /// When [autoPlay] turns off, keep the current frame instead of rewinding
+  /// (lets a detail screen offer a real pause for checking form).
+  final bool holdFrameOnPause;
   final ValueChanged<bool>? onErrorChanged;
   final VideoControllerFactory? controllerFactory;
   final VideoViewBuilder? videoViewBuilder;
@@ -32,6 +36,7 @@ class ExerciseVideoPlayer extends StatefulWidget {
     this.fit = BoxFit.cover,
     this.autoPlay = false, // Default to false to avoid list decoder overhead
     this.showThumbnailOnly = false, // Default to false
+    this.holdFrameOnPause = false,
     this.onErrorChanged,
     this.controllerFactory,
     this.videoViewBuilder,
@@ -96,7 +101,9 @@ class _ExerciseVideoPlayerState extends State<ExerciseVideoPlayer> {
         _controller!.play();
       } else {
         _controller!.pause();
-        _controller!.seekTo(Duration.zero);
+        if (!widget.holdFrameOnPause) {
+          _controller!.seekTo(Duration.zero);
+        }
       }
     }
   }

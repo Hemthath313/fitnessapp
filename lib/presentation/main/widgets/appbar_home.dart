@@ -1,5 +1,6 @@
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
+import 'package:fitness_app/presentation/profile/profile_data.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:flutter/material.dart';
@@ -41,8 +42,9 @@ class _HomePageAppBarWidgetState extends State<HomePageAppBarWidget> {
         ({String displayName, int streak})>(
       selector: (_, homeProvider, statsProvider) {
         final firstName =
-            (homeProvider.userData['first name'] ?? 'Champ') as String;
-        final displayName = firstName.isNotEmpty ? firstName : 'Champ';
+            (homeProvider.userData['first name'] ?? '').toString().trim();
+        final displayName =
+            firstName.isNotEmpty ? firstName : ProfileData.fallbackName;
         return (displayName: displayName, streak: statsProvider.currentStreak);
       },
       builder: (context, data, _) {
@@ -57,7 +59,8 @@ class _HomePageAppBarWidgetState extends State<HomePageAppBarWidget> {
         return FutureBuilder<Map<String, dynamic>>(
           future: _userDataFuture,
           builder: (context, snapshot) {
-            final fetchedName = (snapshot.data?['first name'] ?? displayName) as String;
+            final fetchedName =
+                (snapshot.data?['first name'] ?? displayName).toString().trim();
             final name = fetchedName.isNotEmpty ? fetchedName : displayName;
             return _buildAppBar(context, name, streak);
           },
@@ -78,10 +81,10 @@ class _HomePageAppBarWidgetState extends State<HomePageAppBarWidget> {
       titleSpacing: 20.w,
       title: Row(
         children: [
-          // Avatar -> profile / body data
+          // Avatar -> Edit Profile. (It used to open the sign-up data screen.)
           GestureDetector(
             key: const Key('appbar_profile_button'),
-            onTap: () => context.push(Routes.addDataRoute),
+            onTap: () => context.push(Routes.editProfileRoute),
             child: Container(
               width: 44.w,
               height: 44.w,

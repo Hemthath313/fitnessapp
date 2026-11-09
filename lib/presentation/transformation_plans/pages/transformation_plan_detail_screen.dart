@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -213,7 +214,8 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                         padding: EdgeInsets.all(16.w),
                         decoration: BoxDecoration(
                           color: ColorManager.surface,
-                          borderRadius: BorderRadius.circular(16.r),
+                          boxShadow: ColorManager.cardShadow,
+                          borderRadius: BorderRadius.circular(AppRadius.tile.r),
                           border: Border.all(color: ColorManager.divider),
                         ),
                         child: Column(
@@ -376,7 +378,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                     backgroundColor: primaryColor,
                     padding: EdgeInsets.symmetric(vertical: 14.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r),
+                      borderRadius: BorderRadius.circular(AppRadius.button.r),
                     ),
                     elevation: 0,
                   ),
@@ -449,7 +451,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: primaryColor.withValues(alpha: 0.4)),
         boxShadow: [
           BoxShadow(
@@ -582,7 +584,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: primaryColor.withValues(alpha: 0.4)),
         boxShadow: [
           BoxShadow(
@@ -674,7 +676,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
             padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
               color: ColorManager.surfaceDark,
-              borderRadius: BorderRadius.circular(12.r),
+              borderRadius: BorderRadius.circular(AppRadius.small.r),
               border: Border.all(color: ColorManager.divider),
             ),
             child: Row(
@@ -763,7 +765,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: primaryColor.withValues(alpha: 0.4)),
         boxShadow: [
           BoxShadow(
@@ -855,7 +857,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
             padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
               color: ColorManager.surfaceDark,
-              borderRadius: BorderRadius.circular(12.r),
+              borderRadius: BorderRadius.circular(AppRadius.small.r),
               border: Border.all(color: ColorManager.divider),
             ),
             child: Row(
@@ -903,7 +905,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
             padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
               color: ColorManager.surfaceDark,
-              borderRadius: BorderRadius.circular(12.r),
+              borderRadius: BorderRadius.circular(AppRadius.small.r),
               border: Border.all(color: ColorManager.divider),
             ),
             child: Row(
@@ -992,7 +994,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: primaryColor.withValues(alpha: 0.4)),
         boxShadow: [
           BoxShadow(
@@ -1084,7 +1086,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
             padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
               color: ColorManager.surfaceDark,
-              borderRadius: BorderRadius.circular(12.r),
+              borderRadius: BorderRadius.circular(AppRadius.small.r),
               border: Border.all(color: ColorManager.divider),
             ),
             child: Row(
@@ -1132,7 +1134,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
             padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
               color: ColorManager.surfaceDark,
-              borderRadius: BorderRadius.circular(12.r),
+              borderRadius: BorderRadius.circular(AppRadius.small.r),
               border: Border.all(color: ColorManager.divider),
             ),
             child: Row(
@@ -1181,7 +1183,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
   Widget _buildSectionTitle(String title, IconData icon) {
     return Row(
       children: [
-        Icon(icon, size: 16.sp, color: ColorManager.primary),
+        Icon(icon, size: 16.sp, color: ColorManager.primaryText),
         SizedBox(width: 6.w),
         Expanded(
           child: Text(
@@ -1235,7 +1237,8 @@ class TransformationPlanDetailScreen extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(14.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Column(
@@ -1382,7 +1385,8 @@ class TransformationPlanDetailScreen extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Column(

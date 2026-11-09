@@ -19,7 +19,7 @@ class SessionExercise {
   double get totalVolume {
     double vol = 0;
     for (var s in sets) {
-      if (s.isCompleted) {
+      if (s.isCompleted && s.type != SetType.warmup) {
         vol += s.weight * s.reps;
       }
     }

@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
@@ -225,7 +226,7 @@ class _RecoveryCheckInDialogState extends State<RecoveryCheckInDialog> {
                   ? SizedBox(
                       width: 16.w,
                       height: 16.w,
-                      child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      child: const CircularProgressIndicator(color: ColorManager.onMint, strokeWidth: 2),
                     )
                   : const Icon(Icons.check_rounded, color: ColorManager.onMint, size: 18),
               label: Text(
@@ -235,7 +236,7 @@ class _RecoveryCheckInDialogState extends State<RecoveryCheckInDialog> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.primary,
                 padding: EdgeInsets.symmetric(vertical: 13.h),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
                 elevation: 0,
               ),
             ),

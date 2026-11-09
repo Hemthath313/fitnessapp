@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -104,7 +105,8 @@ class SkeletonList extends StatelessWidget {
                 padding: EdgeInsets.all(14.w),
                 decoration: BoxDecoration(
                   color: ColorManager.surface,
-                  borderRadius: BorderRadius.circular(18.r),
+                  boxShadow: ColorManager.cardShadow,
+                  borderRadius: BorderRadius.circular(AppRadius.card.r),
                 ),
                 child: Row(
                   children: [

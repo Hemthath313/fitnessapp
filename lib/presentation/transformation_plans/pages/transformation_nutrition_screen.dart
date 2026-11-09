@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -167,7 +168,8 @@ class _TransformationNutritionScreenState
                 padding: EdgeInsets.all(20.w),
                 decoration: BoxDecoration(
                   color: ColorManager.surface,
-                  borderRadius: BorderRadius.circular(16.r),
+                  boxShadow: ColorManager.cardShadow,
+                  borderRadius: BorderRadius.circular(AppRadius.tile.r),
                 ),
                 child: Text(
                   'No meal plan available for this day. Please check allergy settings.',
@@ -214,7 +216,7 @@ class _TransformationNutritionScreenState
                 child: Text(
                   isToday ? 'Day $dayNum (Today)' : 'Day $dayNum',
                   style: TextStyle(
-                    color: isSelected ? Colors.white : ColorManager.textPrimary,
+                    color: isSelected ? ColorManager.onColor(primaryColor) : ColorManager.textPrimary,
                     fontSize: 12.sp,
                     fontWeight: isSelected || isToday ? FontWeight.bold : FontWeight.normal,
                   ),
@@ -282,7 +284,8 @@ class _TransformationNutritionScreenState
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: primaryColor.withValues(alpha: 0.25)),
       ),
       child: Column(
@@ -431,7 +434,8 @@ class _TransformationNutritionScreenState
       margin: EdgeInsets.only(bottom: 16.h),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(
           color: isLogged ? ColorManager.success.withValues(alpha: 0.5) : ColorManager.divider,
         ),
@@ -619,7 +623,7 @@ class _TransformationNutritionScreenState
                         ? ColorManager.success.withValues(alpha: 0.5)
                         : primaryColor.withValues(alpha: 0.5),
                   ),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
                   padding: EdgeInsets.symmetric(vertical: 8.h),
                 ),
               ),
@@ -693,7 +697,7 @@ class _TransformationNutritionScreenState
                         '${sub.quantity} ${sub.unit} (${sub.preparationNote}) • ${sub.calories.round()} kcal | ${sub.protein}g P',
                         style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
                       ),
-                      trailing: const Icon(Icons.check_circle_outline_rounded, color: ColorManager.primary),
+                      trailing: Icon(Icons.check_circle_outline_rounded, color: ColorManager.primaryText),
                       onTap: () async {
                         await provider.updateMealSubstitution(
                           substitutionKey: subKey,

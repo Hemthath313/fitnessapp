@@ -33,6 +33,8 @@ class HomeProvider with ChangeNotifier {
           _userData['activity'] = data['activity'] ?? '';
           _userData['bmr'] = (data['bmr'] ?? 0).toDouble();
           _userData['goal'] = data['goal'] ?? '';
+          // Optional target weight in kg (null when the user has not set one).
+          _userData['goalWeight'] = (data['goalWeight'] as num?)?.toDouble();
           _userData['bmi'] = (data['bmi'] ?? 0).toDouble();
           _userData['email'] = data['email'] ?? '';
           _userData['chest'] = (data['chest'] ?? 0).toDouble();

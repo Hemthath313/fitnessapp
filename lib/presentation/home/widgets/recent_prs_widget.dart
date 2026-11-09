@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/model/workout_log.dart';
 import 'package:fitness_app/model/workout_session_model.dart';
 import 'package:fitness_app/services/strength_service.dart';
@@ -84,7 +85,7 @@ class _RecentPRsWidgetState extends State<RecentPRsWidget> {
                 padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
                   color: ColorManager.surface,
-                  borderRadius: BorderRadius.circular(20.r),
+                  borderRadius: BorderRadius.circular(AppRadius.card.r),
                   border: Border.all(
                     color: ColorManager.divider.withValues(alpha: 0.4),
                     width: 1.2,
@@ -174,7 +175,7 @@ class _RecentPRsWidgetState extends State<RecentPRsWidget> {
                             vertical: 14.h, horizontal: 12.w),
                         decoration: BoxDecoration(
                           color: ColorManager.surfaceLight,
-                          borderRadius: BorderRadius.circular(12.r),
+                          borderRadius: BorderRadius.circular(AppRadius.small.r),
                           border: Border.all(
                               color: ColorManager.error.withValues(alpha: 0.3)),
                         ),
@@ -226,7 +227,7 @@ class _RecentPRsWidgetState extends State<RecentPRsWidget> {
                               horizontal: 12.w, vertical: 10.h),
                           decoration: BoxDecoration(
                             color: ColorManager.surfaceLight,
-                            borderRadius: BorderRadius.circular(12.r),
+                            borderRadius: BorderRadius.circular(AppRadius.small.r),
                             border: Border.all(
                               color: ColorManager.divider.withValues(alpha: 0.3),
                             ),

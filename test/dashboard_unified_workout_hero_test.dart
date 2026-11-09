@@ -202,11 +202,11 @@ void main() {
       await tester.pumpAndSettle();
 
       // Priority 2: AI Workout Schedule is prominently rendered
-      expect(find.text('AI Workout Schedule'), findsOneWidget);
+      expect(find.text('Workout Schedule'), findsOneWidget);
       expect(find.textContaining('3-Day Split'), findsOneWidget);
       expect(find.text('Monday Routine'), findsOneWidget);
       // Must NOT display empty onboarding or transformation hero
-      expect(find.text('Build Your AI Workout Plan'), findsNothing);
+      expect(find.text('Build Your Workout Plan'), findsNothing);
       expect(find.textContaining('DAY 1 OF'), findsNothing);
     });
 
@@ -242,8 +242,8 @@ void main() {
       expect(find.textContaining('Week 1'), findsOneWidget);
       expect(find.text('START DAY 1 WORKOUT'), findsOneWidget);
       // AI Schedule must NOT be shown
-      expect(find.text('AI Workout Schedule'), findsNothing);
-      expect(find.text('Build Your AI Workout Plan'), findsNothing);
+      expect(find.text('Workout Schedule'), findsNothing);
+      expect(find.text('Build Your Workout Plan'), findsNothing);
     });
 
     // -------------------------------------------------------------------------
@@ -459,9 +459,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // Priority 2 wins: AI Workout Schedule is rendered, not onboarding or active transformation
-      expect(find.text('AI Workout Schedule'), findsOneWidget);
+      expect(find.text('Workout Schedule'), findsOneWidget);
       expect(find.text('Monday Routine'), findsOneWidget);
-      expect(find.text('Build Your AI Workout Plan'), findsNothing);
+      expect(find.text('Build Your Workout Plan'), findsNothing);
     });
 
     // -------------------------------------------------------------------------

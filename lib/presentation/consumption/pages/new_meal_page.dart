@@ -1,5 +1,6 @@
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
 import 'package:fitness_app/presentation/consumption/widgets/new_meal_app_bar.dart';
+import 'package:fitness_app/presentation/diet_nutrition/widgets/pro_feature_gate.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
@@ -124,7 +125,9 @@ class _NewMealPageState extends State<NewMealPage> {
   Widget build(BuildContext context) {
     final deviceWidth = MediaQuery.of(context).size.width;
 
-    return Scaffold(
+    // Logging meals is a Pro-only feature.
+    return ProFeatureGate(
+      child: Scaffold(
       appBar: PreferredSize(
         preferredSize: Size(
           deviceWidth,
@@ -252,7 +255,7 @@ class _NewMealPageState extends State<NewMealPage> {
                           ColorManager.primary.withValues(alpha: 0.5),
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16.r),
+                        borderRadius: BorderRadius.circular(AppRadius.button.r),
                       ),
                     ),
                     child: Text(
@@ -270,6 +273,7 @@ class _NewMealPageState extends State<NewMealPage> {
           ),
         ),
       ),
+    ),
     );
   }
 }
@@ -327,7 +331,7 @@ class _MealField extends StatelessWidget {
           fontSize: 14.sp,
         ),
         floatingLabelStyle: TextStyle(
-          color: ColorManager.primary,
+          color: ColorManager.primaryText,
           fontSize: 14.sp,
           fontWeight: FontWeight.w600,
         ),

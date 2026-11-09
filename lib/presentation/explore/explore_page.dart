@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_app/presentation/banner_ads/banner_ad_service.dart';
@@ -29,9 +30,17 @@ class _ExploreWidgetState extends State<ExploreWidget>
   void initState() {
     super.initState();
 
-    // The exercise library (and its body-part grid) lives on My Plan, so
-    // Explore keeps recovery, diet, cardio and the programme splits.
+    // The exercise library lives on My Plan. Explore keeps one shortcut card
+    // into it (Body Focus) so browsing here still finds it, plus recovery,
+    // diet, cardio and the programme splits.
     cards = [
+      {
+        'image': ImageManager.strengthWorkout,
+        'title': 'Strength Training',
+        'description': 'Browse every exercise by muscle group.',
+        'isPremiumRequired': false,
+        'onTap': () => context.push(Routes.bodypartsPage),
+      },
       {
         'image': ImageManager.postWorkout,
         'title': 'Pain Relief & Mobility',
@@ -161,7 +170,7 @@ class ExploreCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
           color: ColorManager.surface,
-          borderRadius: BorderRadius.circular(20.0),
+          borderRadius: BorderRadius.circular(AppRadius.card),
           border: Border.all(
             color: ColorManager.divider.withValues(alpha: 0.4),
             width: 1.5,

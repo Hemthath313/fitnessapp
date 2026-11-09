@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fitness_app/model/progress_photo.dart';
 import 'package:fitness_app/presentation/progress_photos/providers/progress_photo_provider.dart';
@@ -310,7 +311,8 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
         padding: EdgeInsets.all(SizeManager.s16.w),
         decoration: BoxDecoration(
           color: ColorManager.surface,
-          borderRadius: BorderRadius.circular(12.r),
+          boxShadow: ColorManager.cardShadow,
+          borderRadius: BorderRadius.circular(AppRadius.small.r),
           border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
         ),
         child: Column(
@@ -352,7 +354,7 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
               onPressed: () => context.push(Routes.premiumScreen),
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.primary,
-                foregroundColor: Colors.black,
+                foregroundColor: ColorManager.onMint,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20.r),
                 ),
@@ -375,7 +377,8 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
       padding: EdgeInsets.all(SizeManager.s16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.small.r),
         border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
       ),
       child: Column(
@@ -422,7 +425,7 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
   }) {
     return Row(
       children: [
-        Icon(icon, color: ColorManager.primary, size: 20.sp),
+        Icon(icon, color: ColorManager.primaryText, size: 20.sp),
         SizedBox(width: 12.w),
         Expanded(
           child: Text(
@@ -433,7 +436,7 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
         Text(
           value,
           style: TextStyle(
-            color: valueColor ?? Colors.white,
+            color: valueColor ?? ColorManager.textPrimary,
             fontSize: 14.sp,
             fontWeight: FontWeight.bold,
           ),

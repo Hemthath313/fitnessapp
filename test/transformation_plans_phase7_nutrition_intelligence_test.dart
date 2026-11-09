@@ -616,7 +616,7 @@ void main() {
 
       expect(find.text('Nutrition Hub'), findsOneWidget);
       expect(find.text('Cutting Phase'), findsOneWidget);
-      expect(find.text('Shredding Protocol'), findsOneWidget);
+      expect(find.text('Cutting Meal Plan'), findsOneWidget);
       expect(find.text('Tools & Resources'), findsOneWidget);
 
       // Verify static diet JSON assets parse properly

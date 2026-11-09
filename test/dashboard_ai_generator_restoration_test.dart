@@ -250,14 +250,14 @@ void main() {
       await tester.pumpAndSettle();
 
       // Top hero displays AI onboarding builder
-      expect(find.text('Build Your AI Workout Plan'), findsOneWidget);
-      expect(find.text('Build My Plan with AI'), findsOneWidget);
+      expect(find.text('Build Your Workout Plan'), findsOneWidget);
+      expect(find.text('Build My Plan'), findsOneWidget);
 
       // Companion card is hidden because top card is already the AI builder
-      expect(find.text('Build Your AI Workout Routine'), findsNothing);
+      expect(find.text('Build Your Workout Routine'), findsNothing);
 
-      // Tapping "Build My Plan with AI" navigates to WorkoutGeneratorScreen
-      await tester.tap(find.text('Build My Plan with AI'));
+      // Tapping "Build My Plan" navigates to WorkoutGeneratorScreen
+      await tester.tap(find.text('Build My Plan'));
       await tester.pumpAndSettle();
       expect(find.text('Workout Generator Screen Destination'), findsOneWidget);
     });
@@ -290,7 +290,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Priority 2 AI routine scroller hub is active
-      expect(find.text('AI Workout Schedule'), findsOneWidget);
+      expect(find.text('Workout Schedule'), findsOneWidget);
       expect(find.text('Re-plan'), findsOneWidget);
 
       // Tapping Re-plan navigates to WorkoutGeneratorScreen
@@ -338,13 +338,13 @@ void main() {
       expect(find.text('START DAY 1 WORKOUT'), findsOneWidget);
 
       // 2. Restored AI Workout Generator card is visible directly below
-      expect(find.text('AI WORKOUT GENERATOR'), findsOneWidget);
-      expect(find.text('Build Your AI Workout Routine'), findsOneWidget);
+      expect(find.text('PLAN BUILDER'), findsOneWidget);
+      expect(find.text('Build Your Workout Routine'), findsOneWidget);
       expect(find.text('3–6 Day Custom Splits'), findsOneWidget);
-      expect(find.text('Build My Routine with AI'), findsOneWidget);
+      expect(find.text('Build My Routine'), findsOneWidget);
 
-      // 3. Tapping "Build My Routine with AI" navigates cleanly
-      await tester.tap(find.text('Build My Routine with AI'));
+      // 3. Tapping "Build My Routine" navigates cleanly
+      await tester.tap(find.text('Build My Routine'));
       await tester.pumpAndSettle();
       expect(find.text('Workout Generator Screen Destination'), findsOneWidget);
     });
@@ -387,11 +387,11 @@ void main() {
       expect(find.text(TransformationPlansData.weightLoss60.title), findsOneWidget);
 
       // 2. Restored AI Workout Generator card is visible
-      expect(find.text('AI WORKOUT GENERATOR'), findsOneWidget);
-      expect(find.text('Build Your AI Workout Routine'), findsOneWidget);
+      expect(find.text('PLAN BUILDER'), findsOneWidget);
+      expect(find.text('Build Your Workout Routine'), findsOneWidget);
 
       // 3. Tapping AI Routine in QuickActions also routes to generator
-      final aiRoutineQuickAction = find.text('AI Routine');
+      final aiRoutineQuickAction = find.text('Routine Builder');
       expect(aiRoutineQuickAction, findsOneWidget);
       await tester.tap(aiRoutineQuickAction);
       await tester.pumpAndSettle();
@@ -435,8 +435,8 @@ void main() {
       expect(find.text(TransformationPlansData.muscleBuilding90.title), findsOneWidget);
 
       // 2. Restored AI Workout Generator card is visible
-      expect(find.text('AI WORKOUT GENERATOR'), findsOneWidget);
-      expect(find.text('Build Your AI Workout Routine'), findsOneWidget);
+      expect(find.text('PLAN BUILDER'), findsOneWidget);
+      expect(find.text('Build Your Workout Routine'), findsOneWidget);
     });
 
     // -------------------------------------------------------------------------
@@ -476,8 +476,8 @@ void main() {
       expect(find.text(TransformationPlansData.strength12Week.title), findsOneWidget);
 
       // 2. Restored AI Workout Generator card is visible
-      expect(find.text('AI WORKOUT GENERATOR'), findsOneWidget);
-      expect(find.text('Build Your AI Workout Routine'), findsOneWidget);
+      expect(find.text('PLAN BUILDER'), findsOneWidget);
+      expect(find.text('Build Your Workout Routine'), findsOneWidget);
     });
 
     // -------------------------------------------------------------------------
@@ -599,8 +599,8 @@ void main() {
       expect(find.text('START DAY 5 WORKOUT'), findsOneWidget);
 
       // Active AI Routine companion card below
-      expect(find.text('AI WORKOUT ROUTINE'), findsOneWidget);
-      expect(find.text('Your Custom AI Routine'), findsOneWidget);
+      expect(find.text('WORKOUT ROUTINE'), findsOneWidget);
+      expect(find.text('Your Custom Routine'), findsOneWidget);
       expect(find.text('Re-plan Split'), findsOneWidget);
     });
 
@@ -646,7 +646,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(TransformationPlansData.beginnerFitness30.title), findsOneWidget);
-      expect(find.text('Build Your AI Workout Routine'), findsOneWidget);
+      expect(find.text('Build Your Workout Routine'), findsOneWidget);
 
       await tester.runAsync(() async {
         final boundary = boundaryKey.currentContext?.findRenderObject()

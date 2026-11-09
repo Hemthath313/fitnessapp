@@ -41,6 +41,8 @@ import 'package:fitness_app/presentation/notifications/pages/notifications_page.
 import 'package:fitness_app/presentation/post_workout/recovery.dart';
 import 'package:fitness_app/presentation/profile/pages/change_measurements_page.dart';
 import 'package:fitness_app/presentation/profile/pages/change_weight_page.dart';
+import 'package:fitness_app/presentation/profile/pages/edit_profile_page.dart';
+import 'package:fitness_app/presentation/profile/pages/reminders_page.dart';
 import 'package:fitness_app/presentation/settings/pages/change_email_page.dart';
 import 'package:fitness_app/presentation/settings/pages/change_password_page.dart';
 import 'package:fitness_app/presentation/settings/pages/delete_account_page.dart';
@@ -92,6 +94,8 @@ class Routes {
   static const String addNewExerciseRoute = '/addExercise';
   static const String changeWeightRoute = '/changeWeight';
   static const String changeMeasurementsRoute = '/changeMeasurements';
+  static const String editProfileRoute = '/editProfile';
+  static const String remindersRoute = '/reminders';
   static const String chestExerciseRoute = '/chestExercises';
   static const String bicepsRoute = '/bicepsExercises';
   static const String tricepsRoute = '/tricepsExercises';
@@ -413,6 +417,16 @@ final GoRouter router = GoRouter(
             PageTransitions.buildPageWithSlideTransition(
                 state.pageKey, ChangeWeightPage())),
     GoRoute(
+        path: Routes.remindersRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const ReminderSettingsPage())),
+    GoRoute(
+        path: Routes.editProfileRoute,
+        pageBuilder: (context, state) =>
+            PageTransitions.buildPageWithSlideTransition(
+                state.pageKey, const EditProfilePage())),
+    GoRoute(
         path: Routes.changeMeasurementsRoute,
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
@@ -469,7 +483,11 @@ final GoRouter router = GoRouter(
         path: Routes.workoutGeneratorRoute,
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
-                state.pageKey, const WorkoutGeneratorScreen())),
+                state.pageKey,
+                WorkoutGeneratorScreen(
+                  initialDays:
+                      int.tryParse(state.uri.queryParameters['days'] ?? ''),
+                ))),
     GoRoute(
         path: Routes.monthlyComparisonRoute,
         pageBuilder: (context, state) =>

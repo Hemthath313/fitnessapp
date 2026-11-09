@@ -1,3 +1,5 @@
+import 'package:fitness_app/utils/managers/layout_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/banner_ads/banner_ad_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
@@ -23,7 +25,8 @@ class _JournalPageState extends State<JournalPage> {
     return SafeArea(
       bottom: false,
       child: SingleChildScrollView(
-        padding: EdgeInsets.all(SizeManager.s16.w),
+        padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.gutter, vertical: SizeManager.s16.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -124,16 +127,16 @@ class _JournalPageState extends State<JournalPage> {
                 Text(
                   'Upgrade to Pro!',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: ColorManager.onMint,
                     fontWeight: FontWeight.bold,
                     fontSize: 18.sp,
                   ),
                 ),
                 SizedBox(height: SizeManager.s4.h),
                 Text(
-                  'Ads-free, AI Workouts, Pro Tools & More.',
+                  'Ads-free, Plan Builder, Pro Tools & More.',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: ColorManager.onMint.withValues(alpha: 0.75),
                     fontSize: 12.sp,
                   ),
                 ),
@@ -147,7 +150,7 @@ class _JournalPageState extends State<JournalPage> {
               foregroundColor: ColorManager.primary,
               padding: EdgeInsets.symmetric(horizontal: 16.w),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(AppRadius.button.r),
               ),
             ),
             child: const Text(
@@ -180,7 +183,8 @@ class _JournalPageState extends State<JournalPage> {
           constraints: BoxConstraints(minHeight: SizeManager.s150.h),
           decoration: BoxDecoration(
             color: ColorManager.surface,
-            borderRadius: BorderRadius.circular(SizeManager.s16.r),
+            boxShadow: ColorManager.cardShadow,
+            borderRadius: BorderRadius.circular(AppRadius.tile.r),
             border: Border.all(
               color: color.withValues(alpha: 0.2),
               width: 1,
@@ -273,7 +277,8 @@ class _JournalPageState extends State<JournalPage> {
       padding: EdgeInsets.all(SizeManager.s20.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(SizeManager.s20.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.card.r),
         border: Border.all(
           color: ColorManager.primary.withValues(alpha: 0.2),
           width: 1,
@@ -289,7 +294,7 @@ class _JournalPageState extends State<JournalPage> {
               SizedBox(width: SizeManager.s8.w),
               Expanded(
                 child: Text(
-                  'AI Workout Generator',
+                  'Plan Builder',
                   style: TextStyle(
                     color: ColorManager.textPrimary,
                     fontSize: 18.sp,
@@ -318,7 +323,7 @@ class _JournalPageState extends State<JournalPage> {
           Text(
             isPremium
                 ? 'Generate customized weekly workout routines tailored to your goals.'
-                : 'Unlock personalized weekly workout splits powered by AI.',
+                : 'Unlock weekly workout splits built around your goal, level and schedule.',
             style: TextStyle(
                 color: ColorManager.white70, fontSize: 12.sp),
           ),
@@ -330,7 +335,7 @@ class _JournalPageState extends State<JournalPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.primary,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(SizeManager.s12.r)),
+                    borderRadius: BorderRadius.circular(AppRadius.button.r)),
               ),
               child: const Text(
                 'Generate Workout',

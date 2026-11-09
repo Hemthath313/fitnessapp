@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'dart:async';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
@@ -138,7 +139,7 @@ class _WorkoutTimerWidgetState extends State<WorkoutTimerWidget> {
       padding: EdgeInsets.all(SizeManager.s16.w),
       decoration: BoxDecoration(
         color: ColorManager.surfaceDark,
-        borderRadius: BorderRadius.circular(SizeManager.s16.r),
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

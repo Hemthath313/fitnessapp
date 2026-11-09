@@ -55,7 +55,7 @@ class _SliderBoardingWidgetState extends State<SliderBoardingWidget>
           position: _offsetAnimation,
           child: const Icon(
             Icons.double_arrow_sharp,
-            color: Colors.white, // Clean white icon on primary blue background
+            color: ColorManager.onMint, // Dark icon on the mint slider button
           ),
         ),
         text: '',

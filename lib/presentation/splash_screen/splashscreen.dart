@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
@@ -6,14 +7,16 @@ import 'package:fitness_app/presentation/widgets/update_dialog.dart';
 import 'package:fitness_app/services/connectivity_service.dart';
 import 'package:fitness_app/services/notification_service.dart';
 import 'package:fitness_app/services/update_service.dart';
+import 'package:fitness_app/presentation/splash_screen/widgets/splash_brand_animation.dart';
+import 'package:fitness_app/utils/managers/app_font.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:in_app_update/in_app_update.dart' as play;
 import 'package:provider/provider.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -41,17 +44,23 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _fadeAnimation;
+    with TickerProviderStateMixin, WidgetsBindingObserver {
+  /// How long the brand animation plays before we are allowed to leave.
+  static const Duration _introDuration = Duration(milliseconds: 2200);
+  static const Duration _reducedMotionDuration = Duration(milliseconds: 600);
 
+  late final AnimationController _intro;
+  late final AnimationController _idle;
+  late final Completer<void> _minDisplay;
+  Timer? _minDisplayTimer;
+
+  bool _introDone = false;
+  bool _leaving = false;
   bool _isOfflineBlocked = false;
   bool _isRetrying = false;
   bool _hasRetryError = false;
   bool _isMandatoryUpdateBlocked = false;
   AppUpdateInfo? _mandatoryUpdateInfo;
-  Timer? _navigationTimer;
   Timer? _offlineRetryTimer;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
@@ -67,34 +76,73 @@ class _SplashScreenState extends State<SplashScreen>
       debugPrint('Error initializing notifications on launch: $e');
     }
 
-    // Animation controller (Runs only once)
-    _controller = AnimationController(
+    final reduceMotion = WidgetsBinding
+        .instance.platformDispatcher.accessibilityFeatures.disableAnimations;
+    final minDisplay = reduceMotion ? _reducedMotionDuration : _introDuration;
+
+    _intro = AnimationController(vsync: this, duration: _introDuration);
+    _idle = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2),
-    )..forward();
+      duration: const Duration(milliseconds: 1600),
+    );
 
-    // Bounce scale effect for logo
-    _scaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(
-          tween: Tween(begin: 0.6, end: 1.2)
-              .chain(CurveTween(curve: Curves.easeOut)),
-          weight: 70),
-      TweenSequenceItem(
-          tween: Tween(begin: 1.2, end: 1.0)
-              .chain(CurveTween(curve: Curves.easeIn)),
-          weight: 30),
-    ]).animate(_controller);
-
-    // Fade-in effect (Runs once)
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0)
-        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
-
-    // Navigate to home screen after 3 seconds
-    _navigationTimer = Timer(const Duration(seconds: 3), () {
-      if (mounted) {
-        navigate();
+    _intro.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _introDone = true;
+        _updateIdle();
       }
     });
+
+    if (reduceMotion) {
+      // No motion: show the finished brand frame immediately.
+      _intro.value = 1;
+      _introDone = true;
+    } else {
+      _intro.forward();
+    }
+
+    // Startup work runs in parallel with the animation; we only hold back the
+    // actual route change until the brand moment has had its time on screen.
+    _minDisplay = Completer<void>();
+    _minDisplayTimer = Timer(minDisplay, () {
+      if (!_minDisplay.isCompleted) _minDisplay.complete();
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(navigate());
+    });
+  }
+
+  /// Runs the looping glow/progress only while we are genuinely waiting.
+  /// It is stopped for blocked (offline / update) states and once we leave, so
+  /// nothing animates forever behind a status card.
+  void _updateIdle() {
+    final shouldRun = _introDone &&
+        !_leaving &&
+        !_isOfflineBlocked &&
+        !_isMandatoryUpdateBlocked;
+    if (shouldRun) {
+      if (!_idle.isAnimating) _idle.repeat();
+    } else if (_idle.isAnimating) {
+      _idle.stop();
+    }
+  }
+
+  /// Leaves the splash for [route] once the minimum display time has elapsed.
+  Future<void> _goTo(String route) async {
+    await _minDisplay.future;
+    if (!mounted) return;
+    _leaving = true;
+    _updateIdle();
+    context.go(route);
+  }
+
+  /// Waits for the brand moment before showing a blocking status card.
+  Future<void> _showBlockedState(VoidCallback apply) async {
+    await _minDisplay.future;
+    if (!mounted) return;
+    setState(apply);
+    _updateIdle();
   }
 
   void _startObservingConnectivity() {
@@ -143,7 +191,7 @@ class _SplashScreenState extends State<SplashScreen>
       if (user == null || !user.emailVerified) {
         _connectivitySubscription?.cancel();
         _offlineRetryTimer?.cancel();
-        context.go(Routes.boardingRoute);
+        await _goTo(Routes.boardingRoute);
         return;
       }
 
@@ -167,7 +215,7 @@ class _SplashScreenState extends State<SplashScreen>
           user: authProvider.user,
           hasAgeParameter: resolvedHasAge,
         );
-        context.go(destination);
+        await _goTo(destination);
       } else {
         setState(() {
           _isRetrying = false;
@@ -240,12 +288,10 @@ class _SplashScreenState extends State<SplashScreen>
           // Fallback to update_url_android and keep mandatory restriction in place
           await UpdateService().openStore(customUrl: updateInfo.updateUrl);
 
-          if (mounted) {
-            setState(() {
-              _isMandatoryUpdateBlocked = true;
-              _mandatoryUpdateInfo = updateInfo;
-            });
-          }
+          await _showBlockedState(() {
+            _isMandatoryUpdateBlocked = true;
+            _mandatoryUpdateInfo = updateInfo;
+          });
           return; // Block navigation completely while mandatory update is pending
         } else {
           // iOS: Show existing custom UpdateDialog
@@ -319,13 +365,13 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Case 1: Unauthenticated user -> boarding
     if (user == null) {
-      context.go(Routes.boardingRoute);
+      await _goTo(Routes.boardingRoute);
       return;
     }
 
     // Case 2: Unverified email -> boarding (safeguards preserved)
     if (!emailIsVerified) {
-      context.go(Routes.boardingRoute);
+      await _goTo(Routes.boardingRoute);
       return;
     }
 
@@ -336,7 +382,7 @@ class _SplashScreenState extends State<SplashScreen>
         user: user,
         hasAgeParameter: hasAgeParameter,
       );
-      context.go(destination);
+      await _goTo(destination);
       return;
     }
 
@@ -344,11 +390,12 @@ class _SplashScreenState extends State<SplashScreen>
     final hasInternet = await NetworkService.hasInternetAccess();
     if (!mounted) return;
     if (!hasInternet) {
-      setState(() {
+      await _showBlockedState(() {
         _isOfflineBlocked = true;
         _isRetrying = false;
         _hasRetryError = false;
       });
+      if (!mounted) return;
       _startObservingConnectivity();
       return;
     }
@@ -373,7 +420,8 @@ class _SplashScreenState extends State<SplashScreen>
             _isMandatoryUpdateBlocked = false;
             _mandatoryUpdateInfo = null;
           });
-          navigate();
+          _updateIdle();
+          unawaited(navigate());
         }
       } else {
         if (UpdateService().isAndroidPlatform && info.canUsePlayStoreImmediateUpdate) {
@@ -388,255 +436,235 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _navigationTimer?.cancel();
+    _minDisplayTimer?.cancel();
     _offlineRetryTimer?.cancel();
     _connectivitySubscription?.cancel();
-    _controller.dispose(); // Clean up animation controller
+    _intro.dispose();
+    _idle.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ColorManager.background, // Pure black background
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Logo with bounce & fade effect (happens only once)
-              AnimatedBuilder(
-                animation: _controller,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _scaleAnimation.value, // Bounce effect
-                    child: Opacity(
-                      opacity: _fadeAnimation.value, // Fade-in effect (one time)
-                      child: Image.asset(
-                        'assets/images/applogo.png', // Replace with your logo
-                        width: 260, // Adjusted size for balance
-                      ),
-                    ),
-                  );
-                },
-              ),
-
-              if (_isOfflineBlocked) ...[
-                const SizedBox(height: 28),
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: ColorManager.darkSurface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: _hasRetryError
-                          ? Colors.red.withValues(alpha: 0.5)
-                          : ColorManager.primary.withValues(alpha: 0.3),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: (_hasRetryError ? Colors.red : ColorManager.primary)
-                              .withValues(alpha: 0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          _hasRetryError
-                              ? Icons.error_outline_rounded
-                              : Icons.wifi_off_rounded,
-                          color: _hasRetryError ? Colors.redAccent : ColorManager.primary,
-                          size: 36,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                       Text(
-                        'No internet connection',
-                        key: Key('splash_offline_title'),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'We need an internet connection to verify your profile. Please reconnect to continue.',
-                        key: const Key('splash_offline_message'),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: ColorManager.textSecondary,
-                          fontSize: 13,
-                          height: 1.4,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        "We'll automatically retry when you're back online.",
-                        key: const Key('splash_offline_supporting_text'),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: ColorManager.primary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      if (_isRetrying) ...[
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: ColorManager.primary,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Text(
-                              'Verifying profile...',
-                              key: const Key('splash_retrying_indicator'),
-                              style: TextStyle(
-                                color: ColorManager.textSecondary,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                      if (_hasRetryError && !_isRetrying) ...[
-                        const SizedBox(height: 14),
-                         Text(
-                          'Verification failed. Tap Retry to try again.',
-                          key: Key('splash_retry_error_text'),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.redAccent,
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        ElevatedButton.icon(
-                          key: const Key('splash_offline_retry_button'),
-                          onPressed: _retryVerification,
-                          icon: const Icon(Icons.refresh_rounded, size: 18),
-                          label:  Text(
-                            'Retry Now',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: ColorManager.primary,
-                            foregroundColor: const Color(0xFF06201B),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 10,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+    final blocked = _isOfflineBlocked || _isMandatoryUpdateBlocked;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        // The brand splash is always dark, whatever the app theme is, so it
+        // matches the native launch screen with no flash on startup.
+        backgroundColor: SplashBrandAnimation.background,
+        body: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SplashBrandAnimation(
+                  intro: _intro,
+                  idle: _idle,
+                  showProgress: !blocked,
                 ),
+                if (_isOfflineBlocked) ...[
+                  const SizedBox(height: 28),
+                  _buildOfflineCard(),
+                ],
+                if (_isMandatoryUpdateBlocked) ...[
+                  const SizedBox(height: 28),
+                  _buildUpdateCard(),
+                ],
               ],
-              if (_isMandatoryUpdateBlocked) ...[
-                const SizedBox(height: 28),
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: ColorManager.darkSurface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: ColorManager.primary.withValues(alpha: 0.3),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: ColorManager.primary.withValues(alpha: 0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.system_update_rounded,
-                          color: ColorManager.primary,
-                          size: 36,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                       Text(
-                        'Update Required',
-                        key: Key('splash_update_required_title'),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'A mandatory update is required to continue using Gym Buddy. Please update on Google Play.',
-                        key: const Key('splash_update_required_message'),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: ColorManager.textSecondary,
-                          fontSize: 13,
-                          height: 1.4,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        key: const Key('splash_update_store_button'),
-                        onPressed: () async {
-                          final info = _mandatoryUpdateInfo;
-                          if (info != null && info.canUsePlayStoreImmediateUpdate) {
-                            final res = await UpdateService().performNativeImmediateUpdate();
-                            if (res == play.AppUpdateResult.success) return;
-                          }
-                          await UpdateService().openStore(customUrl: _mandatoryUpdateInfo?.updateUrl);
-                        },
-                        icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                        label:  Text(
-                          'Update on Google Play',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: ColorManager.primary,
-                          foregroundColor: const Color(0xFF06201B),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 10,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  BoxDecoration _cardDecoration({Color? borderColor}) => BoxDecoration(
+        color: ColorManager.darkSurface,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: Border.all(
+          color: borderColor ?? ColorManager.primary.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+      );
+
+  Widget _statusIcon(IconData icon, Color color) => Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.15),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: color, size: 36),
+      );
+
+  ButtonStyle get _primaryButtonStyle => ElevatedButton.styleFrom(
+        backgroundColor: ColorManager.primary,
+        foregroundColor: ColorManager.onMint,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.button),
+        ),
+      );
+
+  Widget _buildOfflineCard() {
+    final errorColor = Colors.redAccent;
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: _cardDecoration(
+        borderColor: _hasRetryError
+            ? Colors.red.withValues(alpha: 0.5)
+            : ColorManager.primary.withValues(alpha: 0.3),
+      ),
+      child: Column(
+        children: [
+          _statusIcon(
+            _hasRetryError
+                ? Icons.error_outline_rounded
+                : Icons.wifi_off_rounded,
+            _hasRetryError ? errorColor : ColorManager.primary,
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'No internet connection',
+            key: Key('splash_offline_title'),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: AppType.title,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'We need an internet connection to verify your profile. Please reconnect to continue.',
+            key: const Key('splash_offline_message'),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: ColorManager.textSecondary,
+              fontSize: AppType.small,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            "We'll automatically retry when you're back online.",
+            key: Key('splash_offline_supporting_text'),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: ColorManager.primary,
+              fontSize: AppType.caption,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          if (_isRetrying) ...[
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: ColorManager.primary,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'Verifying profile...',
+                  key: const Key('splash_retrying_indicator'),
+                  style: TextStyle(
+                    color: ColorManager.textSecondary,
+                    fontSize: AppType.caption,
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (_hasRetryError && !_isRetrying) ...[
+            const SizedBox(height: 14),
+            Text(
+              'Verification failed. Tap Retry to try again.',
+              key: const Key('splash_retry_error_text'),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: errorColor,
+                fontSize: AppType.caption,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              key: const Key('splash_offline_retry_button'),
+              onPressed: _retryVerification,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text(
+                'Retry Now',
+                style: TextStyle(
+                  fontSize: AppType.small,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              style: _primaryButtonStyle,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUpdateCard() {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: _cardDecoration(),
+      child: Column(
+        children: [
+          _statusIcon(Icons.system_update_rounded, ColorManager.primary),
+          const SizedBox(height: 16),
+          const Text(
+            'Update Required',
+            key: Key('splash_update_required_title'),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: AppType.title,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'A mandatory update is required to continue using Gym Buddy. Please update on Google Play.',
+            key: const Key('splash_update_required_message'),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: ColorManager.textSecondary,
+              fontSize: AppType.small,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            key: const Key('splash_update_store_button'),
+            onPressed: () async {
+              final info = _mandatoryUpdateInfo;
+              if (info != null && info.canUsePlayStoreImmediateUpdate) {
+                final res = await UpdateService().performNativeImmediateUpdate();
+                if (res == play.AppUpdateResult.success) return;
+              }
+              await UpdateService()
+                  .openStore(customUrl: _mandatoryUpdateInfo?.updateUrl);
+            },
+            icon: const Icon(Icons.open_in_new_rounded, size: 18),
+            label: const Text(
+              'Update on Google Play',
+              style: TextStyle(
+                fontSize: AppType.small,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            style: _primaryButtonStyle,
+          ),
+        ],
       ),
     );
   }

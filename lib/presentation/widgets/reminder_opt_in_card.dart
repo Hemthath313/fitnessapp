@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/services/notification_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
@@ -133,7 +134,7 @@ class _ReminderOptInCardState extends State<ReminderOptInCard> {
           child: Row(
             children: [
               Icon(Icons.check_circle_rounded,
-                  color: ColorManager.primary, size: 20.sp),
+                  color: ColorManager.primaryText, size: 20.sp),
               SizedBox(width: 10.w),
               Expanded(
                 child: Text(
@@ -242,7 +243,7 @@ class _ReminderOptInCardState extends State<ReminderOptInCard> {
                       padding:
                           EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
+                        borderRadius: BorderRadius.circular(AppRadius.button.r),
                       ),
                     ),
                     child: Text(
@@ -269,7 +270,8 @@ class _ReminderOptInCardState extends State<ReminderOptInCard> {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(22.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.card.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: child,

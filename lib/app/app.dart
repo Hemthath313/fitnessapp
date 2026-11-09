@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +39,8 @@ class _MyAppState extends State<MyApp> {
       appBarTheme: AppBarTheme(
         backgroundColor: ColorManager.lightBackground,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         centerTitle: true,
         iconTheme: const IconThemeData(color: ColorManager.lightTextPrimary),
         titleTextStyle: TextStyle(
@@ -51,8 +54,9 @@ class _MyAppState extends State<MyApp> {
       // Card Theme
       cardTheme: CardThemeData(
         color: ColorManager.lightSurface,
-        elevation: 1,
-        shadowColor: ColorManager.lightTextTertiary.withValues(alpha: 0.1),
+        elevation: 2,
+        shadowColor: const Color(0x330F2E2A),
+        surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -67,7 +71,7 @@ class _MyAppState extends State<MyApp> {
           elevation: 2,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.button),
           ),
           textStyle: TextStyle(
             fontSize: 16.sp,
@@ -80,7 +84,7 @@ class _MyAppState extends State<MyApp> {
       // Text Button Theme
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: ColorManager.primary,
+          foregroundColor: ColorManager.lightPrimaryText,
           textStyle: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.w600,
@@ -91,11 +95,11 @@ class _MyAppState extends State<MyApp> {
       // Outlined Button Theme
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: ColorManager.primary,
-          side: const BorderSide(color: ColorManager.primary, width: 2),
+          foregroundColor: ColorManager.lightPrimaryText,
+          side: const BorderSide(color: ColorManager.lightPrimaryText, width: 1.5),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.button),
           ),
           textStyle: TextStyle(
             fontSize: 16.sp,
@@ -118,7 +122,7 @@ class _MyAppState extends State<MyApp> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: ColorManager.primary, width: 2),
+          borderSide: const BorderSide(color: ColorManager.lightPrimaryText, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -137,7 +141,7 @@ class _MyAppState extends State<MyApp> {
       // Bottom Navigation Bar Theme
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: ColorManager.lightSurface,
-        selectedItemColor: ColorManager.primary,
+        selectedItemColor: ColorManager.lightPrimaryText,
         unselectedItemColor: ColorManager.lightTextTertiary,
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
@@ -261,11 +265,11 @@ class _MyAppState extends State<MyApp> {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: ColorManager.primary,
-          foregroundColor: Colors.black,
+          foregroundColor: ColorManager.onMint,
           elevation: 2,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.button),
           ),
           textStyle: TextStyle(
             fontSize: 16.sp,
@@ -293,7 +297,7 @@ class _MyAppState extends State<MyApp> {
           side: const BorderSide(color: ColorManager.primary, width: 2),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.button),
           ),
           textStyle: TextStyle(
             fontSize: 16.sp,
@@ -361,7 +365,7 @@ class _MyAppState extends State<MyApp> {
         backgroundColor: ColorManager.darkSurface,
         selectedColor: ColorManager.primary,
         labelStyle: TextStyle(color: ColorManager.darkTextPrimary),
-        secondaryLabelStyle: TextStyle(color: Colors.black),
+        secondaryLabelStyle: TextStyle(color: ColorManager.onMint),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -414,7 +418,7 @@ class _MyAppState extends State<MyApp> {
       // Floating Action Button Theme
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: ColorManager.primary,
-        foregroundColor: Colors.black,
+        foregroundColor: ColorManager.onMint,
         elevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),

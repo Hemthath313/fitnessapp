@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -51,7 +52,8 @@ class _TransformationStrengthProgressCardState
           padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
             color: ColorManager.surface,
-            borderRadius: BorderRadius.circular(20.r),
+            boxShadow: ColorManager.cardShadow,
+            borderRadius: BorderRadius.circular(AppRadius.card.r),
             border: Border.all(color: ColorManager.divider),
           ),
           child: Column(
@@ -64,7 +66,7 @@ class _TransformationStrengthProgressCardState
                   Expanded(
                     child: Row(
                       children: [
-                        Icon(Icons.fitness_center_rounded, color: ColorManager.primary, size: 20.sp),
+                        Icon(Icons.fitness_center_rounded, color: ColorManager.primaryText, size: 20.sp),
                         SizedBox(width: 8.w),
                         Expanded(
                           child: Text(
@@ -91,7 +93,7 @@ class _TransformationStrengthProgressCardState
                       child: Text(
                         '${summary.totalStrengthWorkouts} Workouts',
                         style: TextStyle(
-                          color: ColorManager.primary,
+                          color: ColorManager.primaryText,
                           fontSize: 11.sp,
                           fontWeight: FontWeight.bold,
                         ),
@@ -166,7 +168,7 @@ class _TransformationStrengthProgressCardState
       padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 16.w),
       decoration: BoxDecoration(
         color: ColorManager.surfaceDark,
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
       ),
       child: Column(
         children: [
@@ -205,7 +207,7 @@ class _TransformationStrengthProgressCardState
       padding: EdgeInsets.all(10.w),
       decoration: BoxDecoration(
         color: ColorManager.surfaceDark,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(AppRadius.small.r),
         border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
@@ -250,7 +252,7 @@ class _TransformationStrengthProgressCardState
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: ColorManager.surfaceDark,
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

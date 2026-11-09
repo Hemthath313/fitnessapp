@@ -1,3 +1,5 @@
+import 'package:fitness_app/utils/managers/layout_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/model/workout_log.dart';
 import 'package:fitness_app/model/workout_session_model.dart';
 import 'package:fitness_app/presentation/workout_logs/widgets/repeat_workout_widgets.dart';
@@ -54,7 +56,7 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
   }
 
   String _formatDuration(int seconds) {
-    if (seconds <= 0) return '0 min';
+    if (seconds <= 0) return '—';
     final mins = seconds ~/ 60;
     final secs = seconds % 60;
     if (mins >= 60) {
@@ -189,24 +191,44 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
           session.workoutName.isNotEmpty ? session.workoutName : session.dayName,
           style: TextStyle(
             color: ColorManager.textPrimary,
-            fontSize: 18.sp,
+            fontSize: AppText.appBarTitle,
             fontWeight: FontWeight.bold,
           ),
         ),
         actions: [
-          IconButton(
+          TextButton(
             key: const Key('edit_session_button'),
-            icon: Icon(
-              _editing ? Icons.check_rounded : Icons.edit_outlined,
-              color: ColorManager.primary,
-            ),
-            tooltip: _editing ? 'Done editing' : 'Edit sets',
             onPressed: () => setState(() => _editing = !_editing),
+            child: Text(
+              _editing ? 'Done' : 'Edit',
+              style: TextStyle(
+                color: ColorManager.primaryText,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-            tooltip: 'Delete Session',
-            onPressed: () => _confirmDelete(context),
+          PopupMenuButton<String>(
+            key: const Key('session_more_menu'),
+            tooltip: 'More',
+            color: ColorManager.surface,
+            icon: Icon(Icons.more_vert_rounded, color: ColorManager.textPrimary),
+            onSelected: (value) {
+              if (value == 'delete') _confirmDelete(context);
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem<String>(
+                key: const Key('session_delete_menu_item'),
+                value: 'delete',
+                child: Row(
+                  children: [
+                    const Icon(Icons.delete_outline, color: Colors.redAccent),
+                    SizedBox(width: 10.w),
+                    const Text('Delete workout', style: TextStyle(color: Colors.redAccent)),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -217,7 +239,7 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        padding: EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: 12.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -262,7 +284,8 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
                 color: ColorManager.surface,
-                borderRadius: BorderRadius.circular(16.r),
+                boxShadow: ColorManager.cardShadow,
+                borderRadius: BorderRadius.circular(AppRadius.tile.r),
                 border: Border.all(color: ColorManager.divider),
               ),
               child: Row(
@@ -369,7 +392,8 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(14.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Column(
@@ -390,7 +414,7 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.analytics_outlined, color: ColorManager.primary, size: 20.sp),
+                icon: Icon(Icons.analytics_outlined, color: ColorManager.primaryText, size: 20.sp),
                 tooltip: 'View Progression',
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
@@ -474,7 +498,7 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
                     width: 65.w,
                     child: Text(
                       est1RM > 0 ? '${est1RM.toStringAsFixed(1)} kg' : '—',
-                      style: TextStyle(color: ColorManager.primary, fontSize: 12.sp, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: ColorManager.primaryText, fontSize: 12.sp, fontWeight: FontWeight.bold),
                     ),
                   ),
                   SizedBox(

@@ -161,7 +161,7 @@ void main() {
       expect(find.text('2 of 3 workouts. 1 to go'), findsOneWidget);
       expect(find.byKey(const Key('next_badge_card')), findsOneWidget);
 
-      await tester.tap(find.text('Back to Home'));
+      await tester.tap(find.text('Done'));
       expect(done, isTrue);
     });
 
@@ -189,7 +189,7 @@ void main() {
       expect(find.byKey(const Key('reward_pr_card')), findsNothing);
     });
 
-    testWidgets('partial session uses the saved-early wording and Back to Home stays reachable',
+    testWidgets('partial session uses the saved-early wording and Done stays reachable',
         (tester) async {
       _viewport(tester);
       final partial = _session(
@@ -209,7 +209,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Workout Saved Early!'), findsOneWidget);
       expect(find.textContaining('Already counted today'), findsOneWidget);
-      expect(find.text('Back to Home'), findsOneWidget);
+      expect(find.text('Done'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   });

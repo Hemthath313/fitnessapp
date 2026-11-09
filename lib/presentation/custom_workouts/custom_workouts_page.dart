@@ -1,3 +1,5 @@
+import 'package:fitness_app/utils/managers/layout_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/model/workout_log.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/services/workout_log_service.dart';
@@ -72,7 +74,7 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                       padding: EdgeInsets.symmetric(vertical: 8.h),
                       child: Row(
                         children: [
-                          Icon(Icons.check_circle, color: ColorManager.primary, size: 20.sp),
+                          Icon(Icons.check_circle, color: ColorManager.primaryText, size: 20.sp),
                           SizedBox(width: 12.w),
                           Expanded(
                             child: Column(
@@ -112,7 +114,8 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
       body: SafeArea(
         bottom: true,
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(SizeManager.s16.w),
+          padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.gutter, vertical: SizeManager.s16.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -159,7 +162,8 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                   return Container(
                     decoration: BoxDecoration(
                       color: ColorManager.surface,
-                      borderRadius: BorderRadius.circular(16.r),
+                      boxShadow: ColorManager.cardShadow,
+                      borderRadius: BorderRadius.circular(AppRadius.tile.r),
                       border: Border.all(color: ColorManager.divider),
                     ),
                     padding: EdgeInsets.all(8.w),
@@ -276,7 +280,8 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Column(
@@ -300,7 +305,8 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
         padding: EdgeInsets.all(20.w),
         decoration: BoxDecoration(
           color: ColorManager.surface,
-          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: ColorManager.cardShadow,
+          borderRadius: BorderRadius.circular(AppRadius.tile.r),
           border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Row(

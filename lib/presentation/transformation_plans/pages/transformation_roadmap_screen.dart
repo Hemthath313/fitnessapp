@@ -1,3 +1,5 @@
+import 'package:fitness_app/utils/managers/layout_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -40,7 +42,7 @@ class _TransformationRoadmapScreenState
           'Transformation Roadmap',
           style: TextStyle(
             color: ColorManager.textPrimary,
-            fontSize: 18.sp,
+            fontSize: AppText.appBarTitle,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -61,7 +63,7 @@ class _TransformationRoadmapScreenState
             tooltip: 'Progress Dashboard',
             icon: Icon(
               Icons.query_stats_rounded,
-              color: ColorManager.primary,
+              color: ColorManager.primaryText,
               size: 22.sp,
             ),
             onPressed: () => context.push(Routes.transformationProgressRoute),
@@ -252,7 +254,7 @@ class _TransformationRoadmapScreenState
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.primary,
                 padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
               ),
               child: const Text('Explore Transformation Plans', style: TextStyle(color: ColorManager.onMint, fontWeight: FontWeight.bold)),
             ),
@@ -324,7 +326,8 @@ class _TransformationRoadmapScreenState
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
       ),
       child: Column(
@@ -381,7 +384,7 @@ class _TransformationRoadmapScreenState
                 side: BorderSide(color: primaryColor.withValues(alpha: 0.5)),
                 padding: EdgeInsets.symmetric(vertical: 8.h),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r),
+                  borderRadius: BorderRadius.circular(AppRadius.button.r),
                 ),
               ),
             ),
@@ -425,7 +428,8 @@ class _TransformationRoadmapScreenState
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
       ),
       child: Column(
@@ -552,7 +556,8 @@ class _TransformationRoadmapScreenState
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
       ),
       child: Column(
@@ -656,7 +661,7 @@ class _TransformationRoadmapScreenState
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(AppRadius.card.r),
         border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
         boxShadow: [
           BoxShadow(
@@ -820,7 +825,7 @@ class _TransformationRoadmapScreenState
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.success,
                 padding: EdgeInsets.symmetric(vertical: 10.h),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
               ),
               child: const Text('Complete & View Results', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
@@ -841,7 +846,8 @@ class _TransformationRoadmapScreenState
             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
             decoration: BoxDecoration(
               color: ColorManager.surface,
-              borderRadius: BorderRadius.circular(14.r),
+              boxShadow: ColorManager.cardShadow,
+              borderRadius: BorderRadius.circular(AppRadius.tile.r),
               border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
             ),
             child: Row(
@@ -897,7 +903,8 @@ class _TransformationRoadmapScreenState
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(14.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Row(
@@ -965,7 +972,8 @@ class _TransformationRoadmapScreenState
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Column(
@@ -1039,11 +1047,11 @@ class _TransformationRoadmapScreenState
                 Routes.transformationNutritionRoute,
                 extra: state.currentDay,
               ),
-              icon: const Icon(Icons.menu_book_rounded, size: 16, color: Colors.white),
+              icon: Icon(Icons.menu_book_rounded, size: 16, color: ColorManager.onColor(primaryColor)),
               label: Text(
                 'View Daily Meal Plan & Recipes 🥗',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: ColorManager.onColor(primaryColor),
                   fontSize: 12.sp,
                   fontWeight: FontWeight.bold,
                 ),
@@ -1051,7 +1059,7 @@ class _TransformationRoadmapScreenState
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
                 padding: EdgeInsets.symmetric(vertical: 8.h),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
                 elevation: 0,
               ),
             ),
@@ -1112,7 +1120,7 @@ class _TransformationRoadmapScreenState
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: ColorManager.surfaceDark,
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
       ),
       child: Row(
         children: [
@@ -1170,7 +1178,7 @@ class _TransformationRoadmapScreenState
               child: Text(
                 'Phase ${phase.phaseNumber}',
                 style: TextStyle(
-                  color: isSelected ? Colors.white : ColorManager.textPrimary,
+                  color: isSelected ? ColorManager.onColor(primaryColor) : ColorManager.textPrimary,
                   fontSize: 12.sp,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 ),
@@ -1187,7 +1195,8 @@ class _TransformationRoadmapScreenState
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.small.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Column(
@@ -1339,7 +1348,8 @@ class _TransformationRoadmapScreenState
     return Container(
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: cardBorder, width: effectiveIsToday ? 1.5 : 1.0),
       ),
       padding: EdgeInsets.all(14.w),
@@ -1597,7 +1607,7 @@ class _TransformationRoadmapScreenState
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isCompleted ? ColorManager.textTertiary : primaryColor,
                   padding: EdgeInsets.symmetric(vertical: 10.h),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
                   elevation: 0,
                 ),
               ),

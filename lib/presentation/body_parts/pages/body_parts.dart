@@ -1,3 +1,5 @@
+import 'package:fitness_app/utils/managers/layout_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/presentation/body_parts/pages/abs.dart';
 import 'package:fitness_app/presentation/body_parts/pages/biceps.dart';
@@ -8,6 +10,7 @@ import 'package:fitness_app/presentation/body_parts/pages/shoulder.dart';
 import 'package:fitness_app/presentation/body_parts/pages/triceps.dart';
 import 'package:fitness_app/presentation/widgets/interactive_exercise_detail.dart';
 import 'package:fitness_app/utils/managers/asset_manager.dart';
+import 'package:fitness_app/utils/managers/card_size_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:flutter/material.dart';
@@ -114,7 +117,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
             // Bold header section + Search & Filter row
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -122,7 +125,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                       'Body Focus',
                       style: TextStyle(
                         color: ColorManager.textPrimary,
-                        fontSize: 32.sp,
+                        fontSize: AppText.pageTitle,
                         fontWeight: FontWeight.bold,
                         letterSpacing: -0.5,
                       ),
@@ -163,11 +166,11 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
                 sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    crossAxisSpacing: 16.0,
-                    mainAxisSpacing: 16.0,
-                    childAspectRatio: 0.85,
+                    crossAxisSpacing: AppCardSize.gridSpacing,
+                    mainAxisSpacing: AppCardSize.gridSpacing,
+                    childAspectRatio: AppCardSize.gridAspectRatio,
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
@@ -197,7 +200,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                             child: Container(
                               decoration: BoxDecoration(
                                 color: ColorManager.surface,
-                                borderRadius: BorderRadius.circular(20.0),
+                                borderRadius: BorderRadius.circular(AppRadius.card),
                                 border: Border.all(
                                   color: ColorManager.divider.withValues(alpha: 0.4),
                                   width: 1.5,
@@ -217,7 +220,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                                   children: [
                                     Positioned.fill(
                                       child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 48),
+                                        padding: const EdgeInsets.fromLTRB(14, 10, 14, 40),
                                         child: Image.asset(
                                           imagePath,
                                           fit: BoxFit.contain,
@@ -239,28 +242,28 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                                       ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsets.all(16.0),
+                                      padding: const EdgeInsets.all(12.0),
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         mainAxisAlignment: MainAxisAlignment.end,
                                         children: [
                                           Text(
                                             bodyPart,
-                                            style:  TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 20.sp,
+                                            style: TextStyle(
+                                              color: ColorManager.textPrimary,
+                                              fontSize: 16.sp,
                                               fontWeight: FontWeight.bold,
                                               letterSpacing: 0.2,
                                             ),
                                           ),
-                                          const SizedBox(height: 4),
+                                          const SizedBox(height: 2),
                                           Row(
                                             children: [
                                               Text(
                                                 'View exercises',
                                                 style: TextStyle(
-                                                  color: Colors.white.withValues(alpha: 0.7),
-                                                  fontSize: 12.sp,
+                                                  color: ColorManager.textSecondary,
+                                                  fontSize: 11.sp,
                                                   fontWeight: FontWeight.w500,
                                                 ),
                                               ),
@@ -268,12 +271,12 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                                               Container(
                                                 padding: const EdgeInsets.all(4),
                                                 decoration: BoxDecoration(
-                                                  color: ColorManager.primary.withValues(alpha: 0.85),
+                                                  color: ColorManager.primary,
                                                   shape: BoxShape.circle,
                                                 ),
                                                 child: const Icon(
                                                   Icons.arrow_forward_ios_rounded,
-                                                  color: Colors.white,
+                                                  color: ColorManager.onMint,
                                                   size: 10,
                                                 ),
                                               ),
@@ -317,7 +320,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                 decoration: InputDecoration(
                   hintText: 'Search all strength exercises...',
                   hintStyle: TextStyle(color: ColorManager.textSecondary, fontSize: 14.sp),
-                  prefixIcon: Icon(Icons.search_rounded, color: ColorManager.primary, size: 20),
+                  prefixIcon: Icon(Icons.search_rounded, color: ColorManager.primaryText, size: 20),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(tooltip: 'Close', 
                           key: const Key('clear_body_parts_search_button'),
@@ -420,7 +423,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: ColorManager.limerGreen2,
+                      color: ColorManager.primaryText,
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
                     ),
@@ -437,7 +440,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                 child: Text(
                   'Clear filters',
                   style: TextStyle(
-                    color: ColorManager.primary,
+                    color: ColorManager.primaryText,
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
                   ),
@@ -604,7 +607,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                           foregroundColor: const Color(0xFF06201B),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(AppRadius.button),
                           ),
                           elevation: 0,
                         ),
@@ -634,7 +637,8 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Column(
@@ -658,11 +662,11 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
           TextButton.icon(
             key: const Key('reset_body_parts_filters_button'),
             onPressed: _resetFilters,
-            icon: Icon(Icons.refresh_rounded, color: ColorManager.primary, size: 18),
+            icon: Icon(Icons.refresh_rounded, color: ColorManager.primaryText, size: 18),
             label: Text(
               'Reset Filters',
               style: TextStyle(
-                color: ColorManager.primary,
+                color: ColorManager.primaryText,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -680,7 +684,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.tile),
         boxShadow: [
           BoxShadow(
             color: ColorManager.primary.withValues(alpha: 0.05),
@@ -752,7 +756,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: ColorManager.limerGreen2,
+                          color: ColorManager.primaryText,
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                         ),
@@ -797,7 +801,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  color: ColorManager.limerGreen2,
+                                  color: ColorManager.primaryText,
                                   fontSize: 11.sp,
                                   fontWeight: FontWeight.bold,
                                 ),

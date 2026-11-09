@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/model/workout_session_model.dart';
 import 'package:fitness_app/services/repeat_workout.dart';
 import 'package:fitness_app/utils/app_feedback.dart';
@@ -70,7 +71,7 @@ class RepeatWorkoutButton extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: ColorManager.primary,
             padding: EdgeInsets.symmetric(vertical: 14.h),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
             elevation: 0,
           ),
         ),
@@ -86,7 +87,7 @@ class RepeatWorkoutButton extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
       ),
     );
   }
@@ -116,7 +117,8 @@ class LastWorkoutStrip extends StatelessWidget {
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: ColorManager.primary.withValues(alpha: 0.35)),
       ),
       child: Row(

@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -72,6 +73,29 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
     });
   }
 
+  /// Time-picker styling that follows the app theme (it used to force the
+  /// dark scheme, which clashed with light mode).
+  Widget _timePickerBuilder(BuildContext context, Widget? child) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final scheme = isDark
+        ? ColorScheme.dark(
+            primary: ColorManager.primary,
+            onPrimary: ColorManager.onMint,
+            surface: ColorManager.surface,
+            onSurface: ColorManager.textPrimary,
+          )
+        : ColorScheme.light(
+            primary: ColorManager.primary,
+            onPrimary: ColorManager.onMint,
+            surface: ColorManager.surface,
+            onSurface: ColorManager.textPrimary,
+          );
+    return Theme(
+      data: Theme.of(context).copyWith(colorScheme: scheme),
+      child: child!,
+    );
+  }
+
   Future<bool> _ensurePermission() async {
     final hasPerm = await NotificationService().hasNotificationPermission();
     if (hasPerm) return true;
@@ -129,19 +153,7 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: _alarmTime,
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.dark(
-              primary: ColorManager.primary,
-              onPrimary: Colors.black,
-              surface: ColorManager.surface,
-              onSurface: ColorManager.white,
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: _timePickerBuilder,
     );
 
     if (picked != null && picked != _alarmTime) {
@@ -198,19 +210,7 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: _workoutNotifTime,
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.dark(
-              primary: ColorManager.primary,
-              onPrimary: Colors.black,
-              surface: ColorManager.surface,
-              onSurface: ColorManager.white,
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: _timePickerBuilder,
     );
 
     if (picked != null && picked != _workoutNotifTime) {
@@ -334,19 +334,7 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: _waterNotifTime,
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.dark(
-              primary: ColorManager.primary,
-              onPrimary: Colors.black,
-              surface: ColorManager.surface,
-              onSurface: ColorManager.white,
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: _timePickerBuilder,
     );
 
     if (picked != null && picked != _waterNotifTime) {
@@ -368,18 +356,9 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: ColorManager.primary.withValues(alpha: 0.3),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: ColorManager.primary.withValues(alpha: 0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
+        border: Border.all(color: ColorManager.divider),
+        boxShadow: ColorManager.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -388,7 +367,7 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
           Row(
             children: [
               Icon(Icons.notifications_active_rounded,
-                  color: ColorManager.primary, size: 20.sp),
+                  color: ColorManager.primaryText, size: 20.sp),
               SizedBox(width: 8.w),
               Expanded(
                 child: Text(
@@ -590,7 +569,7 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
               child: Text(
                 time.format(context),
                 style: TextStyle(
-                  color: ColorManager.primary,
+                  color: ColorManager.primaryText,
                   fontSize: 13.sp,
                   fontWeight: FontWeight.bold,
                 ),

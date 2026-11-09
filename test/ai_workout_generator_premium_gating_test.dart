@@ -286,7 +286,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Empty state shows Generate Plan with AI and free starter routine option
-        expect(find.text('Generate Plan with AI'), findsOneWidget);
+        expect(find.text('Build a Plan'), findsOneWidget);
         expect(find.text('Or Activate Free 3-Day Starter Routine'), findsOneWidget);
       },
     );
@@ -481,7 +481,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Free user successfully enters generator
-        expect(find.text('AI Workout Generator'), findsOneWidget);
+        expect(find.text('Plan Builder'), findsOneWidget);
         expect(find.text('GENERATE WEEKLY PLAN'), findsOneWidget);
       },
     );
@@ -563,7 +563,7 @@ void main() {
         expect(find.text('PRO'), findsOneWidget);
         expect(
           find.text(
-              'Build unlimited custom AI workout splits, access strength analytics, and train completely ad-free.'),
+              'Build unlimited custom workout splits, access strength analytics, and train completely ad-free.'),
           findsOneWidget,
         );
         expect(find.text('Upgrade to Pro'), findsOneWidget);

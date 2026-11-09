@@ -102,6 +102,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  flutter_native_splash: ^2.4.6
 
 flutter_launcher_icons:
   android: "launcher_icon"
@@ -171,3 +172,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Native launch screen: plain brand-dark so the hand-off to the animated Flutter
+# splash (SplashBrandAnimation) has no white flash. Regenerate with:
+#   dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#0A1C22"
+  android_12:
+    color: "#0A1C22"

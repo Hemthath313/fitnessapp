@@ -1,3 +1,5 @@
+import 'package:fitness_app/utils/managers/layout_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/model/workout_session_model.dart';
 import 'package:fitness_app/model/workout_log.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
@@ -14,33 +16,52 @@ import 'package:provider/provider.dart';
 /// 1. What did I do? (Weekly sessions & volume)
 /// 2. Am I getting stronger? (Top PR & Est. 1RM milestone)
 /// 3. What should I do next? (Direct navigation to PR Vault / Next session)
-class AdaptiveStrengthSummaryCard extends StatelessWidget {
+class AdaptiveStrengthSummaryCard extends StatefulWidget {
   const AdaptiveStrengthSummaryCard({super.key});
+
+  @override
+  State<AdaptiveStrengthSummaryCard> createState() =>
+      _AdaptiveStrengthSummaryCardState();
+}
+
+class _AdaptiveStrengthSummaryCardState
+    extends State<AdaptiveStrengthSummaryCard> {
+  // Created once. Building these inside build() opened fresh Firestore
+  // listeners (and flashed empty data) on every rebuild of the Progress tab.
+  final WorkoutLogService _logService = WorkoutLogService();
+  final StrengthService _strengthService = StrengthService();
+  late final Stream<List<WorkoutSession>> _sessionsStream;
+  late final Stream<List<WorkoutLog>> _logsStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _sessionsStream = _logService.getSessions();
+    _logsStream = _logService.getLogs();
+  }
 
   @override
   Widget build(BuildContext context) {
     final stats = Provider.of<StatisticsProvider>(context);
-    final logService = WorkoutLogService();
-    final strengthService = StrengthService();
 
     return StreamBuilder<List<WorkoutSession>>(
-      stream: logService.getSessions(),
+      stream: _sessionsStream,
       builder: (context, sessionSnapshot) {
         return StreamBuilder<List<WorkoutLog>>(
-          stream: logService.getLogs(),
+          stream: _logsStream,
           builder: (context, logSnapshot) {
             final sessions = sessionSnapshot.data ?? [];
             final logs = logSnapshot.data ?? [];
 
             // 1. What did I do? Weekly volume & adherence
-            final weeklyMetrics = strengthService.calculateWeeklyMetrics(sessions);
+            final weeklyMetrics = _strengthService.calculateWeeklyMetrics(sessions);
             final workoutsThisWeek = weeklyMetrics.thisWeekSessions > 0
                 ? weeklyMetrics.thisWeekSessions
                 : stats.workoutsCompletedThisWeek;
             final weeklyTarget = stats.weeklyTarget;
 
             // 2. Am I getting stronger? Top PR
-            final prs = strengthService.getAllTimePRs(sessions: sessions, legacyLogs: logs);
+            final prs = _strengthService.getAllTimePRs(sessions: sessions, legacyLogs: logs);
             final sortedPRs = prs.values.toList()
               ..sort((a, b) => b.estimated1RM.compareTo(a.estimated1RM));
             final topPR = sortedPRs.isNotEmpty ? sortedPRs.first : null;
@@ -49,7 +70,8 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
                 color: ColorManager.surface,
-                borderRadius: BorderRadius.circular(20.r),
+                boxShadow: ColorManager.cardShadow,
+                borderRadius: BorderRadius.circular(AppRadius.card.r),
                 border: Border.all(color: ColorManager.divider),
               ),
               child: Column(
@@ -89,7 +111,7 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                         child: Text(
                           'This Week',
                           style: TextStyle(
-                            color: ColorManager.primary,
+                            color: ColorManager.primaryText,
                             fontSize: 11.sp,
                             fontWeight: FontWeight.bold,
                           ),
@@ -107,7 +129,7 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                           padding: EdgeInsets.all(10.w),
                           decoration: BoxDecoration(
                             color: ColorManager.surfaceDark,
-                            borderRadius: BorderRadius.circular(12.r),
+                            borderRadius: BorderRadius.circular(AppRadius.small.r),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,7 +147,7 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                                     Text(
                                       '$workoutsThisWeek / $weeklyTarget',
                                       style: TextStyle(
-                                        color: workoutsThisWeek >= weeklyTarget ? Colors.greenAccent : ColorManager.white,
+                                        color: workoutsThisWeek >= weeklyTarget ? ColorManager.primaryText : ColorManager.white,
                                         fontSize: 16.sp,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -148,7 +170,7 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                           padding: EdgeInsets.all(10.w),
                           decoration: BoxDecoration(
                             color: ColorManager.surfaceDark,
-                            borderRadius: BorderRadius.circular(12.r),
+                            borderRadius: BorderRadius.circular(AppRadius.small.r),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,7 +188,7 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                                     Text(
                                       '${weeklyMetrics.thisWeekVolume.toInt()} kg',
                                       style: TextStyle(
-                                        color: ColorManager.primary,
+                                        color: ColorManager.primaryText,
                                         fontSize: 16.sp,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -176,7 +198,7 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                                       Text(
                                         '${weeklyMetrics.volumeChangePct > 0 ? '+' : ''}${weeklyMetrics.volumeChangePct.toStringAsFixed(0)}%',
                                         style: TextStyle(
-                                          color: weeklyMetrics.volumeChangePct >= 0 ? Colors.green : Colors.orange,
+                                          color: weeklyMetrics.volumeChangePct >= 0 ? ColorManager.primaryText : Colors.orange.shade800,
                                           fontSize: 11.sp,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -199,7 +221,7 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                       decoration: BoxDecoration(
                         color: ColorManager.surfaceDark,
-                        borderRadius: BorderRadius.circular(12.r),
+                        borderRadius: BorderRadius.circular(AppRadius.small.r),
                         border: Border.all(color: Colors.amber.withValues(alpha: 0.25)),
                       ),
                       child: Row(
@@ -210,6 +232,15 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Text(
+                                  'All-time best',
+                                  style: TextStyle(
+                                    color: ColorManager.textTertiary,
+                                    fontSize: AppText.caption,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(height: 2.h),
                                 Text(
                                   topPR.exerciseName,
                                   style: TextStyle(
@@ -235,7 +266,7 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                       decoration: BoxDecoration(
                         color: ColorManager.surfaceDark,
-                        borderRadius: BorderRadius.circular(12.r),
+                        borderRadius: BorderRadius.circular(AppRadius.small.r),
                       ),
                       child: Row(
                         children: [
@@ -267,7 +298,7 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.analytics_outlined, color: ColorManager.primary, size: 16.sp),
+                          Icon(Icons.analytics_outlined, color: ColorManager.primaryText, size: 16.sp),
                           SizedBox(width: 6.w),
                           Flexible(
                             child: FittedBox(
@@ -275,7 +306,7 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                               child: Text(
                                 'Open Full Strength & PR Vault',
                                 style: TextStyle(
-                                  color: ColorManager.primary,
+                                  color: ColorManager.primaryText,
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -283,7 +314,7 @@ class AdaptiveStrengthSummaryCard extends StatelessWidget {
                             ),
                           ),
                           SizedBox(width: 4.w),
-                          Icon(Icons.arrow_forward_ios_rounded, color: ColorManager.primary, size: 11.sp),
+                          Icon(Icons.arrow_forward_ios_rounded, color: ColorManager.primaryText, size: 11.sp),
                         ],
                       ),
                     ),

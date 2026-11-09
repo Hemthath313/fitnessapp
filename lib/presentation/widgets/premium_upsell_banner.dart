@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,7 @@ class PremiumUpsellBannerCard extends StatelessWidget {
     this.onDismiss,
     this.title = 'Unlock Gym Buddy Pro',
     this.message =
-        'Build unlimited custom AI workout splits, access strength analytics, and train completely ad-free.',
+        'Build unlimited custom workout splits, access strength analytics, and train completely ad-free.',
     this.buttonText = 'Upgrade to Pro',
   });
 
@@ -28,7 +29,7 @@ class PremiumUpsellBannerCard extends StatelessWidget {
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(
           color: ColorManager.primary.withValues(alpha: 0.35),
           width: 1.2,
@@ -134,7 +135,7 @@ class PremiumUpsellBannerCard extends StatelessWidget {
                 foregroundColor: const Color(0xFF06201B),
                 padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 16.w),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r),
+                  borderRadius: BorderRadius.circular(AppRadius.button.r),
                 ),
                 elevation: 0,
               ),

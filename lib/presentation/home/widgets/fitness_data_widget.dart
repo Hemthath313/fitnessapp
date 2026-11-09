@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'dart:math' as math;
 import 'package:fitness_app/presentation/consumption/providers/consumption_provider.dart';
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
@@ -241,7 +242,7 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                 child: Column(
                   children: [
                     Icon(Icons.info_outline,
-                        color: ColorManager.primary, size: 48),
+                        color: ColorManager.primaryText, size: 48),
                     SizedBox(height: 16),
                     Text(
                       'No fitness data available',
@@ -313,7 +314,8 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
             final calorieCardDecoration = isDarkMode 
                 ? BoxDecoration(
                     color: ColorManager.surface,
-                    borderRadius: BorderRadius.circular(18.r),
+                    boxShadow: ColorManager.cardShadow,
+                    borderRadius: BorderRadius.circular(AppRadius.card.r),
                   )
                 : BoxDecoration(
                     gradient: const LinearGradient(
@@ -516,7 +518,7 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                               children: [
                                 Row(
                                   children: [
-                                    Icon(Icons.water_drop_outlined, color: ColorManager.primary, size: 18.sp),
+                                    Icon(Icons.water_drop_outlined, color: ColorManager.primaryText, size: 18.sp),
                                     SizedBox(width: 6.w),
                                     Text(
                                       StringsManager.water,
@@ -618,7 +620,7 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                               children: [
                                 Row(
                                   children: [
-                                    Icon(Icons.accessibility_new_rounded, color: ColorManager.primary, size: 18.sp),
+                                    Icon(Icons.accessibility_new_rounded, color: ColorManager.primaryText, size: 18.sp),
                                     SizedBox(width: 6.w),
                                     Text(
                                       'BMI',

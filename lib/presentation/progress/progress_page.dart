@@ -1,9 +1,11 @@
+import 'package:fitness_app/utils/managers/layout_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
 import 'package:fitness_app/presentation/home/widgets/streak_calendar_widget.dart';
+import 'package:fitness_app/presentation/progress/progress_data.dart';
 import 'package:fitness_app/presentation/progress/widgets/adaptive_strength_summary_card.dart';
 import 'package:fitness_app/presentation/profile/providers/profile_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
-import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -20,17 +22,16 @@ class ProgressPage extends StatefulWidget {
 
 class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final List<String> _tabs = ['Week', 'Month', '3 Months', 'Year'];
+  static const List<ProgressRange> _ranges = ProgressRange.values;
   int _selectedTabIndex = 1; // Default to 'Month'
-  
-  // Cache measurement deltas
-  Map<String, double> _deltas = {'chest': 0.0, 'waist': 0.0, 'biceps': 0.0};
-  bool _loadingDeltas = true;
+  bool _loading = true;
+
+  ProgressRange get _range => _ranges[_selectedTabIndex];
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _tabs.length, vsync: this, initialIndex: _selectedTabIndex);
+    _tabController = TabController(length: _ranges.length, vsync: this, initialIndex: _selectedTabIndex);
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) return;
       setState(() {
@@ -38,41 +39,23 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
       });
     });
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
-      profileProvider.fetchAndSetFlSpots().then((_) {
-        _fetchDeltas(profileProvider);
-      });
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
   }
 
-  Future<void> _fetchDeltas(ProfileProvider profileProvider) async {
+  Future<void> _load() async {
     try {
-      final chestSpots = await profileProvider.fetchMeasurementSpots('chest');
-      final waistSpots = await profileProvider.fetchMeasurementSpots('waist');
-      final bicepsSpots = await profileProvider.fetchMeasurementSpots('biceps');
-
-      if (mounted) {
-        setState(() {
-          if (chestSpots.length >= 2) {
-            _deltas['chest'] = chestSpots[chestSpots.length - 1].y - chestSpots[chestSpots.length - 2].y;
-          }
-          if (waistSpots.length >= 2) {
-            _deltas['waist'] = waistSpots[waistSpots.length - 1].y - waistSpots[waistSpots.length - 2].y;
-          }
-          if (bicepsSpots.length >= 2) {
-            _deltas['biceps'] = bicepsSpots[bicepsSpots.length - 1].y - bicepsSpots[bicepsSpots.length - 2].y;
-          }
-          _loadingDeltas = false;
-        });
-      }
+      final profileProvider = Provider.of<ProfileProvider>(context, listen: false);
+      await Future.wait([
+        profileProvider.fetchAndSetFlSpots(),
+        profileProvider.loadMeasurementHistory(),
+      ]);
     } catch (e) {
-      print('Error fetching measurement deltas: $e');
-      if (mounted) {
-        setState(() {
-          _loadingDeltas = false;
-        });
-      }
+      debugPrint('Error loading progress data: $e');
+    }
+    if (mounted) {
+      setState(() {
+        _loading = false;
+      });
     }
   }
 
@@ -82,123 +65,33 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
     super.dispose();
   }
 
-  List<FlSpot> _getFilteredSpots(List<FlSpot> rawSpots, double defaultWeight) {
-    // Filter out default placeholder spots (where value is 10.0 and month has no other entries)
-    // and make sure we have a clean line.
-    final List<FlSpot> validSpots = [];
-    
-    // Sort spots by month index (x)
-    final sortedRaw = List<FlSpot>.from(rawSpots)..sort((a, b) => a.x.compareTo(b.x));
-
-    for (var spot in sortedRaw) {
-      // If the spot has default placeholder y=10.0, we treat it as unlogged unless weight is actually 10.0
-      if (spot.y != 10.0 && spot.y > 0) {
-        validSpots.add(spot);
-      }
-    }
-
-    if (validSpots.isEmpty) {
-      // Return a flat line of user's current weight
-      return List.generate(12, (index) => FlSpot((index + 1).toDouble(), defaultWeight));
-    }
-
-    // If we only have 1 or 2 data points, let's extrapolate them across all 12 months to avoid empty graphs
-    if (validSpots.length == 1) {
-      final singleWeight = validSpots.first.y;
-      return List.generate(12, (index) => FlSpot((index + 1).toDouble(), singleWeight));
-    }
-
-    // Reconstruct a list where unlogged months get filled with the nearest logged month's weight
-    final List<FlSpot> filledSpots = [];
-    for (int month = 1; month <= 12; month++) {
-      final existing = validSpots.firstWhere((s) => s.x.toInt() == month, orElse: () => const FlSpot(-1, -1));
-      if (existing.x != -1) {
-        filledSpots.add(existing);
-      } else {
-        // Find nearest prior spot
-        final priorSpots = validSpots.where((s) => s.x < month).toList();
-        if (priorSpots.isNotEmpty) {
-          filledSpots.add(FlSpot(month.toDouble(), priorSpots.last.y));
-        } else {
-          // If no prior, use the first available next spot
-          filledSpots.add(FlSpot(month.toDouble(), validSpots.first.y));
-        }
-      }
-    }
-
-    // Now filter this yearly list according to the selected tab
-    // 0: Week (7 days - we simulate weekly data points based on current month), 
-    // 1: Month (current month), 
-    // 2: 3 Months, 
-    // 3: Year (full 12 months)
-    final currentMonth = DateTime.now().month;
-    
-    if (_selectedTabIndex == 3) {
-      // Year
-      return filledSpots;
-    } else if (_selectedTabIndex == 2) {
-      // 3 Months (e.g. currentMonth-2, currentMonth-1, currentMonth)
-      final targetMonths = [
-        ((currentMonth - 3) % 12) + 1,
-        ((currentMonth - 2) % 12) + 1,
-        ((currentMonth - 1) % 12) + 1,
-        currentMonth,
-      ];
-      final List<FlSpot> threeMonthSpots = [];
-      double idx = 1.0;
-      for (var m in targetMonths) {
-        final spot = filledSpots.firstWhere((s) => s.x.toInt() == m);
-        threeMonthSpots.add(FlSpot(idx++, spot.y));
-      }
-      return threeMonthSpots;
-    } else if (_selectedTabIndex == 1) {
-      // Month (4 weeks)
-      // Since database stores month-level data, we simulate weekly variation in the current month
-      final currentMonthSpot = filledSpots.firstWhere((s) => s.x.toInt() == currentMonth);
-      final baseWeight = currentMonthSpot.y;
-      
-      // Let's create a beautiful mini weight progression over 4 weeks
-      // showing slight variation leading to the current weight
-      return [
-        FlSpot(1.0, baseWeight + 1.2),
-        FlSpot(2.0, baseWeight + 0.8),
-        FlSpot(3.0, baseWeight + 0.4),
-        FlSpot(4.0, baseWeight),
-      ];
-    } else {
-      // Week (7 days)
-      final currentMonthSpot = filledSpots.firstWhere((s) => s.x.toInt() == currentMonth);
-      final baseWeight = currentMonthSpot.y;
-      return [
-        FlSpot(1.0, baseWeight + 0.3),
-        FlSpot(2.0, baseWeight + 0.2),
-        FlSpot(3.0, baseWeight + 0.25),
-        FlSpot(4.0, baseWeight + 0.1),
-        FlSpot(5.0, baseWeight + 0.15),
-        FlSpot(6.0, baseWeight + 0.05),
-        FlSpot(7.0, baseWeight),
-      ];
-    }
-  }
-
-  double _calculateDelta(List<FlSpot> spots) {
-    if (spots.length < 2) return 0.0;
-    return spots.last.y - spots.first.y;
-  }
-
   @override
   Widget build(BuildContext context) {
     final homeProvider = Provider.of<HomeProvider>(context);
     final profileProvider = Provider.of<ProfileProvider>(context);
 
     final userData = homeProvider.userData;
-    final currentWeight = (userData['weight'] ?? 72.5).toDouble();
     final chest = (userData['chest'] ?? 0.0).toDouble();
     final waist = (userData['waist'] ?? 0.0).toDouble();
-    final biceps = (userData['biceps'] ?? 0.0).toDouble(); // Representing Arms
+    final biceps = (userData['biceps'] ?? 0.0).toDouble();
 
-    final spots = _getFilteredSpots(profileProvider.flSpots, currentWeight);
-    final weightDelta = _calculateDelta(spots);
+    // Real, dated readings only - nothing is invented or gap-filled.
+    final now = DateTime.now();
+    final range = _range;
+    final allWeights = profileProvider.weightEntries;
+    final rangeWeights = ProgressData.inRange(allWeights, range, now);
+    final spots = [
+      for (final e in rangeWeights) FlSpot(ProgressData.xFor(e.date, range, now), e.value),
+    ];
+    final double? weightDelta = ProgressData.deltaInRange(allWeights, range, now);
+    final profileWeight = (userData['weight'] as num?)?.toDouble();
+    final double? displayWeight = allWeights.isNotEmpty
+        ? allWeights.last.value
+        : (profileWeight != null && profileWeight > 0 ? profileWeight : null);
+    final history = profileProvider.measurementHistory;
+    final WeightSummary? summary = ProgressData.summarize(rangeWeights);
+    final goalRaw = userData['goalWeight'];
+    final double? goalWeight = goalRaw is num && goalRaw > 0 ? goalRaw.toDouble() : null;
 
     return Scaffold(
       backgroundColor: ColorManager.background,
@@ -228,6 +121,14 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
               ),
               SizedBox(height: 24.h),
 
+              // First-run guidance: nothing logged yet
+              if (!_loading &&
+                  allWeights.isEmpty &&
+                  history.values.every((list) => list.isEmpty)) ...[
+                _buildGetStartedCard(),
+                SizedBox(height: 20.h),
+              ],
+
               // 5-Second Rule: Adaptive Strength Snapshot (What did I do? Am I getting stronger? What should I do next?)
               const AdaptiveStrengthSummaryCard(),
               SizedBox(height: 20.h),
@@ -241,7 +142,8 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                 height: 46.h,
                 decoration: BoxDecoration(
                   color: ColorManager.surface,
-                  borderRadius: BorderRadius.circular(25.r),
+                  boxShadow: ColorManager.cardShadow,
+                  borderRadius: BorderRadius.circular(AppRadius.card.r),
                   border: Border.all(color: ColorManager.divider),
                 ),
                 child: TabBar(
@@ -255,7 +157,7 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                   unselectedLabelColor: ColorManager.textSecondary,
                   labelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
                   unselectedLabelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
-                  tabs: _tabs.map((tab) => Tab(text: tab)).toList(),
+                  tabs: _ranges.map((r) => Tab(text: r.label)).toList(),
                   dividerColor: Colors.transparent,
                 ),
               ),
@@ -266,7 +168,8 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                 padding: EdgeInsets.all(20.w),
                 decoration: BoxDecoration(
                   color: ColorManager.surface,
-                  borderRadius: BorderRadius.circular(24.r),
+                  boxShadow: ColorManager.cardShadow,
+                  borderRadius: BorderRadius.circular(AppRadius.card.r),
                   border: Border.all(color: ColorManager.divider),
                 ),
                 child: Column(
@@ -294,7 +197,7 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                               textBaseline: TextBaseline.alphabetic,
                               children: [
                                 Text(
-                                  spots.isNotEmpty ? spots.last.y.toStringAsFixed(1) : currentWeight.toStringAsFixed(1),
+                                  displayWeight != null ? displayWeight.toStringAsFixed(1) : '—',
                                   style: TextStyle(
                                     color: ColorManager.white,
                                     fontSize: 32.sp,
@@ -320,6 +223,7 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                             alignment: Alignment.centerRight,
                             child: Row(
                               children: [
+                                if (weightDelta != null) ...[
                                 Container(
                                   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                                   decoration: BoxDecoration(
@@ -334,13 +238,14 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                                   child: Text(
                                     '${weightDelta >= 0 ? '+' : ''}${weightDelta.toStringAsFixed(1)} kg',
                                     style: TextStyle(
-                                      color: weightDelta <= 0 ? ColorManager.primary : Colors.orange,
+                                      color: weightDelta <= 0 ? ColorManager.primaryText : Colors.orange,
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
                                 SizedBox(width: 10.w),
+                                ],
                                 GestureDetector(
                                   onTap: () => context.push(Routes.changeWeightRoute),
                                   child: Container(
@@ -356,14 +261,14 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                                       children: [
                                         Icon(
                                           Icons.add_rounded,
-                                          color: ColorManager.primary,
+                                          color: ColorManager.primaryText,
                                           size: 16.sp,
                                         ),
                                         SizedBox(width: 4.w),
                                         Text(
                                           'Log',
                                           style: TextStyle(
-                                            color: ColorManager.primary,
+                                            color: ColorManager.primaryText,
                                             fontSize: 12.sp,
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -378,101 +283,110 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                         ),
                       ],
                     ),
-                    SizedBox(height: 24.h),
+                    SizedBox(height: 10.h),
+                    if (displayWeight != null) _buildGoalRow(displayWeight, goalWeight),
+                    SizedBox(height: 14.h),
 
-                    // Weight Line Chart
-                    SizedBox(
-                      height: 180.h,
-                      child: LineChart(
-                        LineChartData(
-                          minX: spots.isNotEmpty ? spots.first.x : 1.0,
-                          maxX: spots.isNotEmpty ? spots.last.x : 4.0,
-                          minY: spots.map((s) => s.y).reduce((a, b) => a < b ? a : b) - 2.0,
-                          maxY: spots.map((s) => s.y).reduce((a, b) => a > b ? a : b) + 2.0,
-                          titlesData: FlTitlesData(
-                            bottomTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 22.h,
-                                getTitlesWidget: (value, meta) {
-                                  if (_selectedTabIndex == 3) {
-                                    // Year
-                                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                                    int val = value.toInt() - 1;
-                                    if (val >= 0 && val < 12 && value == value.toInt().toDouble()) {
-                                      // Only show alternate months to keep it clean
-                                      if (val % 2 == 0) {
-                                        return Text(months[val], style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
-                                      }
-                                    }
-                                  } else if (_selectedTabIndex == 2) {
-                                    // 3 Months
-                                    final currentMonth = DateTime.now().month;
-                                    final m1 = ((currentMonth - 3) % 12) + 1;
-                                    final m2 = ((currentMonth - 2) % 12) + 1;
-                                    final m3 = ((currentMonth - 1) % 12) + 1;
-                                    final m4 = currentMonth;
-                                    
-                                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                                    if (value == 1.0) return Text(months[m1-1], style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
-                                    if (value == 2.0) return Text(months[m2-1], style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
-                                    if (value == 3.0) return Text(months[m3-1], style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
-                                    if (value == 4.0) return Text(months[m4-1], style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
-                                  } else if (_selectedTabIndex == 1) {
-                                    // Month
-                                    if (value == 1.0) return Text('Week 1', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
-                                    if (value == 2.0) return Text('Week 2', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
-                                    if (value == 3.0) return Text('Week 3', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
-                                    if (value == 4.0) return Text('Week 4', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
-                                  } else {
-                                    // Week
-                                    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                                    int val = value.toInt() - 1;
-                                    if (val >= 0 && val < 7) {
-                                      return Text(days[val], style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp));
-                                    }
-                                  }
-                                  return const Text('');
-                                },
-                              ),
+                    // Weight Line Chart (real readings only)
+                    if (_loading)
+                      SizedBox(
+                        height: 180.h,
+                        child: const Center(child: CircularProgressIndicator()),
+                      )
+                    else if (spots.length < 2)
+                      _buildWeightEmptyState(allWeights.isEmpty, spots.length)
+                    else
+                      SizedBox(
+                        height: 180.h,
+                        child: LineChart(
+                          LineChartData(
+                            minX: 0,
+                            maxX: range.days.toDouble(),
+                            minY: _chartMin(spots, goalWeight),
+                            maxY: _chartMax(spots, goalWeight),
+                            extraLinesData: ExtraLinesData(
+                              horizontalLines: [
+                                if (goalWeight != null)
+                                  HorizontalLine(
+                                    y: goalWeight,
+                                    color: ColorManager.primaryText.withValues(alpha: 0.7),
+                                    strokeWidth: 1.5,
+                                    dashArray: [6, 4],
+                                    label: HorizontalLineLabel(
+                                      show: true,
+                                      alignment: Alignment.topRight,
+                                      style: TextStyle(
+                                        color: ColorManager.primaryText,
+                                        fontSize: AppText.caption,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      labelResolver: (line) => 'Goal ${line.y.toStringAsFixed(1)}',
+                                    ),
+                                  ),
+                              ],
                             ),
-                            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                            titlesData: FlTitlesData(
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  reservedSize: 22.h,
+                                  interval: ProgressData.axisInterval(range),
+                                  getTitlesWidget: (value, meta) {
+                                    // Only label real days inside the window.
+                                    if (value < 0 ||
+                                        value > range.days - 1 ||
+                                        value != value.roundToDouble()) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    return Text(
+                                      ProgressData.axisLabel(value, range, now),
+                                      style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+                                    );
+                                  },
+                                ),
+                              ),
+                              leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                              rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                              topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                            ),
+                            gridData: const FlGridData(show: false),
+                            borderData: FlBorderData(show: false),
+                            lineBarsData: [
+                              LineChartBarData(
+                                spots: spots,
+                                isCurved: spots.length > 2,
+                                preventCurveOverShooting: true,
+                                color: ColorManager.primary,
+                                barWidth: 3.w,
+                                dotData: FlDotData(
+                                  show: spots.length <= 31,
+                                  getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
+                                    radius: 4.r,
+                                    color: ColorManager.primary,
+                                    strokeWidth: 2.w,
+                                    strokeColor: ColorManager.surface,
+                                  ),
+                                ),
+                                belowBarData: BarAreaData(
+                                  show: true,
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      ColorManager.primary.withValues(alpha: 0.25),
+                                      ColorManager.primary.withValues(alpha: 0.0),
+                                    ],
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          gridData: const FlGridData(show: false),
-                          borderData: FlBorderData(show: false),
-                          lineBarsData: [
-                            LineChartBarData(
-                              spots: spots,
-                              isCurved: true,
-                              color: ColorManager.primary,
-                              barWidth: 3.w,
-                              dotData: FlDotData(
-                                show: true,
-                                getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
-                                  radius: 4.r,
-                                  color: ColorManager.primary,
-                                  strokeWidth: 2.w,
-                                  strokeColor: ColorManager.surface,
-                                ),
-                              ),
-                              belowBarData: BarAreaData(
-                                show: true,
-                                gradient: LinearGradient(
-                                  colors: [
-                                    ColorManager.primary.withValues(alpha: 0.25),
-                                    ColorManager.primary.withValues(alpha: 0.0),
-                                  ],
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                ),
-                              ),
-                            ),
-                          ],
                         ),
                       ),
-                    ),
+                    if (!_loading && summary != null) ...[
+                      SizedBox(height: 16.h),
+                      _buildSummaryRow(summary),
+                    ],
                   ],
                 ),
               ),
@@ -496,11 +410,23 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                   ),
                   SizedBox(width: 8.w),
                   GestureDetector(
+                    onTap: () => context.push(Routes.monthlyComparisonRoute),
+                    child: Text(
+                      'Compare',
+                      style: TextStyle(
+                        color: ColorManager.primaryText,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 16.w),
+                  GestureDetector(
                     onTap: () => context.push(Routes.changeMeasurementsRoute),
                     child: Text(
-                      'See all',
+                      'Update',
                       style: TextStyle(
-                        color: ColorManager.primary,
+                        color: ColorManager.primaryText,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.bold,
                       ),
@@ -508,31 +434,37 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                   ),
                 ],
               ),
-              SizedBox(height: 16.h),
+              SizedBox(height: 4.h),
+              Text(
+                'Change over the selected period (${range.label.toLowerCase()})',
+                style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
+              ),
+              SizedBox(height: 12.h),
 
               // Measurements checklist items
-              _loadingDeltas
+              _loading
                   ? Center(child: Padding(padding: EdgeInsets.all(12.w), child: const CircularProgressIndicator()))
                   : Container(
                       padding: EdgeInsets.symmetric(vertical: 8.h),
                       decoration: BoxDecoration(
                         color: ColorManager.surface,
-                        borderRadius: BorderRadius.circular(20.r),
+                        boxShadow: ColorManager.cardShadow,
+                        borderRadius: BorderRadius.circular(AppRadius.card.r),
                         border: Border.all(color: ColorManager.divider),
                       ),
                       child: Column(
                         children: [
-                          _buildMeasurementRow(Icons.all_inbox_rounded, 'Chest', chest, _deltas['chest'] ?? 0.0),
+                          _buildMeasurementRow(Icons.all_inbox_rounded, 'Chest', chest, ProgressData.deltaInRange(history['chest'] ?? const [], range, now)),
                           Padding(
                             padding: EdgeInsets.symmetric(horizontal: 20.w),
                             child: const Divider(height: 1),
                           ),
-                          _buildMeasurementRow(Icons.calendar_view_week_rounded, 'Waist', waist, _deltas['waist'] ?? 0.0),
+                          _buildMeasurementRow(Icons.calendar_view_week_rounded, 'Waist', waist, ProgressData.deltaInRange(history['waist'] ?? const [], range, now)),
                           Padding(
                             padding: EdgeInsets.symmetric(horizontal: 20.w),
                             child: const Divider(height: 1),
                           ),
-                          _buildMeasurementRow(Icons.notifications_active_outlined, 'Arms', biceps, _deltas['biceps'] ?? 0.0),
+                          _buildMeasurementRow(Icons.fitness_center_rounded, 'Biceps', biceps, ProgressData.deltaInRange(history['biceps'] ?? const [], range, now)),
                         ],
                       ),
                     ),
@@ -540,7 +472,7 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
 
               // Deep Dive Analytics Section
               Text(
-                'Logs & Analytics',
+                'Analytics',
                 style: TextStyle(
                   color: ColorManager.white,
                   fontSize: 18.sp,
@@ -551,15 +483,6 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
 
               Row(
                 children: [
-                  Expanded(
-                    child: _buildDeepDiveCard(
-                      title: 'History',
-                      icon: Icons.history_rounded,
-                      color: Colors.blue,
-                      onTap: () => context.push(Routes.workoutHistoryRoute),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
                   Expanded(
                     child: _buildDeepDiveCard(
                       title: 'Strength',
@@ -587,15 +510,241 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
     );
   }
 
-  Widget _buildMeasurementRow(IconData icon, String name, double value, double delta) {
+  double _chartMin(List<FlSpot> spots, double? goal) {
+    var lo = spots.map((s) => s.y).reduce((a, b) => a < b ? a : b);
+    if (goal != null && goal < lo) lo = goal;
+    return lo - 2.0;
+  }
+
+  double _chartMax(List<FlSpot> spots, double? goal) {
+    var hi = spots.map((s) => s.y).reduce((a, b) => a > b ? a : b);
+    if (goal != null && goal > hi) hi = goal;
+    return hi + 2.0;
+  }
+
+  /// "Goal 70.0 kg · 5.0 kg to lose", or a link to set a goal.
+  Widget _buildGoalRow(double current, double? goal) {
+    return GestureDetector(
+      onTap: () => context.push(Routes.changeWeightRoute),
+      child: Row(
+        children: [
+          Icon(Icons.flag_rounded, color: ColorManager.primaryText, size: 16.sp),
+          SizedBox(width: 6.w),
+          Flexible(
+            child: Text(
+              goal == null
+                  ? 'Set a goal weight'
+                  : 'Goal ${goal.toStringAsFixed(1)} kg · ${ProgressData.goalProgressText(current, goal)}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: goal == null ? ColorManager.primaryText : ColorManager.textSecondary,
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(WeightSummary summary) {
+    final perWeek = summary.perWeek;
+    return Row(
+      children: [
+        Expanded(child: _buildStatTile('Start', '${summary.start.toStringAsFixed(1)} kg')),
+        SizedBox(width: 10.w),
+        Expanded(child: _buildStatTile('Lowest', '${summary.lowest.toStringAsFixed(1)} kg')),
+        SizedBox(width: 10.w),
+        Expanded(
+          child: _buildStatTile(
+            'Per week',
+            perWeek == null
+                ? '—'
+                : '${perWeek >= 0 ? '+' : ''}${perWeek.toStringAsFixed(1)} kg',
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatTile(String label, String value) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: ColorManager.surfaceDark,
+        borderRadius: BorderRadius.circular(AppRadius.small.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp)),
+          SizedBox(height: 4.h),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: TextStyle(
+                color: ColorManager.textPrimary,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGetStartedCard() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(20.w),
+      decoration: BoxDecoration(
+        color: ColorManager.surface,
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.card.r),
+        border: Border.all(color: ColorManager.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Start tracking your progress',
+            style: TextStyle(
+              color: ColorManager.textPrimary,
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            'Log your weight and body measurements to see your trend here. '
+            'Your workouts are tracked automatically.',
+            style: TextStyle(
+              color: ColorManager.textSecondary,
+              fontSize: 13.sp,
+              height: 1.4,
+            ),
+          ),
+          SizedBox(height: 16.h),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => context.push(Routes.changeWeightRoute),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      gradient: ColorManager.mintGradient,
+                      borderRadius: BorderRadius.circular(14.r),
+                    ),
+                    child: Text(
+                      'Log weight',
+                      style: TextStyle(
+                        color: ColorManager.onMint,
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => context.push(Routes.changeMeasurementsRoute),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14.r),
+                      border: Border.all(color: ColorManager.divider),
+                    ),
+                    child: Text(
+                      'Add measurements',
+                      style: TextStyle(
+                        color: ColorManager.textPrimary,
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeightEmptyState(bool noWeighIns, int pointsInRange) {
+    return SizedBox(
+      height: 180.h,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.show_chart_rounded, color: ColorManager.textTertiary, size: 36.sp),
+            SizedBox(height: 10.h),
+            Text(
+              noWeighIns
+                  ? 'No weigh-ins yet'
+                  : (pointsInRange == 1
+                      ? 'Only one weigh-in in this period'
+                      : 'No weigh-ins in this period'),
+              style: TextStyle(
+                color: ColorManager.textPrimary,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              'Log your weight on different days to see your trend.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
+            ),
+            SizedBox(height: 12.h),
+            GestureDetector(
+              onTap: () => context.push(Routes.changeWeightRoute),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  gradient: ColorManager.mintGradient,
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
+                child: Text(
+                  'Log weight',
+                  style: TextStyle(
+                    color: ColorManager.onMint,
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMeasurementRow(IconData icon, String name, double value, double? delta) {
     String deltaText = '';
     Color deltaColor = ColorManager.textSecondary;
-    if (delta > 0) {
-      deltaText = '+${delta.toStringAsFixed(1)} cm';
-      deltaColor = Colors.orange;
-    } else if (delta < 0) {
-      deltaText = '${delta.toStringAsFixed(1)} cm';
-      deltaColor = ColorManager.primary;
+    if (delta != null && delta.abs() >= 0.05) {
+      if (delta > 0) {
+        deltaText = '+${delta.toStringAsFixed(1)} cm';
+        deltaColor = Colors.orange;
+      } else {
+        deltaText = '${delta.toStringAsFixed(1)} cm';
+        deltaColor = ColorManager.primaryText;
+      }
     }
 
     return Padding(
@@ -608,7 +757,7 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
               color: ColorManager.background,
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: ColorManager.primary, size: 20.sp),
+            child: Icon(icon, color: ColorManager.primaryText, size: 20.sp),
           ),
           SizedBox(width: 16.w),
           Text(
@@ -652,7 +801,8 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
         padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 12.w),
         decoration: BoxDecoration(
           color: ColorManager.surface,
-          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: ColorManager.cardShadow,
+          borderRadius: BorderRadius.circular(AppRadius.tile.r),
           border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
         child: Column(

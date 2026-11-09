@@ -157,13 +157,13 @@ void main() {
       await tester.pumpWidget(_wrap(
         const Column(
           children: [
-            HeroBadge(text: 'AI WORKOUT ROUTINE', icon: Icons.auto_awesome),
+            HeroBadge(text: 'WORKOUT ROUTINE', icon: Icons.auto_awesome),
             HeroMetaChip(icon: Icons.timer_outlined, text: '~45 min'),
           ],
         ),
       ));
 
-      expect(find.text('AI WORKOUT ROUTINE'), findsOneWidget);
+      expect(find.text('WORKOUT ROUTINE'), findsOneWidget);
       expect(find.text('~45 min'), findsOneWidget);
       expect(find.byIcon(Icons.timer_outlined), findsOneWidget);
     });

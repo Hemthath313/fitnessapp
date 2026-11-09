@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/model/personal_record_model.dart';
 import 'package:fitness_app/model/workout_log.dart';
 import 'package:fitness_app/model/workout_session_model.dart';
@@ -198,7 +199,8 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
           padding: EdgeInsets.all(4.w),
           decoration: BoxDecoration(
             color: ColorManager.surface,
-            borderRadius: BorderRadius.circular(12.r),
+            boxShadow: ColorManager.cardShadow,
+            borderRadius: BorderRadius.circular(AppRadius.small.r),
             border: Border.all(color: ColorManager.divider),
           ),
           child: Row(
@@ -216,7 +218,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
                       child: Text(
                         'Heaviest Weight',
                         style: TextStyle(
-                          color: !_showEstimated1RM ? Colors.white : ColorManager.textSecondary,
+                          color: !_showEstimated1RM ? ColorManager.onMint : ColorManager.textSecondary,
                           fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
@@ -238,7 +240,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
                       child: Text(
                         'Estimated 1RM',
                         style: TextStyle(
-                          color: _showEstimated1RM ? Colors.white : ColorManager.textSecondary,
+                          color: _showEstimated1RM ? ColorManager.onMint : ColorManager.textSecondary,
                           fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
@@ -326,7 +328,8 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(14.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: rank < 3 ? Colors.amber.withValues(alpha: 0.4) : ColorManager.divider),
       ),
       child: InkWell(
@@ -483,7 +486,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
                   child: Text(
                     ex.exerciseName,
                     style: TextStyle(
-                      color: isSelected ? Colors.white : ColorManager.textSecondary,
+                      color: isSelected ? ColorManager.onMint : ColorManager.textSecondary,
                       fontSize: 12.sp,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
@@ -500,7 +503,8 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
           padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
             color: ColorManager.surface,
-            borderRadius: BorderRadius.circular(16.r),
+            boxShadow: ColorManager.cardShadow,
+            borderRadius: BorderRadius.circular(AppRadius.tile.r),
             border: Border.all(color: ColorManager.divider),
           ),
           child: Column(
@@ -539,7 +543,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
                       ),
                       child: Text(
                         _chartMetricIs1RM ? 'Switch to Weight' : 'Switch to 1RM',
-                        style: TextStyle(color: ColorManager.primary, fontSize: 11.sp, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: ColorManager.primaryText, fontSize: 11.sp, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -581,7 +585,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
             backgroundColor: ColorManager.surface,
             foregroundColor: ColorManager.primary,
             side: BorderSide(color: ColorManager.primary.withValues(alpha: 0.4)),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
             padding: EdgeInsets.symmetric(vertical: 12.h),
           ),
         ),
@@ -715,7 +719,8 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(14.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(
           color: insight.status == StrengthStatus.stalled
               ? Colors.orange.withValues(alpha: 0.4)
@@ -785,7 +790,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
               SizedBox(width: 12.w),
               Text(
                 'Estimated 1RM: ${insight.latestEstimated1RM.toStringAsFixed(1)} kg',
-                style: TextStyle(color: ColorManager.primary, fontSize: 11.sp, fontWeight: FontWeight.w600),
+                style: TextStyle(color: ColorManager.primaryText, fontSize: 11.sp, fontWeight: FontWeight.w600),
               ),
             ],
           ),

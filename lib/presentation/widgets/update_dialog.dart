@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'dart:io' show Platform;
 import 'package:fitness_app/services/update_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
@@ -341,7 +342,7 @@ class UpdateDialog extends StatelessWidget {
                             foregroundColor: Colors.white.withValues(alpha: 0.85),
                             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(RadiusManager.r15),
+                              borderRadius: BorderRadius.circular(AppRadius.button),
                             ),
                           ),
                           child: Text(

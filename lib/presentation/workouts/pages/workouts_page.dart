@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
@@ -236,7 +237,8 @@ class _WorkoutPageState extends State<WorkoutPage> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: ColorManager.surface,
-          borderRadius: BorderRadius.circular(15),
+          boxShadow: ColorManager.cardShadow,
+          borderRadius: BorderRadius.circular(AppRadius.tile),
         ),
         child: Text(
           desc,
@@ -268,7 +270,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
           Text(
             'Instructions',
             style: TextStyle(
-              color: ColorManager.primary,
+              color: ColorManager.primaryText,
               fontSize: 20.sp,
               fontWeight: FontWeight.bold,
             ),
@@ -278,7 +280,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
             (i) => Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child:
-                  Text('• $i', style: const TextStyle(color: Colors.white70)),
+                  Text('• $i', style: TextStyle(color: ColorManager.textSecondary)),
             ),
           ),
         ],
@@ -294,14 +296,14 @@ class _WorkoutPageState extends State<WorkoutPage> {
                 backgroundColor: ColorManager.primary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(AppRadius.button),
                 ),
               ),
               onPressed: () => Navigator.pop(context),
               child: Text(
                 'Close',
                 style: TextStyle(
-                  color: Colors.black,
+                  color: ColorManager.onMint,
                   fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
                 ),
@@ -316,7 +318,8 @@ class _WorkoutPageState extends State<WorkoutPage> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(15),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile),
         border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
       ),
       child: Column(
@@ -324,7 +327,7 @@ class _WorkoutPageState extends State<WorkoutPage> {
         children: [
           Row(
             children: [
-              Icon(icon, color: ColorManager.primary, size: 20.sp),
+              Icon(icon, color: ColorManager.primaryText, size: 20.sp),
               SizedBox(width: 8.w),
               Text(label,
                   style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),

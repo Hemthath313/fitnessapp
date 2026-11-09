@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,6 +7,7 @@ import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/model/workout_log.dart';
 import 'package:fitness_app/services/progression_service.dart';
 import 'package:fitness_app/services/workout_log_service.dart';
+import 'package:fitness_app/utils/haptics.dart';
 import 'package:fitness_app/presentation/workout_tools/plate_calculator_sheet.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
@@ -475,6 +477,7 @@ class _InteractiveExerciseDetailWidgetState
           _isResting = false;
           _restTimerSeconds = 0;
         });
+        Haptics.heavy();
       } else {
         setState(() {
           _restTimerSeconds--;
@@ -489,8 +492,9 @@ class _InteractiveExerciseDetailWidgetState
       final wasCompleted = _sets[index].isCompleted;
       _sets[index].isCompleted = !wasCompleted;
 
-      // Start Rest Timer on completion
-      if (!wasCompleted) {
+      // Start Rest Timer on completion. Inside a guided workout the workout
+      // screen owns the one rest timer, so the sheet stays quiet.
+      if (!wasCompleted && widget.onSetsChanged == null) {
         _startRestTimer();
       }
     });
@@ -679,7 +683,7 @@ class _InteractiveExerciseDetailWidgetState
               onPressed: () => Navigator.pop(ctx),
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button)),
               ),
               child: const Text('Awesome!', style: TextStyle(color: ColorManager.onMint)),
             ),
@@ -789,7 +793,7 @@ class _InteractiveExerciseDetailWidgetState
           child: Text(
             label,
             style: TextStyle(
-              color: isSelected ? Colors.white : ColorManager.textSecondary,
+              color: isSelected ? ColorManager.onMint : ColorManager.textSecondary,
               fontSize: 14.sp,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
             ),
@@ -826,7 +830,7 @@ class _InteractiveExerciseDetailWidgetState
           padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
             color: ColorManager.surfaceLight,
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(AppRadius.tile.r),
             border: Border.all(color: ColorManager.divider),
           ),
           child: Text(
@@ -882,7 +886,7 @@ class _InteractiveExerciseDetailWidgetState
             padding: EdgeInsets.all(14.w),
             decoration: BoxDecoration(
               color: ColorManager.surfaceLight,
-              borderRadius: BorderRadius.circular(12.r),
+              borderRadius: BorderRadius.circular(AppRadius.small.r),
               border: Border.all(color: ColorManager.divider),
             ),
             child: Text(
@@ -905,7 +909,7 @@ class _InteractiveExerciseDetailWidgetState
                 padding: EdgeInsets.all(14.w),
                 decoration: BoxDecoration(
                   color: ColorManager.surfaceLight,
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(AppRadius.small.r),
                   border: Border.all(color: ColorManager.divider),
                 ),
                 child: Row(
@@ -948,12 +952,12 @@ class _InteractiveExerciseDetailWidgetState
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: ColorManager.surfaceLight,
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Row(
         children: [
-          Icon(icon, color: ColorManager.primary, size: 22.sp),
+          Icon(icon, color: ColorManager.primaryText, size: 22.sp),
           SizedBox(width: 10.w),
           Expanded(
             child: Column(
@@ -1184,7 +1188,7 @@ class _InteractiveExerciseDetailWidgetState
                 foregroundColor: ColorManager.primary,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r),
+                  borderRadius: BorderRadius.circular(AppRadius.button.r),
                   side: BorderSide(color: ColorManager.divider),
                 ),
               ),
@@ -1198,7 +1202,7 @@ class _InteractiveExerciseDetailWidgetState
                 foregroundColor: Colors.red,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r),
+                  borderRadius: BorderRadius.circular(AppRadius.button.r),
                   side: BorderSide(color: ColorManager.divider),
                 ),
               ),
@@ -1235,7 +1239,7 @@ class _InteractiveExerciseDetailWidgetState
                   foregroundColor: const Color(0xFF06201B),
                   padding: EdgeInsets.symmetric(vertical: 14.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
+                    borderRadius: BorderRadius.circular(AppRadius.button.r),
                   ),
                 ),
                 child: Text(
@@ -1287,7 +1291,7 @@ class _InteractiveExerciseDetailWidgetState
           padding: EdgeInsets.all(12.w),
           decoration: BoxDecoration(
             color: ColorManager.surfaceLight,
-            borderRadius: BorderRadius.circular(14.r),
+            borderRadius: BorderRadius.circular(AppRadius.tile.r),
             border: Border.all(color: ColorManager.divider),
           ),
           child: _buildProgressChart(chronological),
@@ -1317,7 +1321,7 @@ class _InteractiveExerciseDetailWidgetState
               padding: EdgeInsets.all(14.w),
               decoration: BoxDecoration(
                 color: ColorManager.surfaceLight,
-                borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(AppRadius.small.r),
                 border: Border.all(color: ColorManager.divider),
               ),
               child: Column(
@@ -1337,7 +1341,7 @@ class _InteractiveExerciseDetailWidgetState
                       Row(
                         children: [
                           IconButton(
-                            icon: Icon(Icons.replay, color: ColorManager.primary, size: 18.sp),
+                            icon: Icon(Icons.replay, color: ColorManager.primaryText, size: 18.sp),
                             tooltip: 'Reuse these sets',
                             constraints: const BoxConstraints(),
                             padding: EdgeInsets.symmetric(horizontal: 4.w),
@@ -1558,7 +1562,7 @@ class _InteractiveExerciseDetailWidgetState
                           Icon(Icons.timer, color: ColorManager.primary, size: 20.sp),
                           SizedBox(width: 8.w),
                           Text(
-                            'Rest Timer: ${_restTimerSeconds}s',
+                            'Rest Timer: ${(_restTimerSeconds ~/ 60).toString().padLeft(2, '0')}:${(_restTimerSeconds % 60).toString().padLeft(2, '0')}',
                             style: TextStyle(
                               color: ColorManager.primary,
                               fontWeight: FontWeight.bold,
@@ -1594,7 +1598,7 @@ class _InteractiveExerciseDetailWidgetState
                 padding: EdgeInsets.all(4.w),
                 decoration: BoxDecoration(
                   color: ColorManager.surfaceLight,
-                  borderRadius: BorderRadius.circular(14.r),
+                  borderRadius: BorderRadius.circular(AppRadius.tile.r),
                   border: Border.all(color: ColorManager.divider),
                 ),
                 child: Row(

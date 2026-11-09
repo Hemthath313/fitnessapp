@@ -12,6 +12,7 @@ import 'package:fitness_app/presentation/home/widgets/carousel_home_box.dart';
 import 'package:fitness_app/presentation/home/widgets/carousel_slider_home_widget.dart';
 import 'package:fitness_app/presentation/transformation_plans/providers/transformation_provider.dart';
 import 'package:fitness_app/presentation/transformation_plans/widgets/transformation_daily_checklist.dart';
+import 'package:fitness_app/utils/managers/card_size_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 
@@ -117,7 +118,7 @@ class DashboardChallengeSection extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.flag_rounded,
-                      color: ColorManager.primary,
+                      color: ColorManager.primaryText,
                       size: 18.sp,
                     ),
                     SizedBox(width: 8.w),
@@ -146,7 +147,7 @@ class DashboardChallengeSection extends StatelessWidget {
                       Text(
                         'View All',
                         style: TextStyle(
-                          color: ColorManager.primary,
+                          color: ColorManager.primaryText,
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
                         ),
@@ -154,7 +155,7 @@ class DashboardChallengeSection extends StatelessWidget {
                       SizedBox(width: 2.w),
                       Icon(
                         Icons.arrow_forward_ios_rounded,
-                        color: ColorManager.primary,
+                        color: ColorManager.primaryText,
                         size: 11.sp,
                       ),
                     ],
@@ -216,7 +217,7 @@ class DashboardChallengeSection extends StatelessWidget {
               leading = [featuredCard()];
               middle = otherProgrammes();
             } else if (provider.isLoading) {
-              leading = [_buildLoadingPlaceholder()];
+              leading = [_buildLoadingPlaceholder(context)];
             } else if (provider.hasActiveTransformation) {
               // Phase 3 Deduplication: the active transformation is already shown
               // in HomeAiRoutineCard (the primary workout hero).
@@ -289,10 +290,10 @@ class DashboardChallengeSection extends StatelessWidget {
       tone: HeroImages.toneForPlan(plan.id),
       imageAsset: HeroImages.forKey(HeroImages.keyForPlan(plan.id)),
       photoAsset: HeroImages.photoForPlan(plan.id),
-      imageSize: 130.w,
-      imageTop: 44.h,
-      height: CarouselHomeBox.height,
-      padding: EdgeInsets.all(18.w),
+      imageSize: AppCardSize.heroImageSize,
+      imageTop: AppCardSize.heroImageTop,
+      height: CarouselHomeBox.heightOf(context),
+      padding: EdgeInsets.all(AppCardSize.heroPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -331,7 +332,7 @@ class DashboardChallengeSection extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 14.h),
+          SizedBox(height: 10.h),
           Padding(
             padding: EdgeInsets.only(right: GradientHeroCard.textInset),
             child: Text(
@@ -340,13 +341,13 @@ class DashboardChallengeSection extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 20.sp,
+                fontSize: AppCardSize.heroTitleSize,
                 height: 1.2,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 8.h),
           Wrap(
             spacing: 6.w,
             runSpacing: 6.h,
@@ -381,9 +382,10 @@ class DashboardChallengeSection extends StatelessWidget {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(vertical: 13.h),
+                padding: EdgeInsets.symmetric(
+                    vertical: AppCardSize.heroButtonPadding),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14.r),
+                  borderRadius: BorderRadius.circular(AppRadius.button.r),
                 ),
                 elevation: 0,
               ),
@@ -414,7 +416,7 @@ class DashboardChallengeSection extends StatelessWidget {
           color: ColorManager.surface,
           borderRadius: BorderRadius.circular(AppRadius.card.r),
         ),
-        padding: EdgeInsets.all(18.w),
+        padding: EdgeInsets.all(AppCardSize.heroPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -443,7 +445,7 @@ class DashboardChallengeSection extends StatelessWidget {
                       Text(
                         'ACTIVE CHALLENGE',
                         style: TextStyle(
-                          color: ColorManager.primary,
+                          color: ColorManager.primaryText,
                           fontSize: 11.sp,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.5,
@@ -455,7 +457,7 @@ class DashboardChallengeSection extends StatelessWidget {
                 Text(
                   'Week ${state.currentWeekNumber}',
                   style: TextStyle(
-                    color: ColorManager.primary,
+                    color: ColorManager.primaryText,
                     fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
                   ),
@@ -493,7 +495,7 @@ class DashboardChallengeSection extends StatelessWidget {
                 Text(
                   '$pct% Completed',
                   style: TextStyle(
-                    color: ColorManager.primary,
+                    color: ColorManager.primaryText,
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
                   ),
@@ -544,12 +546,12 @@ class DashboardChallengeSection extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: 14.h),
+              SizedBox(height: 10.h),
             ],
 
             // Compact Daily Accountability Checklist Summary
             const TransformationDailyChecklist(compact: true),
-            SizedBox(height: 14.h),
+            SizedBox(height: 10.h),
 
             // Action Buttons
             Row(
@@ -563,9 +565,9 @@ class DashboardChallengeSection extends StatelessWidget {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: ColorManager.primary,
-                      padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
+                      padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14.r),
+                        borderRadius: BorderRadius.circular(AppRadius.button.r),
                       ),
                       elevation: 0,
                     ),
@@ -599,11 +601,11 @@ class DashboardChallengeSection extends StatelessWidget {
                       context.push(Routes.transformationProgressRoute);
                     },
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: ColorManager.primary,
-                      padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
+                      foregroundColor: ColorManager.primaryText,
+                      padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
                       side: BorderSide(color: ColorManager.primary.withValues(alpha: 0.6)),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14.r),
+                        borderRadius: BorderRadius.circular(AppRadius.button.r),
                       ),
                     ),
                     child: Text(
@@ -642,7 +644,7 @@ class DashboardChallengeSection extends StatelessWidget {
           color: ColorManager.surface,
           borderRadius: BorderRadius.circular(AppRadius.card.r),
         ),
-        padding: EdgeInsets.all(18.w),
+        padding: EdgeInsets.all(AppCardSize.heroPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -718,9 +720,9 @@ class DashboardChallengeSection extends StatelessWidget {
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: ColorManager.success,
-                      padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
+                      padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14.r),
+                        borderRadius: BorderRadius.circular(AppRadius.button.r),
                       ),
                       elevation: 0,
                     ),
@@ -751,11 +753,11 @@ class DashboardChallengeSection extends StatelessWidget {
                     key: const Key('explore_another_challenge_cta'),
                     onPressed: () => context.push(Routes.transformationPlansRoute),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: ColorManager.primary,
-                      padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
+                      foregroundColor: ColorManager.primaryText,
+                      padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
                       side: BorderSide(color: ColorManager.primary.withValues(alpha: 0.6)),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14.r),
+                        borderRadius: BorderRadius.circular(AppRadius.button.r),
                       ),
                     ),
                     child: Text(
@@ -776,9 +778,9 @@ class DashboardChallengeSection extends StatelessWidget {
     );
   }
 
-  Widget _buildLoadingPlaceholder() {
+  Widget _buildLoadingPlaceholder(BuildContext context) {
     return Container(
-      height: CarouselHomeBox.height,
+      height: CarouselHomeBox.heightOf(context),
       decoration: BoxDecoration(
         color: ColorManager.surfaceDark,
         borderRadius: BorderRadius.circular(AppRadius.hero.r),

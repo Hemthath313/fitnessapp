@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/presentation/transformation_plans/models/transformation_meal_plan_model.dart';
@@ -123,7 +124,7 @@ class _TransformationLogMealDialogState
             padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
               color: ColorManager.surfaceDark,
-              borderRadius: BorderRadius.circular(12.r),
+              borderRadius: BorderRadius.circular(AppRadius.small.r),
             ),
             child: Column(
               children: widget.meal.foods.map((food) {
@@ -191,7 +192,7 @@ class _TransformationLogMealDialogState
                         child: Text(
                           '${(preset * 100).toInt()}%',
                           style: TextStyle(
-                            color: isSelected ? Colors.white : ColorManager.textSecondary,
+                            color: isSelected ? ColorManager.onMint : ColorManager.textSecondary,
                             fontSize: 11.sp,
                             fontWeight: FontWeight.bold,
                           ),
@@ -283,7 +284,7 @@ class _TransformationLogMealDialogState
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : const Icon(Icons.check_circle_outline_rounded, color: Colors.white),
+                  : const Icon(Icons.check_circle_outline_rounded, color: ColorManager.onMint),
               label: Text(
                 _isLogging ? 'Logging...' : 'Log to Gym Buddy Food Tracker',
                 style: TextStyle(
@@ -296,7 +297,7 @@ class _TransformationLogMealDialogState
                 backgroundColor: ColorManager.primary,
                 padding: EdgeInsets.symmetric(vertical: 14.h),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(AppRadius.button.r),
                 ),
                 elevation: 0,
               ),

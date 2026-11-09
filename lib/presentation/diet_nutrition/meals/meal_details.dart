@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,11 +8,15 @@ class MealDetailsSheet extends StatelessWidget {
   final VoidCallback onSwapMeal;
   final Function(String) onAddFood;
 
+  /// Shown only for custom meals the user added; null hides the button.
+  final VoidCallback? onDelete;
+
   const MealDetailsSheet({
     super.key,
     required this.meal,
     required this.onSwapMeal,
     required this.onAddFood,
+    this.onDelete,
   });
 
   @override
@@ -121,10 +126,28 @@ class MealDetailsSheet extends StatelessWidget {
                 backgroundColor: ColorManager.limerGreen2,
                 foregroundColor: ColorManager.black,
                 padding: EdgeInsets.symmetric(vertical: 12.h),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
               ),
             ),
           ),
+          if (onDelete != null) ...[
+            SizedBox(height: 8.h),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton.icon(
+                key: const Key('meal_delete_button'),
+                onPressed: onDelete,
+                icon: Icon(Icons.delete_outline_rounded, size: 20.sp),
+                label: Text(
+                  'Remove This Meal',
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+                ),
+                style: TextButton.styleFrom(
+                  foregroundColor: ColorManager.error,
+                ),
+              ),
+            ),
+          ],
           SizedBox(height: 20.h),
         ],
       ),
@@ -169,13 +192,13 @@ class MealDetailsSheet extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(Icons.lightbulb_outline, color: ColorManager.primary, size: 18.sp),
+            Icon(Icons.lightbulb_outline, color: ColorManager.primaryText, size: 18.sp),
             SizedBox(width: 8.w),
             Text(
               'Substitutions:',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: ColorManager.primary,
+                color: ColorManager.primaryText,
                 fontSize: 14.sp,
               ),
             ),

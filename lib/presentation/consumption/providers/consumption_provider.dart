@@ -16,6 +16,46 @@ class ConsumptionProvider with ChangeNotifier {
   int consumedCalories = 0;
   double _waterGoalLiters = 2.5;
 
+  /// How many days of logged meals are loaded.
+  static const int mealHistoryDays = 90;
+
+  /// Calories from the Bulking / Cutting / Maintain plan screens today (read
+  /// from the day's mealRecords document).
+  int _planConsumedCalories = 0;
+
+  static bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
+  /// Meals logged by hand today (the manual "Add Meal" log).
+  List<MealModel> get todaysMeals {
+    final now = DateTime.now();
+    return _meals.where((m) => _isSameDay(m.dateTime, now)).toList();
+  }
+
+  double get manualCaloriesToday =>
+      todaysMeals.fold(0.0, (total, m) => total + m.calories);
+  double get manualProteinToday =>
+      todaysMeals.fold(0.0, (total, m) => total + m.proteins);
+  double get manualCarbsToday =>
+      todaysMeals.fold(0.0, (total, m) => total + m.carbs);
+  double get manualFatsToday =>
+      todaysMeals.fold(0.0, (total, m) => total + m.fats);
+
+  /// Today's total: plan meals ticked off + meals logged by hand. This is the
+  /// number the Home calorie ring shows.
+  void _recomputeConsumed() {
+    consumedCalories = _planConsumedCalories + manualCaloriesToday.round();
+  }
+
+  @visibleForTesting
+  void setMealsForTesting(List<MealModel> meals, {int planCalories = 0}) {
+    _meals
+      ..clear()
+      ..addAll(meals);
+    _planConsumedCalories = planCalories;
+    _recomputeConsumed();
+  }
+
   double get waterGoalLiters => _waterGoalLiters;
 
   void setWaterGoal(double liters) {
@@ -91,10 +131,14 @@ class ConsumptionProvider with ChangeNotifier {
     }
 
     try {
+      // Meal history is kept (it feeds programme progress), but only the
+      // recent window is loaded so the download does not grow forever.
+      final cutoff = DateTime.now().subtract(const Duration(days: mealHistoryDays));
       final mealsSnapshot = await FirebaseFirestore.instance
           .collection('meals')
           .doc(user.uid)
           .collection('mealData')
+          .where('dateTime', isGreaterThanOrEqualTo: Timestamp.fromDate(cutoff))
           .get();
 
       final List<MealModel> loadedMeals = [];
@@ -133,17 +177,8 @@ class ConsumptionProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> clearMealsIfNeeded() async {
-    final lastClearedDate = await getLastClearedDate();
-    DateTime now = DateTime.now();
-
-    if (lastClearedDate == null ||
-        isLastDateTimeDifferent(now, lastClearedDate)) {
-      await clearAllMeals(); // clear all meals directly
-      await setLastClearedDate(now); // update Firestore after clear
-    }
-  }
-
+  /// Deletes every logged meal. Meals are NOT cleared daily any more: they are
+  /// history. Only call this for an explicit user action (e.g. account reset).
   Future<void> clearAllMeals() async {
     User? user = _currentUser;
     if (user == null) return;
@@ -181,6 +216,9 @@ class ConsumptionProvider with ChangeNotifier {
   Future<void> addWater({
     required double amount,
     required DateTime dateTime,
+    /// The user's daily water goal in LITERS (the unit water is stored and
+    /// shown in). Defaults to the provider's goal.
+    double? goalLiters,
   }) async {
     try {
       User? user = _currentUser;
@@ -198,8 +236,14 @@ class ConsumptionProvider with ChangeNotifier {
       // Immediately fetch and update water data
       await fetchAndSetWater();
       
-      // Handle daily water notification logic (assuming 2500ml is the goal)
-      if (waterADay >= 2500) {
+      // Stop the reminder once today's goal is reached.
+      // waterADay is in liters, so the goal must be too. (It used to be compared
+      // against 2500, which could never be reached, so the reminder never
+      // switched off.)
+      final goal = (goalLiters != null && goalLiters > 0)
+          ? goalLiters
+          : _waterGoalLiters;
+      if (waterADay >= goal) {
         await NotificationService().cancelWaterReminder();
       } else {
         await NotificationService().scheduleWaterReminder();
@@ -209,6 +253,44 @@ class ConsumptionProvider with ChangeNotifier {
     } catch (e) {
       rethrow;
     }
+  }
+
+  /// Removes the most recent water entry logged today (undo for a mis-tap).
+  /// Returns the amount removed in liters, or null when there is nothing to undo.
+  Future<double?> undoLastWater({double? goalLiters}) async {
+    final user = _currentUser;
+    if (user == null || _water.isEmpty) return null;
+    final last = _water.reduce((a, b) => a.dateTime.isAfter(b.dateTime) ? a : b);
+
+    await FirebaseFirestore.instance
+        .collection('meals')
+        .doc(user.uid)
+        .collection('waterData')
+        .doc(last.id)
+        .delete();
+    await fetchAndSetWater();
+
+    final goal = (goalLiters != null && goalLiters > 0)
+        ? goalLiters
+        : _waterGoalLiters;
+    if (waterADay < goal) {
+      await NotificationService().scheduleWaterReminder();
+    }
+    return last.amount;
+  }
+
+  /// Saves the daily water goal (liters) to the profile and applies it now.
+  Future<void> saveWaterGoal(double liters) async {
+    if (liters < 0.5 || liters > 10) {
+      throw ArgumentError('Water goal must be between 0.5 and 10 liters');
+    }
+    setWaterGoal(liters);
+    final user = _currentUser;
+    if (user == null) return;
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .set({'waterGoal': liters}, SetOptions(merge: true));
   }
 
   Future<DateTime?> getLastClearedDate() async {
@@ -359,7 +441,7 @@ class ConsumptionProvider with ChangeNotifier {
       if (doc.exists && doc.data() != null) {
         final data = doc.data() as Map<String, dynamic>;
         notifyListeners(); // Update UI
-        return data['consumedCalories'] ?? 0;
+        return (data['consumedCalories'] as num?)?.toInt() ?? 0;
       }
       return 0;
     } catch (e) {
@@ -378,6 +460,9 @@ class ConsumptionProvider with ChangeNotifier {
           .collection('mealData')
           .doc(mealID)
           .delete();
+      _meals.removeWhere((m) => m.id == mealID);
+      _recomputeConsumed();
+      notifyListeners();
     } catch (e) {
       rethrow;
     }
@@ -391,6 +476,7 @@ class ConsumptionProvider with ChangeNotifier {
     try {
       User? user = _currentUser;
       if (user == null) {
+        _planConsumedCalories = 0;
         consumedCalories = 0;
         notifyListeners();
         return;
@@ -407,14 +493,19 @@ class ConsumptionProvider with ChangeNotifier {
 
       if (snapshot.exists && snapshot.data() != null) {
         final data = snapshot.data() as Map<String, dynamic>;
-        consumedCalories = data['consumedCalories'] ?? 0;
+        _planConsumedCalories =
+            (data['consumedCalories'] as num?)?.toInt() ?? 0;
       } else {
-        consumedCalories = 0;
+        _planConsumedCalories = 0;
       }
+      _recomputeConsumed();
 
       notifyListeners();
     } catch (e) {
       debugPrint('ConsumptionProvider: getConsumedCalories error (offline): $e');
+      // Keep the last known plan calories, but still include meals logged by hand.
+      _recomputeConsumed();
+      notifyListeners();
     }
   }
 }

@@ -7,7 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-/// Renders individual legacy logs clearly marked as "Legacy Log"
+/// Renders individual quick logs (single exercises logged outside a session)
 /// without fabricating duration, completion status, or session-level PRs.
 class LegacyWorkoutLogCard extends StatelessWidget {
   final WorkoutLog log;
@@ -24,7 +24,7 @@ class LegacyWorkoutLogCard extends StatelessWidget {
     return Card(
       color: ColorManager.surface,
       margin: EdgeInsets.only(bottom: 10.h),
-      elevation: 0,
+      elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14.r),
         side: BorderSide(color: ColorManager.divider.withValues(alpha: 0.6)),
@@ -34,7 +34,7 @@ class LegacyWorkoutLogCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top Row: Clean Exercise Name, Legacy Badge, Progression Link
+            // Top Row: Clean Exercise Name, Quick-log Badge, Progression Link
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -63,7 +63,7 @@ class LegacyWorkoutLogCard extends StatelessWidget {
                               borderRadius: BorderRadius.circular(6.r),
                             ),
                             child: Text(
-                              'Legacy Log',
+                              'Quick log',
                               style: TextStyle(
                                 color: Colors.blueGrey.shade200,
                                 fontSize: 11.sp,
@@ -108,7 +108,9 @@ class LegacyWorkoutLogCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6.r),
                   ),
                   child: Text(
-                    '${s.reps} reps @ ${s.weight.toStringAsFixed(s.weight % 1 == 0 ? 0 : 1)} kg',
+                    log.category == 'Cardio'
+                        ? '${s.reps} min'
+                        : '${s.reps} reps @ ${s.weight.toStringAsFixed(s.weight % 1 == 0 ? 0 : 1)} kg',
                     style: TextStyle(
                       color: ColorManager.textSecondary,
                       fontSize: 11.sp,

@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/presentation/widgets/feedback_dialog.dart';
 import 'package:fitness_app/services/review_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
@@ -136,7 +137,7 @@ class _RatingPromptDialogState extends State<RatingPromptDialog> {
                     disabledForegroundColor: ColorManager.textSecondary,
                     padding: EdgeInsets.symmetric(vertical: SizeManager.s14.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(RadiusManager.r15),
+                      borderRadius: BorderRadius.circular(AppRadius.button),
                     ),
                   ),
                   child: Text(

@@ -1,4 +1,6 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/presentation/home/widgets/gradient_hero_card.dart';
+import 'package:fitness_app/utils/managers/card_size_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -42,8 +44,9 @@ class CarouselHomeBox extends StatelessWidget {
   /// Optional transparent cut-out photo; replaces the illustration when set.
   final String? photoAsset;
 
-  /// Fixed height shared by every card in the shelf.
-  static double get height => 232.h;
+  /// Fixed height shared by every card in the shelf (see [AppCardSize]).
+  static double heightOf(BuildContext context) =>
+      AppCardSize.shelfHeight(context);
 
   @override
   Widget build(BuildContext context) {
@@ -54,10 +57,10 @@ class CarouselHomeBox extends StatelessWidget {
         tone: tone,
         imageAsset: HeroImages.forKey(heroKey),
         photoAsset: photoAsset,
-        imageSize: 130.w,
-        imageTop: 40.h,
-        height: height,
-        padding: EdgeInsets.all(18.w),
+        imageSize: AppCardSize.heroImageSize,
+        imageTop: AppCardSize.heroImageTop,
+        height: heightOf(context),
+        padding: EdgeInsets.all(AppCardSize.heroPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -66,7 +69,7 @@ class CarouselHomeBox extends StatelessWidget {
                 Flexible(child: HeroBadge(text: badge.toUpperCase())),
               ],
             ),
-            SizedBox(height: 14.h),
+            SizedBox(height: 10.h),
             Padding(
               padding: EdgeInsets.only(right: GradientHeroCard.textInset),
               child: Text(
@@ -75,7 +78,7 @@ class CarouselHomeBox extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 20.sp,
+                  fontSize: AppCardSize.heroTitleSize,
                   height: 1.2,
                   fontWeight: FontWeight.bold,
                 ),
@@ -97,7 +100,7 @@ class CarouselHomeBox extends StatelessWidget {
               ),
             ],
             if (progress != null) ...[
-              SizedBox(height: 10.h),
+              SizedBox(height: 8.h),
               ClipRRect(
                 borderRadius: BorderRadius.circular(4.r),
                 child: LinearProgressIndicator(
@@ -128,9 +131,10 @@ class CarouselHomeBox extends StatelessWidget {
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 13.h),
+                    padding: EdgeInsets.symmetric(
+                        vertical: AppCardSize.heroButtonPadding),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r),
+                      borderRadius: BorderRadius.circular(AppRadius.button.r),
                     ),
                     elevation: 0,
                   ),

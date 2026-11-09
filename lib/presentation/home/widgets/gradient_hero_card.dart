@@ -268,7 +268,7 @@ class HeroPhoto extends StatelessWidget {
   }
 }
 
-/// Small translucent label used on hero cards (e.g. "AI WORKOUT ROUTINE").
+/// Small translucent label used on hero cards (e.g. "WORKOUT ROUTINE").
 class HeroBadge extends StatelessWidget {
   const HeroBadge({super.key, required this.text, this.icon});
 

@@ -1,11 +1,13 @@
+import 'dart:async';
+
+import 'package:fitness_app/presentation/challenges/challenge_progress.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/data/challenge_data.dart';
 import 'package:go_router/go_router.dart';
@@ -16,10 +18,19 @@ class DailyExercisePage extends StatefulWidget {
   final int day;
   final VoidCallback onComplete;
 
+  /// Storage seam; defaults to Firestore. Overridden in tests.
+  final SixPackProgressStore? store;
+
+  /// Runs after the day is saved, off the critical path. Defaults to
+  /// [StatisticsProvider.updateStreak].
+  final Future<void> Function()? updateStreak;
+
   const DailyExercisePage({
     super.key,
     required this.day,
     required this.onComplete,
+    this.store,
+    this.updateStreak,
   });
 
   @override
@@ -28,6 +39,19 @@ class DailyExercisePage extends StatefulWidget {
 
 class _DailyExercisePageState extends State<DailyExercisePage> {
   final List<bool> _completionStatus = [false, false, false];
+  late final SixPackProgressStore _store =
+      widget.store ?? const FirestoreSixPackProgressStore();
+  ChallengeProgress? _progress;
+  bool _isSaving = false;
+  final TextEditingController _feedbackController = TextEditingController();
+
+  @override
+  void dispose() {
+    _feedbackController.dispose();
+    super.dispose();
+  }
+
+  bool get _isRepeat => _progress?.isCompleted(widget.day) ?? false;
 
   @override
   void initState() {
@@ -36,46 +60,22 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
   }
 
   Future<void> _loadInitialProgress() async {
-    final progress = await fetchProgress();
-    if (progress['lastCompletedDay'] == widget.day) {
+    try {
+      final progress = await _store.load();
+      if (!mounted) return;
       setState(() {
-        _completionStatus[0] = true;
-        _completionStatus[1] = true;
-        _completionStatus[2] = true;
+        _progress = progress;
+        if (progress.isCompleted(widget.day)) {
+          for (var i = 0; i < _completionStatus.length; i++) {
+            _completionStatus[i] = true;
+          }
+        }
       });
+    } catch (e) {
+      // Non-fatal: the day can still be done; completion re-checks progress.
+      debugPrint('Six-pack day: could not load progress: $e');
     }
   }
-
-  Future<Map<String, dynamic>> fetchProgress() async {
-    final userId = FirebaseAuth.instance.currentUser!.uid;
-    print('Fetching progress for user ID: $userId');
-
-    final snapshot =
-        await FirebaseFirestore.instance.collection('users').doc(userId).get();
-    print('Firestore Snapshot Data: ${snapshot.data()}');
-
-    final progressData = snapshot.data()?['progress'] ?? {};
-    print('Six Pack Challenge Progress Data: $progressData');
-
-    return progressData['sixPackChallenge'] ?? {};
-  }
-
-  bool isDayUnlocked(Map<String, dynamic> progressData, int day) {
-    final completionDateStr = progressData['completionDate'] ?? '';
-    final lastCompletedDay = progressData['lastCompletedDay'] ?? 0;
-
-    final completionDate =
-        DateTime.tryParse(completionDateStr)?.toLocal() ?? DateTime.now();
-    final today = DateTime.now();
-
-    // Compare only the date parts
-    final isNewDay = today.year > completionDate.year ||
-        today.month > completionDate.month ||
-        today.day > completionDate.day;
-
-    return isNewDay || day <= lastCompletedDay + 1;
-  }
-
 
   void showExerciseDetails(BuildContext context, ChallengeExercise exercise) {
     showModalBottomSheet(
@@ -148,6 +148,12 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
   @override
   Widget build(BuildContext context) {
     final exercises = ChallengeData.sixPackCurriculum[widget.day] ?? [];
+    final sub = Provider.of<SubscriptionProvider?>(context);
+    final isPremium = sub?.isPremium ?? false;
+    final needsPro = widget.day > 3 && !isPremium;
+    // Membership is still loading: don't flash the paywall at a Pro user.
+    final checkingAccess = needsPro && (sub?.isLoading ?? false);
+    final accessAllowed = !needsPro;
 
     return Scaffold(
       backgroundColor: ColorManager.background,
@@ -159,18 +165,24 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
       ),
       body: Stack(
         children: [
-          if (exercises.isEmpty)
+          if (checkingAccess)
+            const Center(child: CircularProgressIndicator())
+          else if (exercises.isEmpty)
             Center(
               child: Text('Curriculum not found for this day.',
                   style: TextStyle(color: ColorManager.textPrimary)),
             )
           else
             ListView.builder(
-              itemCount: exercises.length,
+              itemCount: exercises.length + (_isRepeat ? 1 : 0),
               padding: EdgeInsets.only(top: 12.h),
-              itemBuilder: (context, index) {
+              itemBuilder: (context, listIndex) {
+                if (_isRepeat && listIndex == 0) {
+                  return _buildCompletedBanner();
+                }
+                final index = _isRepeat ? listIndex - 1 : listIndex;
                 final exercise = exercises[index];
-                final isUnlocked = _isAccessAllowed(context);
+                final isUnlocked = accessAllowed;
 
                 return Card(
                   color: isUnlocked ? ColorManager.surface : Colors.grey[800],
@@ -205,7 +217,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18.sp,
-                          color: isUnlocked ? Colors.white : Colors.white54),
+                          color: isUnlocked ? ColorManager.textPrimary : ColorManager.textTertiary),
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -218,7 +230,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
                         Text(
                           'Target: ${exercise.target}',
                           style: TextStyle(
-                              fontSize: 12.sp, color: Colors.white70),
+                              fontSize: 12.sp, color: ColorManager.textSecondary),
                         ),
                       ],
                     ),
@@ -233,15 +245,16 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
                               });
                             },
                           )
-                        : const Icon(Icons.lock, color: Colors.white24),
+                        : Icon(Icons.lock, color: ColorManager.textTertiary),
                   ),
                 );
               },
             ),
-          if (!_isAccessAllowed(context)) _buildPremiumLockOverlay(context),
+          if (!accessAllowed && !checkingAccess)
+            _buildPremiumLockOverlay(context),
         ],
       ),
-      bottomNavigationBar: !_isAccessAllowed(context)
+      bottomNavigationBar: !accessAllowed
           ? null
           : Padding(
               padding: EdgeInsets.all(20.w),
@@ -250,21 +263,68 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
                   backgroundColor: _allCompleted()
                       ? ColorManager.limerGreen2
                       : Colors.grey[600],
+                  disabledBackgroundColor: _isSaving
+                      ? ColorManager.limerGreen2
+                      : Colors.grey[600],
                   padding: EdgeInsets.symmetric(vertical: 16.h),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r)),
+                      borderRadius: BorderRadius.circular(AppRadius.button.r)),
                 ),
-                onPressed: _allCompleted() ? _handleDayCompletion : null,
-                child: Text(
-                  _allCompleted()
-                      ? 'Finish Day ${widget.day}'
-                      : 'Complete all 3 workouts',
-                  style: TextStyle(
-                      color: _allCompleted() ? Colors.black : Colors.white54,
-                      fontWeight: FontWeight.bold),
-                ),
+                onPressed:
+                    _allCompleted() && !_isSaving ? _handleDayCompletion : null,
+                child: _isSaving
+                    ? SizedBox(
+                        key: const Key('sixpack_finish_progress'),
+                        width: 20.w,
+                        height: 20.w,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: ColorManager.onMint,
+                        ),
+                      )
+                    : Text(
+                        !_allCompleted()
+                            ? 'Complete all 3 workouts'
+                            : _isRepeat
+                                ? 'Log Day ${widget.day} again'
+                                : 'Finish Day ${widget.day}',
+                        style: TextStyle(
+                            color: _allCompleted()
+                                ? ColorManager.onMint
+                                : ColorManager.textPrimary,
+                            fontWeight: FontWeight.bold),
+                      ),
               ),
             ),
+    );
+  }
+
+  Widget _buildCompletedBanner() {
+    return Container(
+      key: const Key('sixpack_completed_banner'),
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: ColorManager.limerGreen2.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
+        border: Border.all(color: ColorManager.limerGreen2),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.check_circle, color: ColorManager.limerGreen2, size: 22.sp),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Text(
+              'Day ${widget.day} is already complete. You can repeat it for '
+              'practice; your challenge progress will not change.',
+              style: TextStyle(
+                color: ColorManager.textPrimary,
+                fontSize: 13.sp,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -272,42 +332,97 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
     return _completionStatus.every((status) => status);
   }
 
+  /// Saves the day, then shows the celebration straight away. Logging the
+  /// workout and the streak/reminder bookkeeping happen in the background so
+  /// the user never waits on them.
   Future<void> _handleDayCompletion() async {
-    final userId = FirebaseAuth.instance.currentUser!.uid;
-    await FirebaseFirestore.instance.collection('users').doc(userId).update({
-      'progress.sixPackChallenge.lastCompletedDay': widget.day,
-      'progress.sixPackChallenge.completionDate':
-          DateTime.now().toIso8601String(),
-    });
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
+
+    final updateStreak = widget.updateStreak ??
+        Provider.of<StatisticsProvider?>(context, listen: false)?.updateStreak;
+    final messenger = ScaffoldMessenger.of(context);
+    final day = widget.day;
+    var syncPending = false;
 
     try {
-      // Log to finishedWorkouts so it shows up in general logs and calendars
-      await FirebaseFirestore.instance
-          .collection('finishedWorkouts')
-          .doc(userId)
-          .collection('finishedWorkoutsData')
-          .add({
-        'name': 'Six-Pack Challenge Day ${widget.day}',
-        'repNumber': 0,
-        'setNumber': 3,
-        'dateTime': DateTime.now(),
-        'id': 'challenge_day_${widget.day}',
-      });
+      ChallengeProgress? known = _progress;
+      if (known == null) {
+        try {
+          known = await _store.load();
+        } catch (_) {
+          known = null;
+        }
+      }
 
-      final statisticsProvider = Provider.of<StatisticsProvider>(context, listen: false);
-      await statisticsProvider.updateStreak();
+      // Re-doing an earlier day must not rewind progress or re-lock tomorrow.
+      if (known == null || known.advancesProgress(day)) {
+        try {
+          await _store.saveCompletion(day);
+        } on TimeoutException {
+          // Firestore has queued the write; it syncs when the network returns.
+          syncPending = true;
+        }
+        _progress = ChallengeProgress(
+          lastCompletedDay: day,
+          completionDate: DateTime.now(),
+        );
+      }
     } catch (e) {
-      print('Error updating streak or logging challenge: $e');
+      debugPrint('Six-pack day: could not save progress: $e');
+      if (mounted) setState(() => _isSaving = false);
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+              "Couldn't save your progress. Check your connection and try again."),
+        ),
+      );
+      return;
     }
 
+    unawaited(_recordWorkoutInBackground(day, updateStreak));
     widget.onComplete();
 
-    if (mounted) {
-      if (widget.day == 30) {
-        _showCompletionFeedback(context);
-      } else {
-        _showDayCompletionDialog(context);
-      }
+    if (!mounted) return;
+    setState(() => _isSaving = false);
+
+    if (syncPending) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+              "Slow connection — your progress will sync when you're back online."),
+        ),
+      );
+    }
+
+    if (day == 30) {
+      _showCompletionFeedback(context);
+    } else {
+      _showDayCompletionDialog(context);
+    }
+  }
+
+  Future<void> _saveFeedbackQuietly(String text) async {
+    try {
+      await _store.saveFeedback(text);
+    } catch (e) {
+      debugPrint('Six-pack day: could not save feedback: $e');
+    }
+  }
+
+  Future<void> _recordWorkoutInBackground(
+    int day,
+    Future<void> Function()? updateStreak,
+  ) async {
+    try {
+      await _store.recordWorkout(day);
+    } catch (e) {
+      debugPrint('Six-pack day: could not log workout: $e');
+    }
+    try {
+      await updateStreak?.call();
+    } catch (e) {
+      debugPrint('Six-pack day: could not update streak: $e');
     }
   }
 
@@ -336,7 +451,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.limerGreen2,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r)),
+                    borderRadius: BorderRadius.circular(AppRadius.button.r)),
               ),
               onPressed: () {
                 Navigator.of(context).pop(); // close dialog
@@ -351,6 +466,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
   }
 
   void _showCompletionFeedback(BuildContext context) {
+    final messenger = ScaffoldMessenger.of(context);
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -374,6 +490,8 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
             ),
             SizedBox(height: 16.h),
             TextField(
+              key: const Key('sixpack_feedback_field'),
+              controller: _feedbackController,
               style: TextStyle(color: ColorManager.textPrimary),
               maxLines: 3,
               decoration: InputDecoration(
@@ -394,14 +512,21 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.amber,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r)),
+                    borderRadius: BorderRadius.circular(AppRadius.button.r)),
               ),
               onPressed: () {
-                // Here you would normally save feedback
+                final text = _feedbackController.text.trim();
+                if (text.isNotEmpty) {
+                  unawaited(_saveFeedbackQuietly(text));
+                }
                 Navigator.of(context).pop(); // close dialog
                 Navigator.of(context).pop(); // go back
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Thank you for your feedback!')),
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text(text.isEmpty
+                        ? 'Challenge complete. Well done!'
+                        : 'Thank you for your feedback!'),
+                  ),
                 );
               },
               child: const Text('Submit & Finish',
@@ -411,11 +536,6 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
         ],
       ),
     );
-  }
-
-  bool _isAccessAllowed(BuildContext context) {
-    final subProvider = Provider.of<SubscriptionProvider>(context, listen: false);
-    return subProvider.isPremium || widget.day <= 3;
   }
 
   Widget _buildPremiumLockOverlay(BuildContext context) {
@@ -463,7 +583,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
                 onPressed: () => context.push(Routes.premiumScreen),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorManager.primary,
-                  foregroundColor: Colors.black,
+                  foregroundColor: ColorManager.onMint,
                   padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 15.h),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30.r),

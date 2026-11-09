@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/layout_manager.dart';
 import 'package:fitness_app/model/workout_session_model.dart';
 import 'package:fitness_app/presentation/workout_logs/widgets/repeat_workout_widgets.dart';
 import 'package:fitness_app/services/strength_service.dart';
@@ -11,20 +12,37 @@ import 'package:intl/intl.dart';
 class WorkoutSessionCard extends StatelessWidget {
   final WorkoutSession session;
 
+  /// Overridable for tests; defaults to the current time.
+  final DateTime? now;
+
   const WorkoutSessionCard({
     super.key,
     required this.session,
+    this.now,
   });
 
   String _formatDuration(int seconds) {
-    if (seconds <= 0) return '0 min';
+    if (seconds <= 0) return '';
     final mins = seconds ~/ 60;
     if (mins >= 60) {
       final hours = mins ~/ 60;
       final remMins = mins % 60;
       return '${hours}h ${remMins}m';
     }
-    return '$mins min';
+    return '${mins < 1 ? 1 : mins} min';
+  }
+
+  /// "45 min · 3,200 kg · 5 exercises". Parts with no data are left out.
+  String _summaryLine() {
+    final parts = <String>[];
+    final duration = _formatDuration(session.durationSeconds);
+    if (duration.isNotEmpty) parts.add(duration);
+    if (session.totalVolume >= 1) {
+      parts.add('${NumberFormat('#,###').format(session.totalVolume.round())} kg');
+    }
+    final n = session.exercises.length;
+    parts.add('$n ${n == 1 ? 'exercise' : 'exercises'}');
+    return parts.join(' · ');
   }
 
   @override
@@ -32,18 +50,24 @@ class WorkoutSessionCard extends StatelessWidget {
     final sessionDate = session.completedAt ?? session.startedAt;
     final isPartial = session.isPartial;
     final title = session.workoutName.isNotEmpty ? session.workoutName : session.dayName;
+    final reference = now ?? DateTime.now();
+    final dateText = DateFormat(
+      sessionDate.year == reference.year ? 'EEE, MMM d' : 'EEE, MMM d, yyyy',
+    ).format(sessionDate);
+    final timeText = DateFormat('h:mm a').format(sessionDate);
 
-    // Extract first 3 clean exercise names for preview
-    final exerciseNames = session.exercises
+    // One-line preview of the exercises; the full list is on the detail page.
+    final names = session.exercises
         .map((e) => ExerciseIdentity.cleanDisplayName(e.exerciseName))
-        .take(3)
         .toList();
-    final remainingCount = session.exercises.length - exerciseNames.length;
+    final preview = names.take(3).join(', ');
+    final remaining = names.length - 3;
+    final previewText = remaining > 0 ? '$preview +$remaining more' : preview;
 
     return Card(
       color: ColorManager.surface,
       margin: EdgeInsets.only(bottom: 12.h),
-      elevation: 0,
+      elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16.r),
         side: BorderSide(color: ColorManager.divider),
@@ -57,161 +81,84 @@ class WorkoutSessionCard extends StatelessWidget {
         },
         borderRadius: BorderRadius.circular(16.r),
         child: Padding(
-          padding: EdgeInsets.all(16.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          padding: EdgeInsets.fromLTRB(16.w, 14.h, 12.w, 12.h),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              // Header Row: Title & Status Badge
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            color: ColorManager.textPrimary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16.sp,
-                          ),
-                        ),
-                        SizedBox(height: 3.h),
-                        Text(
-                          DateFormat('EEE, MMM d, yyyy • h:mm a').format(sessionDate),
-                          style: TextStyle(
-                            color: ColorManager.textTertiary,
-                            fontSize: 12.sp,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                    decoration: BoxDecoration(
-                      color: isPartial ? Colors.orange.withValues(alpha: 0.12) : Colors.green.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8.r),
-                      border: Border.all(
-                        color: isPartial ? Colors.orange.withValues(alpha: 0.35) : Colors.green.withValues(alpha: 0.35),
-                      ),
-                    ),
-                    child: Text(
-                      isPartial ? 'Partial' : 'Completed',
-                      style: TextStyle(
-                        color: isPartial ? Colors.orange : Colors.greenAccent,
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 12.h),
-
-              // Metrics Chips Row: Duration, Volume, Exercises
-              Row(
-                children: [
-                  _buildMetricBadge(
-                    icon: Icons.timer_outlined,
-                    text: _formatDuration(session.durationSeconds),
-                    color: Colors.blueAccent,
-                  ),
-                  SizedBox(width: 8.w),
-                  _buildMetricBadge(
-                    icon: Icons.fitness_center_rounded,
-                    text: '${session.totalVolume.toInt()} kg',
-                    color: ColorManager.primary,
-                  ),
-                  SizedBox(width: 8.w),
-                  _buildMetricBadge(
-                    icon: Icons.checklist_rounded,
-                    text: '${session.exercises.length} exercises',
-                    color: Colors.purpleAccent,
-                  ),
-                ],
-              ),
-              SizedBox(height: 12.h),
-
-              // Exercises List Preview
-              if (exerciseNames.isNotEmpty) ...[
-                Wrap(
-                  spacing: 6.w,
-                  runSpacing: 4.h,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ...exerciseNames.map((name) => Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                          decoration: BoxDecoration(
-                            color: ColorManager.surfaceDark,
-                            borderRadius: BorderRadius.circular(6.r),
-                            border: Border.all(color: ColorManager.divider.withValues(alpha: 0.5)),
-                          ),
+                    Row(
+                      children: [
+                        Flexible(
                           child: Text(
-                            name,
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: ColorManager.textSecondary,
-                              fontSize: 11.sp,
+                              color: ColorManager.textPrimary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.sp,
                             ),
                           ),
-                        )),
-                    if (remainingCount > 0)
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                        decoration: BoxDecoration(
-                          color: ColorManager.surfaceDark,
-                          borderRadius: BorderRadius.circular(6.r),
                         ),
-                        child: Text(
-                          '+$remainingCount more',
-                          style: TextStyle(
-                            color: ColorManager.textTertiary,
-                            fontSize: 11.sp,
-                            fontWeight: FontWeight.w500,
+                        // Only the exception is flagged; finished is the default.
+                        if (isPartial) ...[
+                          SizedBox(width: 8.w),
+                          Container(
+                            key: const Key('session_partial_badge'),
+                            padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(8.r),
+                              border: Border.all(color: Colors.orange.withValues(alpha: 0.35)),
+                            ),
+                            child: Text(
+                              'Partial',
+                              style: TextStyle(
+                                color: Colors.orange,
+                                fontSize: AppText.caption,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
+                      ],
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      '$dateText • $timeText',
+                      style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      _summaryLine(),
+                      key: const Key('session_summary_line'),
+                      style: TextStyle(
+                        color: ColorManager.textPrimary,
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w600,
                       ),
+                    ),
+                    if (previewText.isNotEmpty) ...[
+                      SizedBox(height: 3.h),
+                      Text(
+                        previewText,
+                        key: const Key('session_exercise_preview'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
+                      ),
+                    ],
                   ],
                 ),
-              ],
-              SizedBox(height: 10.h),
-              Align(
-                alignment: Alignment.centerRight,
-                child: RepeatWorkoutButton(session: session),
               ),
+              SizedBox(width: 8.w),
+              RepeatWorkoutButton(session: session, label: 'Repeat'),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildMetricBadge({
-    required IconData icon,
-    required String text,
-    required Color color,
-  }) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 13.sp, color: color),
-          SizedBox(width: 4.w),
-          Text(
-            text,
-            style: TextStyle(
-              color: ColorManager.textPrimary,
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
       ),
     );
   }

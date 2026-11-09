@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fitness_app/model/progress_photo.dart';
 import 'package:fitness_app/presentation/progress_photos/providers/progress_photo_provider.dart';
@@ -50,7 +51,7 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push(Routes.addProgressPhotoRoute),
         backgroundColor: ColorManager.primary,
-        child: const Icon(Icons.add_a_photo, color: Colors.black),
+        child: const Icon(Icons.add_a_photo, color: ColorManager.onMint),
       ),
       body: Column(
         children: [
@@ -92,7 +93,7 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
                   children: [
                     Icon(cat['icon'] as IconData,
                         size: 16.sp,
-                        color: isSelected ? Colors.black : Colors.white),
+                        color: isSelected ? ColorManager.onMint : ColorManager.textPrimary),
                     SizedBox(width: 4.w),
                     Text(cat['label'] as String),
                   ],
@@ -101,7 +102,7 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
                 backgroundColor: ColorManager.surface,
                 selectedColor: ColorManager.primary,
                 labelStyle: TextStyle(
-                  color: isSelected ? Colors.black : Colors.white,
+                  color: isSelected ? ColorManager.onMint : ColorManager.textPrimary,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
@@ -136,7 +137,7 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
       child: Container(
         decoration: BoxDecoration(
           color: ColorManager.surface,
-          borderRadius: BorderRadius.circular(SizeManager.s12.r),
+          borderRadius: BorderRadius.circular(AppRadius.small.r),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.2),
@@ -263,7 +264,8 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
                 color: ColorManager.surface,
-                borderRadius: BorderRadius.circular(12.r),
+                boxShadow: ColorManager.cardShadow,
+                borderRadius: BorderRadius.circular(AppRadius.small.r),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

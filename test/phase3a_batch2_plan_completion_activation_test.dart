@@ -169,7 +169,7 @@ void main() {
         await tester.tap(resetScheduleButton);
         await tester.pumpAndSettle();
 
-        expect(find.text('Reset AI Plan?'), findsOneWidget);
+        expect(find.text('Reset your plan?'), findsOneWidget);
         await tester.tap(find.widgetWithText(ElevatedButton, 'Reset'));
         await tester.pumpAndSettle();
 
@@ -182,7 +182,7 @@ void main() {
         expect(prefsAfterHomeReset.getInt('weekly_target_count'), isNull);
 
         // Both HomeAiRoutineCard and WeeklyScheduleWidget reflect no active plan
-        expect(find.text('Build Your AI Workout Plan'), findsOneWidget);
+        expect(find.text('Build Your Workout Plan'), findsOneWidget);
         expect(find.text('No Plan Active'), findsOneWidget);
 
         // Part B: Re-populate a 5-day plan and delete via WeeklyScheduleWidget._deleteWeeklyPlan
@@ -212,7 +212,7 @@ void main() {
         expect(statsProvider.weeklyTarget, 3);
         expect(prefsAfterWeeklyReset.getStringList('scheduled_workout_days'), isNull);
         expect(prefsAfterWeeklyReset.getInt('weekly_target_count'), isNull);
-        expect(find.text('Build Your AI Workout Plan'), findsOneWidget);
+        expect(find.text('Build Your Workout Plan'), findsOneWidget);
         expect(find.text('No Plan Active'), findsOneWidget);
       },
     );
@@ -476,9 +476,9 @@ void main() {
         await tester.tap(find.text('Finish'));
         await tester.pumpAndSettle();
 
-        // Summary view is shown; tap Back to Home
-        expect(find.text('Back to Home'), findsOneWidget);
-        await tester.tap(find.text('Back to Home'));
+        // Summary view is shown; tap Done
+        expect(find.text('Done'), findsOneWidget);
+        await tester.tap(find.text('Done'));
         await tester.pumpAndSettle();
 
         final prefs = await SharedPreferences.getInstance();

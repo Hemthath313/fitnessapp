@@ -145,6 +145,8 @@ class WorkoutLogService {
 
   /// Atomic Batch Save: Bridges WorkoutSession, WorkoutLog, and finishedWorkoutsData in 1 transaction!
   Future<void> saveWorkoutSession(WorkoutSession session) async {
+    // A retry after a failed save reuses the same id; keep one copy only.
+    _localSessions.removeWhere((s) => s.id == session.id);
     _localSessions.insert(0, session);
     for (var ex in session.exercises) {
       final completedSets = ex.sets.where((s) => s.isCompleted).toList();

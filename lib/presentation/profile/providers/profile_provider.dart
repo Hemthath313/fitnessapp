@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
+import '../../progress/progress_data.dart';
+
 class ProfileProvider with ChangeNotifier {
   final List<double> _weight = [];
 
@@ -65,6 +67,25 @@ class ProfileProvider with ChangeNotifier {
     return [..._flSpots];
   }
 
+  /// Every real weigh-in, oldest -> newest, with its true date.
+  final List<TimedValue> _weightEntries = [];
+
+  List<TimedValue> get weightEntries => List.unmodifiable(_weightEntries);
+
+  /// Real, dated measurement readings per body part ('chest', 'waist', ...).
+  final Map<String, List<TimedValue>> _measurementHistory = {};
+
+  Map<String, List<TimedValue>> get measurementHistory =>
+      Map.unmodifiable(_measurementHistory);
+
+  static bool _sameEntries(List<TimedValue> a, List<TimedValue> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i].date != b[i].date || a[i].value != b[i].value) return false;
+    }
+    return true;
+  }
+
   Future<void> fetchAndSetWeight() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -93,49 +114,57 @@ class ProfileProvider with ChangeNotifier {
     required double bmr,
     required int weightDateTime,
     required BuildContext context,
+    DateTime? date,
+    String? entryId,
   }) async {
     try {
       User? user = FirebaseAuth.instance.currentUser;
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user!.uid)
-          .update({
-        'weight': weight,
-        'bmi': bmi,
-        'bmr': bmr,
-      });
+      final when = date ?? DateTime.now();
 
-      final docSnapshot = await FirebaseFirestore.instance
+      // Only the newest reading is the user's "current" weight. A back-dated
+      // entry must not overwrite today's weight, BMI and calorie target.
+      if (_weightEntries.isEmpty) {
+        try {
+          await fetchAndSetFlSpots();
+        } catch (_) {}
+      }
+      if (ProgressData.isOnOrAfterLatest(_weightEntries, when)) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user!.uid)
+            .update({
+          'weight': weight,
+          'bmi': bmi,
+          'bmr': bmr,
+        });
+      }
+
+      // One reading per calendar day: logging again the same day corrects it,
+      // a different day (even in the same month) adds a new point. When an
+      // existing entry is being edited its document is updated directly.
+      final dayKey = ProgressData.dayKey(when);
+      final collection = FirebaseFirestore.instance
           .collection('flSpots')
-          .doc(user.uid)
-          .collection('flSpotsData')
-          .where('weightDateTime', isEqualTo: weightDateTime)
-          .get();
+          .doc(user?.uid)
+          .collection('flSpotsData');
 
-      if (docSnapshot.docs.isNotEmpty) {
-        final docId = docSnapshot.docs.first.id;
-        await FirebaseFirestore.instance
-            .collection('flSpots')
-            .doc(user.uid)
-            .collection('flSpotsData')
-            .doc(docId)
-            .update(
-          {
-            'weight': weight,
-          },
-        );
+      final payload = {
+        'weight': weight,
+        'weightDateTime': when.month, // kept for older readers
+        'dateKey': dayKey,
+        'timestamp': when.millisecondsSinceEpoch,
+      };
+
+      if (entryId != null) {
+        await collection.doc(entryId).update(payload);
       } else {
-        await FirebaseFirestore.instance
-            .collection('flSpots')
-            .doc(user.uid)
-            .collection('flSpotsData')
-            .doc()
-            .set(
-          {
-            'weight': weight,
-            'weightDateTime': weightDateTime,
-          },
-        );
+        final docSnapshot =
+            await collection.where('dateKey', isEqualTo: dayKey).get();
+        if (docSnapshot.docs.isNotEmpty) {
+          await docSnapshot.docs.first.reference.update(payload);
+        } else {
+          await collection.doc().set(payload);
+        }
       }
 
       await fetchAndSetFlSpots();
@@ -144,39 +173,131 @@ class ProfileProvider with ChangeNotifier {
     }
   }
 
+  /// Deletes one weigh-in. Returns the new latest reading when the deleted
+  /// one was the latest (so the caller can resync the profile weight), else
+  /// null.
+  Future<TimedValue?> deleteWeightEntry(TimedValue entry) async {
+    final user = FirebaseAuth.instance.currentUser;
+    final id = entry.id;
+    if (user == null || id == null) return null;
+
+    final wasLatest = _weightEntries.isNotEmpty && _weightEntries.last.id == id;
+    await FirebaseFirestore.instance
+        .collection('flSpots')
+        .doc(user.uid)
+        .collection('flSpotsData')
+        .doc(id)
+        .delete();
+
+    await fetchAndSetFlSpots();
+    return wasLatest && _weightEntries.isNotEmpty ? _weightEntries.last : null;
+  }
+
+  /// Saves the personal details sign-up collected. [bmi] and [bmr] are only
+  /// written when the caller could recalculate them.
+  Future<void> updatePersonalInfo({
+    required String firstName,
+    required String surname,
+    required int age,
+    required double height,
+    required String gender,
+    double? bmi,
+    double? bmr,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+      'first name': firstName,
+      'surname': surname,
+      'age': age,
+      'height': height,
+      'gender': gender,
+      if (bmi != null) 'bmi': bmi,
+      if (bmr != null) 'bmr': bmr,
+    });
+    notifyListeners();
+  }
+
+  /// Sets (or, with null, clears) the user's goal weight in kg.
+  Future<void> updateGoalWeight(double? goalWeight) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+      'goalWeight': goalWeight ?? FieldValue.delete(),
+    });
+  }
+
+  /// Writes the user's current weight, BMI and calorie target.
+  Future<void> updateProfileWeight({
+    required double weight,
+    required double bmi,
+    required double bmr,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+      'weight': weight,
+      'bmi': bmi,
+      'bmr': bmr,
+    });
+  }
+
   Future<void> fetchAndSetFlSpots() async {
     User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
 
     try {
       final flSpotSnapshot = await FirebaseFirestore.instance
           .collection('flSpots')
-          .doc(user!.uid)
+          .doc(user.uid)
           .collection('flSpotsData')
           .get();
 
-      final List<FlSpot> loadedFlSpots = [];
+      final now = DateTime.now();
+      final loaded = <TimedValue>[];
 
       for (var doc in flSpotSnapshot.docs) {
-        final flspotsData = doc.data();
-        int month = flspotsData['weightDateTime'];
+        final data = doc.data();
+        final w = data['weight'];
+        if (w is! num || w <= 0) continue;
 
-        int index = _flSpots.indexWhere((spot) => spot.x == month.toDouble());
-        if (index != -1) {
-          _flSpots[index] = FlSpot(
-            month.toDouble(),
-            flspotsData['weight'],
-          );
+        DateTime? date;
+        final ts = data['timestamp'];
+        if (ts is num) {
+          date = DateTime.fromMillisecondsSinceEpoch(ts.toInt());
+        } else if (ts is Timestamp) {
+          date = ts.toDate();
         } else {
-          loadedFlSpots.add(
-            FlSpot(
-              month.toDouble(),
-              flspotsData['weight'],
-            ),
-          );
+          // Older entries only stored a month number.
+          final month = data['weightDateTime'];
+          if (month is num) {
+            date = ProgressData.legacyMonthToDate(month.toInt(), now);
+          }
+        }
+        if (date == null) continue;
+        loaded.add(TimedValue(date, w.toDouble(), id: doc.id));
+      }
+
+      final entries = ProgressData.sorted(loaded);
+
+      // Month-based spots still feed the profile page chart: latest reading
+      // of each month this year, 10 = "no reading" placeholder.
+      final spots = List<FlSpot>.generate(
+          12, (i) => FlSpot((i + 1).toDouble(), 10));
+      for (final e in entries) {
+        if (e.date.year == now.year) {
+          spots[e.date.month - 1] = FlSpot(e.date.month.toDouble(), e.value);
         }
       }
-      _flSpots.addAll(loadedFlSpots);
-      notifyListeners();
+
+      final changed = !_sameEntries(_weightEntries, entries);
+      _weightEntries
+        ..clear()
+        ..addAll(entries);
+      _flSpots
+        ..clear()
+        ..addAll(spots);
+      if (changed) notifyListeners();
     } catch (e) {
       rethrow;
     }
@@ -232,13 +353,18 @@ class ProfileProvider with ChangeNotifier {
         'calf': calf,
       };
 
+      final dayKey = ProgressData.dayKey(DateTime.now());
       for (var entry in measurements.entries) {
-        final docSnapshot = await FirebaseFirestore.instance
+        if (entry.value <= 0) continue; // never record "not measured" as 0
+        final collection = FirebaseFirestore.instance
             .collection('measurementSpots')
             .doc(user.uid)
-            .collection(entry.key)
-            .where('month', isEqualTo: month)
-            .get();
+            .collection(entry.key);
+
+        // One reading per calendar day; a new day adds a new point even
+        // within the same month.
+        final docSnapshot =
+            await collection.where('dateKey', isEqualTo: dayKey).get();
 
         if (docSnapshot.docs.isNotEmpty) {
           await docSnapshot.docs.first.reference.update({
@@ -246,18 +372,16 @@ class ProfileProvider with ChangeNotifier {
             'timestamp': timestamp,
           });
         } else {
-          await FirebaseFirestore.instance
-              .collection('measurementSpots')
-              .doc(user.uid)
-              .collection(entry.key)
-              .add({
+          await collection.add({
             'value': entry.value,
             'month': month,
+            'dateKey': dayKey,
             'timestamp': timestamp,
           });
         }
       }
 
+      await loadMeasurementHistory();
       notifyListeners();
     } catch (e) {
       rethrow;
@@ -276,16 +400,76 @@ class ProfileProvider with ChangeNotifier {
           .orderBy('month')
           .get();
 
-      return snapshot.docs.map((doc) {
+      // Several readings can now exist in one month: keep the latest per
+      // month so the month-based charts keep one point per x.
+      final latestPerMonth = <int, MapEntry<num, double>>{};
+      for (final doc in snapshot.docs) {
         final data = doc.data();
-        return FlSpot(
-          (data['month'] as int).toDouble(),
-          (data['value'] as num).toDouble(),
-        );
-      }).toList();
+        final month = data['month'];
+        final value = data['value'];
+        if (month is! num || value is! num) continue;
+        final ts = (data['timestamp'] as num?) ?? 0;
+        final existing = latestPerMonth[month.toInt()];
+        if (existing == null || ts >= existing.key) {
+          latestPerMonth[month.toInt()] = MapEntry(ts, value.toDouble());
+        }
+      }
+      final months = latestPerMonth.keys.toList()..sort();
+      return [
+        for (final m in months) FlSpot(m.toDouble(), latestPerMonth[m]!.value),
+      ];
     } catch (e) {
-      print('Error fetching measurement spots for $type: $e');
+      debugPrint('Error fetching measurement spots for $type: $e');
       return [];
+    }
+  }
+
+  static const List<String> _trackedMeasurements = [
+    'chest',
+    'shoulders',
+    'biceps',
+    'foreArm',
+    'waist',
+    'hips',
+    'thigh',
+    'calf',
+  ];
+
+  /// Loads real, dated readings for every tracked body part.
+  Future<void> loadMeasurementHistory() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final results = await Future.wait(_trackedMeasurements.map((part) async {
+        final snapshot = await FirebaseFirestore.instance
+            .collection('measurementSpots')
+            .doc(user.uid)
+            .collection(part)
+            .get();
+
+        final entries = <TimedValue>[];
+        for (final doc in snapshot.docs) {
+          final data = doc.data();
+          final value = data['value'];
+          if (value is! num || value <= 0) continue;
+          final ts = data['timestamp'];
+          if (ts is! num) continue;
+          entries.add(TimedValue(
+            DateTime.fromMillisecondsSinceEpoch(ts.toInt()),
+            value.toDouble(),
+          ));
+        }
+        return MapEntry(part, ProgressData.sorted(entries));
+      }));
+      final loaded = Map<String, List<TimedValue>>.fromEntries(results);
+
+      _measurementHistory
+        ..clear()
+        ..addAll(loaded);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading measurement history: $e');
     }
   }
 }

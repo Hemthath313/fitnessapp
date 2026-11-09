@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -356,7 +357,8 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               decoration: BoxDecoration(
                 color: ColorManager.surface,
-                borderRadius: BorderRadius.circular(16.r),
+                boxShadow: ColorManager.cardShadow,
+                borderRadius: BorderRadius.circular(AppRadius.tile.r),
                 border: Border.all(color: ColorManager.divider.withValues(alpha: 0.4)),
               ),
               child: Row(
@@ -451,7 +453,8 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
                 Container(
                   decoration: BoxDecoration(
                     color: ColorManager.surface,
-                    borderRadius: BorderRadius.circular(14.r),
+                    boxShadow: ColorManager.cardShadow,
+                    borderRadius: BorderRadius.circular(AppRadius.tile.r),
                     border: Border.all(color: ColorManager.divider.withValues(alpha: 0.5)),
                   ),
                   child: Row(
@@ -504,9 +507,9 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
                 label: Text('Apply ${_formatWeight(_targetWeight)} ${_isKg ? 'kg' : 'lbs'} to Set', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorManager.primary,
-                  foregroundColor: Colors.black,
+                  foregroundColor: ColorManager.onMint,
                   padding: EdgeInsets.symmetric(vertical: 14.h),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
                   elevation: 4,
                 ),
               ),
@@ -613,7 +616,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
                         child: Text(
                           _formatWeight(plate),
                           style: TextStyle(
-                            color: isLightColor ? Colors.black : Colors.white,
+                            color: isLightColor ? ColorManager.onMint : ColorManager.textPrimary,
                             fontSize: 11.sp,
                             fontWeight: FontWeight.w900,
                           ),

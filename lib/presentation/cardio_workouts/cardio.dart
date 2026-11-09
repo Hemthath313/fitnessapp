@@ -1,4 +1,6 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/data/exercise_data.dart';
+import 'package:fitness_app/presentation/cardio_workouts/cardio_log_panel.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
@@ -114,7 +116,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.tile),
         boxShadow: [
           BoxShadow(
             color: ColorManager.limerGreen2.withValues(alpha: 0.05),
@@ -319,7 +321,8 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                       padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: ColorManager.surface,
-                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: ColorManager.cardShadow,
+                        borderRadius: BorderRadius.circular(AppRadius.tile),
                       ),
                       child: Text(
                         exercise.description,
@@ -390,7 +393,8 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                         padding: EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: ColorManager.surface,
-                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: ColorManager.cardShadow,
+                          borderRadius: BorderRadius.circular(AppRadius.small),
                           border: Border.all(
                             color: ColorManager.limerGreen2.withValues(alpha: 0.2),
                             width: 1,
@@ -438,9 +442,13 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
               ),
             ),
 
-            // Close Button
+            // Timer + Log cardio, then Close
             Padding(
-              padding: EdgeInsets.all(24),
+              padding: EdgeInsets.fromLTRB(24, 0, 24, 8),
+              child: CardioLogPanel(exerciseName: exercise.name),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(24, 8, 24, 24),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -448,7 +456,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                     backgroundColor: ColorManager.limerGreen2,
                     padding: EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(AppRadius.button),
                     ),
                   ),
                   onPressed: () => Navigator.pop(context),
@@ -474,7 +482,8 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(15),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile),
         border: Border.all(
           color: ColorManager.limerGreen2.withValues(alpha: 0.3),
           width: 1,

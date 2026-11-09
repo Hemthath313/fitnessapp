@@ -1,3 +1,5 @@
+import 'package:fitness_app/utils/managers/layout_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -29,7 +31,7 @@ class TransformationProgressScreen extends StatelessWidget {
           'Transformation Progress',
           style: TextStyle(
             color: ColorManager.textPrimary,
-            fontSize: 18.sp,
+            fontSize: AppText.appBarTitle,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -150,7 +152,7 @@ class TransformationProgressScreen extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.primary,
                 padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
               ),
               child: const Text('Explore Programmes', style: TextStyle(color: ColorManager.onMint, fontWeight: FontWeight.bold)),
             ),
@@ -174,7 +176,8 @@ class TransformationProgressScreen extends StatelessWidget {
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.card.r),
         border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
       ),
       child: Column(
@@ -232,7 +235,7 @@ class TransformationProgressScreen extends StatelessWidget {
               Text(
                 '$pct% Completed',
                 style: TextStyle(
-                  color: ColorManager.primary,
+                  color: ColorManager.primaryText,
                   fontSize: 13.sp,
                   fontWeight: FontWeight.bold,
                 ),
@@ -318,7 +321,8 @@ class TransformationProgressScreen extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Column(
@@ -356,12 +360,12 @@ class TransformationProgressScreen extends StatelessWidget {
                       Text(
                         'Update Weight',
                         style: TextStyle(
-                          color: ColorManager.primary,
+                          color: ColorManager.primaryText,
                           fontSize: 11.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Icon(Icons.chevron_right_rounded, color: ColorManager.primary, size: 14.sp),
+                      Icon(Icons.chevron_right_rounded, color: ColorManager.primaryText, size: 14.sp),
                     ],
                   ),
                 ),
@@ -497,7 +501,8 @@ class TransformationProgressScreen extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Column(
@@ -509,7 +514,7 @@ class TransformationProgressScreen extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
-                    Icon(Icons.straighten_rounded, color: ColorManager.primary, size: 18.sp),
+                    Icon(Icons.straighten_rounded, color: ColorManager.primaryText, size: 18.sp),
                     SizedBox(width: 8.w),
                     Expanded(
                       child: Text(
@@ -535,12 +540,12 @@ class TransformationProgressScreen extends StatelessWidget {
                       Text(
                         'Record',
                         style: TextStyle(
-                          color: ColorManager.primary,
+                          color: ColorManager.primaryText,
                           fontSize: 11.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Icon(Icons.chevron_right_rounded, color: ColorManager.primary, size: 14.sp),
+                      Icon(Icons.chevron_right_rounded, color: ColorManager.primaryText, size: 14.sp),
                     ],
                   ),
                 ),
@@ -616,7 +621,8 @@ class TransformationProgressScreen extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Column(
@@ -628,7 +634,7 @@ class TransformationProgressScreen extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
-                    Icon(Icons.event_repeat_rounded, color: ColorManager.primary, size: 18.sp),
+                    Icon(Icons.event_repeat_rounded, color: ColorManager.primaryText, size: 18.sp),
                     SizedBox(width: 8.w),
                     Expanded(
                       child: Text(
@@ -654,12 +660,12 @@ class TransformationProgressScreen extends StatelessWidget {
                       Text(
                         'Check In',
                         style: TextStyle(
-                          color: ColorManager.primary,
+                          color: ColorManager.primaryText,
                           fontSize: 11.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Icon(Icons.add_rounded, color: ColorManager.primary, size: 14.sp),
+                      Icon(Icons.add_rounded, color: ColorManager.primaryText, size: 14.sp),
                     ],
                   ),
                 ),
@@ -688,7 +694,7 @@ class TransformationProgressScreen extends StatelessWidget {
                   padding: EdgeInsets.all(12.w),
                   decoration: BoxDecoration(
                     color: ColorManager.surfaceDark,
-                    borderRadius: BorderRadius.circular(12.r),
+                    borderRadius: BorderRadius.circular(AppRadius.small.r),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -741,7 +747,8 @@ class TransformationProgressScreen extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Column(
@@ -773,7 +780,7 @@ class TransformationProgressScreen extends StatelessWidget {
                 padding: EdgeInsets.all(12.w),
                 decoration: BoxDecoration(
                   color: ColorManager.surfaceDark,
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(AppRadius.small.r),
                   border: Border.all(
                     color: insight.type == 'recovery'
                         ? ColorManager.accent.withValues(alpha: 0.3)
@@ -828,7 +835,8 @@ class TransformationProgressScreen extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Column(
@@ -925,7 +933,8 @@ class TransformationProgressScreen extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Column(

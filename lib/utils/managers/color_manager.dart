@@ -26,6 +26,7 @@ class ColorManager {
 
   /// Reference-design tokens (Daily Companion look)
   static const Color ringAmber = Color(0xFFF4B03E);   // progress ring arcs
+  static const Color premium = Color(0xFFFFC107);     // Pro / premium accent (locks, badges, stars)
   static const Color iconChip = Color(0xFF31343B);    // dark circle behind ring icons
   static const Color barDim = Color(0xFF376D5E);      // completed (past) bars
   static const Color barMuted = Color(0xFF3D4145);    // empty bars
@@ -37,6 +38,11 @@ class ColorManager {
 
   /// Text/icons placed ON the mint primary colour (9.2:1; white is only 1.85:1).
   static const Color onMint = Color(0xFF06201B);
+
+  /// Readable text/icon colour for any solid fill: dark ink on light fills such
+  /// as the mint primary, white on dark ones such as the hero teal.
+  static Color onColor(Color background) =>
+      background.computeLuminance() > 0.4 ? onMint : Colors.white;
 
   /// Brighter secondary text for dark surfaces (readable on `surface`).
   static const Color textMuted = Color(0xFFB8BDC6);
@@ -75,11 +81,29 @@ class ColorManager {
   static const Color lightSurfaceLight = Color(0xFFF7FAF9);     // Near-white sections
 
   static const Color lightTextPrimary = Color(0xFF1E2140);      // Dark blue-charcoal
-  static const Color lightTextSecondary = Color(0xFF6B7280);    // Muted grey
-  static const Color lightTextTertiary = Color(0xFF9CA3AF);     // Light grey
+  static const Color lightTextSecondary = Color(0xFF4B5563);    // Readable grey (7.5:1 on white)
+  static const Color lightTextTertiary = Color(0xFF656D7B);     // Captions/hints (5.2:1 on white)
   static const Color lightTextDisabled = Color(0xFFD1D5DB);
 
-  static const Color lightDivider = Color(0xFFE5E7EB);
+  static const Color lightDivider = Color(0xFFE3E9E8);
+
+  /// Teal that stays readable as TEXT/ICON on white or mint-white (5.3:1).
+  /// The bright mint [primary] is only 1.9:1 there, so it is for fills.
+  static const Color lightPrimaryText = Color(0xFF14786A);
+
+  /// Status colours that stay readable as TEXT on white / mint-white (>= 4.8:1).
+  /// The bright [success] / [warning] / [info] are fills and dark-mode text.
+  static const Color lightSuccessText = Color(0xFF1B7A43);
+  static const Color lightWarningText = Color(0xFF8A5A00);
+  static const Color lightInfoText = Color(0xFF1D4ED8);
+  static const Color darkInfoText = Color(0xFF6CB4FF);
+
+  /// Soft two-layer card shadow used in light mode so white cards lift off
+  /// the mint-white background. Dark mode uses none.
+  static const List<BoxShadow> lightCardShadow = [
+    BoxShadow(color: Color(0x1A0F2E2A), blurRadius: 18, offset: Offset(0, 6)),
+    BoxShadow(color: Color(0x0F0F2E2A), blurRadius: 3, offset: Offset(0, 1)),
+  ];
 
   // ═══════════════════════════════════════
   // DARK THEME (toggle)
@@ -114,6 +138,18 @@ class ColorManager {
   static Color textDisabled = lightTextDisabled;
   static Color divider = lightDivider;
 
+  /// Teal for text/icons on theme surfaces (darker in light mode, mint in dark).
+  static Color primaryText = lightPrimaryText;
+
+  /// Green / amber / blue for status TEXT on theme surfaces (dark in light
+  /// mode, bright in dark mode).
+  static Color successText = lightSuccessText;
+  static Color warningText = lightWarningText;
+  static Color infoText = lightInfoText;
+
+  /// Card shadow for the current theme (empty in dark mode).
+  static List<BoxShadow> cardShadow = lightCardShadow;
+
   /// Call this whenever the theme mode changes
   static void updateTheme(bool isDarkMode) {
     if (isDarkMode) {
@@ -128,6 +164,11 @@ class ColorManager {
       textTertiary = darkTextTertiary;
       textDisabled = darkTextDisabled;
       divider = darkDivider;
+      primaryText = primary;
+      successText = successLight;
+      warningText = ringAmber;
+      infoText = darkInfoText;
+      cardShadow = const [];
     } else {
       background = lightBackground;
       backgroundDark = lightBackgroundDark;
@@ -140,6 +181,11 @@ class ColorManager {
       textTertiary = lightTextTertiary;
       textDisabled = lightTextDisabled;
       divider = lightDivider;
+      primaryText = lightPrimaryText;
+      successText = lightSuccessText;
+      warningText = lightWarningText;
+      infoText = lightInfoText;
+      cardShadow = lightCardShadow;
     }
 
     // Sync legacy aliases
@@ -230,12 +276,13 @@ class AppTheme {
     brightness: Brightness.light,
     tertiary: ColorManager.success,
     onTertiary: Colors.white,
+    surfaceTint: Colors.transparent,
   );
 
   // ── DARK COLOR SCHEME ──
   static const ColorScheme darkColorScheme = ColorScheme.dark(
     primary: ColorManager.primary,
-    onPrimary: Colors.black,
+    onPrimary: ColorManager.onMint,
     secondary: ColorManager.accent,
     onSecondary: Colors.white,
     surface: ColorManager.darkSurface,

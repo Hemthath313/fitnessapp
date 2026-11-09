@@ -1,3 +1,5 @@
+import 'package:fitness_app/utils/managers/layout_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/model/workout_log.dart';
 import 'package:fitness_app/services/strength_service.dart';
 import 'package:fitness_app/services/workout_log_service.dart';
@@ -95,7 +97,8 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
                 height: 220.h,
                 decoration: BoxDecoration(
                   color: ColorManager.surface,
-                  borderRadius: BorderRadius.circular(16.r),
+                  boxShadow: ColorManager.cardShadow,
+                  borderRadius: BorderRadius.circular(AppRadius.tile.r),
                   border: Border.all(color: ColorManager.divider),
                 ),
                 child: _buildChart(graphLogs),
@@ -127,7 +130,8 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
               Expanded(
                 child: ListView.builder(
                   itemCount: historyLogs.length,
-                  padding: EdgeInsets.all(16.w),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.gutter, vertical: 16.h),
                   itemBuilder: (context, index) {
                     final log = historyLogs[index];
                     return Container(
@@ -172,7 +176,8 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
                               padding: EdgeInsets.all(12.w),
                               decoration: BoxDecoration(
                                 color: ColorManager.surface,
-                                borderRadius: BorderRadius.circular(12.r),
+                                boxShadow: ColorManager.cardShadow,
+                                borderRadius: BorderRadius.circular(AppRadius.small.r),
                                 border: Border.all(color: ColorManager.divider),
                               ),
                               child: Column(

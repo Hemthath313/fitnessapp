@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/presentation/home/widgets/achievements_widget.dart';
 import 'package:fitness_app/services/badge_rules.dart';
@@ -112,7 +113,8 @@ class NextBadgeBar extends StatelessWidget {
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(22.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.card.r),
       ),
       child: Row(
         children: [
@@ -164,8 +166,8 @@ class NextBadgeBar extends StatelessWidget {
                           value: progress.fraction,
                           minHeight: 6.h,
                           backgroundColor: ColorManager.divider,
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                              ColorManager.primary),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              ColorManager.primaryText),
                         ),
                       ),
                     ),

@@ -1,6 +1,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:fitness_app/presentation/home/providers/home_provider.dart';
 import 'package:fitness_app/presentation/profile/providers/profile_provider.dart';
+import 'package:fitness_app/presentation/progress/progress_data.dart';
 import 'package:fitness_app/presentation/settings/widgets/change_password_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -39,14 +40,14 @@ class _ChangeMeasurementsPageState extends State<ChangeMeasurementsPage> {
   void initState() {
     super.initState();
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
-    _chestController.text = homeProvider.userData['chest'].toString();
-    _shoulderController.text = homeProvider.userData['shoulders'].toString();
-    _bicepsController.text = homeProvider.userData['biceps'].toString();
-    _foreArmController.text = homeProvider.userData['foreArm'].toString();
-    _waistController.text = homeProvider.userData['waist'].toString();
-    _hipsController.text = homeProvider.userData['hips'].toString();
-    _thighCotroller.text = homeProvider.userData['thigh'].toString();
-    _calfController.text = homeProvider.userData['calf'].toString();
+    _chestController.text = ProgressData.prefill(homeProvider.userData['chest']);
+    _shoulderController.text = ProgressData.prefill(homeProvider.userData['shoulders']);
+    _bicepsController.text = ProgressData.prefill(homeProvider.userData['biceps']);
+    _foreArmController.text = ProgressData.prefill(homeProvider.userData['foreArm']);
+    _waistController.text = ProgressData.prefill(homeProvider.userData['waist']);
+    _hipsController.text = ProgressData.prefill(homeProvider.userData['hips']);
+    _thighCotroller.text = ProgressData.prefill(homeProvider.userData['thigh']);
+    _calfController.text = ProgressData.prefill(homeProvider.userData['calf']);
     _valueActivity = homeProvider.userData['activity'];
     _valueGoals = homeProvider.userData['goal'];
   }
@@ -80,42 +81,133 @@ class _ChangeMeasurementsPageState extends State<ChangeMeasurementsPage> {
     }
   }
 
+  bool _saving = false;
+
+  /// Reads one field. A blank field keeps the previously saved value, so
+  /// users can update just one measurement.
+  double? _readField(TextEditingController c, String key) {
+    final typed = ProgressData.parseNumber(c.text);
+    if (typed != null) return typed;
+    final previous = Provider.of<HomeProvider>(context, listen: false)
+        .userData[key];
+    return previous is num && previous > 0 ? previous.toDouble() : null;
+  }
+
+  /// First validation error, or null when everything can be saved.
+  String? _validate() {
+    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+    final fields = <(TextEditingController, String, String)>[
+      (_chestController, 'chest', 'Chest'),
+      (_shoulderController, 'shoulders', 'Shoulders'),
+      (_bicepsController, 'biceps', 'Biceps'),
+      (_foreArmController, 'foreArm', 'Forearm'),
+      (_waistController, 'waist', 'Waist'),
+      (_hipsController, 'hips', 'Hips'),
+      (_thighCotroller, 'thigh', 'Thigh'),
+      (_calfController, 'calf', 'Calf'),
+    ];
+    for (final (controller, key, name) in fields) {
+      final previous = homeProvider.userData[key];
+      final hasPrevious = previous is num && previous > 0;
+      final error = ProgressData.validateMeasurement(
+        controller.text,
+        name,
+        allowBlank: hasPrevious,
+      );
+      if (error != null) return error;
+    }
+    return null;
+  }
+
   Future<void> updateUsersMeasurements() async {
     final profileProvider =
         Provider.of<ProfileProvider>(context, listen: false);
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+
+    final chest = _readField(_chestController, 'chest')!;
+    final shoulders = _readField(_shoulderController, 'shoulders')!;
+    final biceps = _readField(_bicepsController, 'biceps')!;
+    final foreArm = _readField(_foreArmController, 'foreArm')!;
+    final waist = _readField(_waistController, 'waist')!;
+    final hips = _readField(_hipsController, 'hips')!;
+    final thigh = _readField(_thighCotroller, 'thigh')!;
+    final calf = _readField(_calfController, 'calf')!;
+
+    await homeProvider.getUsersBMR(
+      gender: homeProvider.userData['gender'],
+      weight: homeProvider.userData['weight'],
+      height: homeProvider.userData['height'],
+      age: homeProvider.userData['age'],
+      activity: _valueActivity!,
+      goal: _valueGoals!,
+    );
+    await homeProvider.getUsersBMI(
+      height: homeProvider.userData['height'],
+      weight: homeProvider.userData['weight'],
+    );
+    if (!mounted) return;
+    await profileProvider.updateUsersData(
+      bmr: homeProvider.userBMRwithGoal,
+      activity: _valueActivity!,
+      context: context,
+      goal: _valueGoals!,
+      chest: chest,
+      shoulders: shoulders,
+      biceps: biceps,
+      foreArm: foreArm,
+      waist: waist,
+      hips: hips,
+      thigh: thigh,
+      calf: calf,
+    );
+  }
+
+  Future<void> _onSavePressed() async {
+    if (_saving) return;
+    final messenger = ScaffoldMessenger.of(context);
+
+    final error = _validate();
+    if (error != null) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(error)));
+      return;
+    }
+    if (_valueActivity == null || _valueGoals == null) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('Please choose your activity level and goal')),
+        );
+      return;
+    }
+
+    _saving = true;
+    LoadingOverlay.show(context, message: 'Updating measurements...');
     try {
-      await homeProvider
-          .getUsersBMR(
-            gender: homeProvider.userData['gender'],
-            weight: homeProvider.userData['weight'],
-            height: homeProvider.userData['height'],
-            age: homeProvider.userData['age'],
-            activity: _valueActivity!,
-            goal: _valueGoals!,
-          )
-          .then((_) => homeProvider.getUsersBMI(
-                height: homeProvider.userData['height'],
-                weight: homeProvider.userData['weight'],
-              ))
-          .then(
-            (_) => profileProvider.updateUsersData(
-              bmr: homeProvider.userBMRwithGoal,
-              activity: _valueActivity!,
-              context: context,
-              goal: _valueGoals!,
-              chest: double.parse(_chestController.text),
-              shoulders: double.parse(_shoulderController.text),
-              biceps: double.parse(_bicepsController.text),
-              foreArm: double.parse(_foreArmController.text),
-              waist: double.parse(_waistController.text),
-              hips: double.parse(_hipsController.text),
-              thigh: double.parse(_thighCotroller.text),
-              calf: double.parse(_calfController.text),
-            ),
-          );
+      await updateUsersMeasurements();
+      await Provider.of<HomeProvider>(context, listen: false).fetchUserData();
+      if (mounted) {
+        LoadingOverlay.hide(context);
+        Navigator.of(context).pop();
+      }
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('Measurements saved')));
     } catch (e) {
-      rethrow;
+      debugPrint('Error saving measurements: $e');
+      if (mounted) {
+        LoadingOverlay.hide(context);
+      }
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text("Couldn't save your measurements. Check your connection and try again."),
+          ),
+        );
+    } finally {
+      _saving = false;
     }
   }
 
@@ -438,21 +530,7 @@ class _ChangeMeasurementsPageState extends State<ChangeMeasurementsPage> {
                     ),
                   ),
                   LimeGreenRoundedButtonWidget(
-                    onTap: () async {
-                      LoadingOverlay.show(context, message: 'Updating measurements...');
-                      try {
-                        await updateUsersMeasurements();
-                        if (context.mounted) {
-                          LoadingOverlay.hide(context);
-                          Navigator.of(context).pop();
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          LoadingOverlay.hide(context);
-                        }
-                        rethrow;
-                      }
-                    },
+                    onTap: _onSavePressed,
                     title: StringsManager.next,
                   )
                 ],

@@ -1,3 +1,5 @@
+import 'package:fitness_app/utils/managers/layout_manager.dart';
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +10,7 @@ import 'package:fitness_app/presentation/home/widgets/carousel_home_box.dart';
 import 'package:fitness_app/presentation/home/widgets/gradient_hero_card.dart';
 import 'package:fitness_app/presentation/home/widgets/mini_challenge_cards.dart';
 import 'package:fitness_app/presentation/transformation_plans/providers/transformation_provider.dart';
+import 'package:fitness_app/utils/managers/card_size_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 
@@ -29,7 +32,7 @@ class TransformationHubScreen extends StatelessWidget {
           'Transformation Plans',
           style: TextStyle(
             color: ColorManager.textPrimary,
-            fontSize: 18.sp,
+            fontSize: AppText.appBarTitle,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -96,12 +99,12 @@ class TransformationHubScreen extends StatelessWidget {
               // Same cards as the dashboard shelf, so View All really lists
               // every challenge.
               SizedBox(
-                height: CarouselHomeBox.height,
+                height: CarouselHomeBox.heightOf(context),
                 child: const SixPackChallengeCard(),
               ),
               SizedBox(height: 16.h),
               SizedBox(
-                height: CarouselHomeBox.height,
+                height: CarouselHomeBox.heightOf(context),
                 child: const ExerciseOfWeekCard(),
               ),
 
@@ -273,9 +276,9 @@ class TransformationHubScreen extends StatelessWidget {
       tone: tone ?? _toneFor(plan),
       imageAsset: HeroImages.forKey(key),
       photoAsset: HeroImages.photoForPlan(plan.id),
-      imageSize: 130.w,
-      imageTop: 40.h,
-      padding: EdgeInsets.all(18.w),
+      imageSize: AppCardSize.heroImageSize,
+      imageTop: AppCardSize.heroImageTop,
+      padding: EdgeInsets.all(AppCardSize.heroPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -394,7 +397,7 @@ class TransformationHubScreen extends StatelessWidget {
                 backgroundColor: Colors.white,
                 padding: EdgeInsets.symmetric(vertical: 13.h),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14.r),
+                  borderRadius: BorderRadius.circular(AppRadius.button.r),
                 ),
                 elevation: 0,
               ),

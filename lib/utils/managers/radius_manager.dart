@@ -10,8 +10,15 @@ class AppRadius {
   /// Standard surface cards (snapshot, weekly bars, quick actions, challenges).
   static const double card = 22;
 
-  /// Small tiles and inner panels.
+  /// Tiles and inner panels sitting on a card (grid tiles, list rows, stat
+  /// boxes).
   static const double tile = 16;
+
+  /// Small inner elements: input boxes, icon chips, compact info rows.
+  static const double small = 12;
+
+  /// Buttons (elevated, outlined, text and the shared lime-green button).
+  static const double button = 14;
 
   /// Pills, chips and badges.
   static const double pill = 20;

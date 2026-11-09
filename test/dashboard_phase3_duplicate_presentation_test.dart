@@ -278,7 +278,7 @@ void main() {
 
       // 2. AI Workout Generator card collapses to avoid competing with Hero AI Builder
       expect(find.byType(DashboardAiWorkoutGeneratorCard), findsOneWidget);
-      expect(find.text('AI WORKOUT GENERATOR'), findsNothing);
+      expect(find.text('PLAN BUILDER'), findsNothing);
 
       // 3. Challenge section renders header with View All
       expect(find.text('Challenges'), findsOneWidget);
@@ -436,7 +436,7 @@ void main() {
 
       // 1. Primary Hero shows Priority 2 AI routine scroller hub
       expect(find.byType(HomeAiRoutineCard), findsOneWidget);
-      expect(find.text('AI Workout Schedule'), findsOneWidget);
+      expect(find.text('Workout Schedule'), findsOneWidget);
       expect(find.text('Monday Routine'), findsOneWidget);
       expect(find.textContaining('3-Day Split'), findsOneWidget);
 

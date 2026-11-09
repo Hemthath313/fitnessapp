@@ -1,6 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/data/challenge_data.dart';
+import 'package:fitness_app/presentation/challenges/challenge_progress.dart';
 import 'package:fitness_app/presentation/home/widgets/carousel_home_box.dart';
 import 'package:fitness_app/presentation/home/widgets/gradient_hero_card.dart';
 import 'package:fitness_app/utils/managers/string_manager.dart';
@@ -34,11 +33,10 @@ class _SixPackChallengeCardState extends State<SixPackChallengeCard>
 
   Future<Map<String, dynamic>> _fetchProgress() async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return {};
-      final snapshot =
-          await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-      return snapshot.data()?['progress']?['sixPackChallenge'] ?? {};
+      // Same loader as the challenge screen: server first, saved copy when
+      // offline, so a slow connection doesn't reset the card to "Start Day 1".
+      final progress = await const FirestoreSixPackProgressStore().load();
+      return {'lastCompletedDay': progress.lastCompletedDay};
     } catch (_) {
       return {};
     }
@@ -81,7 +79,9 @@ class _SixPackChallengeCardState extends State<SixPackChallengeCard>
           onTap: () {
             context.push(Routes.sixPackChallengeRoute).then((_) {
               if (mounted) {
-                setState(() => _progressFuture = _fetchProgress());
+                setState(() {
+                  _progressFuture = _fetchProgress();
+                });
               }
             });
           },

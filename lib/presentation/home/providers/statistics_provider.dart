@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +24,15 @@ class StatisticsProvider with ChangeNotifier {
   DateTime? _scheduleEffectiveDate;
   int _streakAtScheduleChange = 0;
   DateTime? _referenceNow;
+
+  /// When the full workout-date history was last read from Firestore
+  /// successfully. Null until the first complete read this session.
+  DateTime? _datesFetchedAt;
+
+  /// How long the in-memory workout dates are trusted before [updateStreak]
+  /// re-reads the history. Within this window finishing a workout just adds
+  /// today's date instead of re-downloading every collection.
+  static const Duration datesRefreshInterval = Duration(minutes: 30);
 
   static const Map<String, int> _weekdayMap = {
     'monday': DateTime.monday,
@@ -709,6 +720,17 @@ class StatisticsProvider with ChangeNotifier {
     }
   }
 
+  /// True when the in-memory workout dates are missing or older than
+  /// [datesRefreshInterval] and must be re-read before recalculating a streak.
+  bool shouldRefetchDates(DateTime now) {
+    final fetchedAt = _datesFetchedAt;
+    if (fetchedAt == null) return true;
+    return now.difference(fetchedAt) > datesRefreshInterval;
+  }
+
+  @visibleForTesting
+  void markDatesFetchedForTesting(DateTime? at) => _datesFetchedAt = at;
+
   Future<void> updateStreak() async {
     try {
       User? user;
@@ -722,8 +744,9 @@ class StatisticsProvider with ChangeNotifier {
       final previousLastWorkoutDate = _lastWorkoutDate;
       final alreadyCompletedToday = hasWorkoutOnDate(todayDate);
 
-      if (user != null) {
-        // Re-fetch all dates from canonical & legacy sources and ensure today is included
+      if (user != null && shouldRefetchDates(now)) {
+        // Re-read history from canonical & legacy sources only when we have
+        // not done so recently; otherwise today is simply added below.
         await fetchCompletedWorkoutDates();
       }
       final normalizedDates =
@@ -778,50 +801,67 @@ class StatisticsProvider with ChangeNotifier {
       // Check for new achievements
       await _checkAchievements();
 
-      // Cache streak values so reminder copy reflects the current run
-      await NotificationProfile.saveStreak(
-          current: _currentStreak, longest: _longestStreak);
-
-      // Schedule notification reminder to maintain streak
-      await NotificationService().scheduleStreakReminder();
-
-      // Sunday 7 PM "week in review" with this week's real numbers
-      await NotificationService().scheduleWeeklyRecapNotification(
-        workoutsThisWeek: workoutsCompletedThisWeek,
-        target: weeklyTarget,
-        streak: _currentStreak,
-      );
-
-      // Advance today's workout day reminder by 7 days if scheduled (without canceling other days)
-      await NotificationService().advanceTodayWorkoutReminderIfScheduled(
-        scheduledDays: _scheduledWeekdays.isNotEmpty ? scheduledDayNames : null,
-      );
-
-      // Schedule water reminder (user-chosen time, default 6 PM)
-      await NotificationService().scheduleWaterReminder();
-
-      // Reset re-engagement timers (3, 7, 14 days)
-      await NotificationService().scheduleReEngagementNotifications();
-
-      // Update Home Screen Widget
-      await HomeWidget.saveWidgetData<int>('streak', _currentStreak);
-      await HomeWidget.updateWidget(androidName: 'FitnessWidgetProvider');
-
-      // Trigger in-app review at key milestones
-      try {
-        final shouldReview = await ReviewService().incrementWorkoutsLogged();
-        if (shouldReview) {
-          await ReviewService().requestNativeReview();
-          await ReviewService().markAsPrompted();
-        }
-      } catch (e) {
-        print('Error handling review prompt in StatisticsProvider: $e');
-      }
+      // Everything below is bookkeeping the user never waits for.
+      unawaited(_runPostWorkoutSideEffects());
 
       notifyListeners();
     } catch (e) {
       print('Error updating streak: $e');
     }
+  }
+
+  /// Reminders, widget refresh and the review prompt. Runs detached so it
+  /// never blocks (or fails) the workout flow.
+  Future<void> _runPostWorkoutSideEffects() async {
+    final currentStreak = _currentStreak;
+    final longestStreak = _longestStreak;
+    final weeklyDone = workoutsCompletedThisWeek;
+    final target = weeklyTarget;
+    final scheduledNames =
+        _scheduledWeekdays.isNotEmpty ? scheduledDayNames : null;
+    final notifications = NotificationService();
+
+    Future<void> safely(String label, Future<void> Function() task) async {
+      try {
+        await task();
+      } catch (e) {
+        print('Post-workout task "$label" failed: $e');
+      }
+    }
+
+    // Notification calls stay in their original order (they share the
+    // notification plugin); only the home widget runs alongside them.
+    await Future.wait([
+      safely('notifications', () async {
+        await NotificationProfile.saveStreak(
+            current: currentStreak, longest: longestStreak);
+        await notifications.scheduleStreakReminder();
+        await notifications.scheduleWeeklyRecapNotification(
+          workoutsThisWeek: weeklyDone,
+          target: target,
+          streak: currentStreak,
+        );
+        await notifications.advanceTodayWorkoutReminderIfScheduled(
+            scheduledDays: scheduledNames);
+        await notifications.scheduleWaterReminder();
+        await notifications.scheduleReEngagementNotifications();
+      }),
+      safely('home widget', () async {
+        await HomeWidget.saveWidgetData<int>('streak', currentStreak);
+        await HomeWidget.updateWidget(androidName: 'FitnessWidgetProvider');
+      }),
+    ]);
+
+    // In-app review at key milestones. Give the celebration UI a moment to
+    // appear first so the system prompt doesn't land on top of the save.
+    await safely('review prompt', () async {
+      final shouldReview = await ReviewService().incrementWorkoutsLogged();
+      if (shouldReview) {
+        await Future<void>.delayed(const Duration(seconds: 2));
+        await ReviewService().requestNativeReview();
+        await ReviewService().markAsPrompted();
+      }
+    });
   }
 
   static DateTime? _extractDateTime(dynamic raw) {
@@ -838,21 +878,55 @@ class StatisticsProvider with ChangeNotifier {
       if (user == null) return;
 
       final Set<DateTime> dates = {};
+      var anyReadFailed = false;
+      final db = FirebaseFirestore.instance;
 
-      // 1. Fetch from canonical users/{uid}/workout_sessions
-      try {
-        final sessionsSnap = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .collection('workout_sessions')
-            .get();
+      Future<QuerySnapshot<Map<String, dynamic>>?> read(
+        String label,
+        Query<Map<String, dynamic>> query,
+      ) async {
+        try {
+          return await query.get();
+        } catch (e) {
+          anyReadFailed = true;
+          print('Error fetching $label: $e');
+          return null;
+        }
+      }
 
+      // The four sources are independent, so read them at the same time.
+      final results = await Future.wait([
+        // 1. canonical users/{uid}/workout_sessions
+        read('workout_sessions dates',
+            db.collection('users').doc(user.uid).collection('workout_sessions')),
+        // 2. finishedWorkouts (legacy & challenge/session workouts)
+        read(
+            'finishedWorkouts dates',
+            db
+                .collection('finishedWorkouts')
+                .doc(user.uid)
+                .collection('finishedWorkoutsData')),
+        // 3. users/{uid}/workout_logs (manual lifts & exercise trackers)
+        read('workout_logs dates',
+            db.collection('users').doc(user.uid).collection('workout_logs')),
+        // 4. active weekly plan in allWorkouts (scheduled training days)
+        read(
+            'allWorkouts plan days',
+            db
+                .collection('allWorkouts')
+                .doc(user.uid)
+                .collection('allWorkoutsData')),
+      ]);
+      final sessionsSnap = results[0];
+      final finishedSnap = results[1];
+      final logsSnap = results[2];
+      final allWorkoutsSnap = results[3];
+
+      if (sessionsSnap != null) {
         for (var doc in sessionsSnap.docs) {
           final data = doc.data();
           final status = data['status']?.toString().toLowerCase();
-          if (status != null &&
-              status != 'completed' &&
-              status != 'partial') {
+          if (status != null && status != 'completed' && status != 'partial') {
             continue;
           }
           final rawDate = data['completedAt'] ?? data['startedAt'];
@@ -861,73 +935,51 @@ class StatisticsProvider with ChangeNotifier {
             dates.add(normalizeLocalDate(date));
           }
         }
-      } catch (e) {
-        print('Error fetching workout_sessions dates: $e');
       }
 
-      // 2. Fetch from finishedWorkouts (legacy & challenge/session workouts)
-      try {
-        final finishedSnap = await FirebaseFirestore.instance
-            .collection('finishedWorkouts')
-            .doc(user.uid)
-            .collection('finishedWorkoutsData')
-            .get();
-
+      if (finishedSnap != null) {
         for (var doc in finishedSnap.docs) {
           final date = _extractDateTime(doc.data()['dateTime']);
           if (date != null) {
             dates.add(normalizeLocalDate(date));
           }
         }
-      } catch (e) {
-        print('Error fetching finishedWorkouts dates: $e');
       }
 
-      // 3. Fetch from users/{uid}/workout_logs (manual lifts & exercise trackers)
-      try {
-        final logsSnap = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .collection('workout_logs')
-            .get();
-
+      if (logsSnap != null) {
         for (var doc in logsSnap.docs) {
           final date = _extractDateTime(doc.data()['date']);
           if (date != null) {
             dates.add(normalizeLocalDate(date));
           }
         }
-      } catch (e) {
-        print('Error fetching workout_logs dates: $e');
       }
 
-      // 4. Sync scheduled training days from active weekly plan in allWorkouts if present
-      try {
-        final allWorkoutsSnap = await FirebaseFirestore.instance
-            .collection('allWorkouts')
-            .doc(user.uid)
-            .collection('allWorkoutsData')
-            .get();
-
-        final Set<String> planDays = {};
-        for (var doc in allWorkoutsSnap.docs) {
-          final name = doc.data()['name']?.toString() ?? '';
-          final match = RegExp(r'^\[(\w+)\]').firstMatch(name);
-          if (match != null) {
-            planDays.add(match.group(1)!);
+      if (allWorkoutsSnap != null) {
+        try {
+          final Set<String> planDays = {};
+          for (var doc in allWorkoutsSnap.docs) {
+            final name = doc.data()['name']?.toString() ?? '';
+            final match = RegExp(r'^\[(\w+)\]').firstMatch(name);
+            if (match != null) {
+              planDays.add(match.group(1)!);
+            }
           }
+          if (planDays.isNotEmpty) {
+            _scheduledWeekdays = parseWeekdayNames(planDays);
+            _dynamicWeeklyTarget = _scheduledWeekdays.length;
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setStringList(
+                'scheduled_workout_days', scheduledDayNames);
+            await prefs.setInt('weekly_target_count', _dynamicWeeklyTarget);
+          }
+        } catch (e) {
+          print('Error syncing scheduled workout days: $e');
         }
-        if (planDays.isNotEmpty) {
-          _scheduledWeekdays = parseWeekdayNames(planDays);
-          _dynamicWeeklyTarget = _scheduledWeekdays.length;
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setStringList(
-              'scheduled_workout_days', scheduledDayNames);
-          await prefs.setInt('weekly_target_count', _dynamicWeeklyTarget);
-        }
-      } catch (e) {
-        print('Error syncing scheduled workout days: $e');
       }
+
+      // Only trust the cache when every source answered.
+      _datesFetchedAt = anyReadFailed ? null : (_referenceNow ?? DateTime.now());
 
       if (_lastWorkoutDate != null) {
         dates.add(normalizeLocalDate(_lastWorkoutDate!));

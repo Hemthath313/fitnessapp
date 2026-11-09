@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -83,7 +84,7 @@ class TransformationCompletionScreen extends StatelessWidget {
               padding: EdgeInsets.all(24.w),
               decoration: BoxDecoration(
                 color: ColorManager.surface,
-                borderRadius: BorderRadius.circular(24.r),
+                borderRadius: BorderRadius.circular(AppRadius.card.r),
                 border: Border.all(
                   color: ColorManager.success.withValues(alpha: 0.5),
                   width: 1.5,
@@ -159,7 +160,8 @@ class TransformationCompletionScreen extends StatelessWidget {
               padding: EdgeInsets.all(18.w),
               decoration: BoxDecoration(
                 color: ColorManager.surface,
-                borderRadius: BorderRadius.circular(20.r),
+                boxShadow: ColorManager.cardShadow,
+                borderRadius: BorderRadius.circular(AppRadius.card.r),
                 border: Border.all(color: ColorManager.divider),
               ),
               child: Column(
@@ -238,7 +240,8 @@ class TransformationCompletionScreen extends StatelessWidget {
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
                 color: ColorManager.surface,
-                borderRadius: BorderRadius.circular(16.r),
+                boxShadow: ColorManager.cardShadow,
+                borderRadius: BorderRadius.circular(AppRadius.tile.r),
                 border: Border.all(color: ColorManager.divider),
               ),
               child: Column(
@@ -333,7 +336,7 @@ class TransformationCompletionScreen extends StatelessWidget {
                 onPressed: () =>
                     context.pushReplacement(Routes.transformationPlansRoute),
                 icon: const Icon(Icons.explore_rounded,
-                    size: 18, color: Colors.white),
+                    size: 18, color: ColorManager.onMint),
                 label: Text(
                   'Explore Another Challenge',
                   style: TextStyle(
@@ -346,7 +349,7 @@ class TransformationCompletionScreen extends StatelessWidget {
                   backgroundColor: ColorManager.primary,
                   padding: EdgeInsets.symmetric(vertical: 14.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.r),
+                    borderRadius: BorderRadius.circular(AppRadius.button.r),
                   ),
                   elevation: 0,
                 ),
@@ -363,7 +366,7 @@ class TransformationCompletionScreen extends StatelessWidget {
                   padding: EdgeInsets.symmetric(vertical: 14.h),
                   side: BorderSide(color: ColorManager.divider),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.r),
+                    borderRadius: BorderRadius.circular(AppRadius.button.r),
                   ),
                 ),
                 child: Text(
@@ -433,7 +436,8 @@ class TransformationCompletionScreen extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: ColorManager.divider),
       ),
       child: Column(
@@ -545,7 +549,7 @@ class TransformationCompletionScreen extends StatelessWidget {
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(AppRadius.card.r),
         border: Border.all(
           color: const Color(0xFF00B074).withValues(alpha: 0.5),
           width: 1.5,
@@ -658,7 +662,7 @@ class TransformationCompletionScreen extends StatelessWidget {
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(AppRadius.card.r),
         border: Border.all(
           color: const Color(0xFFFF5E36).withValues(alpha: 0.5),
           width: 1.5,
@@ -771,7 +775,7 @@ class TransformationCompletionScreen extends StatelessWidget {
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(AppRadius.card.r),
         border: Border.all(
           color: const Color(0xFF2F6BFF).withValues(alpha: 0.5),
           width: 1.5,
@@ -884,7 +888,7 @@ class TransformationCompletionScreen extends StatelessWidget {
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(AppRadius.card.r),
         border: Border.all(
           color: const Color(0xFF9B51E0).withValues(alpha: 0.5),
           width: 1.5,
@@ -1013,7 +1017,7 @@ class TransformationCompletionScreen extends StatelessWidget {
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: ColorManager.surfaceDark,
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: optionColor.withValues(alpha: 0.3)),
       ),
       child: Column(
@@ -1072,7 +1076,7 @@ class TransformationCompletionScreen extends StatelessWidget {
                 backgroundColor: optionColor,
                 padding: EdgeInsets.symmetric(vertical: 10.h),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r),
+                  borderRadius: BorderRadius.circular(AppRadius.button.r),
                 ),
                 elevation: 0,
               ),
@@ -1114,7 +1118,8 @@ class TransformationCompletionScreen extends StatelessWidget {
           padding: EdgeInsets.all(18.w),
           decoration: BoxDecoration(
             color: ColorManager.surface,
-            borderRadius: BorderRadius.circular(20.r),
+            boxShadow: ColorManager.cardShadow,
+            borderRadius: BorderRadius.circular(AppRadius.card.r),
             border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
           ),
           child: Column(

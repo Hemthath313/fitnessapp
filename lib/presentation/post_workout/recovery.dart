@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'dart:async';
 import 'package:fitness_app/data/pain_relief_data.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
@@ -80,7 +81,8 @@ class _PainZoneCard extends StatelessWidget {
       margin: EdgeInsets.only(bottom: 16.h),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: ColorManager.divider),
       ),
       // Transparent Material so the tile's ink paints above the card colour.
@@ -195,7 +197,8 @@ class _StretchTileState extends State<_StretchTile> {
       padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.small.r),
       ),
       child: Row(
         children: [

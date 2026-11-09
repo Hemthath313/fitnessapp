@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/model/workout_model.dart';
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
@@ -81,7 +82,7 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
         width: double.infinity,
         decoration: BoxDecoration(
           color: ColorManager.surface,
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(AppRadius.card.r),
           border: Border.all(
             color: ColorManager.primary.withValues(alpha: 0.3),
             width: 1.2,
@@ -117,7 +118,7 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                         SizedBox(width: 5.w),
                         Flexible(
                           child: Text(
-                            'AI WORKOUT GENERATOR',
+                            'PLAN BUILDER',
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: ColorManager.primary,
@@ -148,7 +149,7 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
             ),
             SizedBox(height: 12.h),
             Text(
-              'Build Your AI Workout Routine',
+              'Build Your Workout Routine',
               style: TextStyle(
                 color: ColorManager.white,
                 fontSize: 16.sp,
@@ -208,12 +209,12 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                 icon: const Icon(
                   Icons.auto_awesome,
                   size: 18,
-                  color: Colors.black,
+                  color: ColorManager.onMint,
                 ),
                 label: Text(
-                  'Build My Routine with AI',
+                  'Build My Routine',
                   style: TextStyle(
-                    color: Colors.black,
+                    color: ColorManager.onMint,
                     fontSize: 13.sp,
                     fontWeight: FontWeight.bold,
                   ),
@@ -222,7 +223,7 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                   backgroundColor: ColorManager.primary,
                   padding: EdgeInsets.symmetric(vertical: 12.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
+                    borderRadius: BorderRadius.circular(AppRadius.button.r),
                   ),
                   elevation: 0,
                 ),
@@ -277,7 +278,7 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
         width: double.infinity,
         decoration: BoxDecoration(
           color: ColorManager.surface,
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(AppRadius.card.r),
           border: Border.all(
             color: ColorManager.primary.withValues(alpha: 0.3),
             width: 1.2,
@@ -313,7 +314,7 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                         SizedBox(width: 5.w),
                         Flexible(
                           child: Text(
-                            'AI WORKOUT ROUTINE',
+                            'WORKOUT ROUTINE',
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: ColorManager.primary,
@@ -342,7 +343,7 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
             ),
             SizedBox(height: 12.h),
             Text(
-              'Your Custom AI Routine',
+              'Your Custom Routine',
               style: TextStyle(
                 color: ColorManager.white,
                 fontSize: 16.sp,
@@ -433,7 +434,7 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                         context.push(
                           Routes.dayWorkoutSessionRoute,
                           extra: {
-                            'dayName': '$todayName AI Routine',
+                            'dayName': '$todayName Workout',
                             'workouts': resolvedExercises,
                           },
                         );
@@ -447,8 +448,8 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                       ),
                       label: Text(
                         isCompletedToday
-                            ? 'Repeat AI Workout'
-                            : 'Start AI Workout',
+                            ? 'Repeat Routine'
+                            : 'Start Routine',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 12.sp,
@@ -461,7 +462,7 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                             : ColorManager.primary,
                         padding: EdgeInsets.symmetric(vertical: 10.h),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.r),
+                          borderRadius: BorderRadius.circular(AppRadius.button.r),
                         ),
                       ),
                     ),
@@ -489,7 +490,7 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                       side: BorderSide(color: ColorManager.primary),
                       padding: EdgeInsets.symmetric(vertical: 10.h),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.r),
+                        borderRadius: BorderRadius.circular(AppRadius.button.r),
                       ),
                     ),
                   ),

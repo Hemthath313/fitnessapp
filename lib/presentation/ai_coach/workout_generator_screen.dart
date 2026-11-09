@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
@@ -16,7 +17,12 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WorkoutGeneratorScreen extends StatefulWidget {
-  const WorkoutGeneratorScreen({super.key});
+  const WorkoutGeneratorScreen({super.key, this.initialDays});
+
+  /// Set when opened from Workout Splits ("Use this split"): the day count
+  /// picks the matching split (3 full body, 4 upper/lower, 5 bro, 6 PPL) and
+  /// the plan is built straight away for review.
+  final int? initialDays;
 
   static List<Exercise> get availableCatalog => ExerciseData.all;
 
@@ -66,6 +72,14 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
   void initState() {
     super.initState();
     _initGoalFromProfile();
+    final days = widget.initialDays;
+    if (days != null && _daysOptions.contains(days)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _onDaysCountChanged(days);
+        _generateWorkout();
+      });
+    }
   }
 
   void _initGoalFromProfile() {
@@ -170,9 +184,6 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
       _isLoading = true;
       _generatedWeek = [];
     });
-
-    // Simulate "Thinking" delay for UX
-    await Future.delayed(const Duration(milliseconds: 1200));
 
     // Ensure selected days list is non-empty and sorted
     if (_selectedDays.isEmpty) {
@@ -465,7 +476,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
             SizedBox(width: 8.w),
             Flexible(
               child: Text(
-                'Unlock AI Workouts',
+                'Unlock Plan Builder',
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: ColorManager.textPrimary,
@@ -557,7 +568,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
   Widget _buildProPerkRow(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 15.sp, color: ColorManager.primary),
+        Icon(icon, size: 15.sp, color: ColorManager.primaryText),
         SizedBox(width: 8.w),
         Expanded(
           child: Text(
@@ -755,16 +766,16 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
               icon: Icon(
                 canSave ? Icons.bookmark_add_rounded : Icons.lock_outline_rounded,
                 size: 16.sp,
-                color: Colors.white,
+                color: canSave ? ColorManager.onMint : Colors.white,
               ),
               label: Text(
                 canSave ? 'Save to Schedule' : 'Save (Pro)',
-                style: TextStyle(color: Colors.white, fontSize: 12.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(color: canSave ? ColorManager.onMint : Colors.white, fontSize: 12.sp, fontWeight: FontWeight.bold),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: canSave ? ColorManager.primary : Colors.amber.shade700,
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
               ),
             ),
           ],
@@ -783,7 +794,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: AppBar(
-        title: Text('AI Workout Generator', style: TextStyle(color: ColorManager.textPrimary)),
+        title: Text('Plan Builder', style: TextStyle(color: ColorManager.textPrimary)),
         backgroundColor: ColorManager.background,
         iconTheme: IconThemeData(color: ColorManager.textPrimary),
       ),
@@ -801,7 +812,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                 backgroundColor: ColorManager.primary,
                 padding: EdgeInsets.symmetric(vertical: 16.h),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(AppRadius.button.r),
                 ),
               ),
               child: _isLoading
@@ -815,14 +826,14 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.auto_awesome,
-                            size: 18.sp, color: Colors.black),
+                            size: 18.sp, color: ColorManager.onMint),
                         SizedBox(width: 8.w),
                         Text(
                           'GENERATE WEEKLY PLAN',
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: ColorManager.onMint,
                           ),
                         ),
                       ],
@@ -842,7 +853,8 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
       ),
       child: Column(
@@ -962,7 +974,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
         title: Text(
           dayPlan['day'] ?? 'Day',
-          style: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.bold, fontSize: 16.sp),
+          style: TextStyle(color: ColorManager.primaryText, fontWeight: FontWeight.bold, fontSize: 16.sp),
         ),
         subtitle: Text(
           dayPlan['focus'] ?? 'Workout',
@@ -971,7 +983,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
         children: exercises.map((e) => ListTile(
           dense: true,
           contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-          leading: Icon(Icons.play_circle_fill, color: ColorManager.primary, size: 24.sp),
+          leading: Icon(Icons.play_circle_fill, color: ColorManager.primaryText, size: 24.sp),
           title: Text(
             e['name'],
             style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold),
@@ -1076,7 +1088,8 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: ColorManager.surface,
-                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: ColorManager.cardShadow,
+                        borderRadius: BorderRadius.circular(AppRadius.tile),
                       ),
                       child: Text(
                         exercise.description,
@@ -1147,7 +1160,8 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: ColorManager.surface,
-                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: ColorManager.cardShadow,
+                          borderRadius: BorderRadius.circular(AppRadius.small),
                           border: Border.all(
                             color: ColorManager.primary.withValues(alpha: 0.2),
                             width: 1,
@@ -1167,7 +1181,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                                 child: Text(
                                   '${entry.key + 1}',
                                   style: TextStyle(
-                                    color: Colors.black,
+                                    color: ColorManager.onMint,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16.sp,
                                   ),
@@ -1206,14 +1220,14 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                       backgroundColor: ColorManager.primary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(AppRadius.button),
                       ),
                     ),
                     onPressed: () => Navigator.pop(context),
                     child: Text(
                       'Close',
                       style: TextStyle(
-                        color: Colors.black,
+                        color: ColorManager.onMint,
                         fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1233,7 +1247,8 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: ColorManager.surface,
-        borderRadius: BorderRadius.circular(15),
+        boxShadow: ColorManager.cardShadow,
+        borderRadius: BorderRadius.circular(AppRadius.tile),
         border: Border.all(
           color: ColorManager.primary.withValues(alpha: 0.3),
           width: 1,
@@ -1244,7 +1259,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
         children: [
           Row(
             children: [
-              Icon(icon, color: ColorManager.primary, size: 20.sp),
+              Icon(icon, color: ColorManager.primaryText, size: 20.sp),
               SizedBox(width: 8.w),
               Text(
                 label,

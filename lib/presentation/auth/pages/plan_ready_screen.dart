@@ -1,3 +1,5 @@
+import 'package:fitness_app/utils/managers/radius_manager.dart';
+import 'package:fitness_app/utils/managers/card_size_manager.dart';
 import 'package:fitness_app/presentation/home/widgets/gradient_hero_card.dart';
 import 'package:fitness_app/presentation/widgets/reminder_opt_in_card.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
@@ -114,9 +116,9 @@ class PlanReadyScreen extends StatelessWidget {
                       key: const Key('plan_ready_hero'),
                       tone: HeroTone.teal,
                       imageAsset: HeroImages.forGoal(copy.imageHint),
-                      imageSize: 130.w,
+                      imageSize: AppCardSize.heroImageSize,
                       imageTop: 24.h,
-                      padding: EdgeInsets.all(18.w),
+                      padding: EdgeInsets.all(AppCardSize.heroPadding),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -211,7 +213,7 @@ class PlanReadyScreen extends StatelessWidget {
                         elevation: 0,
                         padding: EdgeInsets.symmetric(vertical: 14.h),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14.r),
+                          borderRadius: BorderRadius.circular(AppRadius.button.r),
                         ),
                       ),
                       child: Text(
@@ -258,7 +260,7 @@ class PlanReadyScreen extends StatelessWidget {
               shape: BoxShape.circle,
               color: ColorManager.primary.withValues(alpha: 0.16),
             ),
-            child: Icon(icon, color: ColorManager.primary, size: 16.sp),
+            child: Icon(icon, color: ColorManager.primaryText, size: 16.sp),
           ),
           SizedBox(width: 12.w),
           Expanded(
