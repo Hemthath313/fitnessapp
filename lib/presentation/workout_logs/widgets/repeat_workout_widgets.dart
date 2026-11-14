@@ -50,13 +50,13 @@ class RepeatWorkoutButton extends StatelessWidget {
       style: TextStyle(
         fontSize: 13.sp,
         fontWeight: FontWeight.bold,
-        color: expanded ? ColorManager.onMint : ColorManager.primary,
+        color: expanded ? ColorManager.onMint : ColorManager.primaryText,
       ),
     );
     final icon = Icon(
       Icons.replay_rounded,
       size: 18.sp,
-      color: expanded ? ColorManager.onMint : ColorManager.primary,
+      color: expanded ? ColorManager.onMint : ColorManager.primaryText,
     );
     final onPressed = () => launchRepeatWorkout(context, session);
 

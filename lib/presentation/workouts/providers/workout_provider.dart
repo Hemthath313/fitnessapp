@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -964,8 +965,8 @@ class WorkoutProvider with ChangeNotifier {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content:
-                Text('🎉 New Achievement Unlocked: ${newAchievements.last}!'),
-            backgroundColor: Colors.amber,
+                Text('🎉 New Achievement Unlocked: ${newAchievements.last}!', style: const TextStyle(color: ColorManager.inkOnLight)),
+            backgroundColor: ColorManager.premium,
             duration: const Duration(seconds: 3),
           ),
         );

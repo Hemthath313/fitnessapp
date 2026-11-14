@@ -65,14 +65,14 @@ class WeeklyActivityBars extends StatelessWidget {
                     Container(
                       width: 34.w,
                       height: 34.w,
-                      decoration: const BoxDecoration(
-                        color: ColorManager.iconChip,
+                      decoration: BoxDecoration(
+                        color: ColorManager.primary.withValues(alpha: 0.14),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.fitness_center_rounded,
                         size: 16.sp,
-                        color: Colors.white,
+                        color: ColorManager.primaryText,
                       ),
                     ),
                     SizedBox(width: 10.w),
@@ -146,7 +146,7 @@ class WeeklyActivityBars extends StatelessWidget {
                                     color: isToday
                                         ? ColorManager.textPrimary
                                         : ColorManager.textTertiary,
-                                    fontSize: 11.sp,
+                                    fontSize: 12.sp,
                                     fontWeight: isToday
                                         ? FontWeight.w600
                                         : FontWeight.w500,
@@ -174,7 +174,7 @@ class WeeklyActivityBars extends StatelessWidget {
                             child: Text(
                               'Complete a workout to light up your week.',
                               style: TextStyle(
-                                color: ColorManager.textMuted,
+                                color: ColorManager.textSecondary,
                                 fontSize: 12.sp,
                               ),
                             ),

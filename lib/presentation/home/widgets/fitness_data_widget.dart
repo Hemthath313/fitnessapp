@@ -222,7 +222,7 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                 child: Column(
                   children: [
                     Icon(Icons.error_outline,
-                        color: ColorManager.red, size: 48),
+                        color: ColorManager.errorText, size: 48),
                     SizedBox(height: 16),
                     Text(
                       'Unable to load fitness data',
@@ -285,11 +285,11 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                 var isUnderOrOverWeight =
                     (bmi >= 17 && bmi < 18.5) || (bmi > 25 && bmi <= 30);
                 if (isNormalBMI) {
-                  return const Color(0xFF10B981); // Emerald Green
+                  return ColorManager.success; // Emerald Green
                 } else if (isUnderOrOverWeight) {
-                  return const Color(0xFFF59E0B); // Amber / Yellow
+                  return ColorManager.warning; // Amber / Yellow
                 } else {
-                  return const Color(0xFFEF4444); // Red
+                  return ColorManager.error; // Red
                 }
               }
 
@@ -311,51 +311,26 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
             final isDarkMode = Theme.of(context).brightness == Brightness.dark;
             
             // Theme Decorations matching the user's recommended premium gradient:
-            final calorieCardDecoration = isDarkMode 
-                ? BoxDecoration(
-                    color: ColorManager.surface,
-                    boxShadow: ColorManager.cardShadow,
-                    borderRadius: BorderRadius.circular(AppRadius.card.r),
-                  )
-                : BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF0F766E), // Deep Teal
-                        Color(0xFF14B8A6), // Vibrant Teal
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(18.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF0F766E).withValues(alpha: 0.15),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      )
-                    ],
-                  );
+            final calorieCardDecoration = BoxDecoration(
+              color: ColorManager.surface,
+              boxShadow: ColorManager.cardShadow,
+              borderRadius: BorderRadius.circular(AppRadius.card.r),
+            );
 
             // Other cards (Water, BMI)
             final cardBg = ColorManager.surface;
             final cardDecoration = BoxDecoration(
               color: cardBg,
-              borderRadius: BorderRadius.circular(18.r),
-              boxShadow: [
-                BoxShadow(
-                  color: (isDarkMode ? Colors.black : Colors.grey).withValues(alpha: 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                )
-              ],
+              borderRadius: BorderRadius.circular(AppRadius.card.r),
+              boxShadow: ColorManager.cardShadow,
             );
 
-            final textColor = isDarkMode ? ColorManager.textPrimary : Colors.white;
-            final calorieSecondaryText = isDarkMode ? ColorManager.textSecondary : const Color(0xFFDCE7FF);
-            final calorieSmallLabelText = isDarkMode ? ColorManager.textSecondary : const Color(0xFFEAF1FF);
+            final textColor = ColorManager.textPrimary;
+            final calorieSecondaryText = ColorManager.textSecondary;
+            final calorieSmallLabelText = ColorManager.textSecondary;
             
-            final lightThemeTextColor = isDarkMode ? ColorManager.textPrimary : const Color(0xFF1E2140);
-            final lightThemeSecondaryTextColor = isDarkMode ? ColorManager.textSecondary : const Color(0xFF6B7280);
+            final lightThemeTextColor = ColorManager.textPrimary;
+            final lightThemeSecondaryTextColor = ColorManager.textSecondary;
 
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: PaddingManager.p16.w),
@@ -388,8 +363,8 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                               radius: 50.r,
                               lineWidth: 9.w,
                               percent: caloriePercent,
-                              progressColor: isDarkMode ? ColorManager.primary : Colors.white,
-                              backgroundColor: isDarkMode ? Colors.white10 : Colors.white24,
+                              progressColor: ColorManager.primary,
+                              backgroundColor: ColorManager.primary.withValues(alpha: 0.15),
                               animateFromLastPercent: true,
                               animation: true,
                               center: Column(
@@ -415,7 +390,7 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                                           : "/ -- kcal",
                                       style: TextStyle(
                                         color: calorieSmallLabelText,
-                                        fontSize: 11.sp,
+                                        fontSize: 12.sp,
                                       ),
                                     ),
                                   ),
@@ -430,7 +405,7 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                                   _buildCalorieMetric(
                                     label: "Consumed",
                                     value: "$consumedCalories kcal",
-                                    dotColor: isDarkMode ? const Color(0xFF93C5FD) : const Color(0xFFEAF1FF), 
+                                    dotColor: ColorManager.primaryLight, 
                                     textColor: calorieSecondaryText,
                                     valueColor: textColor,
                                   ),
@@ -440,7 +415,7 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                                     value: hasTarget
                                         ? "${remainingCalories.toStringAsFixed(0)} kcal"
                                         : "--",
-                                    dotColor: isDarkMode ? const Color(0xFF60A5FA) : const Color(0xFFDCE7FF),
+                                    dotColor: ColorManager.accent,
                                     textColor: calorieSecondaryText,
                                     valueColor: textColor,
                                   ),
@@ -450,7 +425,7 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                                     value: hasTarget
                                         ? "${targetCalories.toStringAsFixed(0)} kcal"
                                         : "Not Set",
-                                    dotColor: isDarkMode ? ColorManager.primary : Colors.white,
+                                    dotColor: ColorManager.primary,
                                     textColor: calorieSecondaryText,
                                     valueColor: textColor,
                                   ),
@@ -474,14 +449,14 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                                 children: [
                                   Icon(Icons.tune_rounded,
                                       size: 13.sp,
-                                      color: isDarkMode ? ColorManager.primary : Colors.white),
+                                      color: isDarkMode ? ColorManager.darkPrimaryText : Colors.white),
                                   SizedBox(width: 6.w),
                                   Flexible(
                                     child: Text(
                                       'Set daily calorie target in Profile',
                                       style: TextStyle(
-                                        color: isDarkMode ? ColorManager.primary : Colors.white,
-                                        fontSize: 11.sp,
+                                        color: isDarkMode ? ColorManager.primaryText : Colors.white,
+                                        fontSize: 12.sp,
                                         fontWeight: FontWeight.w600,
                                       ),
                                       maxLines: 1,
@@ -491,7 +466,7 @@ class _FitnessDataWidgetState extends State<FitnessDataWidget> {
                                   SizedBox(width: 4.w),
                                   Icon(Icons.arrow_forward_ios_rounded,
                                       size: 9.sp,
-                                      color: isDarkMode ? ColorManager.primary : Colors.white),
+                                      color: isDarkMode ? ColorManager.darkPrimaryText : Colors.white),
                                 ],
                               ),
                             ),
@@ -757,7 +732,7 @@ class _WaterGlassPainter extends CustomPainter {
         ..close();
 
       final waterPaint = Paint()
-        ..color = const Color(0xFF0D9488) // Same teal
+        ..color = ColorManager.primary
         ..style = PaintingStyle.fill;
 
       canvas.drawPath(waterPath, waterPaint);

@@ -62,10 +62,10 @@ class _ConfigureWaterGoalDialogState extends State<ConfigureWaterGoalDialog> {
                 Container(
                   padding: EdgeInsets.all(8.w),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.15),
+                    color: ColorManager.info.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.water_drop_rounded, color: Colors.blue, size: 20),
+                  child: Icon(Icons.water_drop_rounded, color: ColorManager.infoText, size: 20),
                 ),
                 SizedBox(width: 10.w),
                 Expanded(
@@ -84,7 +84,7 @@ class _ConfigureWaterGoalDialogState extends State<ConfigureWaterGoalDialog> {
                         'General wellness & recovery target',
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                         ),
                       ),
                     ],
@@ -111,7 +111,7 @@ class _ConfigureWaterGoalDialogState extends State<ConfigureWaterGoalDialog> {
                   Text(
                     '${(_selectedTargetMl / 1000).toStringAsFixed(1)} Litres',
                     style: TextStyle(
-                      color: Colors.blue,
+                      color: ColorManager.infoText,
                       fontSize: 24.sp,
                       fontWeight: FontWeight.bold,
                     ),
@@ -139,7 +139,7 @@ class _ConfigureWaterGoalDialogState extends State<ConfigureWaterGoalDialog> {
                   key: Key('water_preset_${ml.toInt()}'),
                   label: Text('${(ml / 1000).toStringAsFixed(1)}L'),
                   selected: isSelected,
-                  selectedColor: Colors.blue,
+                  selectedColor: ColorManager.info,
                   backgroundColor: ColorManager.surfaceDark,
                   labelStyle: TextStyle(
                     color: isSelected ? Colors.white : ColorManager.textPrimary,
@@ -160,7 +160,7 @@ class _ConfigureWaterGoalDialogState extends State<ConfigureWaterGoalDialog> {
               min: 1500.0,
               max: 5000.0,
               divisions: 14, // 250ml steps
-              activeColor: Colors.blue,
+              activeColor: ColorManager.info,
               inactiveColor: ColorManager.surfaceDark,
               onChanged: (val) => setState(() => _selectedTargetMl = val),
             ),
@@ -189,7 +189,7 @@ class _ConfigureWaterGoalDialogState extends State<ConfigureWaterGoalDialog> {
                           nav.pop();
                         },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: ColorManager.primary,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
                   ),
                   child: Text(

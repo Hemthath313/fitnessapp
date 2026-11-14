@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:fitness_app/utils/ad_config.dart';
+import 'package:fitness_app/services/ad_consent_service.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -139,10 +140,17 @@ class PremiumAwareBannerAd extends StatelessWidget {
     return Consumer<SubscriptionProvider>(
       builder: (context, subProvider, _) {
         if (subProvider.isPremium) return const SizedBox.shrink();
-        
-        return BannerAdWidget(
-          pageName: pageName,
-          bottomMargin: bottomMargin,
+
+        // No ad request until consent is resolved and the SDK is started.
+        return ValueListenableBuilder<bool>(
+          valueListenable: AdConsentService.adsReady,
+          builder: (context, ready, _) {
+            if (!ready) return const SizedBox.shrink();
+            return BannerAdWidget(
+              pageName: pageName,
+              bottomMargin: bottomMargin,
+            );
+          },
         );
       },
     );

@@ -176,7 +176,7 @@ class _ReminderOptInCardState extends State<ReminderOptInCard> {
                       color: ColorManager.primary.withValues(alpha: 0.16),
                     ),
                     child: Icon(Icons.notifications_active_rounded,
-                        color: ColorManager.primary, size: 18.sp),
+                        color: ColorManager.primaryText, size: 18.sp),
                   ),
                   SizedBox(width: 12.w),
                   Expanded(
@@ -206,7 +206,7 @@ class _ReminderOptInCardState extends State<ReminderOptInCard> {
                   ActionChip(
                     key: const Key('reminder_time_chip'),
                     avatar: Icon(Icons.schedule_rounded,
-                        size: 16.sp, color: ColorManager.primary),
+                        size: 16.sp, color: ColorManager.primaryText),
                     label: Text(
                       _time.format(context),
                       style: TextStyle(

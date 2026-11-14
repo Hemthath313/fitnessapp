@@ -193,7 +193,7 @@ class _WorkoutSessionLauncherPageState
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.bedtime_rounded,
-                    size: 48.sp, color: Colors.blueAccent),
+                    size: 48.sp, color: ColorManager.info),
                 SizedBox(height: 16.h),
                 Text(
                   _errorMessage ?? 'No scheduled workout found.',

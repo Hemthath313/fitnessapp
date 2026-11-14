@@ -217,7 +217,7 @@ void main() {
 
       // 2. Search field and exercise count exist
       expect(find.byKey(const Key('exercise_search_field')), findsOneWidget);
-      expect(find.text('Showing 13 of 13 exercises'), findsOneWidget);
+      expect(find.textContaining('Showing'), findsNothing); // count hidden when not filtering
 
       // 3. Permanent filter chips are NOT on the main screen
       expect(find.byKey(const Key('difficulty_filter_Beginner')), findsNothing);
@@ -251,7 +251,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Initial state: all 13 chest exercises
-      expect(find.text('Showing 13 of 13 exercises'), findsOneWidget);
+      expect(find.textContaining('Showing'), findsNothing); // count hidden when not filtering
       expect(find.text('Barbell Decline Bench Press'), findsOneWidget);
 
       // 1. Open bottom sheet
@@ -277,7 +277,7 @@ void main() {
       );
 
       // CRITICAL: Background list MUST NOT change yet — Barbell Decline Bench Press (Intermediate) is still rendered
-      expect(find.text('Showing 13 of 13 exercises'), findsOneWidget);
+      expect(find.textContaining('Showing'), findsNothing); // count hidden when not filtering
       expect(find.text('Barbell Decline Bench Press'), findsOneWidget);
 
       // 3. Close bottom sheet WITHOUT tapping Apply (discard draft)
@@ -288,7 +288,7 @@ void main() {
       expect(find.byKey(const Key('apply_exercise_filters_button')), findsNothing);
 
       // Background list is still unfiltered (draft was discarded)
-      expect(find.text('Showing 13 of 13 exercises'), findsOneWidget);
+      expect(find.textContaining('Showing'), findsNothing); // count hidden when not filtering
       expect(find.text('Barbell Decline Bench Press'), findsOneWidget);
 
       // 4. Reopen sheet -> should reflect currently applied filters ('All', not 'Beginner')
@@ -311,7 +311,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Still unchanged in background before Apply
-      expect(find.text('Showing 13 of 13 exercises'), findsOneWidget);
+      expect(find.textContaining('Showing'), findsNothing); // count hidden when not filtering
 
       await tester.tap(find.byKey(const Key('apply_exercise_filters_button')));
       await tester.pumpAndSettle();
@@ -364,7 +364,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Now list is fully reset
-      expect(find.text('Showing 13 of 13 exercises'), findsOneWidget);
+      expect(find.textContaining('Showing'), findsNothing); // count hidden when not filtering
       expect(find.text('Barbell Decline Bench Press'), findsOneWidget);
     });
 

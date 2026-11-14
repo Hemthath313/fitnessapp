@@ -58,12 +58,12 @@ class MealCard extends StatelessWidget {
                   width: 44.w,
                   height: 44.w,
                   decoration: BoxDecoration(
-                    color: ColorManager.iconChip,
+                    color: ColorManager.chipBackground,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     _iconFor(name),
-                    color: ColorManager.primary,
+                    color: ColorManager.primaryText,
                     size: 22.sp,
                   ),
                 ),
@@ -133,7 +133,7 @@ class MealCard extends StatelessWidget {
                               ? Icon(
                                   Icons.check_rounded,
                                   size: 18.sp,
-                                  color: const Color(0xFF06201B),
+                                  color: ColorManager.onMint,
                                 )
                               : null,
                         ),
@@ -172,7 +172,7 @@ class MealCard extends StatelessWidget {
         label,
         style: TextStyle(
           color: ColorManager.primaryText,
-          fontSize: 11.sp,
+          fontSize: 12.sp,
           fontWeight: FontWeight.w700,
         ),
       ),

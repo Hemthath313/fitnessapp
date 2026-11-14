@@ -1,16 +1,17 @@
 import 'dart:async';
+import 'dart:ui' show PlatformDispatcher;
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:fitness_app/app/app.dart';
-import 'package:fitness_app/utils/ad_config.dart';
+import 'package:fitness_app/services/ad_consent_service.dart';
 import 'package:fitness_app/services/notification_service.dart';
+import 'package:fitness_app/utils/units.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart'; // For kDebugMode
 import 'package:flutter_gemini/flutter_gemini.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'firebase_options.dart';
 
 void main() {
@@ -58,19 +59,36 @@ void main() {
         debugPrint('Firebase App Check error: $e');
       }
 
-      // Initialize Google Mobile Ads
-      await MobileAds.instance.initialize();
+      // Mobile Ads starts after the consent check (see AdConsentService),
+      // not here, so EU users are asked before any ad request.
 
-      // Set up Crashlytics
+      // Set up Crashlytics: widget/build errors and platform errors, not
+      // only the async errors runZonedGuarded catches.
       if (!kDebugMode) {
-        await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+        try {
+          await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+          FlutterError.onError =
+              FirebaseCrashlytics.instance.recordFlutterFatalError;
+          PlatformDispatcher.instance.onError = (error, stack) {
+            FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+            return true;
+          };
+        } catch (e) {
+          debugPrint('Crashlytics setup error: $e');
+        }
       }
       
       // Initialize Local Notifications
       final notificationService = NotificationService();
       await notificationService.initializeLocalNotifications();
 
+      // Lifting weight unit (kg / lb), used by every weight screen.
+      await Units.load();
+
       runApp(const MyApp());
+
+      // Consent form (EU/UK) and then the ads SDK, without blocking startup.
+      unawaited(AdConsentService.initialize());
     },
     (error, stackTrace) {
       // Send all Dart errors to Crashlytics

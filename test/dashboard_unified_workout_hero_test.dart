@@ -178,7 +178,7 @@ void main() {
       expect(find.byIcon(Icons.auto_awesome), findsWidgets);
       // Must NOT display transformation hero
       expect(find.textContaining('DAY 1 OF'), findsNothing);
-      expect(find.text('START DAY 1 WORKOUT'), findsNothing);
+      expect(find.text('Start Day 1 workout'), findsNothing);
     });
 
     // -------------------------------------------------------------------------
@@ -240,7 +240,7 @@ void main() {
       expect(find.text(TransformationPlansData.beginnerFitness30.title), findsOneWidget);
       expect(find.text('DAY 1 OF 30'), findsOneWidget);
       expect(find.textContaining('Week 1'), findsOneWidget);
-      expect(find.text('START DAY 1 WORKOUT'), findsOneWidget);
+      expect(find.text('Start Day 1 workout'), findsOneWidget);
       // AI Schedule must NOT be shown
       expect(find.text('Workout Schedule'), findsNothing);
       expect(find.text('Build Your Workout Plan'), findsNothing);
@@ -270,7 +270,7 @@ void main() {
 
       expect(find.text(TransformationPlansData.weightLoss60.title), findsOneWidget);
       expect(find.text('DAY 1 OF 60'), findsOneWidget);
-      expect(find.text('START DAY 1 WORKOUT'), findsOneWidget);
+      expect(find.text('Start Day 1 workout'), findsOneWidget);
       expect(find.textContaining('0% Complete'), findsOneWidget);
     });
 
@@ -298,7 +298,7 @@ void main() {
 
       expect(find.text(TransformationPlansData.muscleBuilding90.title), findsOneWidget);
       expect(find.text('DAY 1 OF 90'), findsOneWidget);
-      expect(find.text('START DAY 1 WORKOUT'), findsOneWidget);
+      expect(find.text('Start Day 1 workout'), findsOneWidget);
     });
 
     // -------------------------------------------------------------------------
@@ -325,7 +325,7 @@ void main() {
 
       expect(find.text(TransformationPlansData.strength12Week.title), findsOneWidget);
       expect(find.text('DAY 1 OF 84'), findsOneWidget);
-      expect(find.text('START DAY 1 WORKOUT'), findsOneWidget);
+      expect(find.text('Start Day 1 workout'), findsOneWidget);
     });
 
     // -------------------------------------------------------------------------
@@ -356,8 +356,8 @@ void main() {
       expect(find.text('DAY 7 • REST DAY'), findsOneWidget);
       expect(find.text('Rest & Muscle Repair'), findsOneWidget);
       // NO misleading Start Workout button on rest days!
-      expect(find.text('START DAY 7 WORKOUT'), findsNothing);
-      expect(find.text('VIEW PROGRAMME ROADMAP'), findsOneWidget);
+      expect(find.text('Start Day 7 workout'), findsNothing);
+      expect(find.text('View programme roadmap'), findsOneWidget);
     });
 
     // -------------------------------------------------------------------------
@@ -386,7 +386,7 @@ void main() {
 
       expect(find.text('DAY 2 • ACTIVE RECOVERY'), findsOneWidget);
       expect(find.text('Active Recovery & Mobility'), findsOneWidget);
-      expect(find.text('START ACTIVE RECOVERY'), findsOneWidget);
+      expect(find.text('Start active recovery'), findsOneWidget);
     });
 
     // -------------------------------------------------------------------------
@@ -416,8 +416,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Final day complete shows graduation button
-      expect(find.text('DAY 30 COMPLETED ✓'), findsOneWidget);
-      expect(find.text('VIEW PROGRAMME GRADUATION'), findsOneWidget);
+      expect(find.text('DAY 30 DONE'), findsOneWidget);
+      expect(find.text('View programme graduation'), findsOneWidget);
     });
 
     // -------------------------------------------------------------------------
@@ -492,7 +492,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // 1. Tapping START DAY 1 WORKOUT launches DayWorkoutSessionPage
-      final startButton = find.text('START DAY 1 WORKOUT');
+      final startButton = find.text('Start Day 1 workout');
       expect(startButton, findsOneWidget);
       await tester.tap(startButton);
       await tester.pumpAndSettle();
@@ -504,7 +504,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // 2. Tapping "Log Lift" in QuickActions when transformation workout is active routes to workoutLogRoute
-      final logLiftButton = find.text('Log Lift');
+      final logLiftButton = find.text('Log past workout');
       expect(logLiftButton, findsOneWidget);
       await tester.tap(logLiftButton);
       await tester.pumpAndSettle();

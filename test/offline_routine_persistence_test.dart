@@ -149,7 +149,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify that Home renders today's routine instead of "No Plan Active"
-      expect(find.text('No Plan Active'), findsNothing);
+      expect(find.text('No plan yet'), findsNothing);
       expect(find.text('Barbell Bench Press'), findsWidgets);
     });
 

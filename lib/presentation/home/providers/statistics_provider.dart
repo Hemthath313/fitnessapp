@@ -12,6 +12,105 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class StatisticsProvider with ChangeNotifier {
   int _currentStreak = 0;
+
+  // ── Streak freeze ──
+  // A freeze covers one missed workout day so the streak survives.
+  // Free: 1 per calendar month. Pro: 3 per month. Used automatically.
+  static const String _freezePrefsKey = 'streak_freeze_dates';
+  Set<DateTime> _frozenDates = {};
+  int _monthlyFreezeAllowance = 1;
+  DateTime? _freezeNoticeDate;
+
+  /// Freezes still available this calendar month.
+  int get freezesLeftThisMonth {
+    final now = _referenceNow ?? DateTime.now();
+    final usedThisMonth = _frozenDates
+        .where((d) => d.year == now.year && d.month == now.month)
+        .length;
+    final left = _monthlyFreezeAllowance - usedThisMonth;
+    return left < 0 ? 0 : left;
+  }
+
+  int get monthlyFreezeAllowance => _monthlyFreezeAllowance;
+
+  /// Pro members get 3 freezes a month instead of 1.
+  void setPremiumForStreakFreeze(bool isPremium) {
+    final next = isPremium ? 3 : 1;
+    if (next == _monthlyFreezeAllowance) return;
+    _monthlyFreezeAllowance = next;
+    notifyListeners();
+  }
+
+  /// Returns (once) the day a freeze was just used, so the UI can say so.
+  DateTime? consumeFreezeNotice() {
+    final d = _freezeNoticeDate;
+    _freezeNoticeDate = null;
+    return d;
+  }
+
+  static String _dayKey(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  Future<void> _loadFrozenDates() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _frozenDates = (prefs.getStringList(_freezePrefsKey) ?? [])
+          .map(DateTime.tryParse)
+          .whereType<DateTime>()
+          .map(normalizeLocalDate)
+          .toSet();
+    } catch (_) {}
+  }
+
+  Future<void> _saveFrozenDates() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(
+          _freezePrefsKey, _frozenDates.map(_dayKey).toList()..sort());
+    } catch (_) {}
+  }
+
+  /// Missed workout days between the last workout and yesterday that are
+  /// not already covered by a freeze.
+  List<DateTime> _uncoveredMissedDays(Set<DateTime> dates, DateTime today) {
+    if (dates.isEmpty) return const [];
+    final last = (dates.toList()..sort()).last;
+    final missed = <DateTime>[];
+    var d = DateTime(last.year, last.month, last.day + 1);
+    while (d.isBefore(today)) {
+      final scheduled = _scheduledWeekdays.isEmpty ||
+          _scheduledWeekdays.contains(d.weekday);
+      if (scheduled && !_frozenDates.contains(d)) missed.add(d);
+      d = DateTime(d.year, d.month, d.day + 1);
+    }
+    return missed;
+  }
+
+  /// Uses freezes automatically when they would save a running streak.
+  /// Returns true when a freeze was applied.
+  Future<bool> _applyStreakFreezeIfNeeded(
+      Set<DateTime> dates, int storedStreak) async {
+    if (storedStreak <= 0 || dates.isEmpty) return false;
+    final today = normalizeLocalDate(_referenceNow ?? DateTime.now());
+    final missed = _uncoveredMissedDays(dates, today);
+    if (missed.isEmpty) return false;
+    // Freezes are counted in the month of the missed day.
+    final byMonth = <String, int>{};
+    for (final m in missed) {
+      byMonth['${m.year}-${m.month}'] = (byMonth['${m.year}-${m.month}'] ?? 0) + 1;
+    }
+    for (final entry in byMonth.entries) {
+      final parts = entry.key.split('-');
+      final y = int.parse(parts[0]);
+      final mo = int.parse(parts[1]);
+      final used = _frozenDates.where((d) => d.year == y && d.month == mo).length;
+      if (used + entry.value > _monthlyFreezeAllowance) return false;
+    }
+    _frozenDates = {..._frozenDates, ...missed};
+    _freezeNoticeDate = missed.last;
+    await _saveFrozenDates();
+    return true;
+  }
   int _longestStreak = 0;
   DateTime? _lastWorkoutDate;
   int _totalWorkouts = 0;
@@ -348,6 +447,7 @@ class StatisticsProvider with ChangeNotifier {
       previousScheduledWeekdays: _previousScheduledWeekdays,
       scheduleEffectiveDate: _scheduleEffectiveDate,
       streakAtScheduleChange: _streakAtScheduleChange,
+      frozenDates: _frozenDates,
     );
     final longest = calculateLongestStreak(
       completedDates: normalizedDates,
@@ -441,6 +541,7 @@ class StatisticsProvider with ChangeNotifier {
     Set<int> previousScheduledWeekdays = const {},
     DateTime? scheduleEffectiveDate,
     int streakAtScheduleChange = 0,
+    Set<DateTime> frozenDates = const {},
   }) {
     final today = normalizeLocalDate(referenceNow ?? DateTime.now());
     final normalizedDates = normalizeAndDeduplicateDates(completedDates)
@@ -508,7 +609,8 @@ class StatisticsProvider with ChangeNotifier {
               : true;
         }
 
-        if (isMissedDay) {
+        // A streak freeze covers a missed day like a planned rest day.
+        if (isMissedDay && !frozenDates.contains(cursor)) {
           if (isAfterEffective) {
             brokeAfterEffectiveDay = true;
           }
@@ -609,6 +711,7 @@ class StatisticsProvider with ChangeNotifier {
       previousScheduledWeekdays: _previousScheduledWeekdays,
       scheduleEffectiveDate: _scheduleEffectiveDate,
       streakAtScheduleChange: _streakAtScheduleChange,
+      frozenDates: _frozenDates,
     );
   }
 
@@ -656,6 +759,8 @@ class StatisticsProvider with ChangeNotifier {
       // 3. Recalculate streak dynamically from the deduplicated dates
       final normalizedDates =
           normalizeAndDeduplicateDates(_completedWorkoutDates);
+      await _loadFrozenDates();
+      await _applyStreakFreezeIfNeeded(normalizedDates, storedStreak);
       if (normalizedDates.isNotEmpty) {
         final calculatedStreak = _calculateCurrentStreak(
           normalizedDates,
@@ -710,7 +815,22 @@ class StatisticsProvider with ChangeNotifier {
         }
       }
 
-      // 4. Update home widget
+      // 4. Evening "streak at risk" nudge when today is an open workout day.
+      try {
+        final now = _referenceNow ?? DateTime.now();
+        final isWorkoutDay = _scheduledWeekdays.isEmpty ||
+            _scheduledWeekdays.contains(now.weekday);
+        if (_currentStreak > 0 && isWorkoutDay && !hasWorkoutOnDate(now)) {
+          await NotificationService().scheduleStreakAtRiskReminder(
+            streak: _currentStreak,
+            freezesLeft: freezesLeftThisMonth,
+          );
+        } else {
+          await NotificationService().cancelStreakAtRiskReminder();
+        }
+      } catch (_) {}
+
+      // 5. Update home widget
       await HomeWidget.saveWidgetData<int>('streak', _currentStreak);
       await HomeWidget.updateWidget(androidName: 'FitnessWidgetProvider');
 
@@ -763,6 +883,7 @@ class StatisticsProvider with ChangeNotifier {
         previousScheduledWeekdays: _previousScheduledWeekdays,
         scheduleEffectiveDate: _scheduleEffectiveDate,
         streakAtScheduleChange: _streakAtScheduleChange,
+        frozenDates: _frozenDates,
       );
 
       final calculatedLongest = _calculateLongestStreak(normalizedDates);
@@ -836,6 +957,8 @@ class StatisticsProvider with ChangeNotifier {
         await NotificationProfile.saveStreak(
             current: currentStreak, longest: longestStreak);
         await notifications.scheduleStreakReminder();
+        // Today's workout is done: no "streak at risk" nudge tonight.
+        await notifications.cancelStreakAtRiskReminder();
         await notifications.scheduleWeeklyRecapNotification(
           workoutsThisWeek: weeklyDone,
           target: target,

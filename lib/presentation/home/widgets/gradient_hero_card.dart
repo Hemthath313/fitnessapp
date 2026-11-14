@@ -332,7 +332,7 @@ class HeroMetaChip extends StatelessWidget {
             text,
             style: TextStyle(
               color: Colors.white,
-              fontSize: 11.sp,
+              fontSize: 12.sp,
               fontWeight: FontWeight.w600,
             ),
           ),

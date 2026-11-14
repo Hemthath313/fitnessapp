@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/units.dart';
 import 'package:fitness_app/model/workout_log.dart';
 import 'package:fitness_app/services/strength_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
@@ -59,14 +60,14 @@ class LegacyWorkoutLogCard extends StatelessWidget {
                           Container(
                             padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                             decoration: BoxDecoration(
-                              color: Colors.blueGrey.withValues(alpha: 0.15),
+                              color: ColorManager.textTertiary.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(6.r),
                             ),
                             child: Text(
                               'Quick log',
                               style: TextStyle(
-                                color: Colors.blueGrey.shade200,
-                                fontSize: 11.sp,
+                                color: ColorManager.textSecondary,
+                                fontSize: 12.sp,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -78,14 +79,14 @@ class LegacyWorkoutLogCard extends StatelessWidget {
                         '${DateFormat('MMM d, yyyy').format(log.date)} • ${log.category}',
                         style: TextStyle(
                           color: ColorManager.textTertiary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                         ),
                       ),
                     ],
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.analytics_outlined, color: ColorManager.primary, size: 20.sp),
+                  icon: Icon(Icons.analytics_outlined, color: ColorManager.primaryText, size: 20.sp),
                   tooltip: 'View Progression',
                   onPressed: () => context.push(
                     '${Routes.exerciseTracker}?exerciseName=${Uri.encodeComponent(cleanName)}',
@@ -110,10 +111,10 @@ class LegacyWorkoutLogCard extends StatelessWidget {
                   child: Text(
                     log.category == 'Cardio'
                         ? '${s.reps} min'
-                        : '${s.reps} reps @ ${s.weight.toStringAsFixed(s.weight % 1 == 0 ? 0 : 1)} kg',
+                        : '${s.reps} reps @ ${Units.fmtSmart(s.weight)} ${Units.label}',
                     style: TextStyle(
                       color: ColorManager.textSecondary,
-                      fontSize: 11.sp,
+                      fontSize: 12.sp,
                     ),
                   ),
                 );

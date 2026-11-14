@@ -116,6 +116,22 @@ class NotificationCopy {
     );
   }
 
+  /// Evening nudge on a workout day that is still open while a streak is
+  /// running. [freezesLeft] tells the user a freeze would cover them.
+  static NotificationText streakAtRisk({
+    required String name,
+    required int streak,
+    required int freezesLeft,
+  }) {
+    final dayWord = streak == 1 ? 'day' : 'days';
+    return NotificationText(
+      'Keep your $streak-$dayWord streak 🔥',
+      freezesLeft > 0
+          ? _say(name, 'a 20-minute session tonight keeps it going. A freeze can cover today, but why spend it?')
+          : _say(name, 'a 20-minute session tonight keeps your streak alive.'),
+    );
+  }
+
   /// Comeback nudges after [days] (3, 7 or 14) of silence. Frames what the
   /// user has already built instead of what they might lose.
   static NotificationText comeback({

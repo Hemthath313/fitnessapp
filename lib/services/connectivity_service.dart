@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -175,7 +176,7 @@ class NetworkService {
         toastLength: Toast.LENGTH_LONG,
         gravity: ToastGravity.BOTTOM,
         backgroundColor:
-            Colors.red.withValues(alpha: 0.6), // Soft red styling
+            ColorManager.error.withValues(alpha: 0.6), // Soft red styling
         textColor: Colors.white,
       ).then((_) => _isToastVisible = false); // Reset flag after toast
     }

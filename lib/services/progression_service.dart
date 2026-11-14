@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/units.dart';
 import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/model/workout_log.dart';
 
@@ -31,12 +32,16 @@ class ProgressionRecommendation {
   /// Formatted initial weight string for input controllers.
   /// Returns an empty string `''` when [hasRecommendedWeight] is false so that
   /// ambiguous-equipment and unknown custom exercises remain explicitly unconfigured.
-  String get formattedWeight =>
-      hasRecommendedWeight ? ProgressionService.formatWeight(recommendedWeight) : '';
+  /// Recommended weight as input text, in the user's unit (kg or lb).
+  String get formattedWeight => !hasRecommendedWeight
+      ? ''
+      : (Units.useLb
+          ? Units.inputText(recommendedWeight)
+          : ProgressionService.formatWeight(recommendedWeight));
 
   /// Target summary string for the progressive overload banner.
   String get targetSummary => hasRecommendedWeight
-      ? 'Target: ${recommendedWeight.toStringAsFixed(1)} kg × $targetMinReps-$targetMaxReps'
+      ? 'Target: ${Units.fmt(recommendedWeight, 1)} ${Units.label} × $targetMinReps-$targetMaxReps'
       : 'Target: Select load × $targetMinReps-$targetMaxReps';
 }
 
@@ -300,7 +305,7 @@ class ProgressionService {
       category: category,
     );
     if (initial == null) return '';
-    return formatWeight(initial);
+    return Units.useLb ? Units.inputText(initial) : formatWeight(initial);
   }
 
   /// Internal numeric fallback for callers requiring a non-null `double`.
@@ -330,20 +335,23 @@ class ProgressionService {
       previousLog: previousLog,
     );
     final hasWeight = rec.hasRecommendedWeight && rec.recommendedWeight > 0;
-    final weight = formatWeight(rec.recommendedWeight);
+    final weight = Units.useLb
+        ? Units.inputText(rec.recommendedWeight)
+        : formatWeight(rec.recommendedWeight);
+    final u = Units.label;
     switch (rec.type) {
       case ProgressionType.increaseWeight:
-        return '🔺 Try $weight kg today';
+        return '🔺 Try $weight $u today';
       case ProgressionType.increaseReps:
         return hasWeight
-            ? 'Same $weight kg, aim for +1 rep per set'
+            ? 'Same $weight $u, aim for +1 rep per set'
             : 'Aim for +1 rep per set';
       case ProgressionType.maintain:
         return hasWeight
-            ? 'Hold $weight kg, aim for ${rec.targetMinReps}+ clean reps'
+            ? 'Hold $weight $u, aim for ${rec.targetMinReps}+ clean reps'
             : 'Aim for ${rec.targetMinReps}+ clean reps';
       case ProgressionType.deload:
-        return hasWeight ? 'Ease back to $weight kg' : 'Take it lighter today';
+        return hasWeight ? 'Ease back to $weight $u' : 'Take it lighter today';
       case ProgressionType.baseline:
         return null;
     }
@@ -445,8 +453,8 @@ class ProgressionService {
         targetMinReps: minReps,
         targetMaxReps: maxReps,
         reason:
-            'Crushed $maxReps reps across all sets last time! Add +$increment kg and reset to $minReps reps.',
-        badgeLabel: '+${increment.toStringAsFixed(1)} kg STEP UP ⚡',
+            'Crushed $maxReps reps across all sets last time! Add +${Units.fmtSmart(increment)} ${Units.label} and reset to $minReps reps.',
+        badgeLabel: '+${Units.fmt(increment, 1)} ${Units.label} STEP UP ⚡',
         type: ProgressionType.increaseWeight,
       );
     } else if (allHitMinReps) {
@@ -456,7 +464,7 @@ class ProgressionService {
         targetMinReps: minReps,
         targetMaxReps: maxReps,
         reason:
-            'Solid base last time. Keep $lastHeaviestWeight kg and aim for +1 rep on your final sets.',
+            'Solid base last time. Keep ${Units.fmtSmart(lastHeaviestWeight)} ${Units.label} and aim for +1 rep on your final sets.',
         badgeLabel: '+1 REP TARGET 🔥',
         type: ProgressionType.increaseReps,
       );
@@ -467,7 +475,7 @@ class ProgressionService {
         targetMinReps: minReps,
         targetMaxReps: maxReps,
         reason:
-            'Hold at $lastHeaviestWeight kg. Focus on strict form to hit at least $minReps clean reps.',
+            'Hold at ${Units.fmtSmart(lastHeaviestWeight)} ${Units.label}. Focus on strict form to hit at least $minReps clean reps.',
         badgeLabel: 'HOLD WEIGHT 🛡️',
         type: ProgressionType.maintain,
       );

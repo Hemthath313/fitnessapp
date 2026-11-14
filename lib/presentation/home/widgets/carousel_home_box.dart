@@ -118,13 +118,13 @@ class CarouselHomeBox extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: onTap,
                   icon: Icon(Icons.arrow_forward_rounded,
-                      size: 16.sp, color: ColorManager.onMint),
+                      size: 16.sp, color: ColorManager.inkOnLight),
                   label: Text(
                     actionText!,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: ColorManager.onMint,
+                      color: ColorManager.inkOnLight,
                       fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
                     ),

@@ -440,7 +440,10 @@ final GoRouter router = GoRouter(
         path: Routes.workoutLogRoute,
         pageBuilder: (context, state) =>
             PageTransitions.buildPageWithSlideTransition(
-                state.pageKey, const WorkoutLogScreen())),
+                state.pageKey,
+                WorkoutLogScreen(
+                    initialDate:
+                        state.extra is DateTime ? state.extra as DateTime : null))),
     GoRoute(
         path: Routes.workoutHistoryRoute,
         pageBuilder: (context, state) =>

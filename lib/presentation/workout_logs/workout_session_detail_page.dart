@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/units.dart';
 import 'package:fitness_app/utils/managers/layout_manager.dart';
 import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/model/workout_log.dart';
@@ -88,7 +89,7 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: ColorManager.error),
             child: const Text('Delete', style: TextStyle(color: Colors.white)),
           ),
         ],
@@ -222,9 +223,9 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
                 value: 'delete',
                 child: Row(
                   children: [
-                    const Icon(Icons.delete_outline, color: Colors.redAccent),
+                    Icon(Icons.delete_outline, color: ColorManager.errorText),
                     SizedBox(width: 10.w),
-                    const Text('Delete workout', style: TextStyle(color: Colors.redAccent)),
+                    Text('Delete workout', style: TextStyle(color: ColorManager.errorText)),
                   ],
                 ),
               ),
@@ -260,17 +261,17 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                   decoration: BoxDecoration(
-                    color: isPartial ? Colors.orange.withValues(alpha: 0.15) : Colors.green.withValues(alpha: 0.15),
+                    color: isPartial ? ColorManager.warning.withValues(alpha: 0.15) : ColorManager.success.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10.r),
                     border: Border.all(
-                      color: isPartial ? Colors.orange.withValues(alpha: 0.4) : Colors.green.withValues(alpha: 0.4),
+                      color: isPartial ? ColorManager.warning.withValues(alpha: 0.4) : ColorManager.success.withValues(alpha: 0.4),
                     ),
                   ),
                   child: Text(
                     isPartial ? 'Partial Session' : 'Completed',
                     style: TextStyle(
-                      color: isPartial ? Colors.orange : Colors.greenAccent,
-                      fontSize: 11.sp,
+                      color: isPartial ? ColorManager.warningText : ColorManager.successText,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -295,13 +296,13 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
                     icon: Icons.timer_outlined,
                     label: 'Duration',
                     value: _formatDuration(session.durationSeconds),
-                    color: Colors.blueAccent,
+                    color: ColorManager.info,
                   ),
                   Container(width: 1, height: 40.h, color: ColorManager.divider),
                   _buildSummaryItem(
                     icon: Icons.fitness_center_rounded,
                     label: 'Total Volume',
-                    value: '${session.totalVolume.toInt()} kg',
+                    value: '${Units.intOf(session.totalVolume)} ${Units.label}',
                     color: ColorManager.primary,
                   ),
                   Container(width: 1, height: 40.h, color: ColorManager.divider),
@@ -309,7 +310,7 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
                     icon: Icons.checklist_rounded,
                     label: 'Exercises',
                     value: '${session.exercises.length}',
-                    color: Colors.purpleAccent,
+                    color: ColorManager.violetText,
                   ),
                 ],
               ),
@@ -378,7 +379,7 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
         SizedBox(height: 2.h),
         Text(
           label,
-          style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+          style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
         ),
       ],
     );
@@ -428,7 +429,7 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
             SizedBox(height: 4.h),
             Text(
               exercise.notes!,
-              style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontStyle: FontStyle.italic),
+              style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp, fontStyle: FontStyle.italic),
             ),
           ],
           SizedBox(height: 10.h),
@@ -442,11 +443,11 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
             ),
             child: Row(
               children: [
-                SizedBox(width: 32.w, child: Text('SET', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold))),
-                Expanded(child: Text('TYPE', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold))),
-                SizedBox(width: 70.w, child: Text('WEIGHT', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold))),
-                SizedBox(width: 50.w, child: Text('REPS', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold))),
-                SizedBox(width: 65.w, child: Text('EST. 1RM', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold))),
+                SizedBox(width: 32.w, child: Text('SET', style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp, fontWeight: FontWeight.bold))),
+                Expanded(child: Text('TYPE', style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp, fontWeight: FontWeight.bold))),
+                SizedBox(width: 70.w, child: Text('WEIGHT', style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp, fontWeight: FontWeight.bold))),
+                SizedBox(width: 50.w, child: Text('REPS', style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp, fontWeight: FontWeight.bold))),
+                SizedBox(width: 65.w, child: Text('EST. 1RM', style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp, fontWeight: FontWeight.bold))),
                 SizedBox(width: 30.w, child: const SizedBox.shrink()),
               ],
             ),
@@ -483,7 +484,7 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
                   SizedBox(
                     width: 70.w,
                     child: Text(
-                      '${set.weight.toStringAsFixed(set.weight % 1 == 0 ? 0 : 1)} kg',
+                      '${Units.fmtSmart(set.weight)} ${Units.label}',
                       style: TextStyle(color: ColorManager.textPrimary, fontSize: 13.sp, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -497,7 +498,7 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
                   SizedBox(
                     width: 65.w,
                     child: Text(
-                      est1RM > 0 ? '${est1RM.toStringAsFixed(1)} kg' : '—',
+                      est1RM > 0 ? '${Units.fmt(est1RM, 1)} ${Units.label}' : '—',
                       style: TextStyle(color: ColorManager.primaryText, fontSize: 12.sp, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -509,8 +510,8 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
                           : (set.isCompleted ? Icons.check_circle_rounded : Icons.radio_button_unchecked),
                       size: 16.sp,
                       color: _editing
-                          ? ColorManager.primary
-                          : (set.isCompleted ? Colors.greenAccent : ColorManager.textTertiary),
+                          ? ColorManager.primaryText
+                          : (set.isCompleted ? ColorManager.success : ColorManager.textTertiary),
                     ),
                   ),
                 ],
@@ -530,18 +531,18 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
 
     switch (type) {
       case SetType.warmup:
-        bg = Colors.amber.withValues(alpha: 0.15);
-        text = Colors.amber;
+        bg = ColorManager.premium.withValues(alpha: 0.15);
+        text = ColorManager.premium;
         label = 'Warmup';
         break;
       case SetType.drop:
-        bg = Colors.purple.withValues(alpha: 0.15);
-        text = Colors.purpleAccent;
+        bg = ColorManager.violet.withValues(alpha: 0.15);
+        text = ColorManager.violetText;
         label = 'Drop';
         break;
       case SetType.failure:
-        bg = Colors.red.withValues(alpha: 0.15);
-        text = Colors.redAccent;
+        bg = ColorManager.error.withValues(alpha: 0.15);
+        text = ColorManager.error;
         label = 'Failure';
         break;
       case SetType.normal:
@@ -559,7 +560,7 @@ class _WorkoutSessionDetailPageState extends State<WorkoutSessionDetailPage> {
       ),
       child: Text(
         label,
-        style: TextStyle(color: text, fontSize: 11.sp, fontWeight: FontWeight.w600),
+        style: TextStyle(color: text, fontSize: 12.sp, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -589,8 +590,7 @@ class _SetEditDialogState extends State<_SetEditDialog> {
   @override
   void initState() {
     super.initState();
-    _weight = TextEditingController(
-        text: widget.weight.toStringAsFixed(widget.weight % 1 == 0 ? 0 : 1));
+    _weight = TextEditingController(text: Units.fmtSmart(widget.weight));
     _reps = TextEditingController(text: '${widget.reps}');
   }
 
@@ -602,7 +602,7 @@ class _SetEditDialogState extends State<_SetEditDialog> {
   }
 
   void _save() {
-    final w = double.tryParse(_weight.text.trim().replaceAll(',', '.'));
+    final w = Units.parseToKg(_weight.text);
     final r = int.tryParse(_reps.text.trim());
     if (w == null || w < 0 || r == null || r <= 0) {
       setState(() => _error = 'Enter a weight of 0 or more and at least 1 rep.');
@@ -628,7 +628,7 @@ class _SetEditDialogState extends State<_SetEditDialog> {
             controller: _weight,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: TextStyle(color: ColorManager.textPrimary),
-            decoration: const InputDecoration(labelText: 'Weight (kg)'),
+            decoration: InputDecoration(labelText: 'Weight (${Units.label})'),
           ),
           SizedBox(height: 12.h),
           TextField(
@@ -640,7 +640,7 @@ class _SetEditDialogState extends State<_SetEditDialog> {
           ),
           if (_error != null) ...[
             SizedBox(height: 8.h),
-            Text(_error!, style: TextStyle(color: Colors.redAccent, fontSize: 12.sp)),
+            Text(_error!, style: TextStyle(color: ColorManager.errorText, fontSize: 12.sp)),
           ],
         ],
       ),
@@ -648,7 +648,7 @@ class _SetEditDialogState extends State<_SetEditDialog> {
         TextButton(
           key: const Key('edit_set_delete'),
           onPressed: () => Navigator.pop(context, const _SetEditResult(delete: true)),
-          child: const Text('Remove set', style: TextStyle(color: Colors.redAccent)),
+          child: Text('Remove set', style: TextStyle(color: ColorManager.errorText)),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context),

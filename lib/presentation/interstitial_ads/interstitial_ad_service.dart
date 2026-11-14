@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:fitness_app/utils/ad_config.dart';
+import 'package:fitness_app/services/ad_consent_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class InterstitialAdService {
   static InterstitialAd? _interstitialAd;
@@ -10,8 +13,10 @@ class InterstitialAdService {
   static Completer<void>? _loadCompleter;
 
   static Future<void> loadInterstitialAd({String? adUnitId}) async {
+    // Never request an ad before consent is resolved and the SDK started.
+    if (!AdConsentService.adsReady.value) return;
     if (_isAdLoaded) {
-      print('Interstitial ad already loaded');
+      debugPrint('Interstitial ad already loaded');
       return;
     }
 
@@ -19,7 +24,7 @@ class InterstitialAdService {
 
     // If already loading, wait for it to complete
     if (_loadCompleter != null && !_loadCompleter!.isCompleted) {
-      print('Interstitial ad already loading, waiting...');
+      debugPrint('Interstitial ad already loading, waiting...');
       return _loadCompleter!.future;
     }
 
@@ -31,7 +36,7 @@ class InterstitialAdService {
         request: const AdRequest(),
         adLoadCallback: InterstitialAdLoadCallback(
           onAdLoaded: (ad) {
-            print('Interstitial ad loaded successfully');
+            debugPrint('Interstitial ad loaded successfully');
             _interstitialAd = ad;
             _isAdLoaded = true;
             _adLoadAttempts = 0;
@@ -40,18 +45,18 @@ class InterstitialAdService {
             _interstitialAd!.fullScreenContentCallback =
                 FullScreenContentCallback(
               onAdShowedFullScreenContent: (ad) {
-                print('Interstitial ad showed full screen content');
+                debugPrint('Interstitial ad showed full screen content');
               },
               onAdDismissedFullScreenContent: (ad) {
-                print('Interstitial ad dismissed');
+                debugPrint('Interstitial ad dismissed');
                 ad.dispose();
                 _isAdLoaded = false;
                 _interstitialAd = null;
-                // Load next ad for future use
-                loadInterstitialAd();
+                // No automatic reload: the next one is preloaded only when
+                // it will actually be due (keeps the match rate healthy).
               },
               onAdFailedToShowFullScreenContent: (ad, error) {
-                print('Interstitial ad failed to show: $error');
+                debugPrint('Interstitial ad failed to show: $error');
                 ad.dispose();
                 _isAdLoaded = false;
                 _interstitialAd = null;
@@ -71,7 +76,7 @@ class InterstitialAdService {
             }
           },
           onAdFailedToLoad: (error) {
-            print('Failed to load interstitial ad: $error');
+            debugPrint('Failed to load interstitial ad: $error');
             _isAdLoaded = false;
             _interstitialAd = null;
 
@@ -94,7 +99,7 @@ class InterstitialAdService {
       // Wait for the loading to complete (either success or failure)
       await _loadCompleter!.future;
     } catch (e) {
-      print('Error loading interstitial ad: $e');
+      debugPrint('Error loading interstitial ad: $e');
       _isAdLoaded = false;
       if (_loadCompleter != null && !_loadCompleter!.isCompleted) {
         _loadCompleter!.complete();
@@ -105,33 +110,33 @@ class InterstitialAdService {
   static Future<void> showInterstitialAd({bool forceShow = false}) async {
     // If ad is not loaded, try to load and wait for it
     if (!_isAdLoaded) {
-      print('Interstitial ad not loaded, loading now...');
+      debugPrint('Interstitial ad not loaded, loading now...');
       await loadInterstitialAd();
     }
 
     // Wait a bit for the ad to be ready (if it just finished loading)
     if (!_isAdLoaded) {
-      print('Interstitial ad still not loaded after loading attempt');
+      debugPrint('Interstitial ad still not loaded after loading attempt');
       return;
     }
 
     if (_interstitialAd != null) {
       try {
         await _interstitialAd!.show();
-        print('Interstitial ad shown successfully');
+        debugPrint('Interstitial ad shown successfully');
       } catch (e) {
-        print('Error showing interstitial ad: $e');
+        debugPrint('Error showing interstitial ad: $e');
         _isAdLoaded = false;
         _interstitialAd = null;
       }
     } else {
-      print('Interstitial ad is null');
+      debugPrint('Interstitial ad is null');
     }
   }
 
   // Specific method for strength workout access
   static Future<void> showStrengthWorkoutAd() async {
-    print('Attempting to show strength workout ad...');
+    debugPrint('Attempting to show strength workout ad...');
     // Wait for ad to load
     await loadInterstitialAd(
         adUnitId: AdConfig.getInterstitialAdUnitIdForContext('strength'));
@@ -141,12 +146,53 @@ class InterstitialAdService {
 
   // Specific method for workout completion
   static Future<void> showWorkoutCompletionAd() async {
-    print('Attempting to show workout completion ad...');
+    debugPrint('Attempting to show workout completion ad...');
     // Wait for ad to load
     await loadInterstitialAd(
         adUnitId: AdConfig.getInterstitialAdUnitIdForContext('workout'));
     // Then show it
     await showInterstitialAd();
+  }
+
+  // ---- After-workout placement (free users only) -------------------------
+  //
+  // Never during a workout and never over the celebration screen: the ad
+  // shows once the user taps Done on the summary, at most once every
+  // [workoutsPerAd] finished workouts.
+
+  static const int workoutsPerAd = 3;
+  static const String _counterKey = 'interstitial_workouts_since_ad';
+
+  /// Call when a workout is saved. Counts it and preloads an ad if one will
+  /// be due when the user leaves the summary.
+  static Future<void> onWorkoutFinished({required bool isPremium}) async {
+    if (isPremium || !AdConsentService.adsReady.value) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final count = (prefs.getInt(_counterKey) ?? 0) + 1;
+      await prefs.setInt(_counterKey, count);
+      if (count >= workoutsPerAd) {
+        unawaited(loadInterstitialAd(
+            adUnitId: AdConfig.getInterstitialAdUnitIdForContext('workout')));
+      }
+    } catch (_) {}
+  }
+
+  /// Call after the summary screen is closed. Shows the ad only if one is
+  /// due and already loaded (never waits for a slow ad).
+  static Future<void> showIfDueAfterWorkout({required bool isPremium}) async {
+    if (isPremium || !AdConsentService.adsReady.value) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final count = prefs.getInt(_counterKey) ?? 0;
+      if (count < workoutsPerAd || !_isAdLoaded || _interstitialAd == null) {
+        return;
+      }
+      await prefs.setInt(_counterKey, 0);
+      await _interstitialAd!.show();
+    } catch (e) {
+      debugPrint('Interstitial after workout failed: $e');
+    }
   }
 
   static bool get isAdLoaded => _isAdLoaded;

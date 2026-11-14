@@ -49,7 +49,7 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Reset', style: TextStyle(color: Colors.red))),
+          TextButton(onPressed: () => Navigator.pop(c, true), child: Text('Reset', style: TextStyle(color: ColorManager.errorText))),
         ],
       ),
     );
@@ -97,52 +97,36 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Weekly Plan',
+                      'Weekly plan',
                       style: TextStyle(
-                        color: ColorManager.white,
-                        fontSize: 20.sp,
+                        color: ColorManager.textPrimary,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     if (hasWeeklyPlan)
-                      Text('Your generated schedule', style: TextStyle(color: ColorManager.gradientStart, fontSize: 12.sp)),
+                      Text('Your generated schedule', style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),
                   ],
                 ),
                 if (hasWeeklyPlan)
-                  IconButton(
-                    onPressed: () => _deleteWeeklyPlan(workoutProvider),
-                    icon: const Icon(Icons.delete_forever, color: Colors.red),
-                    tooltip: 'Reset Plan',
-                  )
-                else 
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: ColorManager.mintGradient,
-                      borderRadius: BorderRadius.circular(20.r),
-                    ),
-                    child: ElevatedButton.icon(
-                      onPressed: () => context.push(Routes.workoutGeneratorRoute),
-                      icon: Icon(Icons.auto_awesome, size: 16.sp, color: ColorManager.onMint),
-                      label: Text(
-                        'AI Build',
-                        style: TextStyle(
-                          color: ColorManager.onMint,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13.sp,
-                        ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextButton(
+                        key: const Key('weekly_plan_edit_button'),
+                        onPressed: () => context.push(Routes.workoutGeneratorRoute),
+                        child: Text('Edit',
+                            style: TextStyle(
+                                color: ColorManager.primaryText,
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w600)),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        elevation: 0,
-                        minimumSize: Size(0, 36.h),
-                        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20.r),
-                        ),
+                      IconButton(
+                        onPressed: () => _deleteWeeklyPlan(workoutProvider),
+                        icon: Icon(Icons.delete_outline_rounded, color: ColorManager.textTertiary),
+                        tooltip: 'Reset Plan',
                       ),
-                    ),
+                    ],
                   ),
               ],
             ),
@@ -267,7 +251,7 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
       ),
       child: Row(
         children: [
-          Icon(Icons.self_improvement, color: ColorManager.primary, size: 24.sp),
+          Icon(Icons.self_improvement, color: ColorManager.primaryText, size: 24.sp),
           SizedBox(width: 12.w),
           Expanded(
             child: Column(
@@ -347,7 +331,7 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
                           Text(
                             'TODAY',
                             style: TextStyle(
-                              color: ColorManager.primary,
+                              color: ColorManager.primaryText,
                               fontWeight: FontWeight.bold,
                               fontSize: 11.sp,
                               letterSpacing: 1,
@@ -356,7 +340,7 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
                         Text(
                           day,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.bold, fontSize: 18.sp),
+                          style: TextStyle(color: ColorManager.primaryText, fontWeight: FontWeight.bold, fontSize: 18.sp),
                         ),
                       ],
                     ),
@@ -435,7 +419,7 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
                 ),
                 SizedBox(height: 12.h),
                 Text(
-                  'No Plan Active',
+                  'No plan yet',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20.sp,
@@ -462,11 +446,11 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
             height: 48.h,
             child: ElevatedButton.icon(
               onPressed: () => context.push(Routes.workoutGeneratorRoute),
-              icon: Icon(Icons.auto_awesome, size: 18.sp, color: ColorManager.onMint),
+              icon: Icon(Icons.auto_awesome, size: 18.sp, color: ColorManager.inkOnLight),
               label: Text(
-                'Build a Plan',
+                'Build a plan',
                 style: TextStyle(
-                  color: ColorManager.onMint,
+                  color: ColorManager.inkOnLight,
                   fontWeight: FontWeight.bold,
                   fontSize: 14.sp,
                 ),
@@ -496,9 +480,9 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
                         SnackBar(
                           content: const Text(
                             '3-Day Starter Routine activated! Ready for your workout.',
-                            style: TextStyle(fontWeight: FontWeight.w600),
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                           ),
-                          backgroundColor: ColorManager.success,
+                          backgroundColor: ColorManager.successDark,
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
@@ -507,7 +491,7 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Failed to activate starter plan: $e'),
+                          content: Text('Failed to activate starter plan: $e', style: const TextStyle(color: Colors.white)),
                           backgroundColor: ColorManager.error,
                         ),
                       );
@@ -569,8 +553,8 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
         children: [
           Container(
             padding: EdgeInsets.all(8.w),
-            decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), shape: BoxShape.circle),
-            child: Icon(Icons.fitness_center, color: Colors.blue, size: 16.sp),
+            decoration: BoxDecoration(color: ColorManager.info.withValues(alpha: 0.1), shape: BoxShape.circle),
+            child: Icon(Icons.fitness_center, color: ColorManager.info, size: 16.sp),
           ),
           SizedBox(width: 12.w),
           Expanded(
@@ -583,15 +567,15 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
                   SizedBox(height: 5.h),
                   Row(
                     children: [
-                      Icon(Icons.history, size: 11.sp, color: Colors.teal),
+                      Icon(Icons.history, size: 11.sp, color: ColorManager.primaryText),
                       SizedBox(width: 4.w),
-                      Flexible(child: Text(lastSessionText, style: TextStyle(color: Colors.teal, fontSize: 11.sp), overflow: TextOverflow.ellipsis)),
+                      Flexible(child: Text(lastSessionText, style: TextStyle(color: ColorManager.primaryText, fontSize: 12.sp), overflow: TextOverflow.ellipsis)),
                     ],
                   ),
                   if (nudgeText != null)
                     Padding(
                       padding: EdgeInsets.only(top: 2.h),
-                      child: Text(nudgeText, style: TextStyle(color: Colors.orange, fontSize: 11.sp, fontWeight: FontWeight.w500)),
+                      child: Text(nudgeText, style: TextStyle(color: ColorManager.warningText, fontSize: 12.sp, fontWeight: FontWeight.w500)),
                     ),
                 ],
               ],
@@ -610,10 +594,10 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
                 onSelected: (value) {
                   if (value == 'delete') _confirmDeleteWorkout(workout, displayName);
                 },
-                itemBuilder: (_) => const [
+                itemBuilder: (_) => [
                   PopupMenuItem<String>(
                     value: 'delete',
-                    child: Text('Delete exercise', style: TextStyle(color: Colors.red)),
+                    child: Text('Delete exercise', style: TextStyle(color: ColorManager.errorText)),
                   ),
                 ],
               ),
@@ -633,7 +617,7 @@ class _WeeklyScheduleWidgetState extends State<WeeklyScheduleWidget> {
         content: Text('Delete "$displayName"?', style: TextStyle(color: ColorManager.textSecondary)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
+          TextButton(onPressed: () => Navigator.pop(c, true), child: Text('Delete', style: TextStyle(color: ColorManager.errorText))),
         ],
       ),
     );

@@ -4,8 +4,6 @@ import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/presentation/workouts/widgets/exercise_widget.dart';
 import 'package:fitness_app/presentation/workouts/widgets/new_exercise_button.dart';
-import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
-import 'package:fitness_app/presentation/interstitial_ads/interstitial_ad_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
@@ -29,7 +27,6 @@ class _WorkoutPageState extends State<WorkoutPage> {
   @override
   void initState() {
     super.initState();
-    InterstitialAdService.loadInterstitialAd();
     _loadWorkouts();
   }
 
@@ -45,14 +42,10 @@ class _WorkoutPageState extends State<WorkoutPage> {
         .fetchAndSetWorkouts();
   }
 
+  /// Interstitials now show only after a finished workout (see
+  /// InterstitialAdService.showIfDueAfterWorkout); this page shows none.
   void _showInterstitialAd() {
     _workoutCount++;
-    if (_workoutCount % 3 == 0) {
-      final sub = Provider.of<SubscriptionProvider>(context, listen: false);
-      if (!sub.isPremium) {
-        InterstitialAdService.showWorkoutCompletionAd();
-      }
-    }
   }
 
   @override

@@ -413,6 +413,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // Tips, nutrition and advice live in the folded "Plan guide" section.
+      await tester.ensureVisible(find.byKey(const Key('plan_guide_toggle')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('plan_guide_toggle')));
+      await tester.pumpAndSettle();
       // Verify orientation banner
       expect(find.byKey(const Key('muscle_gain_roadmap_orientation_banner')), findsOneWidget);
       expect(find.textContaining('Hypertrophy Rule: Progressive Overload'), findsOneWidget);

@@ -5,10 +5,9 @@ import 'package:fitness_app/presentation/progress_photos/providers/progress_phot
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
-import 'package:fitness_app/utils/router/router.dart';
+import 'package:fitness_app/presentation/widgets/pro_locked_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -171,7 +170,7 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Icon(Icons.arrow_drop_down, color: ColorManager.primary),
+                Icon(Icons.arrow_drop_down, color: ColorManager.primaryText),
               ],
             ),
           ),
@@ -283,7 +282,7 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
           decoration: BoxDecoration(
-            color: label == 'Before' ? Colors.orange : ColorManager.primary,
+            color: label == 'Before' ? ColorManager.warning : ColorManager.primary,
             borderRadius: BorderRadius.circular(8.r),
           ),
           child: Text(
@@ -304,76 +303,13 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
 
     final isPremium = Provider.of<SubscriptionProvider>(context).isPremium;
 
-    // Premium Locked View
-    if (!isPremium) {
-      return Container(
-        margin: EdgeInsets.symmetric(horizontal: SizeManager.s16.w),
-        padding: EdgeInsets.all(SizeManager.s16.w),
-        decoration: BoxDecoration(
-          color: ColorManager.surface,
-          boxShadow: ColorManager.cardShadow,
-          borderRadius: BorderRadius.circular(AppRadius.small.r),
-          border: Border.all(color: ColorManager.primary.withValues(alpha: 0.3)),
-        ),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Progress Summary',
-                  style: TextStyle(
-                    color: ColorManager.textPrimary,
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Icon(Icons.lock_outline, color: Colors.amber, size: 24.sp),
-              ],
-            ),
-            SizedBox(height: 24.h),
-            Text(
-              'Unlock Detailed Analysis',
-              style: TextStyle(
-                color: ColorManager.textPrimary,
-                fontSize: 16.sp,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              'See exactly how much weight you\'ve lost and the time between photos.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: ColorManager.textSecondary,
-                fontSize: 14.sp,
-              ),
-            ),
-            SizedBox(height: 16.h),
-            ElevatedButton(
-              onPressed: () => context.push(Routes.premiumScreen),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColorManager.primary,
-                foregroundColor: ColorManager.onMint,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.r),
-                ),
-              ),
-              child: const Text('Get Pro Access'),
-            ),
-          ],
-        ),
-      );
-    }
-
     // Premium Features Unlocked
     final daysDiff = _afterPhoto!.date.difference(_beforePhoto!.date).inDays;
     final weightDiff = (_afterPhoto!.weight != null && _beforePhoto!.weight != null)
         ? _afterPhoto!.weight! - _beforePhoto!.weight!
         : null;
 
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: SizeManager.s16.w),
+    final summary = Container(
       padding: EdgeInsets.all(SizeManager.s16.w),
       decoration: BoxDecoration(
         color: ColorManager.surface,
@@ -403,7 +339,7 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
               icon: Icons.trending_down,
               label: 'Weight Change',
               value: '${weightDiff > 0 ? '+' : ''}${weightDiff.toStringAsFixed(1)} kg',
-              valueColor: weightDiff < 0 ? Colors.green : Colors.orange,
+              valueColor: weightDiff < 0 ? ColorManager.successText : ColorManager.warningText,
             ),
           ],
           SizedBox(height: 12.h),
@@ -413,6 +349,18 @@ class _PhotoComparisonScreenState extends State<PhotoComparisonScreen> {
             value: Provider.of<ProgressPhotoProvider>(context).allPhotos.length.toString(),
           ),
         ],
+      ),
+    );
+
+    // Free users see their real summary blurred, with an unlock button.
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: SizeManager.s16.w),
+      child: ProLockedPreview(
+        locked: !isPremium,
+        title: 'See your progress summary',
+        subtitle: 'Weight change and time between your photos',
+        borderRadius: AppRadius.small,
+        child: summary,
       ),
     );
   }

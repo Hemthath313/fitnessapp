@@ -183,7 +183,7 @@ void main() {
 
         // Both HomeAiRoutineCard and WeeklyScheduleWidget reflect no active plan
         expect(find.text('Build Your Workout Plan'), findsOneWidget);
-        expect(find.text('No Plan Active'), findsOneWidget);
+        expect(find.text('No plan yet'), findsOneWidget);
 
         // Part B: Re-populate a 5-day plan and delete via WeeklyScheduleWidget._deleteWeeklyPlan
         workoutProvider.setAllWorkoutsForTesting(_buildFiveDaySplitWorkouts(wednesday));
@@ -213,7 +213,7 @@ void main() {
         expect(prefsAfterWeeklyReset.getStringList('scheduled_workout_days'), isNull);
         expect(prefsAfterWeeklyReset.getInt('weekly_target_count'), isNull);
         expect(find.text('Build Your Workout Plan'), findsOneWidget);
-        expect(find.text('No Plan Active'), findsOneWidget);
+        expect(find.text('No plan yet'), findsOneWidget);
       },
     );
 
@@ -358,7 +358,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Tap GENERATE WEEKLY PLAN (preview only)
-        final generateBtn = find.text('GENERATE WEEKLY PLAN');
+        final generateBtn = find.text('Generate weekly plan');
         await tester.ensureVisible(generateBtn);
         await tester.tap(generateBtn);
         await tester.pump(const Duration(milliseconds: 1300));

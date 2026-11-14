@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/services/iap_service.dart';
@@ -26,6 +27,26 @@ class SubscriptionProvider with ChangeNotifier {
   @visibleForTesting
   Future<Map<String, dynamic>?> Function(String uid)?
       remoteUserDocFetcherForTesting;
+
+  /// Tests can force the Android "Google Play decides" mode on or off.
+  @visibleForTesting
+  bool? playIsSourceOfTruthForTesting;
+
+  /// On Android, Pro and lifetime come only from Google Play purchases.
+  /// The isPremium / isLifetime fields in Firestore are a record for other
+  /// devices, never trusted here, so editing your own user document does
+  /// not unlock anything.
+  bool get _playIsSourceOfTruth =>
+      playIsSourceOfTruthForTesting ?? (!kIsWeb && Platform.isAndroid);
+
+  /// Product ids that grant lifetime access (one-time products).
+  static const Set<String> lifetimeProductIds = {
+    'premium_monthly',
+    'premium_yearly',
+  };
+
+  /// Auto-renewing subscription (monthly and yearly base plans).
+  static const String subscriptionProductId = 'gymbuddy_premium_monthly';
 
   IAPService? _iapService;
   IAPService get iapService => _iapService ??= IAPService();
@@ -155,9 +176,70 @@ class SubscriptionProvider with ChangeNotifier {
     }
   }
 
+  // ---- Last answer from Google Play (written only from Play results) ----
+
+  static String playEntitlementKey(String uid) => 'play_entitlement_$uid';
+
+  Future<void> _savePlayEntitlement(String uid,
+      {required bool premium, required bool lifetime}) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        playEntitlementKey(uid),
+        jsonEncode({
+          'isPremium': premium,
+          'isLifetime': lifetime,
+          'checkedAt': DateTime.now().toIso8601String(),
+        }),
+      );
+    } catch (e) {
+      debugPrint('SubscriptionProvider: could not save Play entitlement: $e');
+    }
+  }
+
+  Future<({bool premium, bool lifetime})?> _readPlayEntitlement(
+      String uid) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(playEntitlementKey(uid));
+      if (raw == null || raw.isEmpty) return null;
+      final map = Map<String, dynamic>.from(jsonDecode(raw) as Map);
+      return (
+        premium: map['isPremium'] == true,
+        lifetime: map['isLifetime'] == true,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Applies a fresh Google Play result: remembers it on this phone and,
+  /// when it changed, records it in Firestore for other devices.
+  Future<void> _applyPlayEntitlement(
+      {required bool premium, required bool lifetime}) async {
+    final uid = currentUserId;
+    if (uid == null || uid.isEmpty) return;
+    await _savePlayEntitlement(uid, premium: premium, lifetime: lifetime);
+    final changed = premium != _isPremium || lifetime != _isLifetime;
+    if (changed) {
+      try {
+        await setPremiumStatus(premium, isLifetime: lifetime);
+      } catch (e) {
+        // Offline: Firestore record updates next time; the phone is correct.
+        debugPrint('SubscriptionProvider: Firestore record not updated: $e');
+      }
+    }
+    _isPremium = premium;
+    _isLifetime = lifetime;
+    _isServerConfirmed = true;
+    _isOfflineFallback = false;
+    await saveEntitlementsToCache(uid, isPremium: premium, isLifetime: lifetime);
+    notifyListeners();
+  }
+
   Future<void> _init() async {
     final uid = currentUserId;
-    if (uid != null && uid.isNotEmpty) {
+    if (uid != null && uid.isNotEmpty && !_playIsSourceOfTruth) {
       await restoreCachedEntitlements(uid);
     }
     await loadPremiumStatus();
@@ -184,6 +266,12 @@ class SubscriptionProvider with ChangeNotifier {
           notifyListeners();
         } else {
           await loadPremiumStatus();
+          // New login on Android: ask Google Play straight away.
+          if (_playIsSourceOfTruth) {
+            try {
+              await verifySubscriptionStatus();
+            } catch (_) {}
+          }
         }
       });
     } catch (_) {
@@ -217,6 +305,22 @@ class SubscriptionProvider with ChangeNotifier {
       _isLoading = false;
       _error = null;
       notifyListeners();
+      return;
+    }
+
+    // Android: Google Play decides. Use the last Play answer stored on this
+    // phone (none yet = free until verifySubscriptionStatus asks Play).
+    if (_playIsSourceOfTruth) {
+      final play = await _readPlayEntitlement(uid);
+      if (requestId == _loadRequestId && currentUserId == uid) {
+        _isPremium = play?.premium ?? false;
+        _isLifetime = play?.lifetime ?? false;
+        _isServerConfirmed = play != null;
+        _isOfflineFallback = false;
+        _error = null;
+        _isLoading = false;
+        notifyListeners();
+      }
       return;
     }
 
@@ -307,6 +411,18 @@ class SubscriptionProvider with ChangeNotifier {
   }
 
   void _handlePurchaseUpdate(PurchaseDetails purchase) async {
+    if (_playIsSourceOfTruth &&
+        (purchase.status == PurchaseStatus.purchased ||
+            purchase.status == PurchaseStatus.restored)) {
+      final isLifetimeProduct = lifetimeProductIds.contains(purchase.productID);
+      if (isLifetimeProduct || purchase.productID == subscriptionProductId) {
+        await _applyPlayEntitlement(
+          premium: true,
+          lifetime: isLifetimeProduct || _isLifetime,
+        );
+      }
+      return;
+    }
     if (purchase.status == PurchaseStatus.purchased ||
         purchase.status == PurchaseStatus.restored) {
       if (purchase.productID == 'premium_monthly' ||
@@ -355,7 +471,9 @@ class SubscriptionProvider with ChangeNotifier {
   Future<void> verifySubscriptionStatus() async {
     // If the user already has lifetime access written to their Firestore doc,
     // we bypass all active check updates and keep them premium forever.
-    if (_isLifetime) {
+    // (On Android lifetime is re-checked with Play too, so a faked
+    // isLifetime in Firestore can't skip the check.)
+    if (_isLifetime && !_playIsSourceOfTruth) {
       _isPremium = true;
       notifyListeners();
       return;
@@ -364,6 +482,24 @@ class SubscriptionProvider with ChangeNotifier {
     // 1. Android Strict Check
     if (defaultTargetPlatform == TargetPlatform.android) {
       final pastPurchases = await iapService.getAndroidPastPurchases();
+      if (pastPurchases != null && _playIsSourceOfTruth) {
+        final owned = pastPurchases.where((p) =>
+            p.status == PurchaseStatus.purchased ||
+            p.status == PurchaseStatus.restored);
+        final ownsLifetime =
+            owned.any((p) => lifetimeProductIds.contains(p.productID));
+        final hasSubscription =
+            owned.any((p) => p.productID == subscriptionProductId);
+        await _applyPlayEntitlement(
+          premium: ownsLifetime || hasSubscription,
+          lifetime: ownsLifetime,
+        );
+        return;
+      }
+      if (pastPurchases == null && _playIsSourceOfTruth) {
+        // Play couldn't answer: keep the last Play result on this phone.
+        return;
+      }
       if (pastPurchases != null) {
         // If they own legacy or lifetime one-time products, upgrade them to lifetime in Firestore.
         bool ownsLegacyOrLifetime = pastPurchases.any((purchase) =>

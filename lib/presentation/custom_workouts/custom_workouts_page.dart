@@ -134,9 +134,9 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
               // High-level Stats Row
               Row(
                 children: [
-                  Expanded(child: _buildStatCard('Total Workouts', '${stats.totalWorkouts}', Icons.fitness_center_rounded, Colors.blue)),
+                  Expanded(child: _buildStatCard('Total Workouts', '${stats.totalWorkouts}', Icons.fitness_center_rounded, ColorManager.info)),
                   SizedBox(width: 16.w),
-                  Expanded(child: _buildStatCard('Current Streak', '${stats.currentStreak} Days', Icons.local_fire_department_rounded, Colors.orange)),
+                  Expanded(child: _buildStatCard('Current Streak', '${stats.currentStreak} Days', Icons.local_fire_department_rounded, ColorManager.warning)),
                 ],
               ),
               SizedBox(height: SizeManager.s32.h),
@@ -218,7 +218,7 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                                 height: 6.w,
                                 decoration: const BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Colors.greenAccent,
+                                  color: ColorManager.success,
                                 ),
                               ),
                             );
@@ -246,7 +246,7 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                 title: 'Workout History',
                 subtitle: 'Review past logs, sets, and weights lifted.',
                 icon: Icons.history_toggle_off_rounded,
-                color: Colors.teal,
+                color: ColorManager.waterText,
                 route: Routes.workoutHistoryRoute,
               ),
               SizedBox(height: SizeManager.s16.h),
@@ -255,16 +255,16 @@ class _CustomWorkoutsPageState extends State<CustomWorkoutsPage> {
                 title: 'Strength Analytics',
                 subtitle: 'Visualize your PRs and muscle group volume.',
                 icon: Icons.bar_chart_rounded,
-                color: Colors.deepPurple,
+                color: ColorManager.violetText,
                 route: Routes.strengthAnalyticsRoute,
               ),
               SizedBox(height: SizeManager.s16.h),
               _buildDeepDiveCard(
                 context,
                 title: '30-Day Transformation',
-                subtitle: 'Compare progress photos over time.',
+                subtitle: 'Daily core workouts with a 30-day tracker.',
                 icon: Icons.auto_graph_rounded,
-                color: Colors.pink,
+                color: ColorManager.accentText,
                 route: Routes.sixPackChallengeRoute,
               ),
               SizedBox(height: 80.h),

@@ -70,9 +70,9 @@ class TransformationWeeklyScheduleCard extends StatelessWidget {
                       '${summary.completedWorkouts} / ${summary.plannedWorkouts} Done',
                       style: TextStyle(
                         color: summary.completedWorkouts == summary.plannedWorkouts && summary.plannedWorkouts > 0
-                            ? ColorManager.success
+                            ? ColorManager.successText
                             : ColorManager.textSecondary,
-                        fontSize: 11.sp,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -140,7 +140,7 @@ class TransformationWeeklyScheduleCard extends StatelessWidget {
                           ? Icons.info_outline_rounded
                           : Icons.lightbulb_outline_rounded,
                       size: 14.sp,
-                      color: summary.skippedWorkouts >= 2 ? ColorManager.accent : ColorManager.primary,
+                      color: summary.skippedWorkouts >= 2 ? ColorManager.accentText : ColorManager.primaryText,
                     ),
                     SizedBox(width: 8.w),
                     Expanded(
@@ -148,7 +148,7 @@ class TransformationWeeklyScheduleCard extends StatelessWidget {
                         summary.advisoryInsights.join(' '),
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           height: 1.3,
                         ),
                       ),
@@ -189,7 +189,7 @@ class TransformationWeeklyScheduleCard extends StatelessWidget {
             label,
             style: TextStyle(
               color: ColorManager.textTertiary,
-              fontSize: 11.sp,
+              fontSize: 12.sp,
             ),
             overflow: TextOverflow.ellipsis,
           ),

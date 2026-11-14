@@ -205,7 +205,7 @@ class _CardioLogPanelState extends State<CardioLogPanel> {
                     _seconds > 0 ? 'Log cardio ($_minutes min)' : 'Log cardio',
                     style: TextStyle(
                       color: canLog
-                          ? ColorManager.limerGreen2
+                          ? ColorManager.primaryText
                           : ColorManager.textTertiary,
                       fontWeight: FontWeight.bold,
                     ),
@@ -219,8 +219,8 @@ class _CardioLogPanelState extends State<CardioLogPanel> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: _messageIsError
-                    ? ColorManager.error
-                    : ColorManager.limerGreen2,
+                    ? ColorManager.errorText
+                    : ColorManager.primaryText,
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
               ),

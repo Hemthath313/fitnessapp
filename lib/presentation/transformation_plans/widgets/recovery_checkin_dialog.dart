@@ -96,7 +96,7 @@ class _RecoveryCheckInDialogState extends State<RecoveryCheckInDialog> {
                       color: ColorManager.primary.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.bedtime_rounded, color: ColorManager.primary, size: 20.sp),
+                    child: Icon(Icons.bedtime_rounded, color: ColorManager.primaryText, size: 20.sp),
                   ),
                   SizedBox(width: 10.w),
                   Text(
@@ -144,7 +144,7 @@ class _RecoveryCheckInDialogState extends State<RecoveryCheckInDialog> {
             emoji: '👍',
             title: 'Moderate / Normal',
             subtitle: 'Slight soreness, balanced energy, manageable fatigue',
-            color: const Color(0xFFFFA500),
+            color: ColorManager.warning,
           ),
           SizedBox(height: 10.h),
 
@@ -204,8 +204,8 @@ class _RecoveryCheckInDialogState extends State<RecoveryCheckInDialog> {
                           nav.pop();
                           messenger.showSnackBar(
                             SnackBar(
-                              content: const Text('✓ Daily recovery check-in recorded!'),
-                              backgroundColor: ColorManager.success,
+                              content: const Text('✓ Daily recovery check-in recorded!', style: TextStyle(color: Colors.white)),
+                              backgroundColor: ColorManager.successDark,
                               behavior: SnackBarBehavior.floating,
                             ),
                           );
@@ -215,7 +215,7 @@ class _RecoveryCheckInDialogState extends State<RecoveryCheckInDialog> {
                           setState(() => _isSaving = false);
                           messenger.showSnackBar(
                             SnackBar(
-                              content: Text('Failed to save recovery check-in: $e'),
+                              content: Text('Failed to save recovery check-in: $e', style: const TextStyle(color: Colors.white)),
                               backgroundColor: ColorManager.error,
                             ),
                           );
@@ -291,7 +291,7 @@ class _RecoveryCheckInDialogState extends State<RecoveryCheckInDialog> {
                     subtitle,
                     style: TextStyle(
                       color: ColorManager.textSecondary,
-                      fontSize: 11.sp,
+                      fontSize: 12.sp,
                     ),
                   ),
                 ],

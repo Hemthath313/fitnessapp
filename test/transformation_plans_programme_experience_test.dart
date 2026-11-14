@@ -201,11 +201,6 @@ void main() {
       expect(find.text('60-Day Weight Loss Challenge'), findsOneWidget);
       expect(find.text('Day 1 of 60'), findsOneWidget);
 
-      // Nutrition Bar
-      expect(find.text('Daily Nutrition Target'), findsOneWidget);
-      expect(find.text('1950'), findsOneWidget);
-      expect(find.text('160g'), findsOneWidget);
-
       // Milestone Bar
       final milestoneFinder = find.textContaining('Next: Week 1 Survivor');
       await tester.scrollUntilVisible(
@@ -215,6 +210,16 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(milestoneFinder, findsOneWidget);
+
+      // Tips, nutrition and advice live in the folded "Plan guide" section.
+      await tester.ensureVisible(find.byKey(const Key('plan_guide_toggle')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('plan_guide_toggle')));
+      await tester.pumpAndSettle();
+      // Nutrition Bar
+      expect(find.text('Daily Nutrition Target'), findsOneWidget);
+      expect(find.text('1950'), findsOneWidget);
+      expect(find.text('160g'), findsOneWidget);
 
       // Day 1 Workout Card
       final day1Finder = find.text('Day 1');
@@ -238,7 +243,7 @@ void main() {
       expect(find.text('Rest & Recovery'), findsWidgets);
     });
 
-    testWidgets('4. Toggling day completion updates state without duplicate progress',
+    testWidgets('4. Only rest days can be ticked, and unticking asks first',
         (tester) async {
       _configureTestViewport(tester);
 
@@ -272,8 +277,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Tap toggle Day 1 complete
-      final toggleBtn = find.byKey(const Key('toggle_day_1_button'));
+      // Workout days are completed by finishing the workout, not by a tick.
+      expect(find.byKey(const Key('toggle_day_1_button')), findsNothing);
+
+      // Rest days can still be ticked by hand.
+      final blueprint = TransformationPlansData.getById('weight_loss_60')!;
+      final restDay = List.generate(60, (i) => i + 1)
+          .firstWhere((d) => blueprint.getDayBlueprint(d)?.isRestDay ?? false);
+      final toggleBtn = find.byKey(Key('toggle_day_${restDay}_button'));
       await tester.scrollUntilVisible(
         toggleBtn,
         200,
@@ -285,14 +296,19 @@ void main() {
       await tester.tap(toggleBtn);
       await tester.pumpAndSettle();
 
-      expect(transformationProvider.isDayCompleted(1), isTrue);
+      expect(transformationProvider.isDayCompleted(restDay), isTrue);
       expect(transformationProvider.activeTransformation?.completedDayIndices.length, equals(1));
+      // Ticking a future rest day does not move the plan forward.
+      expect(transformationProvider.activeTransformation?.currentDay, equals(1));
 
-      // Tap again to toggle incomplete
+      // Unticking asks for confirmation first.
       await tester.tap(toggleBtn);
       await tester.pumpAndSettle();
+      expect(transformationProvider.isDayCompleted(restDay), isTrue);
+      await tester.tap(find.byKey(const Key('confirm_unmark_day_button')));
+      await tester.pumpAndSettle();
 
-      expect(transformationProvider.isDayCompleted(1), isFalse);
+      expect(transformationProvider.isDayCompleted(restDay), isFalse);
       expect(transformationProvider.activeTransformation?.completedDayIndices.length, equals(0));
     });
 

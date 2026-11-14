@@ -21,7 +21,9 @@ import 'package:fitness_app/services/update_service.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/widgets/error_boundary.dart';
+import 'package:fitness_app/presentation/custom_workouts/day_workout_session_page.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:in_app_update/in_app_update.dart' as play;
@@ -52,7 +54,8 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   late final List<Widget> pages = [
     const HomePage(),
     const WorkoutTabPage(),
-    WorkoutLogHistoryPage(onStartWorkout: () => ontap(1)),
+    WorkoutLogHistoryPage(
+        onStartWorkout: () => DayWorkoutSessionPage.startQuickWorkout(context)),
     const ProgressPage(),
     const MorePage(),
   ];
@@ -239,12 +242,37 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       final subProvider =
           Provider.of<SubscriptionProvider?>(context, listen: false);
       final isPremium = subProvider?.isPremium ?? false;
-      if (!isPremium && !_bannerDismissedByUser) {
-        setState(() {
-          _showPaywallBanner = true;
-        });
+      if (isPremium || _bannerDismissedByUser) return;
+      // Tests drive the banner directly with a short delay.
+      if (widget.paywallTimerDelayForTesting != null) {
+        setState(() => _showPaywallBanner = true);
+        return;
       }
+      _showProBannerIfDue();
     });
+  }
+
+  static const String _proBannerLastShownKey = 'pro_banner_last_shown';
+
+  /// Shows the Pro banner only when it is relevant and not too often:
+  /// after the user has finished 3+ workouts (they've seen the value), and at
+  /// most once every 3 days. It used to appear after every app launch.
+  Future<void> _showProBannerIfDue() async {
+    try {
+      final stats = Provider.of<StatisticsProvider?>(context, listen: false);
+      final hasValue =
+          (stats?.totalWorkouts ?? 0) >= 3 || (stats?.longestStreak ?? 0) >= 3;
+      if (!hasValue) return;
+      final prefs = await SharedPreferences.getInstance();
+      final last = DateTime.tryParse(prefs.getString(_proBannerLastShownKey) ?? '');
+      final now = DateTime.now();
+      if (last != null && now.difference(last) < const Duration(days: 3)) return;
+      if (!mounted) return;
+      setState(() => _showPaywallBanner = true);
+      await prefs.setString(_proBannerLastShownKey, now.toIso8601String());
+    } catch (e) {
+      debugPrint('Pro banner check skipped: $e');
+    }
   }
 
   @override
@@ -279,9 +307,9 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                           color: ColorManager.primary.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.system_update_rounded,
-                          color: ColorManager.primary,
+                          color: ColorManager.primaryText,
                           size: 48,
                         ),
                       ),
@@ -339,7 +367,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: ColorManager.primary,
-                            foregroundColor: const Color(0xFF06201B),
+                            foregroundColor: ColorManager.onMint,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 24,
                               vertical: 14,
@@ -362,6 +390,12 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
     final subProvider = Provider.of<SubscriptionProvider?>(context);
     final isPremium = subProvider?.isPremium ?? false;
+    // Pro gets 3 streak freezes a month instead of 1.
+    final statsForFreeze = Provider.of<StatisticsProvider?>(context, listen: false);
+    if (statsForFreeze != null && statsForFreeze.monthlyFreezeAllowance != (isPremium ? 3 : 1)) {
+      WidgetsBinding.instance.addPostFrameCallback(
+          (_) => statsForFreeze.setPremiumForStreakFreeze(isPremium));
+    }
     final bool shouldShowBanner =
         _showPaywallBanner && !isPremium && !_bannerDismissedByUser;
 
@@ -385,7 +419,16 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
         onDestinationSelected: ontap,
         height: 66.h,
         backgroundColor: ColorManager.surface,
-        indicatorColor: ColorManager.background,
+        // Active tab: soft blue pill, blue icon and label.
+        indicatorColor: ColorManager.primary.withValues(alpha: 0.14),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return TextStyle(
+            color: selected ? ColorManager.primaryText : ColorManager.textTertiary,
+            fontSize: 12.sp,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+          );
+        }),
         surfaceTintColor: Colors.transparent,
         shadowColor: Colors.transparent,
         elevation: 0,
@@ -394,27 +437,27 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
         destinations: [
           NavigationDestination(
             icon: Icon(Icons.home_outlined, color: ColorManager.textTertiary),
-            selectedIcon: Icon(Icons.home_rounded, color: ColorManager.textPrimary),
+            selectedIcon: Icon(Icons.home_rounded, color: ColorManager.primaryText),
             label: 'Home',
           ),
           NavigationDestination(
             icon: Icon(Icons.fitness_center_outlined, color: ColorManager.textTertiary),
-            selectedIcon: Icon(Icons.fitness_center_rounded, color: ColorManager.textPrimary),
+            selectedIcon: Icon(Icons.fitness_center_rounded, color: ColorManager.primaryText),
             label: 'Workouts',
           ),
           NavigationDestination(
             icon: Icon(Icons.calendar_month_outlined, color: ColorManager.textTertiary),
-            selectedIcon: Icon(Icons.calendar_month_rounded, color: ColorManager.textPrimary),
+            selectedIcon: Icon(Icons.calendar_month_rounded, color: ColorManager.primaryText),
             label: 'History',
           ),
           NavigationDestination(
             icon: Icon(Icons.insights_outlined, color: ColorManager.textTertiary),
-            selectedIcon: Icon(Icons.insights_rounded, color: ColorManager.textPrimary),
+            selectedIcon: Icon(Icons.insights_rounded, color: ColorManager.primaryText),
             label: 'Progress',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline_rounded, color: ColorManager.textTertiary),
-            selectedIcon: Icon(Icons.person_rounded, color: ColorManager.textPrimary),
+            selectedIcon: Icon(Icons.person_rounded, color: ColorManager.primaryText),
             label: 'Profile',
           ),
         ],

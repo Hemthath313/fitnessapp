@@ -339,16 +339,16 @@ class UpdateDialog extends StatelessWidget {
                             Navigator.of(context).pop();
                           },
                           style: TextButton.styleFrom(
-                            foregroundColor: Colors.white.withValues(alpha: 0.85),
+                            foregroundColor: ColorManager.textSecondary,
                             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(AppRadius.button),
                             ),
                           ),
                           child: Text(
-                            'LATER',
+                            'Later',
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.85),
+                              color: ColorManager.textSecondary,
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 0.8,
@@ -389,7 +389,7 @@ class UpdateDialog extends StatelessWidget {
                                 padding: EdgeInsets.symmetric(vertical: 12.h),
                                 child: Center(
                                   child: Text(
-                                    'UPDATE NOW',
+                                    'Update now',
                                     style: TextStyle(
                                       color: ColorManager.onMint,
                                       fontSize: 13.sp,

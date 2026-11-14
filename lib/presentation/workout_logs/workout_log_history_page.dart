@@ -17,6 +17,7 @@ import 'package:fitness_app/services/workout_log_service.dart';
 import 'package:fitness_app/utils/app_feedback.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
+import 'package:fitness_app/presentation/custom_workouts/day_workout_session_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -421,7 +422,7 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
           title: Row(
             children: [
-              Icon(Icons.download_done_rounded, color: ColorManager.primary, size: 24.sp),
+              Icon(Icons.download_done_rounded, color: ColorManager.primaryText, size: 24.sp),
               SizedBox(width: 8.w),
               Text('Export CSV', style: TextStyle(color: ColorManager.textPrimary)),
             ],
@@ -449,7 +450,7 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                     style: TextStyle(
                       color: ColorManager.textSecondary,
                       fontFamily: 'monospace',
-                      fontSize: 11.sp,
+                      fontSize: 12.sp,
                     ),
                   ),
                 ),
@@ -470,8 +471,8 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                   AppFeedback.success(context, 'CSV copied to clipboard!');
                 }
               },
-              icon: Icon(Icons.copy, size: 16, color: ColorManager.primary),
-              label: Text('Copy', style: TextStyle(color: ColorManager.primary)),
+              icon: Icon(Icons.copy, size: 16, color: ColorManager.primaryText),
+              label: Text('Copy', style: TextStyle(color: ColorManager.primaryText)),
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: ColorManager.primary.withValues(alpha: 0.5)),
               ),
@@ -497,7 +498,7 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         title: Row(
           children: [
-            Icon(Icons.star, color: Colors.amber, size: 24.sp),
+            Icon(Icons.star, color: ColorManager.premium, size: 24.sp),
             SizedBox(width: 8.w),
             Text('Pro Feature', style: TextStyle(color: ColorManager.textPrimary, fontWeight: FontWeight.bold)),
           ],
@@ -616,7 +617,9 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                                     // Log a workout (today, or a past day)
                                     IconButton(
                                       key: const Key('log_past_workout_button'),
-                                      tooltip: 'Log a workout',
+                                      tooltip: _selectedDay == null
+                                          ? 'Log past workout'
+                                          : 'Log a workout on ${DateFormat('MMM d').format(_selectedDay!)}',
                                       icon: Container(
                                         padding: EdgeInsets.all(8.w),
                                         decoration: BoxDecoration(
@@ -625,7 +628,10 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                                         ),
                                         child: Icon(Icons.add_rounded, color: ColorManager.onMint, size: 20.sp),
                                       ),
-                                      onPressed: () => context.push(Routes.workoutLogRoute),
+                                      // Logs for the day picked in the calendar, else today.
+                                      onPressed: () => context.push(
+                                          Routes.workoutLogRoute,
+                                          extra: _selectedDay),
                                     ),
                                     SizedBox(width: 4.w),
                                     // Less-used tools live in one menu
@@ -664,7 +670,7 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                                           child: Row(
                                             children: [
                                               Icon(Icons.fitness_center_rounded,
-                                                  color: Colors.amberAccent, size: 18.sp),
+                                                  color: ColorManager.warningText, size: 18.sp),
                                               SizedBox(width: 10.w),
                                               Text('Plate calculator',
                                                   style: TextStyle(color: ColorManager.textPrimary, fontSize: 14.sp)),
@@ -677,7 +683,7 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                                           child: Row(
                                             children: [
                                               Icon(Icons.file_download_outlined,
-                                                  color: ColorManager.primary, size: 18.sp),
+                                                  color: ColorManager.primaryText, size: 18.sp),
                                               SizedBox(width: 10.w),
                                               Text('Export CSV',
                                                   style: TextStyle(color: ColorManager.textPrimary, fontSize: 14.sp)),
@@ -691,7 +697,7 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                                                   ),
                                                   child: Text('PRO',
                                                       style: TextStyle(
-                                                        color: ColorManager.primary,
+                                                        color: ColorManager.primaryText,
                                                         fontSize: AppText.caption,
                                                         fontWeight: FontWeight.bold,
                                                       )),
@@ -736,13 +742,13 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                                       Text(
                                         'Progress',
                                         style: TextStyle(
-                                          color: ColorManager.primary,
+                                          color: ColorManager.primaryText,
                                           fontSize: 13.sp,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                       Icon(Icons.chevron_right_rounded,
-                                          color: ColorManager.primary, size: 18.sp),
+                                          color: ColorManager.primaryText, size: 18.sp),
                                     ],
                                   ),
                                 ),
@@ -878,8 +884,8 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                                         rightChevronIcon: Icon(Icons.chevron_right, color: ColorManager.textPrimary, size: 20.sp),
                                       ),
                                       daysOfWeekStyle: DaysOfWeekStyle(
-                                        weekdayStyle: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
-                                        weekendStyle: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+                                        weekdayStyle: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
+                                        weekendStyle: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
                                       ),
                                       calendarStyle: CalendarStyle(
                                         defaultTextStyle: TextStyle(color: ColorManager.textPrimary, fontSize: 13.sp),
@@ -904,7 +910,7 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                                                 width: 6.w,
                                                 height: 6.w,
                                                 decoration: const BoxDecoration(
-                                                  color: Color(0xFF4CAF50), // Green dot for workout day
+                                                  color: ColorManager.success, // Green dot for workout day
                                                   shape: BoxShape.circle,
                                                 ),
                                               ),
@@ -946,7 +952,7 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                                     },
                                     child: Text(
                                       'Clear Filter',
-                                      style: TextStyle(color: ColorManager.primary, fontSize: 13.sp),
+                                      style: TextStyle(color: ColorManager.primaryText, fontSize: 13.sp),
                                     ),
                                   ),
                               ],
@@ -969,19 +975,19 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                                   ),
                                   child: Row(
                                     children: [
-                                      Icon(Icons.analytics_outlined, color: ColorManager.primary, size: 18.sp),
+                                      Icon(Icons.analytics_outlined, color: ColorManager.primaryText, size: 18.sp),
                                       SizedBox(width: 8.w),
                                       Expanded(
                                         child: Text(
                                           'View progress for $progressExercise',
                                           style: TextStyle(
-                                            color: ColorManager.primary,
+                                            color: ColorManager.primaryText,
                                             fontSize: 13.sp,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                       ),
-                                      Icon(Icons.chevron_right_rounded, color: ColorManager.primary, size: 18.sp),
+                                      Icon(Icons.chevron_right_rounded, color: ColorManager.primaryText, size: 18.sp),
                                     ],
                                   ),
                                 ),
@@ -1038,14 +1044,41 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                                     : isTypeFiltered
                                         ? 'Pick "All" to see every workout again.'
                                     : _selectedDay == null
-                                        ? 'Start a workout, or log one you already did.'
-                                        : 'Pick another date or tap "Clear Filter" to view all.',
+                                        ? 'Start a live workout now, or log one you already did.'
+                                        : 'Nothing logged on this day yet.',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: ColorManager.textTertiary,
                                   fontSize: 13.sp,
                                 ),
                               ),
+                              // An empty past day: offer to log it directly.
+                              if (!isSearching &&
+                                  !isTypeFiltered &&
+                                  _selectedDay != null &&
+                                  !_selectedDay!.isAfter(DateTime.now())) ...[
+                                SizedBox(height: 16.h),
+                                ElevatedButton.icon(
+                                  key: const Key('history_log_selected_day_button'),
+                                  onPressed: () => context.push(
+                                      Routes.workoutLogRoute,
+                                      extra: _selectedDay),
+                                  icon: Icon(Icons.add_rounded, color: ColorManager.onMint, size: 18.sp),
+                                  label: Text(
+                                    'Log a workout on ${DateFormat('EEE, MMM d').format(_selectedDay!)}',
+                                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: ColorManager.primary,
+                                    foregroundColor: ColorManager.onMint,
+                                    elevation: 0,
+                                    padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(AppRadius.button.r),
+                                    ),
+                                  ),
+                                ),
+                              ],
                               if (!isSearching && !isTypeFiltered && _selectedDay == null) ...[
                                 SizedBox(height: 20.h),
                                 SizedBox(
@@ -1053,7 +1086,7 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                                   child: ElevatedButton(
                                     key: const Key('history_empty_start_button'),
                                     onPressed: widget.onStartWorkout ??
-                                        () => context.go(Routes.mainRoute),
+                                        () => DayWorkoutSessionPage.startQuickWorkout(context),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: ColorManager.primary,
                                       foregroundColor: ColorManager.onMint,
@@ -1063,7 +1096,7 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                                       ),
                                     ),
                                     child: Text(
-                                      'Start a workout',
+                                      'Start workout',
                                       style: TextStyle(fontSize: AppText.body, fontWeight: FontWeight.bold),
                                     ),
                                   ),
@@ -1072,8 +1105,8 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                                   key: const Key('history_empty_log_button'),
                                   onPressed: () => context.push(Routes.workoutLogRoute),
                                   child: Text(
-                                    'Log one you already did',
-                                    style: TextStyle(color: ColorManager.primary, fontSize: 13.sp),
+                                    'Log past workout',
+                                    style: TextStyle(color: ColorManager.primaryText, fontSize: 13.sp),
                                   ),
                                 ),
                               ],
@@ -1160,9 +1193,9 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
       spacing: 16.w,
       runSpacing: 6.h,
       children: [
-        item(Icons.fitness_center_rounded, Colors.blueAccent, '$sessions', 'sessions'),
-        item(Icons.calendar_today_rounded, Colors.greenAccent, '$activeDays', 'active days'),
-        item(Icons.local_fire_department_rounded, Colors.orangeAccent, '$streak', 'day streak'),
+        item(Icons.fitness_center_rounded, ColorManager.info, '$sessions', 'sessions'),
+        item(Icons.calendar_today_rounded, ColorManager.success, '$activeDays', 'active days'),
+        item(Icons.local_fire_department_rounded, ColorManager.warning, '$streak', 'day streak'),
       ],
     );
   }
@@ -1271,7 +1304,7 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                 children: [
                   Text(
                     letters[i],
-                    style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+                    style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                   ),
                   SizedBox(height: 4.h),
                   Container(
@@ -1302,7 +1335,7 @@ class _WorkoutLogHistoryPageState extends State<WorkoutLogHistoryPage> {
                     height: 6.w,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: hasWorkout ? const Color(0xFF4CAF50) : Colors.transparent,
+                      color: hasWorkout ? ColorManager.success : Colors.transparent,
                     ),
                   ),
                 ],

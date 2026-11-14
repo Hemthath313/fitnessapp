@@ -70,7 +70,7 @@ class _RatingPromptDialogState extends State<RatingPromptDialog> {
               child: Icon(
                 Icons.thumb_up_alt_outlined,
                 size: SizeManager.s40.sp,
-                color: ColorManager.primary,
+                color: ColorManager.primaryText,
               ),
             ),
             SizedBox(height: SizeManager.s20.h),
@@ -116,7 +116,7 @@ class _RatingPromptDialogState extends State<RatingPromptDialog> {
                     child: Icon(
                       isSelected ? Icons.star_rounded : Icons.star_border_rounded,
                       size: SizeManager.s48.sp,
-                      color: isSelected ? Colors.amber : ColorManager.textSecondary.withValues(alpha: 0.5),
+                      color: isSelected ? ColorManager.warningText : ColorManager.textSecondary.withValues(alpha: 0.5),
                     ),
                   ),
                 );
@@ -133,7 +133,7 @@ class _RatingPromptDialogState extends State<RatingPromptDialog> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ColorManager.primary,
                     disabledBackgroundColor: ColorManager.divider,
-                    foregroundColor: const Color(0xFF06201B),
+                    foregroundColor: ColorManager.onMint,
                     disabledForegroundColor: ColorManager.textSecondary,
                     padding: EdgeInsets.symmetric(vertical: SizeManager.s14.h),
                     shape: RoundedRectangleBorder(

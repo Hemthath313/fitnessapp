@@ -44,7 +44,7 @@ class AppFeedback {
     final messenger = ScaffoldMessenger.maybeOf(context);
     if (messenger == null) return;
     final onColor =
-        kind == FeedbackKind.success ? ColorManager.onMint : Colors.white;
+        kind == FeedbackKind.info ? ColorManager.textPrimary : Colors.white;
     messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(

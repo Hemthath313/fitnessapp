@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/units.dart';
 import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
@@ -158,7 +159,8 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
   @override
   void initState() {
     super.initState();
-    _isKg = widget.initialIsKg;
+    // Follow the app's weight unit unless the caller asked for lb.
+    _isKg = widget.initialIsKg && !Units.useLb;
     _barWeight = _isKg ? 20.0 : 45.0;
     _targetWeight = widget.initialWeight > 0
         ? widget.initialWeight
@@ -312,7 +314,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
                           color: ColorManager.primary.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.fitness_center_rounded, color: ColorManager.primary, size: 20.sp),
+                        child: Icon(Icons.fitness_center_rounded, color: ColorManager.primaryText, size: 20.sp),
                       ),
                       SizedBox(width: 10.w),
                       Expanded(
@@ -329,7 +331,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
                             ),
                             Text(
                               'Visual Olympic plate calculator per side',
-                              style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+                              style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -341,7 +343,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
                 ),
                 IconButton(tooltip: 'Close', 
                   key: const Key('plate_calculator_close_button'),
-                  icon: const Icon(Icons.close_rounded, color: Colors.white54),
+                  icon: Icon(Icons.close_rounded, color: ColorManager.textSecondary),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
@@ -364,11 +366,11 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Expanded(child: _buildStatItem('Total Weight', '${_formatWeight(_targetWeight)} ${_isKg ? 'kg' : 'lbs'}', ColorManager.primary)),
-                  Container(height: 30.h, width: 1, color: Colors.white12),
-                  Expanded(child: _buildStatItem('Bar Weight', '${_formatWeight(_barWeight)} ${_isKg ? 'kg' : 'lbs'}', Colors.white70)),
-                  Container(height: 30.h, width: 1, color: Colors.white12),
-                  Expanded(child: _buildStatItem('Per Side', '${_formatWeight(weightPerSide > 0 ? weightPerSide : 0)} ${_isKg ? 'kg' : 'lbs'}', Colors.amberAccent)),
+                  Expanded(child: _buildStatItem('Total Weight', '${_formatWeight(_targetWeight)} ${_isKg ? 'kg' : 'lbs'}', ColorManager.primaryText)),
+                  Container(height: 30.h, width: 1, color: ColorManager.divider),
+                  Expanded(child: _buildStatItem('Bar Weight', '${_formatWeight(_barWeight)} ${_isKg ? 'kg' : 'lbs'}', ColorManager.textPrimary)),
+                  Container(height: 30.h, width: 1, color: ColorManager.divider),
+                  Expanded(child: _buildStatItem('Per Side', '${_formatWeight(weightPerSide > 0 ? weightPerSide : 0)} ${_isKg ? 'kg' : 'lbs'}', ColorManager.warningText)),
                 ],
               ),
             ),
@@ -432,7 +434,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
                       labelText: 'Total Target Weight',
                       labelStyle: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp),
                       suffixText: _isKg ? 'kg' : 'lbs',
-                      suffixStyle: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.bold, fontSize: 16.sp),
+                      suffixStyle: TextStyle(color: ColorManager.primaryText, fontWeight: FontWeight.bold, fontSize: 16.sp),
                       filled: true,
                       fillColor: ColorManager.surface,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14.r), borderSide: BorderSide.none),
@@ -531,7 +533,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
     return Container(
       height: 130.h,
       decoration: BoxDecoration(
-        color: const Color(0xFF161922),
+        color: ColorManager.darkSurfaceDark,
         borderRadius: BorderRadius.circular(20.r),
         border: Border.all(color: Colors.white10),
       ),
@@ -580,7 +582,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
                   child: Center(
                     child: Text(
                       'No Plates (Bar Only)',
-                      style: TextStyle(color: Colors.white38, fontSize: 11.sp),
+                      style: TextStyle(color: Colors.white38, fontSize: 12.sp),
                     ),
                   ),
                 )
@@ -589,7 +591,6 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
                   final color = _getPlateColor(plate);
                   final height = _getPlateHeight(plate);
                   final width = _getPlateWidth(plate);
-                  final isLightColor = plate == 5.0 && _isKg;
 
                   return Container(
                     width: width,
@@ -616,8 +617,8 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
                         child: Text(
                           _formatWeight(plate),
                           style: TextStyle(
-                            color: isLightColor ? ColorManager.onMint : ColorManager.textPrimary,
-                            fontSize: 11.sp,
+                            color: ColorManager.onColor(color),
+                            fontSize: 12.sp,
                             fontWeight: FontWeight.w900,
                           ),
                         ),
@@ -650,7 +651,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
   Widget _buildStatItem(String label, String value, Color valueColor) {
     return Column(
       children: [
-        Text(label, textAlign: TextAlign.center, style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp)),
+        Text(label, textAlign: TextAlign.center, style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),
         SizedBox(height: 4.h),
         Text(value, textAlign: TextAlign.center, style: TextStyle(color: valueColor, fontSize: 14.sp, fontWeight: FontWeight.bold)),
       ],
@@ -687,7 +688,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.black : ColorManager.textSecondary,
+            color: isSelected ? Colors.white : ColorManager.textSecondary,
             fontWeight: FontWeight.bold,
             fontSize: 12.sp,
           ),
@@ -710,7 +711,7 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
         child: Text(
           label,
           style: TextStyle(
-            color: delta > 0 ? ColorManager.primary : Colors.orangeAccent,
+            color: delta > 0 ? ColorManager.primaryText : ColorManager.warningText,
             fontWeight: FontWeight.bold,
             fontSize: 12.sp,
           ),
@@ -746,8 +747,8 @@ class _PlateCalculatorSheetState extends State<PlateCalculatorSheet> {
             child: Text(
               label,
               style: TextStyle(
-                color: isSelected ? ColorManager.primary : ColorManager.textSecondary,
-                fontSize: 11.sp,
+                color: isSelected ? ColorManager.primaryText : ColorManager.textSecondary,
+                fontSize: 12.sp,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),

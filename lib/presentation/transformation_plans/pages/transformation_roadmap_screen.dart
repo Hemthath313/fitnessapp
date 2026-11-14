@@ -33,6 +33,16 @@ class _TransformationRoadmapScreenState
   int _selectedPhaseIndex = 0;
   bool _isChecklistExpanded = false;
 
+  /// "Plan guide" (intro, nutrition, advice and phase notes) starts folded so
+  /// the day list is reachable without a long scroll.
+  bool _planGuideOpen = false;
+
+  /// Days the user tapped open. Today is always open.
+  final Set<int> _expandedDays = {};
+
+  /// Open the phase that contains today the first time the screen builds.
+  bool _phaseInitialised = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,6 +87,28 @@ class _TransformationRoadmapScreenState
             ),
             onPressed: () => context.push(Routes.transformationPlansRoute),
           ),
+          PopupMenuButton<String>(
+            key: const Key('roadmap_more_menu'),
+            tooltip: 'More',
+            icon: Icon(Icons.more_vert_rounded, color: ColorManager.textPrimary, size: 22.sp),
+            color: ColorManager.surface,
+            onSelected: (value) {
+              if (value == 'leave') _confirmLeavePlan(context);
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem<String>(
+                key: const Key('leave_plan_menu_item'),
+                value: 'leave',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout_rounded, color: ColorManager.errorText, size: 20.sp),
+                    SizedBox(width: 10.w),
+                    Text('Leave plan', style: TextStyle(color: ColorManager.errorText, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
       body: Consumer<TransformationProvider>(
@@ -115,6 +147,18 @@ class _TransformationRoadmapScreenState
           }
 
           final phases = blueprint.phases;
+          if (!_phaseInitialised) {
+            _phaseInitialised = true;
+            var firstDay = 1;
+            for (var i = 0; i < phases.length; i++) {
+              final len = phases[i].weeks.fold<int>(0, (n, w) => n + w.days.length);
+              if (activeState.currentDay < firstDay + len) {
+                _selectedPhaseIndex = i;
+                break;
+              }
+              firstDay += len;
+            }
+          }
           if (_selectedPhaseIndex >= phases.length) {
             _selectedPhaseIndex = 0;
           }
@@ -133,67 +177,59 @@ class _TransformationRoadmapScreenState
               _buildProgressHeader(activeState, blueprint, primaryColor),
               SizedBox(height: 14.h),
 
-              // Beginner Orientation Banner (if beginner programme)
-              if (blueprint.id == 'beginner_fitness_30') ...[
-                _buildBeginnerOrientationBanner(primaryColor),
+              // Weekly check-in: only while this week's check-in is still due.
+              if (!activeState.weeklyCheckIns
+                  .any((c) => c.weekNumber == activeState.currentWeekNumber)) ...[
+                _buildWeeklyCheckInBanner(context, activeState, primaryColor),
                 SizedBox(height: 14.h),
               ],
 
-              // Weight Loss Orientation Banner (if weight loss programme)
-              if (blueprint.id == 'weight_loss_60') ...[
-                _buildWeightLossOrientationBanner(primaryColor),
-                SizedBox(height: 14.h),
-              ],
-
-              // Muscle Gain Orientation Banner (if muscle building programme)
-              if (blueprint.id == 'muscle_building_90') ...[
-                _buildMuscleGainOrientationBanner(primaryColor),
-                SizedBox(height: 14.h),
-              ],
-
-              // Strength Building Orientation Banner (if strength programme)
-              if (blueprint.id == 'strength_12_week') ...[
-                _buildStrengthOrientationBanner(primaryColor),
-                SizedBox(height: 14.h),
-              ],
-
-              // Weekly Check-In Shortcut Banner
-              _buildWeeklyCheckInBanner(context, activeState, primaryColor),
+              // 2. Milestones Checkpoint Card
+              _buildMilestonesBar(activeState, primaryColor),
               SizedBox(height: 14.h),
 
-              // 2. Calibrated Nutrition Targets Bar
-              _buildNutritionTargetsBar(context, activeState, primaryColor),
-              SizedBox(height: 16.h),
-
-              // Six-Pack Educational Companion Card (for weight loss programme)
-              if (blueprint.id == 'weight_loss_60') ...[
-                _buildSixPackEducationCard(context, primaryColor),
-                SizedBox(height: 16.h),
+              // 3. Plan guide: intro, nutrition targets, advice and phase
+              // notes, folded into one row so the days stay close to the top.
+              _buildPlanGuideToggle(),
+              if (_planGuideOpen) ...[
+                SizedBox(height: 10.h),
+                if (blueprint.id == 'beginner_fitness_30') ...[
+                  _buildBeginnerOrientationBanner(primaryColor),
+                  SizedBox(height: 12.h),
+                ],
+                if (blueprint.id == 'weight_loss_60') ...[
+                  _buildWeightLossOrientationBanner(primaryColor),
+                  SizedBox(height: 12.h),
+                ],
+                if (blueprint.id == 'muscle_building_90') ...[
+                  _buildMuscleGainOrientationBanner(primaryColor),
+                  SizedBox(height: 12.h),
+                ],
+                if (blueprint.id == 'strength_12_week') ...[
+                  _buildStrengthOrientationBanner(primaryColor),
+                  SizedBox(height: 12.h),
+                ],
+                _buildNutritionTargetsBar(context, activeState, primaryColor),
+                SizedBox(height: 12.h),
+                if (blueprint.id == 'weight_loss_60') ...[
+                  _buildSixPackEducationCard(context, primaryColor),
+                  SizedBox(height: 12.h),
+                ],
+                if (blueprint.id == 'muscle_building_90') ...[
+                  _buildProgressiveOverloadAdvisoryCard(context, primaryColor),
+                  SizedBox(height: 12.h),
+                ],
+                if (blueprint.id == 'strength_12_week') ...[
+                  _buildStrengthIntelligenceAdvisoryCard(context, primaryColor),
+                  SizedBox(height: 12.h),
+                ],
+                _buildPhaseInfoBanner(currentPhase, primaryColor),
               ],
-
-              // Progressive Overload Advisory Card (for muscle building programme)
-              if (blueprint.id == 'muscle_building_90') ...[
-                _buildProgressiveOverloadAdvisoryCard(context, primaryColor),
-                SizedBox(height: 16.h),
-              ],
-
-              // Strength Intelligence Advisory Card (for strength programme)
-              if (blueprint.id == 'strength_12_week') ...[
-                _buildStrengthIntelligenceAdvisoryCard(context, primaryColor),
-                SizedBox(height: 16.h),
-              ],
-
-              // 3. Milestones Checkpoint Card
-              _buildMilestonesBar(activeState, primaryColor),
               SizedBox(height: 16.h),
 
               // 4. Phase Switcher Tabs
               _buildPhaseTabs(phases, primaryColor),
-              SizedBox(height: 12.h),
-
-              // 5. Phase Info Banner
-              _buildPhaseInfoBanner(currentPhase, primaryColor),
-              SizedBox(height: 14.h),
+              SizedBox(height: 8.h),
 
               // 6. Days Schedule for Current Phase
               ..._buildPhaseDaysList(
@@ -282,7 +318,7 @@ class _TransformationRoadmapScreenState
               'Beginner Rule: Form beats weight. Rest 60–90s between sets, drink 2.5L water, and stay consistent!',
               style: TextStyle(
                 color: ColorManager.textPrimary,
-                fontSize: 11.sp,
+                fontSize: 12.sp,
                 height: 1.35,
               ),
             ),
@@ -310,7 +346,7 @@ class _TransformationRoadmapScreenState
               'Fat Loss Rule: Sustainable energy deficit (~15–20%) + 2.0g protein/kg preserves muscle while stripping fat. Rest 45–60s on circuits & hydrate!',
               style: TextStyle(
                 color: ColorManager.textPrimary,
-                fontSize: 11.sp,
+                fontSize: 12.sp,
                 height: 1.35,
               ),
             ),
@@ -361,7 +397,7 @@ class _TransformationRoadmapScreenState
             'Abdominal exercises strengthen your core, but spot reduction is a myth. Visible abs are revealed through an overall caloric deficit and full-body conditioning.',
             style: TextStyle(
               color: ColorManager.textSecondary,
-              fontSize: 11.sp,
+              fontSize: 12.sp,
               height: 1.35,
             ),
           ),
@@ -376,7 +412,7 @@ class _TransformationRoadmapScreenState
                 'Explore 30-Day Six-Pack Challenge',
                 style: TextStyle(
                   color: primaryColor,
-                  fontSize: 11.sp,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -412,7 +448,7 @@ class _TransformationRoadmapScreenState
               'Hypertrophy Rule: Progressive Overload + 10–15% Clean Surplus + ~2.0g protein/kg. Add reps within target bracket before adding weight!',
               style: TextStyle(
                 color: ColorManager.textPrimary,
-                fontSize: 11.sp,
+                fontSize: 12.sp,
                 height: 1.35,
               ),
             ),
@@ -463,7 +499,7 @@ class _TransformationRoadmapScreenState
             'Muscles only grow when progressively challenged over time. The app remembers your logged weights and reps. Strive to add 1–2 reps within your target rep bracket before increasing load by +1.25–2.5 kg. Deload on Weeks 4 and 8 to shed systemic fatigue.',
             style: TextStyle(
               color: ColorManager.textSecondary,
-              fontSize: 11.sp,
+              fontSize: 12.sp,
               height: 1.35,
             ),
           ),
@@ -479,7 +515,7 @@ class _TransformationRoadmapScreenState
                     'Strength Analytics',
                     style: TextStyle(
                       color: primaryColor,
-                      fontSize: 11.sp,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -502,7 +538,7 @@ class _TransformationRoadmapScreenState
                     'Bulking Diet',
                     style: TextStyle(
                       color: primaryColor,
-                      fontSize: 11.sp,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -540,7 +576,7 @@ class _TransformationRoadmapScreenState
               'Strength Rule: Compound Mastery + 2–3 min Rest + Progressive Overload. Log every set accurately; Gym Buddy estimates your 1RM curves!',
               style: TextStyle(
                 color: ColorManager.textPrimary,
-                fontSize: 11.sp,
+                fontSize: 12.sp,
                 height: 1.35,
               ),
             ),
@@ -591,7 +627,7 @@ class _TransformationRoadmapScreenState
             'Track your compound lift progression across Squat, Bench, Deadlift, and Military Press. The app monitors your estimated 1RM, identifies all-time Personal Records (PRs), and remembers previous session weights.',
             style: TextStyle(
               color: ColorManager.textSecondary,
-              fontSize: 11.sp,
+              fontSize: 12.sp,
               height: 1.35,
             ),
           ),
@@ -607,7 +643,7 @@ class _TransformationRoadmapScreenState
                     'PR Vault & 1RM',
                     style: TextStyle(
                       color: primaryColor,
-                      fontSize: 11.sp,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -630,7 +666,7 @@ class _TransformationRoadmapScreenState
                     'Workout History',
                     style: TextStyle(
                       color: primaryColor,
-                      fontSize: 11.sp,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -781,7 +817,7 @@ class _TransformationRoadmapScreenState
         children: [
           Row(
             children: [
-              const Icon(Icons.emoji_events_rounded, color: ColorManager.success, size: 24),
+              Icon(Icons.emoji_events_rounded, color: ColorManager.successText, size: 24),
               SizedBox(width: 10.w),
               Expanded(
                 child: Column(
@@ -800,7 +836,7 @@ class _TransformationRoadmapScreenState
                       'Tap below to finalize your transformation and view your official results summary.',
                       style: TextStyle(
                         color: ColorManager.textSecondary,
-                        fontSize: 11.sp,
+                        fontSize: 12.sp,
                       ),
                     ),
                   ],
@@ -823,7 +859,7 @@ class _TransformationRoadmapScreenState
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: ColorManager.success,
+                backgroundColor: ColorManager.successDark,
                 padding: EdgeInsets.symmetric(vertical: 10.h),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
               ),
@@ -914,7 +950,7 @@ class _TransformationRoadmapScreenState
             children: [
               Icon(
                 hasCheckedIn ? Icons.task_alt_rounded : Icons.pending_actions_rounded,
-                color: hasCheckedIn ? ColorManager.success : ColorManager.accent,
+                color: hasCheckedIn ? ColorManager.successText : ColorManager.accentText,
                 size: 18.sp,
               ),
               SizedBox(width: 8.w),
@@ -932,8 +968,8 @@ class _TransformationRoadmapScreenState
                   Text(
                     hasCheckedIn ? 'Logged for this week' : 'Due this week',
                     style: TextStyle(
-                      color: hasCheckedIn ? ColorManager.success : ColorManager.textTertiary,
-                      fontSize: 11.sp,
+                      color: hasCheckedIn ? ColorManager.successText : ColorManager.textTertiary,
+                      fontSize: 12.sp,
                     ),
                   ),
                 ],
@@ -985,7 +1021,7 @@ class _TransformationRoadmapScreenState
               Expanded(
                 child: Row(
                   children: [
-                    Icon(Icons.restaurant_rounded, color: ColorManager.accent, size: 16.sp),
+                    Icon(Icons.restaurant_rounded, color: ColorManager.accentText, size: 16.sp),
                     SizedBox(width: 6.w),
                     Expanded(
                       child: Text(
@@ -1017,7 +1053,7 @@ class _TransformationRoadmapScreenState
                             : (state.planId == 'strength_12_week' ? 'Strength Fuel' : 'Diet Plans'),
                         style: TextStyle(
                           color: primaryColor,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -1072,7 +1108,7 @@ class _TransformationRoadmapScreenState
                   key: const Key('nutrition_bar_log_meal_btn'),
                   onPressed: () => context.push(Routes.newMealRoute),
                   icon: Icon(Icons.add_circle_outline_rounded, size: 14.sp, color: primaryColor),
-                  label: Text('Log Meal', style: TextStyle(fontSize: 11.sp, color: primaryColor, fontWeight: FontWeight.bold)),
+                  label: Text('Log Meal', style: TextStyle(fontSize: 12.sp, color: primaryColor, fontWeight: FontWeight.bold)),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: primaryColor.withValues(alpha: 0.4)),
                     padding: EdgeInsets.symmetric(vertical: 6.h),
@@ -1085,8 +1121,8 @@ class _TransformationRoadmapScreenState
                 child: OutlinedButton.icon(
                   key: const Key('nutrition_bar_log_water_btn'),
                   onPressed: () => context.push(Routes.addWaterRoute),
-                  icon: Icon(Icons.water_drop_outlined, size: 14.sp, color: ColorManager.secondary),
-                  label: Text('Log Water', style: TextStyle(fontSize: 11.sp, color: ColorManager.secondary, fontWeight: FontWeight.bold)),
+                  icon: Icon(Icons.water_drop_outlined, size: 14.sp, color: ColorManager.accentText),
+                  label: Text('Log Water', style: TextStyle(fontSize: 12.sp, color: ColorManager.accentText, fontWeight: FontWeight.bold)),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: ColorManager.secondary.withValues(alpha: 0.4)),
                     padding: EdgeInsets.symmetric(vertical: 6.h),
@@ -1106,7 +1142,7 @@ class _TransformationRoadmapScreenState
       children: [
         Text(value, style: TextStyle(color: color, fontSize: 13.sp, fontWeight: FontWeight.bold)),
         SizedBox(height: 2.h),
-        Text(label, style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp)),
+        Text(label, style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp)),
       ],
     );
   }
@@ -1124,7 +1160,7 @@ class _TransformationRoadmapScreenState
       ),
       child: Row(
         children: [
-          Icon(Icons.emoji_events_rounded, color: ColorManager.warning, size: 20.sp),
+          Icon(Icons.emoji_events_rounded, color: ColorManager.warningText, size: 20.sp),
           SizedBox(width: 10.w),
           Expanded(
             child: Column(
@@ -1142,7 +1178,7 @@ class _TransformationRoadmapScreenState
                 ),
                 Text(
                   '${achieved.length} of ${state.milestones.length} milestones achieved',
-                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
                 ),
               ],
             ),
@@ -1213,7 +1249,7 @@ class _TransformationRoadmapScreenState
           SizedBox(height: 3.h),
           Text(
             phase.description,
-            style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp, height: 1.3),
+            style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp, height: 1.3),
           ),
         ],
       ),
@@ -1250,12 +1286,13 @@ class _TransformationRoadmapScreenState
             children: [
               Expanded(
                 child: Text(
-                  'Week ${week.weekNumber}: ${week.focus}',
+                  'Week ${week.weekNumber} · ${week.focus}',
                   style: TextStyle(
-                    color: ColorManager.textPrimary,
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.bold,
+                    color: ColorManager.textSecondary,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
                   ),
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -1271,19 +1308,44 @@ class _TransformationRoadmapScreenState
         final isCompleted = state.completedDayIndices.contains(dayNum);
         final isToday = dayNum == state.currentDay;
 
+        final isOpen = isToday || _expandedDays.contains(dayNum);
+        if (!isOpen) {
+          widgets.add(_buildDayRow(
+            context: context,
+            provider: provider,
+            state: state,
+            day: day,
+            dayNumber: dayNum,
+            isCompleted: isCompleted,
+          ));
+          continue;
+        }
         widgets.add(
           Padding(
-            padding: EdgeInsets.only(bottom: 10.h),
-            child: _buildDayCard(
-              context: context,
-              provider: provider,
-              day: day,
-              dayNumber: dayNum,
-              isCompleted: isCompleted,
-              isToday: isToday,
-              primaryColor: primaryColor,
-              planTitle: plan.title,
-              planId: plan.id,
+            padding: EdgeInsets.symmetric(vertical: 8.h),
+            child: Column(
+              children: [
+                _buildDayCard(
+                  context: context,
+                  provider: provider,
+                  day: day,
+                  dayNumber: dayNum,
+                  isCompleted: isCompleted,
+                  isToday: isToday,
+                  primaryColor: primaryColor,
+                  planTitle: plan.title,
+                  planId: plan.id,
+                ),
+                if (!isToday)
+                  TextButton.icon(
+                    key: Key('collapse_day_${dayNum}_button'),
+                    onPressed: () => setState(() => _expandedDays.remove(dayNum)),
+                    icon: Icon(Icons.expand_less_rounded,
+                        size: 18.sp, color: ColorManager.textSecondary),
+                    label: Text('Show less',
+                        style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),
+                  ),
+              ],
             ),
           ),
         );
@@ -1291,6 +1353,221 @@ class _TransformationRoadmapScreenState
     }
 
     return widgets;
+  }
+
+  Widget _buildPlanGuideToggle() {
+    return InkWell(
+      key: const Key('plan_guide_toggle'),
+      borderRadius: BorderRadius.circular(AppRadius.tile.r),
+      onTap: () => setState(() => _planGuideOpen = !_planGuideOpen),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: ColorManager.surface,
+          boxShadow: ColorManager.cardShadow,
+          borderRadius: BorderRadius.circular(AppRadius.tile.r),
+          border: Border.all(color: ColorManager.divider),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.menu_book_rounded, size: 18.sp, color: ColorManager.primaryText),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Plan guide',
+                      style: TextStyle(
+                          color: ColorManager.textPrimary,
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600)),
+                  SizedBox(height: 2.h),
+                  Text('Nutrition targets, tips and phase notes',
+                      style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),
+                ],
+              ),
+            ),
+            Icon(
+              _planGuideOpen ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+              color: ColorManager.textSecondary,
+              size: 22.sp,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// One-line day: status, "Day N", workout name and date. Tap to open.
+  Widget _buildDayRow({
+    required BuildContext context,
+    required TransformationProvider provider,
+    required UserTransformationState state,
+    required TransformationDayBlueprint day,
+    required int dayNumber,
+    required bool isCompleted,
+  }) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final isSkipped = state.isDaySkipped(dayNumber);
+    final currentDoneToday = state.isDayCompleted(state.currentDay) &&
+        state.completionDateFor(state.currentDay, now) == today;
+    String dateLabel;
+    if (isCompleted) {
+      final done = state.completionDateFor(dayNumber, now) ?? today;
+      dateLabel = 'Done ${DateFormat('MMM d').format(done)}';
+    } else if (isSkipped) {
+      dateLabel = 'Skipped';
+    } else if (state.isDayRescheduled(dayNumber)) {
+      dateLabel = DateFormat('MMM d').format(state.getScheduledDateForDay(dayNumber));
+    } else {
+      final offset = (dayNumber - state.currentDay + (currentDoneToday ? 1 : 0)).clamp(0, 10000);
+      final d = today.add(Duration(days: offset));
+      dateLabel = offset == 1
+          ? 'Tomorrow'
+          : (offset < 7 ? DateFormat('EEE').format(d) : DateFormat('MMM d').format(d));
+    }
+    final title = day.isRestDay ? 'Rest & Recovery' : (day.muscleGroup ?? 'Workout');
+    final muted = isCompleted || isSkipped;
+
+    final Widget status = day.isRestDay
+        ? IconButton(
+            key: Key('toggle_day_${dayNumber}_button'),
+            visualDensity: VisualDensity.compact,
+            icon: Icon(
+              isCompleted ? Icons.check_circle_rounded : Icons.bedtime_outlined,
+              color: isCompleted ? ColorManager.successText : ColorManager.textTertiary,
+              size: 20.sp,
+            ),
+            onPressed: () => _toggleRestDay(context, provider, dayNumber, isCompleted),
+            tooltip: isCompleted ? 'Mark rest day not done' : 'Mark rest day done',
+          )
+        : Padding(
+            key: Key('day_status_${dayNumber}_icon'),
+            padding: EdgeInsets.all(10.w),
+            child: Icon(
+              isCompleted ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+              color: isCompleted ? ColorManager.successText : ColorManager.textTertiary,
+              size: 20.sp,
+            ),
+          );
+
+    return InkWell(
+      key: Key('day_row_$dayNumber'),
+      onTap: () => setState(() => _expandedDays.add(dayNumber)),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: ColorManager.divider)),
+        ),
+        padding: EdgeInsets.symmetric(vertical: 2.h),
+        child: Row(
+          children: [
+            status,
+            Text(
+              'Day $dayNumber',
+              style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
+            ),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: muted ? ColorManager.textSecondary : ColorManager.textPrimary,
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            SizedBox(width: 8.w),
+            Text(
+              dateLabel,
+              style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
+            ),
+            Icon(Icons.chevron_right_rounded, size: 18.sp, color: ColorManager.textTertiary),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _toggleRestDay(
+    BuildContext context,
+    TransformationProvider provider,
+    int dayNumber,
+    bool isCompleted,
+  ) async {
+    if (isCompleted) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: ColorManager.surface,
+          title: Text('Mark Day $dayNumber as not done?',
+              style: TextStyle(color: ColorManager.textPrimary, fontSize: 16.sp, fontWeight: FontWeight.bold)),
+          content: Text('This rest day will no longer count toward your progress.',
+              style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text('Cancel', style: TextStyle(color: ColorManager.textSecondary)),
+            ),
+            TextButton(
+              key: const Key('confirm_unmark_day_button'),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text('Mark not done', style: TextStyle(color: ColorManager.errorText, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+    }
+    await provider.toggleDayCompletion(dayNumber);
+  }
+
+  Future<void> _confirmLeavePlan(BuildContext context) async {
+    final provider = Provider.of<TransformationProvider>(context, listen: false);
+    final state = provider.activeTransformation;
+    if (state == null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: ColorManager.surface,
+        title: Text('Leave ${state.planTitle}?',
+            style: TextStyle(color: ColorManager.textPrimary, fontSize: 16.sp, fontWeight: FontWeight.bold)),
+        content: Text(
+          'Your plan will stop today. Your ${state.completedDayIndices.length} completed '
+          '${state.completedDayIndices.length == 1 ? 'day is' : 'days are'} kept in your programme history, '
+          'and you can start a new plan any time.',
+          style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Stay on plan', style: TextStyle(color: ColorManager.textSecondary)),
+          ),
+          TextButton(
+            key: const Key('confirm_leave_plan_button'),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('Leave plan', style: TextStyle(color: ColorManager.errorText, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await provider.abandonPlan();
+    if (!context.mounted) return;
+    final failed = provider.error != null && provider.hasActiveTransformation;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          failed ? "Couldn't leave the plan. Try again." : 'You left the plan. Pick a new one any time.',
+          style: TextStyle(color: failed ? Colors.white : ColorManager.textPrimary),
+        ),
+        backgroundColor: failed ? ColorManager.error : ColorManager.surfaceLight,
+      ),
+    );
+    if (!failed && context.canPop()) context.pop();
   }
 
   Widget _buildDayCard({
@@ -1312,15 +1589,27 @@ class _TransformationRoadmapScreenState
 
     final now = DateTime.now();
     final todayMidnight = DateTime(now.year, now.month, now.day);
-    final schedMidnight = DateTime(scheduledDate.year, scheduledDate.month, scheduledDate.day);
-    final effectiveIsToday = schedMidnight == todayMidnight;
-    final isMissed = !isCompleted && !isSkipped && !day.isRestDay && schedMidnight.isBefore(todayMidnight);
+    // Self-paced plan: "today" is the provider's current day, and an
+    // unfinished past day is never "missed" (the plan just waits).
+    final int currentDay = state?.currentDay ?? 1;
+    final effectiveIsToday = dayNumber == currentDay;
+    // Date shown on the card: when it was done, or when it's expected.
+    final bool currentDoneToday = state != null &&
+        state.isDayCompleted(currentDay) &&
+        state.completionDateFor(currentDay, now) == todayMidnight;
+    final DateTime displayDate = isCompleted
+        ? (state?.completionDateFor(dayNumber, now) ?? scheduledDate)
+        : (isRescheduled
+            ? scheduledDate
+            : todayMidnight.add(Duration(
+                days: (dayNumber - currentDay + (currentDoneToday ? 1 : 0))
+                    .clamp(0, 10000))));
 
     String statusLabel;
     Color statusColor;
     if (isCompleted) {
       statusLabel = 'Completed';
-      statusColor = ColorManager.success;
+      statusColor = ColorManager.successText;
     } else if (isSkipped) {
       statusLabel = 'Skipped';
       statusColor = ColorManager.accent;
@@ -1330,9 +1619,6 @@ class _TransformationRoadmapScreenState
     } else if (isRescheduled) {
       statusLabel = 'Rescheduled';
       statusColor = ColorManager.secondary;
-    } else if (isMissed) {
-      statusLabel = 'Missed';
-      statusColor = Colors.orange;
     } else if (day.isRestDay) {
       statusLabel = 'Rest Day';
       statusColor = ColorManager.textSecondary;
@@ -1379,7 +1665,7 @@ class _TransformationRoadmapScreenState
                           color: effectiveIsToday
                               ? primaryColor
                               : (isCompleted ? ColorManager.success : ColorManager.textSecondary),
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -1408,7 +1694,7 @@ class _TransformationRoadmapScreenState
                       key: Key('reschedule_day_${dayNumber}_button'),
                       icon: Icon(
                         Icons.edit_calendar_rounded,
-                        color: isRescheduled ? ColorManager.secondary : ColorManager.textSecondary,
+                        color: isRescheduled ? ColorManager.accentText : ColorManager.textSecondary,
                         size: 20.sp,
                       ),
                       tooltip: 'Reschedule Workout',
@@ -1421,17 +1707,34 @@ class _TransformationRoadmapScreenState
                       ),
                     ),
                   ],
-                  // Checkbox Toggle
-                  IconButton(
-                    key: Key('toggle_day_${dayNumber}_button'),
-                    icon: Icon(
-                      isCompleted ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                      color: isCompleted ? ColorManager.success : ColorManager.textTertiary,
-                      size: 22.sp,
+                  // Rest days can be ticked by hand. Workout days are completed
+                  // by finishing the workout, so streaks and badges match.
+                  if (day.isRestDay)
+                    IconButton(
+                      key: Key('toggle_day_${dayNumber}_button'),
+                      icon: Icon(
+                        isCompleted ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                        color: isCompleted ? ColorManager.successText : ColorManager.textTertiary,
+                        size: 22.sp,
+                      ),
+                      onPressed: () => _toggleRestDay(context, provider, dayNumber, isCompleted),
+                      tooltip: isCompleted ? 'Mark rest day not done' : 'Mark rest day done',
+                    )
+                  else
+                    Padding(
+                      key: Key('day_status_${dayNumber}_icon'),
+                      padding: EdgeInsets.all(12.w),
+                      child: Tooltip(
+                        message: isCompleted
+                            ? 'Workout completed'
+                            : 'Finish the workout to complete this day',
+                        child: Icon(
+                          isCompleted ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                          color: isCompleted ? ColorManager.successText : ColorManager.divider,
+                          size: 22.sp,
+                        ),
+                      ),
                     ),
-                    onPressed: () => provider.toggleDayCompletion(dayNumber),
-                    tooltip: isCompleted ? 'Mark Incomplete' : 'Mark Completed',
-                  ),
                 ],
               ),
             ],
@@ -1446,10 +1749,12 @@ class _TransformationRoadmapScreenState
                 child: Text(
                   isRescheduled
                       ? 'Original: ${DateFormat('MMM d').format(originalDate)} • Scheduled: ${DateFormat('MMM d').format(scheduledDate)}'
-                      : DateFormat('EEE, MMM d').format(scheduledDate),
+                      : (isCompleted
+                          ? 'Done ${DateFormat('EEE, MMM d').format(displayDate)}'
+                          : DateFormat('EEE, MMM d').format(displayDate)),
                   style: TextStyle(
-                    color: isRescheduled ? ColorManager.secondary : ColorManager.textSecondary,
-                    fontSize: 11.sp,
+                    color: isRescheduled ? ColorManager.accentText : ColorManager.textSecondary,
+                    fontSize: 12.sp,
                     fontWeight: isRescheduled ? FontWeight.w600 : FontWeight.normal,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -1466,7 +1771,7 @@ class _TransformationRoadmapScreenState
                   statusLabel,
                   style: TextStyle(
                     color: statusColor,
-                    fontSize: 11.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -1478,7 +1783,9 @@ class _TransformationRoadmapScreenState
             SizedBox(height: 4.h),
             Text(
               day.notes!,
-              style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
             ),
           ],
 
@@ -1495,80 +1802,26 @@ class _TransformationRoadmapScreenState
                 );
                 final isAdapted = adaptedExercises.join(',') != day.exerciseNames.join(',');
 
+                final shown = adaptedExercises.take(3).join(' · ');
+                final more = adaptedExercises.length - 3;
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: 8.h),
-                    Wrap(
-                      spacing: 6.w,
-                      runSpacing: 4.h,
-                      children: adaptedExercises.map((name) {
-                        return Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                          decoration: BoxDecoration(
-                            color: ColorManager.surfaceDark,
-                            borderRadius: BorderRadius.circular(6.r),
-                          ),
-                          child: Text(
-                            name,
-                            style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
-                          ),
-                        );
-                      }).toList(),
+                    // One plain line instead of a chip per exercise.
+                    Text(
+                      more > 0 ? '$shown  +$more more' : shown,
+                      key: Key('day_${dayNumber}_exercise_line'),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp, height: 1.35),
                     ),
-                    SizedBox(height: 6.h),
-                    Wrap(
-                      spacing: 6.w,
-                      runSpacing: 4.h,
-                      children: [
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                          decoration: BoxDecoration(
-                            color: primaryColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(4.r),
-                          ),
-                          child: Text(
-                            '🔥 Warm-up (5-10m)',
-                            style: TextStyle(
-                              color: primaryColor,
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                          decoration: BoxDecoration(
-                            color: ColorManager.secondary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(4.r),
-                          ),
-                          child: Text(
-                            '🧘 Cooldown (5m)',
-                            style: TextStyle(
-                              color: ColorManager.secondary,
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        if (isAdapted) ...[
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                            decoration: BoxDecoration(
-                              color: ColorManager.success.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(4.r),
-                            ),
-                            child: Text(
-                              '🏠 Home Adapted',
-                              style: TextStyle(
-                                color: ColorManager.success,
-                                fontSize: 11.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
+                    SizedBox(height: 4.h),
+                    Text(
+                      isAdapted
+                          ? 'Includes warm-up and cooldown · adapted for home'
+                          : 'Includes warm-up and cooldown',
+                      style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                     ),
                   ],
                 );
@@ -1595,19 +1848,23 @@ class _TransformationRoadmapScreenState
                 icon: Icon(
                   isCompleted ? Icons.replay_rounded : Icons.play_arrow_rounded,
                   size: 16.sp,
-                  color: Colors.white,
+                  color: isCompleted ? ColorManager.textPrimary : ColorManager.onColor(primaryColor),
                 ),
                 label: Text(
                   isCompleted ? 'Repeat Workout' : 'Start Day $dayNumber Workout',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: isCompleted ? ColorManager.textPrimary : ColorManager.onColor(primaryColor),
                     fontSize: 12.sp,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isCompleted ? ColorManager.textTertiary : primaryColor,
+                  // Done: quiet grey button, same as the home Workout Plan card.
+                  backgroundColor: isCompleted ? ColorManager.surfaceDark : primaryColor,
                   padding: EdgeInsets.symmetric(vertical: 10.h),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.button.r),
+                    side: isCompleted ? BorderSide(color: ColorManager.divider) : BorderSide.none,
+                  ),
                   elevation: 0,
                 ),
               ),

@@ -55,7 +55,7 @@ class _MyAppState extends State<MyApp> {
       cardTheme: CardThemeData(
         color: ColorManager.lightSurface,
         elevation: 2,
-        shadowColor: const Color(0x330F2E2A),
+        shadowColor: const Color(0x3318181B),
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -67,7 +67,7 @@ class _MyAppState extends State<MyApp> {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: ColorManager.primary,
-          foregroundColor: const Color(0xFF06201B),
+          foregroundColor: ColorManager.onMint,
           elevation: 2,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
@@ -167,7 +167,7 @@ class _MyAppState extends State<MyApp> {
         backgroundColor: ColorManager.lightSurfaceDark,
         selectedColor: ColorManager.primary,
         labelStyle: TextStyle(color: ColorManager.lightTextPrimary),
-        secondaryLabelStyle: TextStyle(color: Color(0xFF06201B)),
+        secondaryLabelStyle: TextStyle(color: ColorManager.onMint),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -220,7 +220,7 @@ class _MyAppState extends State<MyApp> {
       // Floating Action Button Theme
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: ColorManager.primary,
-        foregroundColor: const Color(0xFF06201B),
+        foregroundColor: ColorManager.onMint,
         elevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),

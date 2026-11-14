@@ -41,9 +41,10 @@ void main() {
     }
   });
 
-  test('the old bright greens fail on white, which is why text uses the new tokens', () {
+  test('raw fills fail as text, which is why text uses the *Text tokens', () {
     ColorManager.updateTheme(false);
     expect(_contrast(Colors.green, ColorManager.surface), lessThan(4.5));
+    ColorManager.updateTheme(true);
     expect(_contrast(ColorManager.primary, ColorManager.surface), lessThan(4.5));
   });
 }

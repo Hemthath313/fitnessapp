@@ -208,8 +208,8 @@ class TransformationProgressScreen extends StatelessWidget {
                 child: Text(
                   state.isCompleted ? 'COMPLETED' : 'WEEK ${state.currentWeekNumber}',
                   style: TextStyle(
-                    color: state.isCompleted ? ColorManager.success : ColorManager.primary,
-                    fontSize: 11.sp,
+                    color: state.isCompleted ? ColorManager.successText : ColorManager.primaryText,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -286,7 +286,7 @@ class TransformationProgressScreen extends StatelessWidget {
           label,
           style: TextStyle(
             color: ColorManager.textTertiary,
-            fontSize: 11.sp,
+            fontSize: 12.sp,
           ),
         ),
       ],
@@ -334,7 +334,7 @@ class TransformationProgressScreen extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
-                    Icon(Icons.monitor_weight_outlined, color: ColorManager.accent, size: 18.sp),
+                    Icon(Icons.monitor_weight_outlined, color: ColorManager.accentText, size: 18.sp),
                     SizedBox(width: 8.w),
                     Expanded(
                       child: Text(
@@ -361,7 +361,7 @@ class TransformationProgressScreen extends StatelessWidget {
                         'Update Weight',
                         style: TextStyle(
                           color: ColorManager.primaryText,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -444,7 +444,7 @@ class TransformationProgressScreen extends StatelessWidget {
               'Weekly check-in weights will map your transformation trend chart here.',
               style: TextStyle(
                 color: ColorManager.textTertiary,
-                fontSize: 11.sp,
+                fontSize: 12.sp,
               ),
             ),
           ],
@@ -464,7 +464,7 @@ class TransformationProgressScreen extends StatelessWidget {
           label,
           style: TextStyle(
             color: ColorManager.textTertiary,
-            fontSize: 11.sp,
+            fontSize: 12.sp,
           ),
         ),
         SizedBox(height: 3.h),
@@ -541,7 +541,7 @@ class TransformationProgressScreen extends StatelessWidget {
                         'Record',
                         style: TextStyle(
                           color: ColorManager.primaryText,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -565,10 +565,10 @@ class TransformationProgressScreen extends StatelessWidget {
             children: [
               TableRow(
                 children: [
-                  Text('Area', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold)),
-                  Text('Start', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold)),
-                  Text('Current', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold)),
-                  Text('Change', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold)),
+                  Text('Area', style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp, fontWeight: FontWeight.bold)),
+                  Text('Start', style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp, fontWeight: FontWeight.bold)),
+                  Text('Current', style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp, fontWeight: FontWeight.bold)),
+                  Text('Change', style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp, fontWeight: FontWeight.bold)),
                 ],
               ),
               ...parts.map((p) {
@@ -661,7 +661,7 @@ class TransformationProgressScreen extends StatelessWidget {
                         'Check In',
                         style: TextStyle(
                           color: ColorManager.primaryText,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -717,7 +717,7 @@ class TransformationProgressScreen extends StatelessWidget {
                               '${c.weight != null ? '${c.weight!.toStringAsFixed(1)} kg • ' : ''}$adherencePct% Adherence • ${c.fatigueLevel ?? 'Normal'}',
                               style: TextStyle(
                                 color: ColorManager.textSecondary,
-                                fontSize: 11.sp,
+                                fontSize: 12.sp,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -756,7 +756,7 @@ class TransformationProgressScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.lightbulb_outline_rounded, color: ColorManager.warning, size: 18.sp),
+              Icon(Icons.lightbulb_outline_rounded, color: ColorManager.warningText, size: 18.sp),
               SizedBox(width: 8.w),
               Expanded(
                 child: Text(
@@ -844,7 +844,7 @@ class TransformationProgressScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.emoji_events_rounded, color: ColorManager.warning, size: 18.sp),
+              Icon(Icons.emoji_events_rounded, color: ColorManager.warningText, size: 18.sp),
               SizedBox(width: 8.w),
               Expanded(
                 child: Text(
@@ -877,7 +877,7 @@ class TransformationProgressScreen extends StatelessWidget {
                   children: [
                     Icon(
                       m.isAchieved ? Icons.military_tech_rounded : Icons.lock_outline_rounded,
-                      color: m.isAchieved ? ColorManager.warning : ColorManager.textTertiary,
+                      color: m.isAchieved ? ColorManager.warningText : ColorManager.textTertiary,
                       size: 20.sp,
                     ),
                     SizedBox(width: 12.w),
@@ -898,7 +898,7 @@ class TransformationProgressScreen extends StatelessWidget {
                             m.description,
                             style: TextStyle(
                               color: ColorManager.textTertiary,
-                              fontSize: 11.sp,
+                              fontSize: 12.sp,
                             ),
                           ),
                         ],
@@ -908,8 +908,8 @@ class TransformationProgressScreen extends StatelessWidget {
                       Text(
                         'Day ${m.triggerDay}',
                         style: TextStyle(
-                          color: ColorManager.warning,
-                          fontSize: 11.sp,
+                          color: ColorManager.warningText,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -946,7 +946,7 @@ class TransformationProgressScreen extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
-                    Icon(Icons.restaurant_rounded, color: ColorManager.accent, size: 18.sp),
+                    Icon(Icons.restaurant_rounded, color: ColorManager.accentText, size: 18.sp),
                     SizedBox(width: 8.w),
                     Expanded(
                       child: Text(
@@ -971,8 +971,8 @@ class TransformationProgressScreen extends StatelessWidget {
                 child: Text(
                   'Daily Target',
                   style: TextStyle(
-                    color: ColorManager.accent,
-                    fontSize: 11.sp,
+                    color: ColorManager.accentText,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -1004,7 +1004,7 @@ class TransformationProgressScreen extends StatelessWidget {
                       SizedBox(height: 2.h),
                       Text(
                         'Energy Target',
-                        style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+                        style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                       ),
                     ],
                   ),
@@ -1023,7 +1023,7 @@ class TransformationProgressScreen extends StatelessWidget {
                       Text(
                         '${state.targetMacros['protein']?.toStringAsFixed(0)}g',
                         style: TextStyle(
-                          color: ColorManager.accent,
+                          color: ColorManager.accentText,
                           fontSize: 14.sp,
                           fontWeight: FontWeight.bold,
                         ),
@@ -1031,7 +1031,7 @@ class TransformationProgressScreen extends StatelessWidget {
                       SizedBox(height: 2.h),
                       Text(
                         'Protein Goal',
-                        style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+                        style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                       ),
                     ],
                   ),
@@ -1050,7 +1050,7 @@ class TransformationProgressScreen extends StatelessWidget {
                       Text(
                         '${(state.dailyWaterTargetMl / 1000).toStringAsFixed(1)}L',
                         style: TextStyle(
-                          color: ColorManager.secondary,
+                          color: ColorManager.accentText,
                           fontSize: 14.sp,
                           fontWeight: FontWeight.bold,
                         ),
@@ -1058,7 +1058,7 @@ class TransformationProgressScreen extends StatelessWidget {
                       SizedBox(height: 2.h),
                       Text(
                         'Water Goal',
-                        style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+                        style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                       ),
                     ],
                   ),
@@ -1075,7 +1075,7 @@ class TransformationProgressScreen extends StatelessWidget {
                     : 'Personalized targets to support sustainable fat loss while preserving lean muscle. Log daily entries via the tools below:'),
             style: TextStyle(
               color: ColorManager.textSecondary,
-              fontSize: 11.sp,
+              fontSize: 12.sp,
               height: 1.35,
             ),
           ),
@@ -1088,8 +1088,8 @@ class TransformationProgressScreen extends StatelessWidget {
                 child: OutlinedButton.icon(
                   key: const Key('progress_log_meal_btn'),
                   onPressed: () => context.push(Routes.newMealRoute),
-                  icon: Icon(Icons.add_circle_outline_rounded, size: 14.sp, color: ColorManager.primary),
-                  label: Text('Log Meal', style: TextStyle(fontSize: 11.sp, color: ColorManager.primary, fontWeight: FontWeight.bold)),
+                  icon: Icon(Icons.add_circle_outline_rounded, size: 14.sp, color: ColorManager.primaryText),
+                  label: Text('Log Meal', style: TextStyle(fontSize: 12.sp, color: ColorManager.primaryText, fontWeight: FontWeight.bold)),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: ColorManager.primary.withValues(alpha: 0.4)),
                     padding: EdgeInsets.symmetric(vertical: 8.h),
@@ -1102,8 +1102,8 @@ class TransformationProgressScreen extends StatelessWidget {
                 child: OutlinedButton.icon(
                   key: const Key('progress_log_water_btn'),
                   onPressed: () => context.push(Routes.addWaterRoute),
-                  icon: Icon(Icons.water_drop_outlined, size: 14.sp, color: ColorManager.secondary),
-                  label: Text('Log Water', style: TextStyle(fontSize: 11.sp, color: ColorManager.secondary, fontWeight: FontWeight.bold)),
+                  icon: Icon(Icons.water_drop_outlined, size: 14.sp, color: ColorManager.accentText),
+                  label: Text('Log Water', style: TextStyle(fontSize: 12.sp, color: ColorManager.accentText, fontWeight: FontWeight.bold)),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: ColorManager.secondary.withValues(alpha: 0.4)),
                     padding: EdgeInsets.symmetric(vertical: 8.h),
@@ -1125,7 +1125,7 @@ class TransformationProgressScreen extends StatelessWidget {
               icon: const Icon(Icons.menu_book_rounded, size: 15, color: ColorManager.onMint),
               label: Text(
                 'View Daily Meal Plan & Recipes 🥗',
-                style: TextStyle(color: ColorManager.onMint, fontSize: 11.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(color: ColorManager.onMint, fontSize: 12.sp, fontWeight: FontWeight.bold),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.primary,
@@ -1158,7 +1158,7 @@ class TransformationProgressScreen extends StatelessWidget {
                           'Six-Pack Challenge Companion',
                           style: TextStyle(
                             color: ColorManager.textPrimary,
-                            fontSize: 11.sp,
+                            fontSize: 12.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -1166,7 +1166,7 @@ class TransformationProgressScreen extends StatelessWidget {
                           'Abs are strengthened in workouts and revealed by your energy deficit.',
                           style: TextStyle(
                             color: ColorManager.textSecondary,
-                            fontSize: 11.sp,
+                            fontSize: 12.sp,
                           ),
                         ),
                       ],
@@ -1181,8 +1181,8 @@ class TransformationProgressScreen extends StatelessWidget {
                     child: Text(
                       'Explore',
                       style: TextStyle(
-                        color: ColorManager.primary,
-                        fontSize: 11.sp,
+                        color: ColorManager.primaryText,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1214,7 +1214,7 @@ class TransformationProgressScreen extends StatelessWidget {
                           'Bulking Diet Plan & Clean Surplus',
                           style: TextStyle(
                             color: ColorManager.textPrimary,
-                            fontSize: 11.sp,
+                            fontSize: 12.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -1222,7 +1222,7 @@ class TransformationProgressScreen extends StatelessWidget {
                           'Target 1.8–2.2g protein/kg and clean unrefined carbs.',
                           style: TextStyle(
                             color: ColorManager.textSecondary,
-                            fontSize: 11.sp,
+                            fontSize: 12.sp,
                           ),
                         ),
                       ],
@@ -1264,7 +1264,7 @@ class TransformationProgressScreen extends StatelessWidget {
                           'Strength & Power Fueling Guide',
                           style: TextStyle(
                             color: ColorManager.textPrimary,
-                            fontSize: 11.sp,
+                            fontSize: 12.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -1272,7 +1272,7 @@ class TransformationProgressScreen extends StatelessWidget {
                           'Target 1.8–2.0g protein/kg and complex carbs for ATP replenishment.',
                           style: TextStyle(
                             color: ColorManager.textSecondary,
-                            fontSize: 11.sp,
+                            fontSize: 12.sp,
                           ),
                         ),
                       ],

@@ -306,22 +306,21 @@ class _ExerciseVideoPlayerState extends State<ExerciseVideoPlayer> {
                         child: _buildVideoSurface(_controller!),
                       ),
                     ),
+              // Small corner badge so the exercise figure stays visible.
               if (widget.showThumbnailOnly)
-                Center(
+                Positioned(
+                  left: 6,
+                  bottom: 6,
                   child: Container(
-                    padding: const EdgeInsets.all(6),
+                    padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.6),
+                      color: Colors.black.withValues(alpha: 0.55),
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: ColorManager.limerGreen2.withValues(alpha: 0.8),
-                        width: 1.5,
-                      ),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.play_arrow_rounded,
-                      color: ColorManager.limerGreen2,
-                      size: 20,
+                      color: Colors.white,
+                      size: 16,
                     ),
                   ),
                 ),
@@ -400,23 +399,21 @@ class _ExerciseVideoPlayerState extends State<ExerciseVideoPlayer> {
                 ),
               ),
             ),
-            Center(
+            Positioned(
+              left: 6,
+              bottom: 6,
               child: Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(3),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.6),
+                  color: Colors.black.withValues(alpha: 0.55),
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: ColorManager.limerGreen2.withValues(alpha: 0.8),
-                    width: 1.5,
-                  ),
                 ),
                 child: Icon(
                   hasVideoPath
                       ? Icons.play_arrow_rounded
                       : Icons.fitness_center_rounded,
-                  color: ColorManager.limerGreen2,
-                  size: 20,
+                  color: Colors.white,
+                  size: 16,
                 ),
               ),
             ),
@@ -476,12 +473,12 @@ class _ExerciseVideoPlayerState extends State<ExerciseVideoPlayer> {
                     icon: Icon(
                       Icons.refresh_rounded,
                       size: 16,
-                      color: ColorManager.primary,
+                      color: ColorManager.primaryText,
                     ),
                     label: Text(
                       'Retry',
                       style: TextStyle(
-                        color: ColorManager.primary,
+                        color: ColorManager.primaryText,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),

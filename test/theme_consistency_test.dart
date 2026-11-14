@@ -18,14 +18,19 @@ double _contrast(Color a, Color b) {
 void main() {
   tearDown(() => ColorManager.updateTheme(false));
 
-  group('text on teal', () {
-    test('mint fills take dark ink, never white', () {
+  group('text on blue', () {
+    test('blue primary fills take white text', () {
       expect(ColorManager.onColor(ColorManager.primary), ColorManager.onMint);
+      expect(ColorManager.onMint, Colors.white);
       expect(_contrast(ColorManager.onMint, ColorManager.primary), greaterThanOrEqualTo(4.5));
-      expect(_contrast(Colors.white, ColorManager.primary), lessThan(3));
     });
 
-    test('dark hero teal takes white', () {
+    test('light fills (gold Pro) take dark ink', () {
+      expect(ColorManager.onColor(ColorManager.premium), ColorManager.inkOnLight);
+      expect(_contrast(ColorManager.inkOnLight, ColorManager.premium), greaterThanOrEqualTo(4.5));
+    });
+
+    test('dark hero blue takes white', () {
       for (final c in [ColorManager.heroTealStart, ColorManager.heroTealMid]) {
         expect(ColorManager.onColor(c), Colors.white);
         expect(_contrast(Colors.white, c), greaterThanOrEqualTo(4.5));
@@ -48,13 +53,13 @@ void main() {
       }
     });
 
-    test('theme switch swaps the teal text colour and the card shadow', () {
+    test('theme switch swaps the blue text colour and the card shadow', () {
       ColorManager.updateTheme(false);
       expect(ColorManager.primaryText, ColorManager.lightPrimaryText);
       expect(ColorManager.cardShadow, isNotEmpty);
 
       ColorManager.updateTheme(true);
-      expect(ColorManager.primaryText, ColorManager.primary);
+      expect(ColorManager.primaryText, ColorManager.darkPrimaryText);
       expect(ColorManager.cardShadow, isEmpty);
     });
 

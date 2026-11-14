@@ -52,7 +52,7 @@ const List<AchievementDef> allAchievements = [
     emoji: '💪',
     title: 'Strong Start',
     desc: 'Log 10 workouts total',
-    color: Color(0xFF4CAF50),
+    color: ColorManager.success,
   ),
   AchievementDef(
     id: '7 Day Streak',
@@ -173,7 +173,7 @@ class AchievementsWidget extends StatelessWidget {
                         '${unlocked.length}/${allAchievements.length}',
                         style: TextStyle(
                           color: ColorManager.primaryText,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -279,7 +279,7 @@ class _AchievementBadge extends StatelessWidget {
                 color: isUnlocked
                     ? ColorManager.textPrimary
                     : ColorManager.textTertiary,
-                fontSize: 11.sp,
+                fontSize: 12.sp,
                 fontWeight:
                     isUnlocked ? FontWeight.bold : FontWeight.normal,
               ),
@@ -303,7 +303,10 @@ void showAchievementUnlockDialog(
     context: context,
     barrierDismissible: true,
     builder: (context) => Dialog(
-      backgroundColor: Colors.transparent,
+      // Solid card underneath so the tinted gradient reads the same in
+      // light and dark mode.
+      backgroundColor: ColorManager.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
       child: Container(
         padding: EdgeInsets.all(24.w),
         decoration: BoxDecoration(
@@ -340,7 +343,7 @@ void showAchievementUnlockDialog(
             Text(
               '🎉 Achievement Unlocked!',
               style: TextStyle(
-                color: Colors.white70,
+                color: ColorManager.textSecondary,
                 fontSize: 14.sp,
                 letterSpacing: 1.2,
               ),
@@ -350,7 +353,7 @@ void showAchievementUnlockDialog(
               achievement.title,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: achievement.color,
+                color: ColorManager.textPrimary,
                 fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
               ),

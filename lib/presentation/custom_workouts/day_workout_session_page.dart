@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/units.dart';
 import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -11,6 +12,8 @@ import 'package:fitness_app/presentation/home/providers/statistics_provider.dart
 import 'package:fitness_app/presentation/home/widgets/achievements_widget.dart';
 import 'package:fitness_app/presentation/home/widgets/next_badge_card.dart';
 import 'package:fitness_app/presentation/widgets/interactive_exercise_detail.dart';
+import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
+import 'package:fitness_app/presentation/interstitial_ads/interstitial_ad_service.dart';
 import 'package:fitness_app/presentation/workout_tools/plate_calculator_sheet.dart';
 import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/services/exercise_substitution_service.dart';
@@ -50,6 +53,22 @@ class DayWorkoutSessionPage extends StatefulWidget {
     this.videoControllerFactory,
     this.videoViewBuilder,
   });
+
+  /// Name used for a workout started from scratch (no plan or routine).
+  static const String quickWorkoutName = 'Quick workout';
+
+  /// Opens a live workout from scratch: rest timer, tick sets, add exercises.
+  /// [exercises] (catalog Exercise objects) start it pre-filled, e.g. from
+  /// "+ Add to workout" on an exercise.
+  static Future<void> startQuickWorkout(BuildContext context,
+      {List<dynamic> exercises = const []}) {
+    return Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => DayWorkoutSessionPage(
+        dayName: quickWorkoutName,
+        workouts: List<dynamic>.from(exercises),
+      ),
+    ));
+  }
 
   @override
   State<DayWorkoutSessionPage> createState() => _DayWorkoutSessionPageState();
@@ -105,7 +124,11 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
     _initExercises();
     _loadHistoryAndProgression();
     _loadSectionPrefs();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _offerResumeIfDraft());
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _offerResumeIfDraft();
+      // A quick workout starts empty: go straight to picking an exercise.
+      if (mounted && _exercises.isEmpty) _showAddExerciseSheet();
+    });
   }
 
   @override
@@ -727,7 +750,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
       for (var ex in _exercises) {
         final List<WorkoutSet> sets = [];
         for (int i = 0; i < ex.isCompleted.length; i++) {
-          final w = double.tryParse(ex.weightControllers[i].text) ?? 0.0;
+          final w = Units.parseToKg(ex.weightControllers[i].text) ?? 0.0;
           final r = int.tryParse(ex.repControllers[i].text) ?? ex.defaultReps;
           sets.add(WorkoutSet(
             weight: w,
@@ -751,7 +774,9 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
       final session = WorkoutSession(
         id: _sessionId ??= 'session_${now.millisecondsSinceEpoch}',
         userId: uid,
-        workoutName: '${widget.dayName} Routine',
+        workoutName: widget.dayName == DayWorkoutSessionPage.quickWorkoutName
+            ? DayWorkoutSessionPage.quickWorkoutName
+            : '${widget.dayName} Routine',
         dayName: widget.dayName,
         startedAt: _startedAt,
         completedAt: now,
@@ -813,7 +838,17 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
               transformationProvider.hasActiveTransformation) {
             final active = transformationProvider.activeTransformation!;
             if (widget.planId == null || active.planId == widget.planId) {
-              await transformationProvider.markDayCompleted(widget.planDay!);
+              // Keep a short result for the home card: sets, minutes, PRs.
+              final setsDone = session.exercises
+                  .fold<int>(0, (n, e) => n + e.completedSetsCount);
+              await transformationProvider.markDayCompleted(
+                widget.planDay!,
+                summary: {
+                  'sets': setsDone,
+                  'minutes': (session.durationSeconds / 60).round(),
+                  'prs': reward.newPRs.length,
+                },
+              );
             }
           }
         } catch (tpError) {
@@ -829,6 +864,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
         _reward = reward;
       });
       UpdateService().setWorkoutSessionActive(false);
+      unawaited(InterstitialAdService.onWorkoutFinished(isPremium: _isPremiumUser()));
     } catch (e) {
       debugPrint('Error saving workout session: $e');
       if (mounted) {
@@ -836,8 +872,8 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-                "Couldn't save your workout. Check your connection and try again."),
-            backgroundColor: Colors.red,
+                "Couldn't save your workout. Check your connection and try again.", style: TextStyle(color: Colors.white)),
+            backgroundColor: ColorManager.error,
           ),
         );
       }
@@ -1037,7 +1073,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
             TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancel')),
             ElevatedButton(
               onPressed: () => Navigator.pop(c, true),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              style: ElevatedButton.styleFrom(backgroundColor: ColorManager.error),
               child: const Text('Exit', style: TextStyle(color: Colors.white)),
             ),
           ],
@@ -1053,7 +1089,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.r)),
         title: Row(
           children: [
-            Icon(Icons.save_outlined, color: ColorManager.primary, size: 22.sp),
+            Icon(Icons.save_outlined, color: ColorManager.primaryText, size: 22.sp),
             SizedBox(width: 8.w),
             Text('Finish Early?', style: TextStyle(color: ColorManager.textPrimary, fontSize: 16.sp, fontWeight: FontWeight.bold)),
           ],
@@ -1069,7 +1105,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
           ),
           TextButton(
             onPressed: () => Navigator.pop(c, 'discard'),
-            child: const Text('Discard', style: TextStyle(color: Colors.redAccent)),
+            child: Text('Discard', style: TextStyle(color: ColorManager.errorText)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(c, 'save'),
@@ -1110,7 +1146,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
             ElevatedButton(
               key: const Key('session_confirm_discard'),
               onPressed: () => Navigator.pop(c, true),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              style: ElevatedButton.styleFrom(backgroundColor: ColorManager.error),
               child: const Text('Discard', style: TextStyle(color: Colors.white)),
             ),
           ],
@@ -1123,6 +1159,25 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
       return false;
     }
     return false;
+  }
+
+  bool _isPremiumUser() {
+    try {
+      // No provider (tests, previews): treat as premium so no ad is shown.
+      return Provider.of<SubscriptionProvider?>(context, listen: false)
+              ?.isPremium ??
+          true;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  /// Done on the workout summary: leave first, then show an ad if one is due
+  /// (free users, every few workouts). Never shown mid-workout.
+  void _closeAfterSummary() {
+    final isPremium = _isPremiumUser();
+    _closeSession();
+    unawaited(InterstitialAdService.showIfDueAfterWorkout(isPremium: isPremium));
   }
 
   void _closeSession() {
@@ -1179,7 +1234,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                     SizedBox(width: 8.w),
                     Text('•', style: TextStyle(color: ColorManager.textTertiary)),
                     SizedBox(width: 8.w),
-                    Text('${_totalSessionVolume.toStringAsFixed(0)} kg', style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),
+                    Text('${Units.fmt(_totalSessionVolume, 0)} ${Units.label}', style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),
                     SizedBox(width: 8.w),
                     Text('•', style: TextStyle(color: ColorManager.textTertiary)),
                     SizedBox(width: 8.w),
@@ -1206,7 +1261,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                     : Text(
                         'Finish',
                         style: TextStyle(
-                          color: _totalCompletedSets > 0 ? ColorManager.primary : ColorManager.textTertiary,
+                          color: _totalCompletedSets > 0 ? ColorManager.primaryText : ColorManager.textTertiary,
                           fontWeight: FontWeight.bold,
                           fontSize: 14.sp,
                         ),
@@ -1275,7 +1330,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
         borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(
           color: ex.isAllCompleted
-              ? const Color(0xFF4CAF50).withValues(alpha: 0.5)
+              ? ColorManager.successText.withValues(alpha: 0.5)
               : ColorManager.divider,
         ),
       ),
@@ -1328,8 +1383,8 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                               child: Text(
                                 isCompound ? 'COMPOUND' : 'ACCESSORY',
                                 style: TextStyle(
-                                  color: isCompound ? ColorManager.primary : ColorManager.textTertiary,
-                                  fontSize: 11.sp,
+                                  color: isCompound ? ColorManager.primaryText : ColorManager.textTertiary,
+                                  fontSize: 12.sp,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -1340,7 +1395,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                                 '${ex.completedSetsCount}/${ex.isCompleted.length} sets completed',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+                                style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                               ),
                             ),
                           ],
@@ -1368,7 +1423,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                     children: [
                       Icon(Icons.ondemand_video_rounded, size: 14.sp, color: ColorManager.primaryText),
                       SizedBox(width: 4.w),
-                      Text('Guide', style: TextStyle(color: ColorManager.primaryText, fontSize: 11.sp, fontWeight: FontWeight.bold)),
+                      Text('Guide', style: TextStyle(color: ColorManager.primaryText, fontSize: 12.sp, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
@@ -1391,7 +1446,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                     children: [
                       Icon(Icons.swap_horiz_rounded, size: 14.sp, color: ColorManager.primaryText),
                       SizedBox(width: 4.w),
-                      Text('Swap', style: TextStyle(color: ColorManager.primaryText, fontSize: 11.sp, fontWeight: FontWeight.bold)),
+                      Text('Swap', style: TextStyle(color: ColorManager.primaryText, fontSize: 12.sp, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
@@ -1426,7 +1481,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                                 ex.progression!.badgeLabel,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(color: ColorManager.primaryText, fontSize: 11.sp, fontWeight: FontWeight.bold),
+                                style: TextStyle(color: ColorManager.primaryText, fontSize: 12.sp, fontWeight: FontWeight.bold),
                               ),
                             ),
                             SizedBox(width: 8.w),
@@ -1436,7 +1491,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 textAlign: TextAlign.end,
-                                style: TextStyle(color: ColorManager.white, fontSize: 11.sp, fontWeight: FontWeight.bold),
+                                style: TextStyle(color: ColorManager.white, fontSize: 12.sp, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ],
@@ -1444,7 +1499,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                         SizedBox(height: 2.h),
                         Text(
                           ex.progression!.reason,
-                          style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+                          style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
                         ),
                       ],
                     ),
@@ -1458,11 +1513,11 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
             padding: EdgeInsets.symmetric(vertical: 4.h),
             child: Row(
               children: [
-                SizedBox(width: 28.w, child: Center(child: Text('SET', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold)))),
-                SizedBox(width: 56.w, child: Center(child: Text('PREV', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold)))),
-                Expanded(flex: 6, child: Center(child: Text('KG', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold)))),
-                Expanded(flex: 5, child: Center(child: Text('REPS', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold)))),
-                SizedBox(width: 48.w, child: Center(child: Text('DONE', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp, fontWeight: FontWeight.bold)))),
+                SizedBox(width: 28.w, child: Center(child: Text('SET', style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp, fontWeight: FontWeight.bold)))),
+                SizedBox(width: 56.w, child: Center(child: Text('PREV', style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp, fontWeight: FontWeight.bold)))),
+                Expanded(flex: 6, child: Center(child: Text('KG', style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp, fontWeight: FontWeight.bold)))),
+                Expanded(flex: 5, child: Center(child: Text('REPS', style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp, fontWeight: FontWeight.bold)))),
+                SizedBox(width: 48.w, child: Center(child: Text('DONE', style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp, fontWeight: FontWeight.bold)))),
               ],
             ),
           ),
@@ -1486,14 +1541,14 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                   _saveDraft();
                 },
                 icon: Icon(Icons.add_rounded, size: 14.sp, color: ColorManager.primaryText),
-                label: Text('Add Set', style: TextStyle(color: ColorManager.primaryText, fontSize: 11.sp, fontWeight: FontWeight.bold)),
+                label: Text('Add Set', style: TextStyle(color: ColorManager.primaryText, fontSize: 12.sp, fontWeight: FontWeight.bold)),
               ),
               TextButton(
                 key: Key('session_weight_step_${ex.order}'),
                 onPressed: () => _cycleWeightStep(ex, isCompound),
                 child: Text(
-                  'Step ${_fmtKg(_stepFor(ex, isCompound))} kg',
-                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+                  'Step ${_fmtKg(_stepFor(ex, isCompound))} ${Units.label}',
+                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
                 ),
               ),
               const Spacer(),
@@ -1506,7 +1561,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                     });
                     _saveDraft();
                   },
-                  child: Text('Remove Set', style: TextStyle(color: Colors.redAccent.shade100, fontSize: 11.sp)),
+                  child: Text('Remove Set', style: TextStyle(color: Colors.redAccent.shade100, fontSize: 12.sp)),
                 ),
             ],
           ),
@@ -1527,13 +1582,14 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
     String prevStr = '—';
     if (ex.previousLog != null && setIdx < ex.previousLog!.sets.length) {
       final prevSet = ex.previousLog!.sets[setIdx];
-      prevStr = '${prevSet.weight.toStringAsFixed(prevSet.weight % 1 == 0 ? 0 : 1)}×${prevSet.reps}';
+      prevStr = '${Units.fmtSmart(prevSet.weight)}×${prevSet.reps}';
     }
 
     final row = Container(
       padding: EdgeInsets.symmetric(vertical: 2.h),
       decoration: BoxDecoration(
-        color: isDone ? const Color(0xFF1E4331).withValues(alpha: 0.3) : Colors.transparent,
+        // Soft green wash on a finished set; works on dark and white cards.
+        color: isDone ? ColorManager.success.withValues(alpha: 0.12) : Colors.transparent,
         borderRadius: BorderRadius.circular(8.r),
       ),
       child: Row(
@@ -1558,7 +1614,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: isDone
-                              ? const Color(0xFF4CAF50)
+                              ? ColorManager.successDark
                               : _setTypeColor(ex.setTypes[setIdx])
                                   .withValues(alpha: ex.setTypes[setIdx] == SetType.normal ? 1 : 0.25),
                           border: ex.setTypes[setIdx] == SetType.normal
@@ -1570,7 +1626,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                             _setTypeLabel(ex.setTypes[setIdx], setIdx),
                             style: TextStyle(
                               color: isDone ? Colors.white : ColorManager.textSecondary,
-                              fontSize: 11.sp,
+                              fontSize: 12.sp,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -1591,7 +1647,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                 prevStr,
                 style: TextStyle(
                   color: ColorManager.textTertiary,
-                  fontSize: 11.sp,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -1741,10 +1797,11 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                       width: 32.w,
                       height: 32.h,
                       decoration: BoxDecoration(
-                        color: isDone ? const Color(0xFF4CAF50) : ColorManager.surfaceDark,
+                        // Deep green so the white tick stays readable (5.5:1).
+                        color: isDone ? ColorManager.successDark : ColorManager.surfaceDark,
                         borderRadius: BorderRadius.circular(8.r),
                         border: Border.all(
-                          color: isDone ? const Color(0xFF81C784) : ColorManager.divider,
+                          color: isDone ? ColorManager.successDark : ColorManager.divider,
                         ),
                       ),
                       child: Icon(
@@ -1772,11 +1829,11 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
         alignment: Alignment.centerRight,
         padding: EdgeInsets.only(right: 16.w),
         decoration: BoxDecoration(
-          color: Colors.red.withValues(alpha: 0.25),
+          color: ColorManager.error.withValues(alpha: 0.25),
           borderRadius: BorderRadius.circular(8.r),
         ),
         child: Icon(Icons.delete_outline_rounded,
-            color: Colors.redAccent, size: 20.sp),
+            color: ColorManager.errorText, size: 20.sp),
       ),
       onDismissed: (_) {
         setState(() => ex.removeSet(setIdx));
@@ -1840,7 +1897,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                 child: Icon(
                   Icons.calculate_outlined,
                   size: 13.sp,
-                  color: isDone ? Colors.white24 : ColorManager.primary,
+                  color: isDone ? Colors.white24 : ColorManager.primaryText,
                 ),
               ),
             ),
@@ -1876,8 +1933,10 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
 
   /// Compound lifts step 2.5 kg and other exercises 1 kg until the lifter
   /// picks a step for that exercise (for example 1.25 kg micro-plates).
+  /// +/- step in the user's unit: 2.5 / 1 kg, or 5 / 2.5 lb.
   double _stepFor(_SessionExerciseState ex, bool isCompound) =>
-      ex.weightStep ?? (isCompound ? 2.5 : 1.0);
+      ex.weightStep ??
+      (Units.useLb ? (isCompound ? 5.0 : 2.5) : (isCompound ? 2.5 : 1.0));
 
   /// 100, 102.5 and 101.25 all print without padding zeros.
   String _fmtKg(double v) {
@@ -1899,11 +1958,11 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
   Color _setTypeColor(SetType t) {
     switch (t) {
       case SetType.warmup:
-        return Colors.amber;
+        return ColorManager.premium;
       case SetType.drop:
-        return Colors.purpleAccent;
+        return ColorManager.violetText;
       case SetType.failure:
-        return Colors.redAccent;
+        return ColorManager.error;
       case SetType.normal:
         return ColorManager.surfaceDark;
     }
@@ -2072,10 +2131,10 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
       child: OutlinedButton.icon(
         key: const Key('session_add_exercise_button'),
         onPressed: _showAddExerciseSheet,
-        icon: Icon(Icons.add_rounded, color: ColorManager.primary, size: 18.sp),
+        icon: Icon(Icons.add_rounded, color: ColorManager.primaryText, size: 18.sp),
         label: Text('Add exercise',
             style: TextStyle(
-                color: ColorManager.primary,
+                color: ColorManager.primaryText,
                 fontSize: 14.sp,
                 fontWeight: FontWeight.bold)),
         style: OutlinedButton.styleFrom(
@@ -2157,7 +2216,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
         top: false,
         child: Row(
           children: [
-            Icon(Icons.timer_outlined, color: ColorManager.primary, size: 20.sp),
+            Icon(Icons.timer_outlined, color: ColorManager.primaryText, size: 20.sp),
             SizedBox(width: 8.w),
             Column(
               mainAxisSize: MainAxisSize.min,
@@ -2165,7 +2224,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
               children: [
                 Text(
                   'REST TIMER',
-                  style: TextStyle(color: ColorManager.primary, fontSize: 11.sp, fontWeight: FontWeight.bold, letterSpacing: 0.6),
+                  style: TextStyle(color: ColorManager.primaryText, fontSize: 11.sp, fontWeight: FontWeight.bold, letterSpacing: 0.6),
                 ),
                 Text(
                   _formatTimer(_restSecondsRemaining),
@@ -2182,7 +2241,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                 backgroundColor: ColorManager.surfaceDark,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
               ),
-              child: Text('-30s', style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp)),
+              child: Text('-30s', style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),
             ),
             SizedBox(width: 6.w),
             // [+30s]
@@ -2193,7 +2252,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                 backgroundColor: ColorManager.surfaceDark,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
               ),
-              child: Text('+30s', style: TextStyle(color: ColorManager.primary, fontSize: 11.sp, fontWeight: FontWeight.bold)),
+              child: Text('+30s', style: TextStyle(color: ColorManager.primaryText, fontSize: 12.sp, fontWeight: FontWeight.bold)),
             ),
             SizedBox(width: 6.w),
             // [Skip]
@@ -2204,7 +2263,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                 backgroundColor: ColorManager.primary,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
               ),
-              child: Text('Skip', style: TextStyle(color: ColorManager.onMint, fontSize: 11.sp, fontWeight: FontWeight.bold)),
+              child: Text('Skip', style: TextStyle(color: ColorManager.onMint, fontSize: 12.sp, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -2222,7 +2281,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
         boxShadow: ColorManager.cardShadow,
         borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(
-          color: const Color(0xFFFFA500).withValues(alpha: 0.35),
+          color: ColorManager.warning.withValues(alpha: 0.35),
           width: 1.2,
         ),
       ),
@@ -2242,10 +2301,10 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                   Container(
                     padding: EdgeInsets.all(6.w),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFA500).withValues(alpha: 0.15),
+                      color: ColorManager.warning.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.whatshot_rounded, color: Color(0xFFFFA500), size: 16),
+                    child: Icon(Icons.whatshot_rounded, color: ColorManager.warningText, size: 16),
                   ),
                   SizedBox(width: 10.w),
                   Expanded(
@@ -2265,7 +2324,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                           'Prepare muscles, activate joint capsules & raise core temp',
                           style: TextStyle(
                             color: ColorManager.textSecondary,
-                            fontSize: 11.sp,
+                            fontSize: 12.sp,
                           ),
                         ),
                       ],
@@ -2307,7 +2366,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                         children: [
                           Icon(
                             isDone ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                            color: isDone ? ColorManager.success : ColorManager.textTertiary,
+                            color: isDone ? ColorManager.successText : ColorManager.textTertiary,
                             size: 18.sp,
                           ),
                           SizedBox(width: 10.w),
@@ -2316,7 +2375,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                               routine,
                               style: TextStyle(
                                 color: isDone ? ColorManager.textTertiary : ColorManager.textPrimary,
-                                fontSize: 11.sp,
+                                fontSize: 12.sp,
                                 decoration: isDone ? TextDecoration.lineThrough : null,
                               ),
                             ),
@@ -2344,7 +2403,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
         boxShadow: ColorManager.cardShadow,
         borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(
-          color: const Color(0xFF2F6BFF).withValues(alpha: 0.35),
+          color: ColorManager.info.withValues(alpha: 0.35),
           width: 1.2,
         ),
       ),
@@ -2364,10 +2423,10 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                   Container(
                     padding: EdgeInsets.all(6.w),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2F6BFF).withValues(alpha: 0.15),
+                      color: ColorManager.info.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.self_improvement_rounded, color: Color(0xFF2F6BFF), size: 16),
+                    child: Icon(Icons.self_improvement_rounded, color: ColorManager.infoText, size: 16),
                   ),
                   SizedBox(width: 10.w),
                   Expanded(
@@ -2387,7 +2446,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                           'Gentle stretching, parasympathetic reset & stiffness reduction',
                           style: TextStyle(
                             color: ColorManager.textSecondary,
-                            fontSize: 11.sp,
+                            fontSize: 12.sp,
                           ),
                         ),
                       ],
@@ -2429,7 +2488,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                         children: [
                           Icon(
                             isDone ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                            color: isDone ? ColorManager.success : ColorManager.textTertiary,
+                            color: isDone ? ColorManager.successText : ColorManager.textTertiary,
                             size: 18.sp,
                           ),
                           SizedBox(width: 10.w),
@@ -2438,7 +2497,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
                               routine,
                               style: TextStyle(
                                 color: isDone ? ColorManager.textTertiary : ColorManager.textPrimary,
-                                fontSize: 11.sp,
+                                fontSize: 12.sp,
                                 decoration: isDone ? TextDecoration.lineThrough : null,
                               ),
                             ),
@@ -2462,7 +2521,7 @@ class _DayWorkoutSessionPageState extends State<DayWorkoutSessionPage>
       session: _finishedSession!,
       dayName: widget.dayName,
       data: _reward,
-      onDone: _closeSession,
+      onDone: _closeAfterSummary,
       onViewSession: GoRouter.maybeOf(context) == null
           ? null
           : () => context.push(
@@ -2647,7 +2706,7 @@ class _SessionExerciseState {
     double vol = 0;
     for (int i = 0; i < isCompleted.length; i++) {
       if (isCompleted[i] && setTypes[i] != SetType.warmup) {
-        final w = double.tryParse(weightControllers[i].text) ?? 0.0;
+        final w = Units.parseToKg(weightControllers[i].text) ?? 0.0;
         final r = int.tryParse(repControllers[i].text) ?? 0;
         vol += w * r;
       }

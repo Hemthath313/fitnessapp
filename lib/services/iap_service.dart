@@ -82,6 +82,13 @@ class IAPService {
       try {
          final addition = _iap.getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
          final response = await addition.queryPastPurchases();
+         // An error (billing service disconnected, no Play account, offline)
+         // comes back with an empty list. That is "unknown", not "expired":
+         // return null so a paying user is never downgraded by mistake.
+         if (response.error != null) {
+           debugPrint('IAPService: past purchases unavailable: ${response.error}');
+           return null;
+         }
          return response.pastPurchases;
       } catch (e) {
         debugPrint('Error querying Android past purchases: $e');

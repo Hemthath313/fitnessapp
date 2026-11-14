@@ -32,8 +32,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          backgroundColor: Colors.redAccent,
-          content: Text('Email not verified yet. Please check again.'),
+          backgroundColor: ColorManager.error,
+          content: Text('Email not verified yet. Please check again.', style: TextStyle(color: Colors.white)),
         ),
       );
     }
@@ -50,7 +50,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
         backgroundColor: ColorManager.limerGreen2,
         content: Text(
           'Verification email resent. Please check your inbox.',
-          style: TextStyle(color: ColorManager.black),
+          style: TextStyle(color: ColorManager.onMint),
         ),
       ),
     );
@@ -95,7 +95,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.email_outlined,
-                size: 80, color: ColorManager.limerGreen2),
+                size: 80, color: ColorManager.primaryText),
             const SizedBox(height: 20),
             Text(
               'Please check your email and verify your account.',

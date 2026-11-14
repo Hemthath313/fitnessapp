@@ -459,6 +459,8 @@ void main() {
                                   difficulty: activeExercise.difficulty,
                                   setsReps: activeExercise.setsReps,
                                   category: 'Chest',
+                                  // Set table shows only inside a workout.
+                                  onSetsChanged: (_) {},
                                   videoControllerFactory: (path, options) =>
                                       _FakeVideoPlayerController(
                                         assetPath: path,

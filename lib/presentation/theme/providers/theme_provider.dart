@@ -8,6 +8,7 @@ class ThemeProvider extends ChangeNotifier {
   bool _isDarkMode = true; // Default to dark mode
   
   ThemeProvider() {
+    ColorManager.updateTheme(_isDarkMode);
     _loadThemePreference();
   }
   

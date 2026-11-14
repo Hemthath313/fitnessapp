@@ -323,7 +323,7 @@ class DashboardChallengeSection extends StatelessWidget {
                       'PRO',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 11.sp,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -371,11 +371,11 @@ class DashboardChallengeSection extends StatelessWidget {
                 );
               },
               icon: Icon(Icons.arrow_forward_rounded,
-                  size: 16.sp, color: ColorManager.onMint),
+                  size: 16.sp, color: ColorManager.inkOnLight),
               label: Text(
                 ctaLabel,
                 style: TextStyle(
-                  color: ColorManager.onMint,
+                  color: ColorManager.inkOnLight,
                   fontSize: 14.sp,
                   fontWeight: FontWeight.bold,
                 ),
@@ -528,7 +528,7 @@ class DashboardChallengeSection extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.military_tech_rounded,
-                      color: ColorManager.ringAmber,
+                      color: ColorManager.warningText,
                       size: 16.sp,
                     ),
                     SizedBox(width: 8.w),
@@ -537,7 +537,7 @@ class DashboardChallengeSection extends StatelessWidget {
                         'Next Milestone: ${nextMilestone.title} (Day ${nextMilestone.triggerDay})',
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w500,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -575,13 +575,13 @@ class DashboardChallengeSection extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.play_arrow_rounded, size: 18, color: Color(0xFF06201B)),
+                        const Icon(Icons.play_arrow_rounded, size: 18, color: ColorManager.onMint),
                         SizedBox(width: 4.w),
                         Flexible(
                           child: Text(
                             'Continue',
                             style: TextStyle(
-                              color: const Color(0xFF06201B),
+                              color: ColorManager.onMint,
                               fontSize: 13.sp,
                               fontWeight: FontWeight.bold,
                             ),
@@ -660,13 +660,13 @@ class DashboardChallengeSection extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.emoji_events_rounded, color: ColorManager.success, size: 13),
+                      Icon(Icons.emoji_events_rounded, color: ColorManager.successText, size: 13),
                       SizedBox(width: 5.w),
                       Text(
                         'PROGRAMME COMPLETED 🏆',
                         style: TextStyle(
-                          color: ColorManager.success,
-                          fontSize: 11.sp,
+                          color: ColorManager.successText,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -679,7 +679,7 @@ class DashboardChallengeSection extends StatelessWidget {
                     completedDateStr,
                     style: TextStyle(
                       color: ColorManager.textTertiary,
-                      fontSize: 11.sp,
+                      fontSize: 12.sp,
                     ),
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.end,
@@ -719,7 +719,7 @@ class DashboardChallengeSection extends StatelessWidget {
                       extra: state,
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: ColorManager.success,
+                      backgroundColor: ColorManager.successDark,
                       padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(AppRadius.button.r),

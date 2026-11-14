@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/units.dart';
 import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/model/personal_record_model.dart';
 import 'package:fitness_app/model/workout_session_model.dart';
@@ -139,7 +140,7 @@ class _WorkoutRewardViewState extends State<WorkoutRewardView> {
                 child: Text(
                   'View session',
                   style: TextStyle(
-                    color: ColorManager.primary,
+                    color: ColorManager.primaryText,
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                   ),
@@ -178,7 +179,7 @@ class _WorkoutRewardViewState extends State<WorkoutRewardView> {
   }
 
   Widget _hero(bool isPartial) {
-    final color = isPartial ? Colors.amber : ColorManager.primary;
+    final color = isPartial ? ColorManager.premium : ColorManager.primary;
     return Column(
       children: [
         TweenAnimationBuilder<double>(
@@ -244,12 +245,12 @@ class _WorkoutRewardViewState extends State<WorkoutRewardView> {
         color: ColorManager.surface,
         boxShadow: ColorManager.cardShadow,
         borderRadius: BorderRadius.circular(AppRadius.card.r),
-        border: Border.all(color: Colors.orange.withValues(alpha: 0.4)),
+        border: Border.all(color: ColorManager.warning.withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [
           Icon(Icons.local_fire_department_rounded,
-              color: Colors.orange, size: 40.sp),
+              color: ColorManager.warningText, size: 40.sp),
           SizedBox(width: 12.w),
           Expanded(
             child: Column(
@@ -304,12 +305,12 @@ class _WorkoutRewardViewState extends State<WorkoutRewardView> {
               children: [
                 Text('Best',
                     style: TextStyle(
-                        color: ColorManager.textTertiary, fontSize: 11.sp)),
+                        color: ColorManager.textTertiary, fontSize: 12.sp)),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.emoji_events_rounded,
-                        color: Colors.amber, size: 14.sp),
+                        color: ColorManager.warningText, size: 14.sp),
                     SizedBox(width: 2.w),
                     Text(
                       '${data.longestStreak}',
@@ -340,7 +341,7 @@ class _WorkoutRewardViewState extends State<WorkoutRewardView> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _metric('Total Volume', '${session.totalVolume.toStringAsFixed(0)} kg',
+          _metric('Total Volume', '${Units.fmt(session.totalVolume, 0)} ${Units.label}',
               Icons.fitness_center),
           _metric('Time', _formatTimer(session.durationSeconds), Icons.timer),
           _metric('Exercises', '${session.exercises.length}',
@@ -365,7 +366,7 @@ class _WorkoutRewardViewState extends State<WorkoutRewardView> {
         ),
         Text(
           label,
-          style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+          style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
         ),
       ],
     );
@@ -381,14 +382,14 @@ class _WorkoutRewardViewState extends State<WorkoutRewardView> {
         color: ColorManager.surface,
         boxShadow: ColorManager.cardShadow,
         borderRadius: BorderRadius.circular(AppRadius.card.r),
-        border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
+        border: Border.all(color: ColorManager.premium.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.emoji_events_rounded, color: Colors.amber, size: 20.sp),
+              Icon(Icons.emoji_events_rounded, color: ColorManager.warningText, size: 20.sp),
               SizedBox(width: 8.w),
               Text(
                 prs.length == 1 ? 'New personal record!' : 'New personal records!',
@@ -409,11 +410,11 @@ class _WorkoutRewardViewState extends State<WorkoutRewardView> {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                   decoration: BoxDecoration(
-                    color: Colors.amber.withValues(alpha: 0.14),
+                    color: ColorManager.premium.withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(20.r),
                   ),
                   child: Text(
-                    '${pr.exerciseName}  ${_kg(pr.weight)} kg × ${pr.reps}',
+                    '${pr.exerciseName}  ${Units.fmtSmart(pr.weight)} ${Units.label} × ${pr.reps}',
                     style: TextStyle(
                       color: ColorManager.textPrimary,
                       fontSize: 12.sp,

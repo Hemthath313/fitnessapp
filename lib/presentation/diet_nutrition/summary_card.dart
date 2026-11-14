@@ -37,9 +37,9 @@ class SummaryCard extends StatelessWidget {
     this.consumedFats,
   }) : super(key: key);
 
-  // Macro arcs: one mint family plus warm accents (functional, not decorative).
-  static const Color _carbsColor = Color(0xFFF4B03E);
-  static const Color _fatsColor = Color(0xFFE58B6E);
+  // Macro arcs: protein blue, carbs amber, fats violet (coral is calories).
+  static const Color _carbsColor = ColorManager.ringAmber;
+  static const Color _fatsColor = Color(0xFF8B5CF6);
 
   /// Shared with the Nutrition Hub estimator so both use the same macro colours.
   static const Color carbsColor = _carbsColor;
@@ -100,11 +100,12 @@ class SummaryCard extends StatelessWidget {
                 value: progress,
                 strokeWidth: 8,
                 strokeCap: StrokeCap.round,
-                backgroundColor: ColorManager.iconChip,
-                color: ColorManager.primary,
+                // Calories are coral everywhere (snapshot, diet, streak).
+                backgroundColor: ColorManager.calorie.withValues(alpha: 0.18),
+                color: ColorManager.calorieText,
               ),
             ),
-            Icon(Icons.bolt_rounded, color: ColorManager.primaryText, size: 26.w),
+            Icon(Icons.local_fire_department_rounded, color: ColorManager.calorieText, size: 26.w),
           ],
         ),
         SizedBox(width: 18.w),
@@ -137,8 +138,8 @@ class SummaryCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(6.r),
                 child: LinearProgressIndicator(
                   value: progress,
-                  backgroundColor: ColorManager.iconChip,
-                  color: ColorManager.primary,
+                  backgroundColor: ColorManager.calorie.withValues(alpha: 0.18),
+                  color: ColorManager.calorieText,
                   minHeight: 6.h,
                 ),
               ),
@@ -149,7 +150,7 @@ class SummaryCard extends StatelessWidget {
                 style: TextStyle(
                   color: over > 0
                       ? ColorManager.warningText
-                      : ColorManager.primaryText,
+                      : ColorManager.textSecondary,
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
                 ),
@@ -188,7 +189,7 @@ class SummaryCard extends StatelessWidget {
                 value: progress,
                 strokeWidth: 5,
                 strokeCap: StrokeCap.round,
-                backgroundColor: ColorManager.iconChip,
+                backgroundColor: ColorManager.chipBackground,
                 color: color,
               ),
             ),
@@ -205,7 +206,7 @@ class SummaryCard extends StatelessWidget {
         SizedBox(height: 6.h),
         Text(
           'Target: $total g',
-          style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+          style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
         ),
       ],
     );

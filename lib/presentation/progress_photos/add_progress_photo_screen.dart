@@ -187,7 +187,7 @@ class _AddProgressPhotoScreenState extends State<AddProgressPhotoScreen> {
                     ? Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.add_a_photo, size: 60.sp, color: ColorManager.primary),
+                          Icon(Icons.add_a_photo, size: 60.sp, color: ColorManager.primaryText),
                           SizedBox(height: 12.h),
                           Text(
                             'Tap to select photo',
@@ -238,7 +238,7 @@ class _AddProgressPhotoScreenState extends State<AddProgressPhotoScreen> {
                   borderRadius: BorderRadius.circular(12.r),
                   borderSide: BorderSide.none,
                 ),
-                prefixIcon: Icon(Icons.monitor_weight, color: ColorManager.primary),
+                prefixIcon: Icon(Icons.monitor_weight, color: ColorManager.primaryText),
               ),
             ),
 
@@ -260,7 +260,7 @@ class _AddProgressPhotoScreenState extends State<AddProgressPhotoScreen> {
                   borderRadius: BorderRadius.circular(12.r),
                   borderSide: BorderSide.none,
                 ),
-                prefixIcon: Icon(Icons.notes, color: ColorManager.primary),
+                prefixIcon: Icon(Icons.notes, color: ColorManager.primaryText),
               ),
             ),
 

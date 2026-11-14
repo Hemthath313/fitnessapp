@@ -175,7 +175,7 @@ class _DietMainState extends State<DietMain>
           if (!isPremium)
             IconButton(
               tooltip: 'Go Premium',
-              icon: Icon(Icons.star, color: ColorManager.premium),
+              icon: Icon(Icons.star, color: ColorManager.warningText),
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PremiumScreen())),
             )
         ],
@@ -215,9 +215,9 @@ class _DietMainState extends State<DietMain>
                       ),
                       child: Row(
                         children:  [
-                          Icon(Icons.lock, color: ColorManager.premium, size: 12),
+                          Icon(Icons.lock, color: ColorManager.warningText, size: 12),
                           SizedBox(width: 4),
-                          Text('PREMIUM', style: TextStyle(color: ColorManager.premium, fontSize: AppText.caption, fontWeight: FontWeight.bold)),
+                          Text('PREMIUM', style: TextStyle(color: ColorManager.warningText, fontSize: AppText.caption, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
@@ -256,7 +256,7 @@ class _DietMainState extends State<DietMain>
                                       shape: BoxShape.circle,
                                       border: Border.all(color: ColorManager.premium, width: 2),
                                     ),
-                                    child: Icon(Icons.lock, color: ColorManager.premium, size: 32),
+                                    child: Icon(Icons.lock, color: ColorManager.warningText, size: 32),
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
@@ -353,7 +353,7 @@ class _DietMainState extends State<DietMain>
                           color: ColorManager.primary.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.menu_book, color: ColorManager.primary, size: 24),
+                        child: Icon(Icons.menu_book, color: ColorManager.primaryText, size: 24),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -534,7 +534,7 @@ class _DietMainState extends State<DietMain>
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.calculate_outlined, color: ColorManager.primary, size: 20),
+                      Icon(Icons.calculate_outlined, color: ColorManager.primaryText, size: 20),
                       const SizedBox(width: 8),
                       Text(
                         'Macro & Calorie Estimator',
@@ -578,7 +578,7 @@ class _DietMainState extends State<DietMain>
                         ),
                         Text(
                           '${_calculatorWeight.toStringAsFixed(1)} kg',
-                          style: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.bold, fontSize: AppText.body),
+                          style: TextStyle(color: ColorManager.primaryText, fontWeight: FontWeight.bold, fontSize: AppText.body),
                         ),
                       ],
                     ),
@@ -645,7 +645,7 @@ class _DietMainState extends State<DietMain>
                           const SizedBox(height: 4),
                           Text(
                             NutritionTargets.adjustmentLabel(goalName),
-                            style: TextStyle(color: ColorManager.primary, fontSize: AppText.caption, fontStyle: FontStyle.italic),
+                            style: TextStyle(color: ColorManager.primaryText, fontSize: AppText.caption, fontStyle: FontStyle.italic),
                           ),
                         ],
                       ),
@@ -730,7 +730,7 @@ class _DietMainState extends State<DietMain>
       selectedColor: ColorManager.primary.withValues(alpha: 0.2),
       checkmarkColor: ColorManager.primary,
       labelStyle: TextStyle(
-        color: isSelected ? ColorManager.primary : ColorManager.textSecondary,
+        color: isSelected ? ColorManager.primaryText : ColorManager.textSecondary,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
       backgroundColor: ColorManager.surface,

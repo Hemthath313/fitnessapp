@@ -112,7 +112,7 @@ class WorkoutSplitListPage extends StatelessWidget {
                           'days/wk',
                           style: TextStyle(
                             color: ColorManager.textTertiary,
-                            fontSize: 11.sp,
+                            fontSize: 12.sp,
                           ),
                         ),
                       ],

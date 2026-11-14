@@ -508,12 +508,12 @@ class _SplashScreenState extends State<SplashScreen>
       );
 
   Widget _buildOfflineCard() {
-    final errorColor = Colors.redAccent;
+    final errorColor = ColorManager.error;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: _cardDecoration(
         borderColor: _hasRetryError
-            ? Colors.red.withValues(alpha: 0.5)
+            ? ColorManager.error.withValues(alpha: 0.5)
             : ColorManager.primary.withValues(alpha: 0.3),
       ),
       child: Column(
@@ -552,7 +552,7 @@ class _SplashScreenState extends State<SplashScreen>
             key: Key('splash_offline_supporting_text'),
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: ColorManager.primary,
+              color: ColorManager.primaryLight,
               fontSize: AppType.caption,
               fontWeight: FontWeight.w500,
             ),

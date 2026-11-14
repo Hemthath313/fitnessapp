@@ -26,7 +26,7 @@ class SplashBrandAnimation extends StatelessWidget {
   });
 
   /// Always-dark brand background (matches the native launch screen).
-  static const Color background = Color(0xFF0A1C22);
+  static const Color background = Color(0xFF121314);
 
   static const String name = 'Gym Buddy';
   static const String tagline = 'Train smarter. Every rep counts.';
@@ -78,7 +78,7 @@ class SplashBrandAnimation extends StatelessWidget {
                             ),
                             TextSpan(
                               text: 'Buddy',
-                              style: TextStyle(color: ColorManager.primary),
+                              style: TextStyle(color: ColorManager.primaryLight),
                             ),
                           ],
                         ),
@@ -186,7 +186,7 @@ class _BarbellPainter extends CustomPainter {
   static const _plates = <_Plate>[
     _Plate(0.20, 0.065, 0.62, ColorManager.primary, 0.10),
     _Plate(0.275, 0.050, 0.46, ColorManager.primaryDark, 0.17),
-    _Plate(0.335, 0.040, 0.32, Color(0xFFBFF3E8), 0.24),
+    _Plate(0.335, 0.040, 0.32, Color(0xFFBFD4FF), 0.24),
   ];
 
   @override
@@ -247,7 +247,7 @@ class _BarbellPainter extends CustomPainter {
     final paint = Paint()
       ..strokeCap = StrokeCap.round
       ..strokeWidth = w * 0.022
-      ..color = const Color(0xFFDFF7F1);
+      ..color = const Color(0xFFF2F4EC);
     canvas.drawLine(
       Offset(w / 2 - half, barY),
       Offset(w / 2 + half, barY),
@@ -281,7 +281,7 @@ class _BarbellPainter extends CustomPainter {
     if (t <= 0) return;
     final w = size.width;
     final paint = Paint()
-      ..color = const Color(0xFFDFF7F1).withValues(alpha: t);
+      ..color = const Color(0xFFF2F4EC).withValues(alpha: t);
     for (final side in const [-1.0, 1.0]) {
       final rect = Rect.fromCenter(
         center: Offset(w / 2 + side * w * 0.385, barY),

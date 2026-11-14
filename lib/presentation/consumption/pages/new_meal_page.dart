@@ -250,7 +250,7 @@ class _NewMealPageState extends State<NewMealPage> {
                     onPressed: _saving ? null : _submit,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: ColorManager.primary,
-                      foregroundColor: const Color(0xFF06201B),
+                      foregroundColor: ColorManager.onMint,
                       disabledBackgroundColor:
                           ColorManager.primary.withValues(alpha: 0.5),
                       elevation: 0,
@@ -263,7 +263,7 @@ class _NewMealPageState extends State<NewMealPage> {
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF06201B),
+                        color: ColorManager.onMint,
                       ),
                     ),
                   ),
@@ -335,7 +335,7 @@ class _MealField extends StatelessWidget {
           fontSize: 14.sp,
           fontWeight: FontWeight.w600,
         ),
-        errorStyle: TextStyle(color: ColorManager.error, fontSize: 11.sp),
+        errorStyle: TextStyle(color: ColorManager.errorText, fontSize: 12.sp),
         filled: true,
         fillColor: ColorManager.background,
         contentPadding:

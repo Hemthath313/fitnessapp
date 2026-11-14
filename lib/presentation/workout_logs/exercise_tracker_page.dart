@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/units.dart';
 import 'package:fitness_app/utils/managers/layout_manager.dart';
 import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/model/workout_log.dart';
@@ -120,7 +121,7 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
                     ),
                     Text(
                       _activeTab == 1 ? 'Epley 1RM Guardrails Active' : '',
-                      style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+                      style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                     ),
                   ],
                 ),
@@ -155,7 +156,7 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
                                   DateFormat('MMM d').format(log.date),
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: ColorManager.accent,
+                                    color: ColorManager.accentText,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 12.sp,
                                   ),
@@ -163,7 +164,7 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
                                 SizedBox(height: 2.h),
                                 Text(
                                   DateFormat('yyyy').format(log.date),
-                                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+                                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                                 ),
                               ],
                             ),
@@ -204,10 +205,10 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
                                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                                         children: [
                                           _buildLogDataCell('$setIdx'),
-                                          _buildLogDataCell('${setVal.weight.toStringAsFixed(setVal.weight % 1 == 0 ? 0 : 1)} kg'),
+                                          _buildLogDataCell('${Units.fmtSmart(setVal.weight)} ${Units.label}'),
                                           _buildLogDataCell('${setVal.reps}'),
                                           _buildLogDataCell(
-                                            est1RM > 0 ? '${est1RM.toStringAsFixed(1)} kg' : '—',
+                                            est1RM > 0 ? '${Units.fmt(est1RM, 1)} ${Units.label}' : '—',
                                             color: est1RM > 0 ? ColorManager.primary : ColorManager.textTertiary,
                                           ),
                                         ],
@@ -252,7 +253,7 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
               style: TextStyle(
                 color: isSelected ? Colors.white : ColorManager.textSecondary,
                 fontWeight: FontWeight.bold,
-                fontSize: 11.sp,
+                fontSize: 12.sp,
               ),
             ),
           ),
@@ -269,7 +270,7 @@ class _ExerciseTrackerPageState extends State<ExerciseTrackerPage> {
         style: TextStyle(
           color: ColorManager.textTertiary,
           fontWeight: FontWeight.bold,
-          fontSize: 11.sp,
+          fontSize: 12.sp,
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/units.dart';
 import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/model/workout_log.dart';
 import 'package:fitness_app/model/workout_session_model.dart';
@@ -112,12 +113,12 @@ class _RecentPRsWidgetState extends State<RecentPRsWidget> {
                               Container(
                                 padding: EdgeInsets.all(6.w),
                                 decoration: BoxDecoration(
-                                  color: Colors.amber.withValues(alpha: 0.15),
+                                  color: ColorManager.premium.withValues(alpha: 0.15),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
                                   Icons.emoji_events_rounded,
-                                  color: Colors.amber,
+                                  color: ColorManager.warningText,
                                   size: 18.sp,
                                 ),
                               ),
@@ -148,7 +149,7 @@ class _RecentPRsWidgetState extends State<RecentPRsWidget> {
                                 Text(
                                   'PR Vault',
                                   style: TextStyle(
-                                    color: ColorManager.primary,
+                                    color: ColorManager.primaryText,
                                     fontSize: 12.sp,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -156,7 +157,7 @@ class _RecentPRsWidgetState extends State<RecentPRsWidget> {
                                 SizedBox(width: 2.w),
                                 Icon(
                                   Icons.chevron_right_rounded,
-                                  color: ColorManager.primary,
+                                  color: ColorManager.primaryText,
                                   size: 16.sp,
                                 ),
                               ],
@@ -182,14 +183,14 @@ class _RecentPRsWidgetState extends State<RecentPRsWidget> {
                         child: Row(
                           children: [
                             Icon(Icons.cloud_off_rounded,
-                                color: ColorManager.error, size: 20.sp),
+                                color: ColorManager.errorText, size: 20.sp),
                             SizedBox(width: 12.w),
                             Expanded(
                               child: Text(
                                 'Unable to load recent personal records. Tap PR Vault to view your strength history.',
                                 style: TextStyle(
                                   color: ColorManager.textSecondary,
-                                  fontSize: 11.sp,
+                                  fontSize: 12.sp,
                                   height: 1.4,
                                 ),
                               ),
@@ -243,7 +244,7 @@ class _RecentPRsWidgetState extends State<RecentPRsWidget> {
                                 ),
                                 child: Icon(
                                   Icons.fitness_center_rounded,
-                                  color: ColorManager.primary,
+                                  color: ColorManager.primaryText,
                                   size: 16.sp,
                                 ),
                               ),
@@ -264,10 +265,10 @@ class _RecentPRsWidgetState extends State<RecentPRsWidget> {
                                     ),
                                     SizedBox(height: 2.h),
                                     Text(
-                                      '$formattedWeight kg × ${pr.reps} reps • $dateStr',
+                                      '${Units.fmtSmart(pr.weight)} ${Units.label} × ${pr.reps} reps • $dateStr',
                                       style: TextStyle(
                                         color: ColorManager.textSecondary,
-                                        fontSize: 11.sp,
+                                        fontSize: 12.sp,
                                       ),
                                     ),
                                   ],
@@ -286,10 +287,10 @@ class _RecentPRsWidgetState extends State<RecentPRsWidget> {
                                   ),
                                 ),
                                 child: Text(
-                                  '${pr.estimated1RM.toStringAsFixed(0)} kg 1RM',
+                                  '${Units.fmt(pr.estimated1RM, 0)} ${Units.label} 1RM',
                                   style: TextStyle(
-                                    color: ColorManager.primary,
-                                    fontSize: 11.sp,
+                                    color: ColorManager.primaryText,
+                                    fontSize: 12.sp,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -317,7 +318,7 @@ class _RecentPRsWidgetState extends State<RecentPRsWidget> {
                               ),
                               child: Icon(
                                 Icons.trending_up_rounded,
-                                color: ColorManager.primary,
+                                color: ColorManager.primaryText,
                                 size: 20.sp,
                               ),
                             ),
@@ -327,7 +328,7 @@ class _RecentPRsWidgetState extends State<RecentPRsWidget> {
                                 'Log your sets during workouts to unlock automatic PR detection, estimated 1RMs, and strength curves.',
                                 style: TextStyle(
                                   color: ColorManager.textSecondary,
-                                  fontSize: 11.sp,
+                                  fontSize: 12.sp,
                                   height: 1.4,
                                 ),
                               ),

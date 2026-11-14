@@ -345,7 +345,7 @@ class TransformationPlansData {
         TransformationMilestone(
           id: 'wl_day_30',
           title: 'Mid-Way Champion',
-          description: 'Halfway point! First milestone progress photos and weigh-in check.',
+          description: 'Halfway point! First milestone weigh-in and measurements check.',
           triggerDay: 30,
         ),
         TransformationMilestone(
@@ -1082,7 +1082,7 @@ class TransformationPlansData {
       // Week 13: Final Peak Week & Measurement Reveal
       targetSets = 3;
       targetReps = '8-10';
-      weekTip = 'Congratulations on 90 days! Take your final progress photos, log your measurements, and celebrate your gains.';
+      weekTip = 'Congratulations on 90 days! Log your final weigh-in and measurements, and celebrate your gains.';
       chestNotes = 'Peak chest fullness: 3 crisp sets, mind-muscle mastery.';
       backNotes = 'Peak V-taper: 3 crisp sets, showcasing your newly built back width.';
       legNotes = 'Peak lower physique: 3 crisp sets, admire your leg definition.';

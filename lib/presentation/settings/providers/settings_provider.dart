@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:fitness_app/data/db.dart';
 import 'package:fitness_app/presentation/auth/providers/auth_provider.dart' as app_auth;
 import 'package:fitness_app/utils/widgets/loading_overlay.dart';
@@ -74,8 +75,21 @@ class SettingsProvider with ChangeNotifier {
       User? user = _auth.currentUser;
 
       if (isGoogleUser) {
-        // For Google users, no reauthentication needed - just delete
-        await DataBase(user!.uid).deleteUserData();
+        // Firebase refuses user.delete() unless the sign-in is recent
+        // (requires-recent-login), so confirm the Google account first.
+        final googleAccount = await GoogleSignIn().signIn();
+        if (googleAccount == null) {
+          throw FirebaseAuthException(
+            code: 'cancelled',
+            message: 'Google sign-in was cancelled. Your account was not deleted.',
+          );
+        }
+        final googleAuth = await googleAccount.authentication;
+        await user!.reauthenticateWithCredential(GoogleAuthProvider.credential(
+          idToken: googleAuth.idToken,
+          accessToken: googleAuth.accessToken,
+        ));
+        await DataBase(user.uid).deleteUserData();
         await app_auth.AuthProvider.clearCachedOnboardingStatus(user.uid);
         await user.delete();
       } else {

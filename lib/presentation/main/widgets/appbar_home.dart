@@ -39,21 +39,26 @@ class _HomePageAppBarWidgetState extends State<HomePageAppBarWidget> {
   @override
   Widget build(BuildContext context) {
     return Selector2<HomeProvider, StatisticsProvider,
-        ({String displayName, int streak})>(
+        ({String displayName, int streak, int freezes})>(
       selector: (_, homeProvider, statsProvider) {
         final firstName =
             (homeProvider.userData['first name'] ?? '').toString().trim();
         final displayName =
             firstName.isNotEmpty ? firstName : ProfileData.fallbackName;
-        return (displayName: displayName, streak: statsProvider.currentStreak);
+        return (
+          displayName: displayName,
+          streak: statsProvider.currentStreak,
+          freezes: statsProvider.freezesLeftThisMonth,
+        );
       },
       builder: (context, data, _) {
         final displayName = data.displayName;
         final streak = data.streak;
+        final freezes = data.freezes;
 
         final homeProvider = Provider.of<HomeProvider>(context, listen: false);
         if (homeProvider.userData.isNotEmpty || _userDataFuture == null) {
-          return _buildAppBar(context, displayName, streak);
+          return _buildAppBar(context, displayName, streak, freezes);
         }
 
         return FutureBuilder<Map<String, dynamic>>(
@@ -62,14 +67,15 @@ class _HomePageAppBarWidgetState extends State<HomePageAppBarWidget> {
             final fetchedName =
                 (snapshot.data?['first name'] ?? displayName).toString().trim();
             final name = fetchedName.isNotEmpty ? fetchedName : displayName;
-            return _buildAppBar(context, name, streak);
+            return _buildAppBar(context, name, streak, freezes);
           },
         );
       },
     );
   }
 
-  Widget _buildAppBar(BuildContext context, String displayName, int streak) {
+  Widget _buildAppBar(
+      BuildContext context, String displayName, int streak, int freezes) {
     final initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'U';
 
     return AppBar(
@@ -100,7 +106,7 @@ class _HomePageAppBarWidgetState extends State<HomePageAppBarWidget> {
                 child: Text(
                   initial,
                   style: TextStyle(
-                    color: const Color(0xFF06201B),
+                    color: ColorManager.onMint,
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
                   ),
@@ -150,7 +156,7 @@ class _HomePageAppBarWidgetState extends State<HomePageAppBarWidget> {
             button: true,
             excludeSemantics: true,
             label: streak > 0
-                ? '$streak day streak. Opens workout history'
+                ? '$streak day streak, $freezes streak ${freezes == 1 ? 'freeze' : 'freezes'} left. Opens workout history'
                 : 'No streak yet. Opens workout history',
             child: GestureDetector(
           onTap: () => context.push(Routes.workoutHistoryRoute),
@@ -161,7 +167,10 @@ class _HomePageAppBarWidgetState extends State<HomePageAppBarWidget> {
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
                 decoration: BoxDecoration(
-                  color: ColorManager.iconChip,
+                  // Streak uses the calorie/energy coral.
+                  color: streak > 0
+                      ? ColorManager.calorie.withValues(alpha: 0.14)
+                      : ColorManager.chipBackground,
                   borderRadius: BorderRadius.circular(AppRadius.pill.r),
                 ),
                 child: Row(
@@ -170,7 +179,7 @@ class _HomePageAppBarWidgetState extends State<HomePageAppBarWidget> {
                     Icon(
                       Icons.local_fire_department_rounded,
                       color: streak > 0
-                          ? ColorManager.ringAmber
+                          ? ColorManager.calorieText
                           : ColorManager.textTertiary,
                       size: 18.sp,
                     ),
@@ -191,10 +200,26 @@ class _HomePageAppBarWidgetState extends State<HomePageAppBarWidget> {
                         'day${streak == 1 ? '' : 's'}',
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
+                      // Streak freezes left this month (protect a missed day).
+                      if (freezes > 0) ...[
+                        SizedBox(width: 6.w),
+                        Icon(Icons.ac_unit_rounded,
+                            key: const Key('streak_freeze_indicator'),
+                            size: 13.sp,
+                            color: ColorManager.waterText),
+                        Text(
+                          '$freezes',
+                          style: TextStyle(
+                            color: ColorManager.waterText,
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ],
                   ],
                 ),
@@ -208,12 +233,12 @@ class _HomePageAppBarWidgetState extends State<HomePageAppBarWidget> {
         IconButton(tooltip: 'Go Premium', 
           onPressed: () => context.push(Routes.premiumScreen),
           style: IconButton.styleFrom(
-            backgroundColor: ColorManager.iconChip,
+            backgroundColor: ColorManager.premium.withValues(alpha: 0.16),
             minimumSize: Size(44.w, 44.w),
           ),
           icon: Icon(
             Icons.workspace_premium_rounded,
-            color: ColorManager.ringAmber,
+            color: ColorManager.warningText,
             size: 22.sp,
           ),
         ),

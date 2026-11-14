@@ -113,7 +113,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                   log.hasEnoughData ? '${log.dailyAdherenceScore.round()}% Adherence' : 'In Progress',
                   style: TextStyle(
                     color: log.hasEnoughData ? primaryColor : ColorManager.textSecondary,
-                    fontSize: 11.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -163,7 +163,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                   label: 'Water',
                   value: '${(log.actualWaterMl / 1000).toStringAsFixed(1)} / ${(log.targetWaterMl / 1000).toStringAsFixed(1)}L',
                   isComplete: log.waterStatus == AccountabilityStatus.completed,
-                  color: Colors.blue,
+                  color: ColorManager.info,
                 ),
               ),
             ],
@@ -196,7 +196,7 @@ class TransformationDailyChecklist extends StatelessWidget {
               Icon(
                 isComplete ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
                 size: 10.sp,
-                color: isComplete ? ColorManager.success : ColorManager.textTertiary,
+                color: isComplete ? ColorManager.successText : ColorManager.textTertiary,
               ),
               SizedBox(width: 3.w),
               Flexible(
@@ -204,7 +204,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                   label,
                   style: TextStyle(
                     color: ColorManager.textSecondary,
-                    fontSize: 11.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -217,7 +217,7 @@ class TransformationDailyChecklist extends StatelessWidget {
             value,
             style: TextStyle(
               color: isComplete ? ColorManager.textPrimary : ColorManager.textSecondary,
-              fontSize: 11.sp,
+              fontSize: 12.sp,
               fontWeight: FontWeight.bold,
             ),
             overflow: TextOverflow.ellipsis,
@@ -280,7 +280,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                       'Day ${log.dayNumber} • ${DateFormat('EEE, MMM d').format(targetDate)}',
                       style: TextStyle(
                         color: ColorManager.textSecondary,
-                        fontSize: 11.sp,
+                        fontSize: 12.sp,
                       ),
                     ),
                   ],
@@ -312,7 +312,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                       'Adherence',
                       style: TextStyle(
                         color: ColorManager.textSecondary,
-                        fontSize: 11.sp,
+                        fontSize: 12.sp,
                       ),
                     ),
                   ],
@@ -327,7 +327,7 @@ class TransformationDailyChecklist extends StatelessWidget {
             log.coverageText,
             style: TextStyle(
               color: ColorManager.textSecondary,
-              fontSize: 11.sp,
+              fontSize: 12.sp,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -408,7 +408,7 @@ class TransformationDailyChecklist extends StatelessWidget {
             padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
               color: isRest
-                  ? Colors.teal.withValues(alpha: 0.15)
+                  ? ColorManager.infoText.withValues(alpha: 0.15)
                   : (isDone
                       ? ColorManager.success.withValues(alpha: 0.15)
                       : primaryColor.withValues(alpha: 0.15)),
@@ -419,7 +419,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                   ? Icons.self_improvement_rounded
                   : (isDone ? Icons.check_circle_rounded : Icons.fitness_center_rounded),
               color: isRest
-                  ? Colors.teal
+                  ? ColorManager.infoText
                   : (isDone ? ColorManager.success : primaryColor),
               size: 18.sp,
             ),
@@ -444,7 +444,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                       : (isDone ? '✓ Session finished and verified' : 'Scheduled programme training'),
                   style: TextStyle(
                     color: ColorManager.textSecondary,
-                    fontSize: 11.sp,
+                    fontSize: 12.sp,
                   ),
                 ),
               ],
@@ -454,7 +454,7 @@ class TransformationDailyChecklist extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
             decoration: BoxDecoration(
               color: isRest
-                  ? Colors.teal.withValues(alpha: 0.15)
+                  ? ColorManager.infoText.withValues(alpha: 0.15)
                   : (isDone
                       ? ColorManager.success.withValues(alpha: 0.15)
                       : ColorManager.surface),
@@ -464,9 +464,9 @@ class TransformationDailyChecklist extends StatelessWidget {
               isRest ? 'Rest Day' : (isDone ? 'Completed' : 'Pending'),
               style: TextStyle(
                 color: isRest
-                    ? Colors.teal
+                    ? ColorManager.infoText
                     : (isDone ? ColorManager.success : ColorManager.textSecondary),
-                fontSize: 11.sp,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -504,7 +504,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                   color: ColorManager.accent.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.local_fire_department_rounded, color: ColorManager.accent, size: 18.sp),
+                child: Icon(Icons.local_fire_department_rounded, color: ColorManager.accentText, size: 18.sp),
               ),
               SizedBox(width: 12.w),
               Expanded(
@@ -529,7 +529,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                         Text(
                           '${log.actualCalories.round()} / ${log.targetCalories.round()} kcal',
                           style: TextStyle(
-                            color: isDone ? ColorManager.success : ColorManager.textPrimary,
+                            color: isDone ? ColorManager.successText : ColorManager.textPrimary,
                             fontSize: 12.sp,
                             fontWeight: FontWeight.bold,
                           ),
@@ -562,8 +562,8 @@ class TransformationDailyChecklist extends StatelessWidget {
                     ? '✓ On target (within ±10% tolerance)'
                     : (isPartial ? 'Close to target' : 'Tracking in progress'),
                 style: TextStyle(
-                  color: isDone ? ColorManager.success : ColorManager.textSecondary,
-                  fontSize: 11.sp,
+                  color: isDone ? ColorManager.successText : ColorManager.textSecondary,
+                  fontSize: 12.sp,
                 ),
               ),
               InkWell(
@@ -573,7 +573,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                   'View Meals 🥗',
                   style: TextStyle(
                     color: primaryColor,
-                    fontSize: 11.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -612,7 +612,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                   color: ColorManager.secondary.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.egg_alt_rounded, color: ColorManager.secondary, size: 18.sp),
+                child: Icon(Icons.egg_alt_rounded, color: ColorManager.accentText, size: 18.sp),
               ),
               SizedBox(width: 12.w),
               Expanded(
@@ -637,7 +637,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                         Text(
                           '${log.actualProtein.round()} / ${log.targetProtein.round()} g',
                           style: TextStyle(
-                            color: isDone ? ColorManager.success : ColorManager.textPrimary,
+                            color: isDone ? ColorManager.successText : ColorManager.textPrimary,
                             fontSize: 12.sp,
                             fontWeight: FontWeight.bold,
                           ),
@@ -669,8 +669,8 @@ class TransformationDailyChecklist extends StatelessWidget {
                   ? '✓ Muscle protection target achieved (≥90%)'
                   : (isPartial ? 'Partial intake (≥70%)' : 'Target: ${log.targetProtein.round()}g lean protein'),
               style: TextStyle(
-                color: isDone ? ColorManager.success : ColorManager.textSecondary,
-                fontSize: 11.sp,
+                color: isDone ? ColorManager.successText : ColorManager.textSecondary,
+                fontSize: 12.sp,
               ),
             ),
           ),
@@ -706,10 +706,10 @@ class TransformationDailyChecklist extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withValues(alpha: 0.15),
+                  color: ColorManager.info.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.water_drop_rounded, color: Colors.blue, size: 18),
+                child: Icon(Icons.water_drop_rounded, color: ColorManager.infoText, size: 18),
               ),
               SizedBox(width: 12.w),
               Expanded(
@@ -734,7 +734,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                         Text(
                           '${(log.actualWaterMl / 1000).toStringAsFixed(1)} / ${(log.targetWaterMl / 1000).toStringAsFixed(1)} L',
                           style: TextStyle(
-                            color: isDone ? ColorManager.success : ColorManager.textPrimary,
+                            color: isDone ? ColorManager.successText : ColorManager.textPrimary,
                             fontSize: 12.sp,
                             fontWeight: FontWeight.bold,
                           ),
@@ -749,7 +749,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                         minHeight: 5.h,
                         backgroundColor: ColorManager.surface,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          isDone ? ColorManager.success : Colors.blue,
+                          isDone ? ColorManager.success : ColorManager.info,
                         ),
                       ),
                     ),
@@ -771,11 +771,11 @@ class TransformationDailyChecklist extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.tune_rounded, color: Colors.blue, size: 12.sp),
+                    Icon(Icons.tune_rounded, color: ColorManager.infoText, size: 12.sp),
                     SizedBox(width: 3.w),
                     Text(
                       'Goal: ${(log.targetWaterMl / 1000).toStringAsFixed(1)}L',
-                      style: TextStyle(color: Colors.blue, fontSize: 11.sp, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: ColorManager.infoText, fontSize: 12.sp, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -793,14 +793,14 @@ class TransformationDailyChecklist extends StatelessWidget {
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withValues(alpha: 0.15),
+                      color: ColorManager.info.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6.r),
                     ),
                     child: Text(
                       '+250 ml 💧',
                       style: TextStyle(
-                        color: Colors.blue,
-                        fontSize: 11.sp,
+                        color: ColorManager.infoText,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -834,7 +834,7 @@ class TransformationDailyChecklist extends StatelessWidget {
       emoji = '⚡️';
     } else if (level == 'moderate') {
       levelTitle = 'Normal / Moderate';
-      levelColor = const Color(0xFFFFA500);
+      levelColor = ColorManager.warning;
       emoji = '👍';
     } else if (level == 'poor') {
       levelTitle = 'High Fatigue / Need Rest';
@@ -881,7 +881,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                       : 'Log fatigue & sleep quality',
                   style: TextStyle(
                     color: isRecorded ? levelColor : ColorManager.textSecondary,
-                    fontSize: 11.sp,
+                    fontSize: 12.sp,
                     fontWeight: isRecorded ? FontWeight.w600 : FontWeight.normal,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -910,7 +910,7 @@ class TransformationDailyChecklist extends StatelessWidget {
                 isRecorded ? 'Update' : 'Check In',
                 style: TextStyle(
                   color: primaryColor,
-                  fontSize: 11.sp,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.bold,
                 ),
               ),

@@ -175,7 +175,7 @@ class _LoginPageState extends State<LoginPage> {
                         child: Icon(
                           Icons.fitness_center,
                           size: 44.sp,
-                          color: ColorManager.primary,
+                          color: ColorManager.primaryText,
                         ),
                       ),
                       SizedBox(height: 16.h),
@@ -224,7 +224,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: Text(
                         'Forgot Password?',
                         style: TextStyle(
-                          color: ColorManager.primary,
+                          color: ColorManager.primaryText,
                           fontWeight: FontWeight.w600,
                           fontSize: 14.sp,
                         ),
@@ -367,7 +367,7 @@ class _LoginPageState extends State<LoginPage> {
                             ? StringsManager.signUp
                             : StringsManager.signIn,
                         style: TextStyle(
-                          color: ColorManager.primary,
+                          color: ColorManager.primaryText,
                           fontWeight: FontWeight.w600,
                           fontSize: 14.sp,
                         ),

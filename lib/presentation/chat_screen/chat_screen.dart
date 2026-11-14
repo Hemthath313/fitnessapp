@@ -152,8 +152,8 @@ class _ChatScreenState extends State<ChatScreen> {
     if (_limitReached) {
        ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Daily limit reached! Come back tomorrow.'),
-          backgroundColor: Colors.red,
+          content: Text('Daily limit reached! Come back tomorrow.', style: TextStyle(color: Colors.white)),
+          backgroundColor: ColorManager.error,
         ),
       );
       return;
@@ -319,17 +319,17 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             margin: const EdgeInsets.only(right: 16),
             decoration: BoxDecoration(
-              color: _limitReached ? Colors.red.withValues(alpha: 0.2) : ColorManager.primary.withValues(alpha: 0.2),
+              color: _limitReached ? ColorManager.error.withValues(alpha: 0.2) : ColorManager.primary.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: _limitReached ? Colors.red : ColorManager.primary,
+                color: _limitReached ? ColorManager.error : ColorManager.primary,
                 width: 1,
               )
             ),
             child: Text(
               '${_dailyLimit - _questionsCount} Left',
               style: TextStyle(
-                color: _limitReached ? Colors.red : ColorManager.primary,
+                color: _limitReached ? ColorManager.errorText : ColorManager.primaryText,
                 fontWeight: FontWeight.bold,
                 fontSize: 12.sp,
               ),
@@ -421,7 +421,7 @@ class _ChatScreenState extends State<ChatScreen> {
           style: TextStyle(
             color: isSelected ? ColorManager.onMint : ColorManager.textSecondary,
             fontWeight: FontWeight.bold,
-            fontSize: 11.sp,
+            fontSize: 12.sp,
           ),
         ),
       ),
@@ -450,7 +450,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             child: Row(
               children: [
-                Icon(Icons.lightbulb_outline_rounded, color: ColorManager.primary, size: 28.sp),
+                Icon(Icons.lightbulb_outline_rounded, color: ColorManager.primaryText, size: 28.sp),
                 SizedBox(width: 12.w),
                 Expanded(
                   child: Column(
@@ -459,7 +459,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       Text(
                         '💡 Daily Fitness Fact',
                         style: TextStyle(
-                          color: ColorManager.primary,
+                          color: ColorManager.primaryText,
                           fontWeight: FontWeight.bold,
                           fontSize: 13.sp,
                         ),
@@ -529,7 +529,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             'AI reads your active exercises and critiques your weekly splits, muscle balance, and volume.',
                             style: TextStyle(
                               color: ColorManager.onMint.withValues(alpha: 0.75),
-                              fontSize: 11.sp,
+                              fontSize: 12.sp,
                             ),
                           ),
                         ],
@@ -637,7 +637,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: ColorManager.textSecondary,
-                    fontSize: 11.sp,
+                    fontSize: 12.sp,
                     height: 1.2,
                   ),
                 ),
@@ -770,11 +770,11 @@ class _ChatScreenState extends State<ChatScreen> {
           SizedBox(width: 12.w),
           Container(
             decoration: BoxDecoration(
-              color: _limitReached ? Colors.grey : ColorManager.primary,
+              color: _limitReached ? ColorManager.textTertiary : ColorManager.primary,
               shape: BoxShape.circle,
             ),
             child: IconButton(tooltip: 'Send', 
-              icon: const Icon(Icons.send_rounded, color: Colors.black),
+              icon: const Icon(Icons.send_rounded, color: Colors.white),
               onPressed: _limitReached ? null : () => _sendMessage(),
             ),
           ),
@@ -808,7 +808,7 @@ class ChatMessage {
 //             const Icon(
 //               Icons.lock,
 //               size: 100,
-//               color: Colors.lime,
+//               color: ColorManager.primary,
 //             ),
 //             const SizedBox(height: 20),
 //             const Text(

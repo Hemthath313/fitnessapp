@@ -83,7 +83,7 @@ class TransformationRescheduleDialog extends StatelessWidget {
                   color: ColorManager.primary.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.edit_calendar_rounded, color: ColorManager.primary, size: 22.sp),
+                child: Icon(Icons.edit_calendar_rounded, color: ColorManager.primaryText, size: 22.sp),
               ),
               SizedBox(width: 12.w),
               Expanded(
@@ -125,20 +125,20 @@ class TransformationRescheduleDialog extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Original Date:', style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp)),
+                    Text('Original Date:', style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),
                     Text(DateFormat('EEE, MMM d, yyyy').format(originalDate),
-                        style: TextStyle(color: ColorManager.textPrimary, fontSize: 11.sp, fontWeight: FontWeight.w600)),
+                        style: TextStyle(color: ColorManager.textPrimary, fontSize: 12.sp, fontWeight: FontWeight.w600)),
                   ],
                 ),
                 SizedBox(height: 6.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Scheduled Date:', style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp)),
+                    Text('Scheduled Date:', style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),
                     Text(DateFormat('EEE, MMM d, yyyy').format(scheduledDate),
                         style: TextStyle(
-                          color: isRescheduled ? ColorManager.primary : ColorManager.textPrimary,
-                          fontSize: 11.sp,
+                          color: isRescheduled ? ColorManager.primaryText : ColorManager.textPrimary,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         )),
                   ],
@@ -148,9 +148,9 @@ class TransformationRescheduleDialog extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Status:', style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp)),
+                      Text('Status:', style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),
                       Text('Skipped (Not Completed)',
-                          style: TextStyle(color: ColorManager.accent, fontSize: 11.sp, fontWeight: FontWeight.bold)),
+                          style: TextStyle(color: ColorManager.accentText, fontSize: 12.sp, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ],
@@ -163,14 +163,14 @@ class TransformationRescheduleDialog extends StatelessWidget {
           ListTile(
             key: const Key('reschedule_tomorrow_tile'),
             contentPadding: EdgeInsets.zero,
-            leading: Icon(Icons.next_plan_rounded, color: ColorManager.primary, size: 22.sp),
+            leading: Icon(Icons.next_plan_rounded, color: ColorManager.primaryText, size: 22.sp),
             title: Text(
               'Reschedule to Tomorrow',
               style: TextStyle(color: ColorManager.textPrimary, fontSize: 13.sp, fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
               DateFormat('EEEE, MMM d').format(normalizedTomorrow),
-              style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+              style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
             ),
             trailing: Icon(Icons.arrow_forward_ios_rounded, color: ColorManager.textTertiary, size: 14.sp),
             onTap: () async {
@@ -182,7 +182,7 @@ class TransformationRescheduleDialog extends StatelessWidget {
               );
               messenger.showSnackBar(
                 SnackBar(
-                  content: Text('Day $dayNumber rescheduled to tomorrow (${DateFormat('MMM d').format(normalizedTomorrow)})'),
+                  content: Text('Day $dayNumber rescheduled to tomorrow (${DateFormat('MMM d').format(normalizedTomorrow)})', style: const TextStyle(color: ColorManager.onMint, fontWeight: FontWeight.w600)),
                   backgroundColor: ColorManager.primary,
                 ),
               );
@@ -194,14 +194,14 @@ class TransformationRescheduleDialog extends StatelessWidget {
           ListTile(
             key: const Key('reschedule_pick_date_tile'),
             contentPadding: EdgeInsets.zero,
-            leading: Icon(Icons.calendar_month_rounded, color: ColorManager.secondary, size: 22.sp),
+            leading: Icon(Icons.calendar_month_rounded, color: ColorManager.accentText, size: 22.sp),
             title: Text(
               'Choose Another Available Date',
               style: TextStyle(color: ColorManager.textPrimary, fontSize: 13.sp, fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
               'Pick a suitable day that fits your weekly recovery',
-              style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+              style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
             ),
             trailing: Icon(Icons.arrow_forward_ios_rounded, color: ColorManager.textTertiary, size: 14.sp),
             onTap: () async {
@@ -233,7 +233,7 @@ class TransformationRescheduleDialog extends StatelessWidget {
                 );
                 messenger.showSnackBar(
                   SnackBar(
-                    content: Text('Day $dayNumber moved to ${DateFormat('EEE, MMM d').format(pickedDate)}'),
+                    content: Text('Day $dayNumber moved to ${DateFormat('EEE, MMM d').format(pickedDate)}', style: const TextStyle(color: ColorManager.onMint, fontWeight: FontWeight.w600)),
                     backgroundColor: ColorManager.primary,
                   ),
                 );
@@ -246,14 +246,14 @@ class TransformationRescheduleDialog extends StatelessWidget {
           ListTile(
             key: const Key('skip_workout_tile'),
             contentPadding: EdgeInsets.zero,
-            leading: Icon(Icons.skip_next_rounded, color: ColorManager.accent, size: 22.sp),
+            leading: Icon(Icons.skip_next_rounded, color: ColorManager.accentText, size: 22.sp),
             title: Text(
               'Skip This Workout',
               style: TextStyle(color: ColorManager.textPrimary, fontSize: 13.sp, fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
               'Remains recorded as skipped (never marked completed)',
-              style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+              style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
             ),
             trailing: Icon(Icons.arrow_forward_ios_rounded, color: ColorManager.textTertiary, size: 14.sp),
             onTap: () async {
@@ -280,7 +280,7 @@ class TransformationRescheduleDialog extends StatelessWidget {
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: ColorManager.accent),
                       onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text('Confirm Skip', style: TextStyle(color: Colors.white)),
+                      child: const Text('Confirm Skip', style: TextStyle(color: ColorManager.inkOnLight)),
                     ),
                   ],
                 ),
@@ -291,7 +291,7 @@ class TransformationRescheduleDialog extends StatelessWidget {
                 await provider.skipDay(dayNumber: dayNumber);
                 messenger.showSnackBar(
                   SnackBar(
-                    content: Text('Day $dayNumber marked as skipped.'),
+                    content: Text('Day $dayNumber marked as skipped.', style: const TextStyle(color: ColorManager.inkOnLight)),
                     backgroundColor: ColorManager.accent,
                   ),
                 );
@@ -312,7 +312,7 @@ class TransformationRescheduleDialog extends StatelessWidget {
               ),
               subtitle: Text(
                 'Restore ${DateFormat('MMM d').format(originalDate)}',
-                style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+                style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
               ),
               trailing: Icon(Icons.arrow_forward_ios_rounded, color: ColorManager.textTertiary, size: 14.sp),
               onTap: () async {

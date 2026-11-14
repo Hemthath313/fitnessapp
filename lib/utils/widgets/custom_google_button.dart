@@ -33,7 +33,7 @@ class CustomGoogleSignInButton extends StatelessWidget {
           children: [
             FaIcon(
               FontAwesomeIcons.google,
-              color: ColorManager.primary,
+              color: ColorManager.primaryText,
               size: 20.sp,
             ),
             SizedBox(width: 12.w),

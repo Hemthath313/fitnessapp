@@ -47,14 +47,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
         body:
             'A quick session today keeps your streak going. Even 15 minutes counts!',
         icon: Icons.local_fire_department_rounded,
-        color: Colors.orange,
+        color: ColorManager.warning,
         time: now.subtract(const Duration(minutes: 23)),
       ),
       _AppNotification(
         title: '💧 Hydration Reminder',
         body: 'How\'s your water today? Log a glass to stay on target.',
         icon: Icons.water_drop_rounded,
-        color: Colors.blue,
+        color: ColorManager.info,
         time: now.subtract(const Duration(hours: 2)),
         isRead: true,
       ),
@@ -62,7 +62,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         title: '🏆 Achievement Unlocked!',
         body: 'You earned the "First Flame" badge for logging your first workout!',
         icon: Icons.emoji_events_rounded,
-        color: Colors.amber,
+        color: ColorManager.premium,
         time: now.subtract(const Duration(days: 1)),
         isRead: true,
       ),
@@ -80,7 +80,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         body:
             'The 30-Day Push-Up Challenge is now available. Start today and build serious strength!',
         icon: Icons.fitness_center_rounded,
-        color: Colors.green,
+        color: ColorManager.success,
         time: now.subtract(const Duration(days: 5)),
         isRead: true,
       ),
@@ -137,7 +137,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       Text(
                         '$unreadCount unread',
                         style: TextStyle(
-                          color: ColorManager.primary,
+                          color: ColorManager.primaryText,
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w500,
                         ),
@@ -149,11 +149,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   TextButton.icon(
                     onPressed: _markAllRead,
                     icon: Icon(Icons.done_all_rounded,
-                        size: 16.sp, color: ColorManager.primary),
+                        size: 16.sp, color: ColorManager.primaryText),
                     label: Text(
                       'Mark all read',
                       style: TextStyle(
-                        color: ColorManager.primary,
+                        color: ColorManager.primaryText,
                         fontSize: 12.sp,
                       ),
                     ),
@@ -210,12 +210,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       margin: EdgeInsets.only(bottom: 10.h),
                       padding: EdgeInsets.only(right: 20.w),
                       decoration: BoxDecoration(
-                        color: Colors.red.withValues(alpha: 0.15),
+                        color: ColorManager.error.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(16.r),
                       ),
                       alignment: Alignment.centerRight,
                       child: Icon(Icons.delete_rounded,
-                          color: Colors.red, size: 24.sp),
+                          color: ColorManager.errorText, size: 24.sp),
                     ),
                     child: GestureDetector(
                       onTap: () {
@@ -293,7 +293,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                     _formatTime(notif.time),
                                     style: TextStyle(
                                       color: ColorManager.textTertiary,
-                                      fontSize: 11.sp,
+                                      fontSize: 12.sp,
                                     ),
                                   ),
                                 ],

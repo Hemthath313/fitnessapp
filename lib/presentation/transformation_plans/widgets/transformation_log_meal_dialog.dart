@@ -193,7 +193,7 @@ class _TransformationLogMealDialogState
                           '${(preset * 100).toInt()}%',
                           style: TextStyle(
                             color: isSelected ? ColorManager.onMint : ColorManager.textSecondary,
-                            fontSize: 11.sp,
+                            fontSize: 12.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -257,8 +257,8 @@ class _TransformationLogMealDialogState
                           messenger.showSnackBar(
                             SnackBar(
                               content: Text(
-                                  '✓ ${widget.meal.name} ($scaledCalories kcal) logged to Food Tracker!'),
-                              backgroundColor: ColorManager.success,
+                                  '✓ ${widget.meal.name} ($scaledCalories kcal) logged to Food Tracker!', style: const TextStyle(color: Colors.white)),
+                              backgroundColor: ColorManager.successDark,
                               behavior: SnackBarBehavior.floating,
                             ),
                           );
@@ -268,7 +268,7 @@ class _TransformationLogMealDialogState
                           setState(() => _isLogging = false);
                           messenger.showSnackBar(
                             SnackBar(
-                              content: Text('Failed to log meal: $e'),
+                              content: Text('Failed to log meal: $e', style: const TextStyle(color: Colors.white)),
                               backgroundColor: ColorManager.error,
                             ),
                           );
@@ -324,7 +324,7 @@ class _TransformationLogMealDialogState
           label,
           style: TextStyle(
             color: ColorManager.textSecondary,
-            fontSize: 11.sp,
+            fontSize: 12.sp,
           ),
         ),
       ],

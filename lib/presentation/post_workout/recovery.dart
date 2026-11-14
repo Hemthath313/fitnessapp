@@ -172,7 +172,7 @@ class _StretchTileState extends State<_StretchTile> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${widget.name} completed!'),
+          content: Text('${widget.name} completed!', style: const TextStyle(color: ColorManager.onMint, fontWeight: FontWeight.w600)),
           backgroundColor: ColorManager.limerGreen2,
           duration: const Duration(seconds: 2),
         ),
@@ -252,7 +252,7 @@ class _StretchTileState extends State<_StretchTile> {
             onPressed: _toggleTimer,
             icon: Icon(
               _isRunning ? Icons.pause_circle_filled : Icons.play_circle_fill,
-              color: ColorManager.limerGreen2,
+              color: ColorManager.primaryText,
               size: 32.sp,
             ),
           ),

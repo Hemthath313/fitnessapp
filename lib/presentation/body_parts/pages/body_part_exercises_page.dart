@@ -3,6 +3,7 @@ import 'package:fitness_app/data/exercise_data.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/presentation/widgets/interactive_exercise_detail.dart';
+import 'package:fitness_app/presentation/custom_workouts/day_workout_session_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -81,42 +82,19 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
       backgroundColor: ColorManager.background,
       body: CustomScrollView(
         slivers: [
-          // Beautiful App Bar with gradient
+          // Plain app bar: one title, no decoration.
           SliverAppBar(
-            expandedHeight: 120.0,
-            floating: false,
             pinned: true,
-            backgroundColor: ColorManager.surface,
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                widget.title,
-                style: TextStyle(
-                  color: ColorManager.textPrimary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20.sp,
-                ),
-              ),
-              centerTitle: true,
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: widget.headerColors ??
-                        [
-                          ColorManager.black,
-                          ColorManager.darkGrey,
-                          ColorManager.black,
-                        ],
-                  ),
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.fitness_center,
-                    size: 64,
-                    color: ColorManager.limerGreen2.withValues(alpha: 0.3),
-                  ),
-                ),
+            backgroundColor: ColorManager.background,
+            surfaceTintColor: Colors.transparent,
+            elevation: 0,
+            centerTitle: false,
+            title: Text(
+              widget.title,
+              style: TextStyle(
+                color: ColorManager.textPrimary,
+                fontWeight: FontWeight.bold,
+                fontSize: 20.sp,
               ),
             ),
             iconTheme: IconThemeData(color: ColorManager.textPrimary),
@@ -125,27 +103,10 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
           // Header Section + Search & Filters
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    widget.tagline,
-                    style: TextStyle(
-                      color: ColorManager.limerGreen2,
-                      fontSize: 24.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Premium video workouts',
-                    style: TextStyle(
-                      color: ColorManager.textSecondary,
-                      fontSize: 14.sp,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
                   _buildSearchAndFilters(filteredExercises.length),
                 ],
               ),
@@ -195,7 +156,7 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
                   ),
                   prefixIcon: Icon(
                     Icons.search_rounded,
-                    color: ColorManager.primary,
+                    color: ColorManager.primaryText,
                     size: 20,
                   ),
                   suffixIcon: _searchQuery.isNotEmpty
@@ -260,7 +221,7 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
                     Icon(
                       Icons.tune_rounded,
                       color: hasFilterSelected
-                          ? ColorManager.primary
+                          ? ColorManager.primaryText
                           : ColorManager.textSecondary,
                       size: 20,
                     ),
@@ -285,6 +246,8 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
             ),
           ],
         ),
+        // Result count only matters while searching or filtering.
+        if (_hasActiveFilters) ...[
         const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -313,7 +276,7 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
                 child: Text(
                   'Clear filters',
                   style: TextStyle(
-                    color: ColorManager.primary,
+                    color: ColorManager.primaryText,
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
                   ),
@@ -321,6 +284,7 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
               ),
           ],
         ),
+        ],
       ],
     );
   }
@@ -352,7 +316,7 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: Colors.grey[700],
+                          color: ColorManager.divider,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -380,7 +344,7 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
                           child: Text(
                             'Reset',
                             style: TextStyle(
-                              color: ColorManager.primary,
+                              color: ColorManager.primaryText,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -414,7 +378,7 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
                           visualDensity: VisualDensity.compact,
                           labelStyle: TextStyle(
                             color: isSelected
-                                ? ColorManager.primary
+                                ? ColorManager.primaryText
                                 : ColorManager.textSecondary,
                             fontSize: 12.sp,
                             fontWeight:
@@ -459,7 +423,7 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
                           visualDensity: VisualDensity.compact,
                           labelStyle: TextStyle(
                             color: isSelected
-                                ? ColorManager.primary
+                                ? ColorManager.primaryText
                                 : ColorManager.textSecondary,
                             fontSize: 12.sp,
                             fontWeight:
@@ -491,7 +455,7 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: ColorManager.primary,
-                          foregroundColor: const Color(0xFF06201B),
+                          foregroundColor: ColorManager.onMint,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(AppRadius.button),
@@ -549,11 +513,11 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
           TextButton.icon(
             key: const Key('reset_exercise_filters_button'),
             onPressed: _resetFilters,
-            icon: Icon(Icons.refresh_rounded, color: ColorManager.limerGreen2, size: 18),
+            icon: Icon(Icons.refresh_rounded, color: ColorManager.primaryText, size: 18),
             label: Text(
               'Reset Filters',
               style: TextStyle(
-                color: ColorManager.limerGreen2,
+                color: ColorManager.primaryText,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -571,13 +535,7 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
       decoration: BoxDecoration(
         color: ColorManager.surface,
         borderRadius: BorderRadius.circular(AppRadius.tile),
-        boxShadow: [
-          BoxShadow(
-            color: ColorManager.limerGreen2.withValues(alpha: 0.05),
-            blurRadius: 8,
-            spreadRadius: 1,
-          ),
-        ],
+        boxShadow: ColorManager.cardShadow,
       ),
       child: Material(
         color: Colors.transparent,
@@ -627,7 +585,7 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: ColorManager.limerGreen2,
+                          color: ColorManager.textSecondary,
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                         ),
@@ -648,7 +606,7 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  color: ColorManager.textPrimary.withValues(alpha: 0.85),
+                                  color: ColorManager.textSecondary,
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -664,7 +622,7 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                               decoration: BoxDecoration(
-                                color: ColorManager.limerGreen2.withValues(alpha: 0.12),
+                                color: _levelColor(exercise.difficulty).withValues(alpha: 0.14),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -672,8 +630,8 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  color: ColorManager.limerGreen2,
-                                  fontSize: 11.sp,
+                                  color: _levelTextColor(exercise.difficulty),
+                                  fontSize: 12.sp,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -682,18 +640,37 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              exercise.target,
+                              // Main muscle only; the full list is in the detail.
+                              exercise.target.split(',').first.trim(),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: ColorManager.textSecondary,
-                                fontSize: 11.sp,
+                                fontSize: 12.sp,
                               ),
                             ),
                           ),
                         ],
                       ),
                     ],
+                  ),
+                ),
+                // Start a live workout with this exercise.
+                IconButton(
+                  key: Key('add_to_workout_${exercise.name}'),
+                  tooltip: 'Add to workout',
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => DayWorkoutSessionPage.startQuickWorkout(
+                      context,
+                      exercises: [exercise]),
+                  icon: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: ColorManager.primary.withValues(alpha: 0.14),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.add_rounded,
+                        color: ColorManager.primaryText, size: 18),
                   ),
                 ),
               ],
@@ -704,6 +681,20 @@ class _BodyPartExercisesPageState extends State<BodyPartExercisesPage> {
     );
   }
 
+  /// Level colours: green beginner, amber intermediate, coral advanced.
+  static Color _levelColor(String level) {
+    final l = level.toLowerCase();
+    if (l.startsWith('beg')) return ColorManager.success;
+    if (l.startsWith('adv')) return ColorManager.accent;
+    return ColorManager.warning;
+  }
+
+  static Color _levelTextColor(String level) {
+    final l = level.toLowerCase();
+    if (l.startsWith('beg')) return ColorManager.successText;
+    if (l.startsWith('adv')) return ColorManager.accentText;
+    return ColorManager.warningText;
+  }
 
   void _showExerciseDetails(BuildContext context, Exercise exercise) {
     showModalBottomSheet(

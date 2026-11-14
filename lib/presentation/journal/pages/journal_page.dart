@@ -66,7 +66,7 @@ class _JournalPageState extends State<JournalPage> {
                     title: 'Meal Planner',
                     subtitle: 'Custom meal schedules',
                     icon: Icons.flatware_rounded,
-                    color: Colors.orange,
+                    color: ColorManager.warning,
                     isLocked: true,
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -81,7 +81,7 @@ class _JournalPageState extends State<JournalPage> {
                     title: 'AI Scanner',
                     subtitle: 'Scan food to get proteins, carbs & fats per 100g',
                     icon: Icons.qr_code_scanner_rounded,
-                    color: Colors.green,
+                    color: ColorManager.success,
                     isLocked: true,
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -230,7 +230,7 @@ class _JournalPageState extends State<JournalPage> {
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
               decoration: BoxDecoration(
-                color: Colors.amber.withValues(alpha: 0.12),
+                color: ColorManager.premium.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(6.r),
               ),
               child: Row(
@@ -239,7 +239,7 @@ class _JournalPageState extends State<JournalPage> {
                   Text(
                     'COMING SOON',
                     style: TextStyle(
-                      color: Colors.amber,
+                      color: ColorManager.warningText,
                       fontSize: 11.sp,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.5,
@@ -248,7 +248,7 @@ class _JournalPageState extends State<JournalPage> {
                   SizedBox(width: 4.w),
                   Icon(
                     Icons.lock_rounded,
-                    color: Colors.amber,
+                    color: ColorManager.warningText,
                     size: 11.sp,
                   ),
                 ],
@@ -290,7 +290,7 @@ class _JournalPageState extends State<JournalPage> {
           Row(
             children: [
               Icon(Icons.auto_awesome,
-                  color: ColorManager.primary),
+                  color: ColorManager.primaryText),
               SizedBox(width: SizeManager.s8.w),
               Expanded(
                 child: Text(
@@ -306,14 +306,14 @@ class _JournalPageState extends State<JournalPage> {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                   decoration: BoxDecoration(
-                    color: Colors.amber,
+                    color: ColorManager.premium,
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                   child: Text(
                     'PREMIUM',
                     style: TextStyle(
                         color: Colors.black,
-                        fontSize: 11.sp,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold),
                   ),
                 ),

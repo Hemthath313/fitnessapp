@@ -11,6 +11,7 @@ import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
 import 'package:fitness_app/utils/widgets/loading_overlay.dart';
+import 'package:fitness_app/utils/units.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fitness_app/presentation/widgets/feedback_dialog.dart';
@@ -19,6 +20,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:fitness_app/config/legal_links.dart';
+import 'package:fitness_app/services/ad_consent_service.dart';
 
 class MorePage extends StatefulWidget {
   const MorePage({super.key});
@@ -176,6 +179,20 @@ class _MorePageState extends State<MorePage> {
                   color: ColorManager.primaryText,
                   onTap: () => context.push(Routes.premiumScreen),
                 ),
+                // Cancel / change plan lives in the store; link straight to it.
+                if (subscription.isPremium && !subscription.isLifetime) ...[
+                  SizedBox(height: SizeManager.s12.h),
+                  _buildMenuCard(
+                    context,
+                    key: const Key('more_manage_subscription'),
+                    icon: Icons.credit_card_rounded,
+                    title: 'Manage subscription',
+                    subtitle: 'Change plan or cancel in the store',
+                    color: ColorManager.primaryText,
+                    onTap: () => LegalLinks.open(
+                        context, LegalLinks.manageSubscriptionUrl),
+                  ),
+                ],
                 SizedBox(height: SizeManager.s24.h),
 
                 // Body & Goals
@@ -186,7 +203,7 @@ class _MorePageState extends State<MorePage> {
                   icon: Icons.monitor_weight_outlined,
                   title: 'Log Weight',
                   subtitle: 'Weigh-ins and your goal weight',
-                  color: Colors.teal,
+                  color: ColorManager.waterText,
                   onTap: () => context.push(Routes.changeWeightRoute),
                 ),
                 SizedBox(height: SizeManager.s12.h),
@@ -195,7 +212,7 @@ class _MorePageState extends State<MorePage> {
                   icon: Icons.straighten,
                   title: 'Body Measurements',
                   subtitle: 'Update body measurements',
-                  color: Colors.purple,
+                  color: ColorManager.violetText,
                   onTap: () => context.push(Routes.changeMeasurementsRoute),
                 ),
                 SizedBox(height: SizeManager.s12.h),
@@ -204,7 +221,7 @@ class _MorePageState extends State<MorePage> {
                   icon: Icons.person_outline_rounded,
                   title: 'Edit Profile',
                   subtitle: 'Name, age, height and gender',
-                  color: Colors.blueAccent,
+                  color: ColorManager.info,
                   onTap: () => context.push(Routes.editProfileRoute),
                 ),
                 SizedBox(height: SizeManager.s24.h),
@@ -264,6 +281,81 @@ class _MorePageState extends State<MorePage> {
                 ),
 
                 SizedBox(height: SizeManager.s12.h),
+
+                // Weight unit (lifting weights)
+                ValueListenableBuilder<bool>(
+                  valueListenable: Units.useLbNotifier,
+                  builder: (context, useLb, _) => Container(
+                    key: const Key('settings_weight_unit_row'),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: SizeManager.s16.w,
+                      vertical: SizeManager.s8.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: ColorManager.surface,
+                      borderRadius: BorderRadius.circular(AppRadius.tile.r),
+                      border: Border.all(color: ColorManager.divider),
+                      boxShadow: ColorManager.cardShadow,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(SizeManager.s12.w),
+                          decoration: BoxDecoration(
+                            color: ColorManager.primary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(SizeManager.s12.r),
+                          ),
+                          child: Icon(Icons.fitness_center_rounded,
+                              color: ColorManager.primaryText, size: SizeManager.s24.sp),
+                        ),
+                        SizedBox(width: SizeManager.s16.w),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Weight unit',
+                                style: TextStyle(
+                                  color: ColorManager.textPrimary,
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                'For lifts, sets and plates',
+                                style: TextStyle(
+                                    color: ColorManager.textSecondary, fontSize: 12.sp),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SegmentedButton<bool>(
+                          key: const Key('settings_weight_unit_toggle'),
+                          showSelectedIcon: false,
+                          segments: const [
+                            ButtonSegment(value: false, label: Text('kg')),
+                            ButtonSegment(value: true, label: Text('lb')),
+                          ],
+                          selected: {useLb},
+                          onSelectionChanged: (s) => Units.setUseLb(s.first),
+                          style: ButtonStyle(
+                            visualDensity: VisualDensity.compact,
+                            backgroundColor: WidgetStateProperty.resolveWith((st) =>
+                                st.contains(WidgetState.selected)
+                                    ? ColorManager.primary
+                                    : Colors.transparent),
+                            foregroundColor: WidgetStateProperty.resolveWith((st) =>
+                                st.contains(WidgetState.selected)
+                                    ? ColorManager.onMint
+                                    : ColorManager.textSecondary),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: SizeManager.s12.h),
                 _buildMenuCard(
                   context,
                   icon: Icons.notifications_active_rounded,
@@ -271,7 +363,7 @@ class _MorePageState extends State<MorePage> {
                   subtitle: _reminderCount == null
                       ? 'Workouts, streaks, hydration and more'
                       : ReminderSummary.label(_reminderCount!),
-                  color: Colors.orange,
+                  color: ColorManager.warning,
                   onTap: () async {
                     await context.push(Routes.remindersRoute);
                     _loadReminderCount();
@@ -283,7 +375,7 @@ class _MorePageState extends State<MorePage> {
                   icon: Icons.lock_outline,
                   title: 'Change Password',
                   subtitle: 'Update your account password',
-                  color: Colors.orange,
+                  color: ColorManager.warning,
                   onTap: () => context.push(Routes.changePasswordRoute),
                 ),
                 SizedBox(height: SizeManager.s12.h),
@@ -292,7 +384,7 @@ class _MorePageState extends State<MorePage> {
                   icon: Icons.email_outlined,
                   title: 'Change Email',
                   subtitle: 'Update your email address',
-                  color: Colors.teal,
+                  color: ColorManager.waterText,
                   onTap: () => context.push(Routes.changeEmailRoute),
                 ),
                 SizedBox(height: SizeManager.s12.h),
@@ -301,7 +393,7 @@ class _MorePageState extends State<MorePage> {
                   icon: Icons.rate_review_outlined,
                   title: 'Feedback & Support',
                   subtitle: 'Rate your experience or suggest features',
-                  color: Colors.teal,
+                  color: ColorManager.waterText,
                   onTap: () {
                     showDialog(
                       context: context,
@@ -315,7 +407,7 @@ class _MorePageState extends State<MorePage> {
                   icon: Icons.support_agent_rounded,
                   title: 'Contact Support',
                   subtitle: 'Email ${ProfileData.supportEmail}',
-                  color: Colors.blueAccent,
+                  color: ColorManager.info,
                   onTap: () async {
                     final Uri emailLaunchUri = ProfileData.supportMailUri();
                     final fallbackMessage =
@@ -341,6 +433,52 @@ class _MorePageState extends State<MorePage> {
                 ),
                 SizedBox(height: SizeManager.s24.h),
 
+                // Legal & privacy (required by Play / App Store)
+                _buildSectionTitle('Legal & Privacy'),
+                SizedBox(height: SizeManager.s12.h),
+                _buildMenuCard(
+                  context,
+                  key: const Key('more_privacy_policy'),
+                  icon: Icons.privacy_tip_outlined,
+                  title: 'Privacy Policy',
+                  subtitle: 'How we handle your data',
+                  color: ColorManager.textSecondary,
+                  onTap: () =>
+                      LegalLinks.open(context, LegalLinks.privacyPolicyUrl),
+                ),
+                SizedBox(height: SizeManager.s12.h),
+                _buildMenuCard(
+                  context,
+                  key: const Key('more_terms'),
+                  icon: Icons.description_outlined,
+                  title: 'Terms of Use',
+                  subtitle: 'Subscription and usage terms',
+                  color: ColorManager.textSecondary,
+                  onTap: () => LegalLinks.open(context, LegalLinks.termsUrl),
+                ),
+                // EU/UK users: change their ad consent at any time.
+                ValueListenableBuilder<bool>(
+                  valueListenable: AdConsentService.privacyOptionsRequired,
+                  builder: (context, needed, _) {
+                    if (!needed || subscription.isPremium) {
+                      return const SizedBox.shrink();
+                    }
+                    return Padding(
+                      padding: EdgeInsets.only(top: SizeManager.s12.h),
+                      child: _buildMenuCard(
+                        context,
+                        key: const Key('more_privacy_choices'),
+                        icon: Icons.tune_rounded,
+                        title: 'Privacy choices',
+                        subtitle: 'Change your ad consent',
+                        color: ColorManager.textSecondary,
+                        onTap: AdConsentService.showPrivacyOptions,
+                      ),
+                    );
+                  },
+                ),
+                SizedBox(height: SizeManager.s24.h),
+
                 // Danger Zone
                 _buildSectionTitle('Danger Zone'),
                 SizedBox(height: SizeManager.s12.h),
@@ -359,11 +497,11 @@ class _MorePageState extends State<MorePage> {
                 Center(
                   child: OutlinedButton.icon(
                     onPressed: () => _showLogoutDialog(context),
-                    icon: Icon(Icons.logout, color: ColorManager.red),
+                    icon: Icon(Icons.logout, color: ColorManager.errorText),
                     label: Text(
                       'Logout',
                       style: TextStyle(
-                        color: ColorManager.red,
+                        color: ColorManager.errorText,
                         fontSize: 16.sp,
                         fontWeight: FontWeight.bold,
                       ),
@@ -474,7 +612,7 @@ class _MorePageState extends State<MorePage> {
                       color: isUnlocked
                           ? ColorManager.textPrimary
                           : ColorManager.textSecondary,
-                      fontSize: 11.sp,
+                      fontSize: 12.sp,
                       fontWeight: isUnlocked
                           ? FontWeight.bold
                           : FontWeight.normal,
@@ -524,7 +662,7 @@ class _MorePageState extends State<MorePage> {
                   label,
                   style: TextStyle(
                     color: ColorManager.textSecondary,
-                    fontSize: 11.sp,
+                    fontSize: 12.sp,
                   ),
                 ),
               ],
@@ -556,6 +694,7 @@ class _MorePageState extends State<MorePage> {
 
   Widget _buildMenuCard(
     BuildContext context, {
+    Key? key,
     required IconData icon,
     required String title,
     required String subtitle,
@@ -564,6 +703,7 @@ class _MorePageState extends State<MorePage> {
     bool isDangerous = false,
   }) {
     return InkWell(
+      key: key,
       onTap: onTap,
       borderRadius: BorderRadius.circular(SizeManager.s16.r),
       child: Container(
@@ -707,7 +847,7 @@ class _LogoutButtonState extends State<_LogoutButton> {
       if (parent.mounted) {
         ScaffoldMessenger.of(parent).showSnackBar(
           SnackBar(
-            content: const Text('Could not log out. Please try again.'),
+            content: const Text('Could not log out. Please try again.', style: TextStyle(color: Colors.white)),
             backgroundColor: ColorManager.error,
           ),
         );
@@ -724,8 +864,8 @@ class _LogoutButtonState extends State<_LogoutButton> {
     return ElevatedButton(
       onPressed: _isLoading ? null : _handleLogout,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.red,
-        disabledBackgroundColor: Colors.red.withValues(alpha: 0.6),
+        backgroundColor: ColorManager.error,
+        disabledBackgroundColor: ColorManager.error.withValues(alpha: 0.6),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(SizeManager.s8.r),
         ),

@@ -167,7 +167,7 @@ class TransformationHubScreen extends StatelessWidget {
                   Text(
                     'CURRENTLY ENROLLED',
                     style: TextStyle(
-                      color: ColorManager.success,
+                      color: ColorManager.successText,
                       fontSize: 11.sp,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.5,
@@ -178,7 +178,7 @@ class TransformationHubScreen extends StatelessWidget {
               Text(
                 'Day ${activeState.currentDay} of ${activeState.totalDays}',
                 style: TextStyle(
-                  color: ColorManager.primary,
+                  color: ColorManager.primaryText,
                   fontSize: 12.sp,
                   fontWeight: FontWeight.bold,
                 ),
@@ -212,7 +212,7 @@ class TransformationHubScreen extends StatelessWidget {
                 '$pct% Completed',
                 style: TextStyle(
                   color: ColorManager.textSecondary,
-                  fontSize: 11.sp,
+                  fontSize: 12.sp,
                 ),
               ),
               InkWell(
@@ -228,14 +228,14 @@ class TransformationHubScreen extends StatelessWidget {
                       Text(
                         'View Roadmap',
                         style: TextStyle(
-                          color: ColorManager.primary,
+                          color: ColorManager.primaryText,
                           fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Icon(
                         Icons.chevron_right_rounded,
-                        color: ColorManager.primary,
+                        color: ColorManager.primaryText,
                         size: 16.sp,
                       ),
                     ],
@@ -311,7 +311,7 @@ class TransformationHubScreen extends StatelessWidget {
                       'PRO',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 11.sp,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -329,8 +329,8 @@ class TransformationHubScreen extends StatelessWidget {
                   child: Text(
                     'ACTIVE',
                     style: TextStyle(
-                      color: ColorManager.onMint,
-                      fontSize: 11.sp,
+                      color: ColorManager.inkOnLight,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -383,12 +383,12 @@ class TransformationHubScreen extends StatelessWidget {
                     ? Icons.map_rounded
                     : Icons.arrow_forward_rounded,
                 size: 16.sp,
-                color: ColorManager.onMint,
+                color: ColorManager.inkOnLight,
               ),
               label: Text(
                 isCurrentActive ? 'View Active Roadmap' : 'Explore Programme',
                 style: TextStyle(
-                  color: ColorManager.onMint,
+                  color: ColorManager.inkOnLight,
                   fontSize: 14.sp,
                   fontWeight: FontWeight.bold,
                 ),

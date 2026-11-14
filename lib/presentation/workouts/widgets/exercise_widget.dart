@@ -76,10 +76,10 @@ class ExerciseWidget extends StatelessWidget {
                 children: [
                   Text(
                     StringsManager.delete,
-                    style: TextStyle(color: ColorManager.limerGreen2),
+                    style: TextStyle(color: ColorManager.primaryText),
                   ),
                   const SizedBox(width: 8),
-                  Icon(Icons.delete, color: ColorManager.limerGreen2),
+                  Icon(Icons.delete, color: ColorManager.primaryText),
                 ],
               ),
             );

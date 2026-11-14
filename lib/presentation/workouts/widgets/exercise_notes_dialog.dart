@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/units.dart';
 import 'dart:io';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/style_manager.dart';
@@ -122,7 +123,7 @@ class _ExerciseNotesDialogState extends State<ExerciseNotesDialog> {
                 Expanded(
                   child: _buildTextField(
                     controller: _weightController,
-                    label: 'Weight (kg)',
+                    label: 'Weight (${Units.label})',
                     hint: '20',
                     icon: Icons.monitor_weight,
                   ),
@@ -223,7 +224,7 @@ class _ExerciseNotesDialogState extends State<ExerciseNotesDialog> {
         hintText: hint,
         labelStyle: TextStyle(color: ColorManager.white70),
         hintStyle: TextStyle(color: ColorManager.white70),
-        prefixIcon: Icon(icon, color: ColorManager.limerGreen2),
+        prefixIcon: Icon(icon, color: ColorManager.primaryText),
         filled: true,
         fillColor: ColorManager.black87,
         border: OutlineInputBorder(

@@ -36,7 +36,7 @@ class NoPlanCard extends StatelessWidget {
     final String buttonLabel = hasOnboardingGoal
         ? 'Review & Customize Plan'
         : 'Build My Plan';
-    const Color onLight = Color(0xFF06201B);
+    const Color onLight = ColorManager.inkOnLight;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -163,9 +163,9 @@ class NoPlanCard extends StatelessWidget {
           SnackBar(
             content: const Text(
               '3-Day Starter Routine activated! Ready for your workout.',
-              style: TextStyle(fontWeight: FontWeight.w600),
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
             ),
-            backgroundColor: ColorManager.success,
+            backgroundColor: ColorManager.successDark,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -174,7 +174,7 @@ class NoPlanCard extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to activate starter plan: $e'),
+            content: Text('Failed to activate starter plan: $e', style: const TextStyle(color: Colors.white)),
             backgroundColor: ColorManager.error,
           ),
         );

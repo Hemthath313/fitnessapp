@@ -222,9 +222,9 @@ class _TransformationWeeklyCheckInScreenState
                           '$adherencePct% Completed',
                           style: TextStyle(
                             color: adherencePct >= 80
-                                ? ColorManager.success
-                                : ColorManager.primary,
-                            fontSize: 11.sp,
+                                ? ColorManager.successText
+                                : ColorManager.primaryText,
+                            fontSize: 12.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -301,7 +301,7 @@ class _TransformationWeeklyCheckInScreenState
                           'Since Start',
                           style: TextStyle(
                             color: ColorManager.textTertiary,
-                            fontSize: 11.sp,
+                            fontSize: 12.sp,
                           ),
                         ),
                         SizedBox(height: 2.h),
@@ -309,8 +309,8 @@ class _TransformationWeeklyCheckInScreenState
                           '${weightDelta > 0 ? '+' : ''}${weightDelta.toStringAsFixed(1)} kg',
                           style: TextStyle(
                             color: weightDelta <= 0
-                                ? ColorManager.success
-                                : ColorManager.accent,
+                                ? ColorManager.successText
+                                : ColorManager.accentText,
                             fontSize: 14.sp,
                             fontWeight: FontWeight.bold,
                           ),
@@ -486,7 +486,7 @@ class _TransformationWeeklyCheckInScreenState
           label,
           style: TextStyle(
             color: ColorManager.textSecondary,
-            fontSize: 11.sp,
+            fontSize: 12.sp,
           ),
         ),
         SizedBox(height: 4.h),
@@ -644,8 +644,8 @@ class _TransformationWeeklyCheckInScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Week $_targetWeek check-in recorded successfully!'),
-            backgroundColor: ColorManager.success,
+            content: Text('Week $_targetWeek check-in recorded successfully!', style: const TextStyle(color: Colors.white)),
+            backgroundColor: ColorManager.successDark,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -655,7 +655,7 @@ class _TransformationWeeklyCheckInScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to save check-in: $e'),
+            content: Text('Failed to save check-in: $e', style: const TextStyle(color: Colors.white)),
             backgroundColor: ColorManager.error,
           ),
         );

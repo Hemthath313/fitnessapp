@@ -22,7 +22,7 @@ class NewMealPageAppBar extends StatelessWidget {
         padding: EdgeInsets.only(left: 20.w),
         child: Center(
           child: Material(
-            color: ColorManager.iconChip,
+            color: ColorManager.chipBackground,
             shape: const CircleBorder(),
             child: InkWell(
               customBorder: const CircleBorder(),

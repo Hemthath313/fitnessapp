@@ -124,7 +124,7 @@ class TransformationCompletionScreen extends StatelessWidget {
                     child: Text(
                       'ACHIEVEMENT UNLOCKED',
                       style: TextStyle(
-                        color: ColorManager.success,
+                        color: ColorManager.successText,
                         fontSize: 11.sp,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.8,
@@ -273,9 +273,9 @@ class TransformationCompletionScreen extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.military_tech_rounded,
-                              color: ColorManager.warning,
+                              color: ColorManager.warningText,
                               size: 16,
                             ),
                             SizedBox(width: 4.w),
@@ -284,7 +284,7 @@ class TransformationCompletionScreen extends StatelessWidget {
                                 m.title,
                                 style: TextStyle(
                                   color: ColorManager.textPrimary,
-                                  fontSize: 11.sp,
+                                  fontSize: 12.sp,
                                   fontWeight: FontWeight.bold,
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -393,7 +393,7 @@ class TransformationCompletionScreen extends StatelessWidget {
   }) {
     return Column(
       children: [
-        Icon(icon, color: color ?? ColorManager.primary, size: 20.sp),
+        Icon(icon, color: color ?? ColorManager.primaryText, size: 20.sp),
         SizedBox(height: 6.h),
         Text(
           value,
@@ -408,7 +408,7 @@ class TransformationCompletionScreen extends StatelessWidget {
           label,
           style: TextStyle(
             color: ColorManager.textTertiary,
-            fontSize: 11.sp,
+            fontSize: 12.sp,
           ),
         ),
       ],
@@ -465,22 +465,22 @@ class TransformationCompletionScreen extends StatelessWidget {
                   Text('Area',
                       style: TextStyle(
                           color: ColorManager.textTertiary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold)),
                   Text('Start',
                       style: TextStyle(
                           color: ColorManager.textTertiary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold)),
                   Text('Final',
                       style: TextStyle(
                           color: ColorManager.textTertiary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold)),
                   Text('Change',
                       style: TextStyle(
                           color: ColorManager.textTertiary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold)),
                 ],
               ),
@@ -551,12 +551,12 @@ class TransformationCompletionScreen extends StatelessWidget {
         color: ColorManager.surface,
         borderRadius: BorderRadius.circular(AppRadius.card.r),
         border: Border.all(
-          color: const Color(0xFF00B074).withValues(alpha: 0.5),
+          color: ColorManager.success.withValues(alpha: 0.5),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF00B074).withValues(alpha: 0.1),
+            color: ColorManager.success.withValues(alpha: 0.1),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -570,7 +570,7 @@ class TransformationCompletionScreen extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00B074).withValues(alpha: 0.2),
+                  color: ColorManager.success.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child:  Text('🎓', style: TextStyle(fontSize: 20.sp)),
@@ -593,7 +593,7 @@ class TransformationCompletionScreen extends StatelessWidget {
                       'You built consistency & form. Select your next path:',
                       style: TextStyle(
                         color: ColorManager.textSecondary,
-                        fontSize: 11.sp,
+                        fontSize: 12.sp,
                       ),
                     ),
                   ],
@@ -664,12 +664,12 @@ class TransformationCompletionScreen extends StatelessWidget {
         color: ColorManager.surface,
         borderRadius: BorderRadius.circular(AppRadius.card.r),
         border: Border.all(
-          color: const Color(0xFFFF5E36).withValues(alpha: 0.5),
+          color: ColorManager.accent.withValues(alpha: 0.5),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFFF5E36).withValues(alpha: 0.1),
+            color: ColorManager.accent.withValues(alpha: 0.1),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -683,7 +683,7 @@ class TransformationCompletionScreen extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF5E36).withValues(alpha: 0.2),
+                  color: ColorManager.accent.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child:  Text('🏆', style: TextStyle(fontSize: 20.sp)),
@@ -706,7 +706,7 @@ class TransformationCompletionScreen extends StatelessWidget {
                       'You sculpted athletic definition! Select your next path:',
                       style: TextStyle(
                         color: ColorManager.textSecondary,
-                        fontSize: 11.sp,
+                        fontSize: 12.sp,
                       ),
                     ),
                   ],
@@ -777,12 +777,12 @@ class TransformationCompletionScreen extends StatelessWidget {
         color: ColorManager.surface,
         borderRadius: BorderRadius.circular(AppRadius.card.r),
         border: Border.all(
-          color: const Color(0xFF2F6BFF).withValues(alpha: 0.5),
+          color: ColorManager.info.withValues(alpha: 0.5),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF2F6BFF).withValues(alpha: 0.1),
+            color: ColorManager.info.withValues(alpha: 0.1),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -796,7 +796,7 @@ class TransformationCompletionScreen extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2F6BFF).withValues(alpha: 0.2),
+                  color: ColorManager.info.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child:  Text('⚡', style: TextStyle(fontSize: 20.sp)),
@@ -819,7 +819,7 @@ class TransformationCompletionScreen extends StatelessWidget {
                       'You built impressive muscle mass and strength! Select your next path:',
                       style: TextStyle(
                         color: ColorManager.textSecondary,
-                        fontSize: 11.sp,
+                        fontSize: 12.sp,
                       ),
                     ),
                   ],
@@ -890,12 +890,12 @@ class TransformationCompletionScreen extends StatelessWidget {
         color: ColorManager.surface,
         borderRadius: BorderRadius.circular(AppRadius.card.r),
         border: Border.all(
-          color: const Color(0xFF9B51E0).withValues(alpha: 0.5),
+          color: ColorManager.violet.withValues(alpha: 0.5),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF9B51E0).withValues(alpha: 0.1),
+            color: ColorManager.violet.withValues(alpha: 0.1),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -909,7 +909,7 @@ class TransformationCompletionScreen extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF9B51E0).withValues(alpha: 0.2),
+                  color: ColorManager.violet.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child:  Text('🏆', style: TextStyle(fontSize: 20.sp)),
@@ -932,7 +932,7 @@ class TransformationCompletionScreen extends StatelessWidget {
                       'You forged remarkable tendon strength and compound power! Select your next path:',
                       style: TextStyle(
                         color: ColorManager.textSecondary,
-                        fontSize: 11.sp,
+                        fontSize: 12.sp,
                       ),
                     ),
                   ],
@@ -1048,7 +1048,7 @@ class TransformationCompletionScreen extends StatelessWidget {
                   tag,
                   style: TextStyle(
                     color: optionColor,
-                    fontSize: 11.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -1060,7 +1060,7 @@ class TransformationCompletionScreen extends StatelessWidget {
             subtitle,
             style: TextStyle(
               color: ColorManager.textSecondary,
-              fontSize: 11.sp,
+              fontSize: 12.sp,
             ),
           ),
           SizedBox(height: 10.h),
@@ -1120,14 +1120,14 @@ class TransformationCompletionScreen extends StatelessWidget {
             color: ColorManager.surface,
             boxShadow: ColorManager.cardShadow,
             borderRadius: BorderRadius.circular(AppRadius.card.r),
-            border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+            border: Border.all(color: ColorManager.premium.withValues(alpha: 0.3)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  const Icon(Icons.fitness_center_rounded, color: Colors.amber, size: 22),
+                  Icon(Icons.fitness_center_rounded, color: ColorManager.warningText, size: 22),
                   SizedBox(width: 8.w),
                   Text(
                     'Strength Achievements',
@@ -1160,7 +1160,7 @@ class TransformationCompletionScreen extends StatelessWidget {
                       value: '${summary.prsAchieved.length}',
                       subtext: 'Records',
                       icon: Icons.emoji_events_rounded,
-                      color: Colors.amber,
+                      color: ColorManager.premium,
                     ),
                   ),
                   SizedBox(width: 8.w),
@@ -1216,7 +1216,7 @@ class TransformationCompletionScreen extends StatelessWidget {
                                 'Baseline: ${p.startingWeight.toStringAsFixed(1)} kg → Final: ${p.latestWeight.toStringAsFixed(1)} kg',
                                 style: TextStyle(
                                   color: ColorManager.textSecondary,
-                                  fontSize: 11.sp,
+                                  fontSize: 12.sp,
                                 ),
                               ),
                             ],
@@ -1233,8 +1233,8 @@ class TransformationCompletionScreen extends StatelessWidget {
                           child: Text(
                             '${isPositive ? '+' : ''}${p.weightDifference.toStringAsFixed(1)} kg (${isPositive ? '+' : ''}${p.percentageImprovement.toStringAsFixed(1)}%)',
                             style: TextStyle(
-                              color: isPositive ? ColorManager.success : ColorManager.textSecondary,
-                              fontSize: 11.sp,
+                              color: isPositive ? ColorManager.successText : ColorManager.textSecondary,
+                              fontSize: 12.sp,
                               fontWeight: FontWeight.bold,
                             ),
                           ),

@@ -17,7 +17,7 @@ class StyleManager {
     fontWeight: FontWightManager.semiBold,
   );
   static TextStyle get loginPageSubButtonSmallTextStyle => TextStyle(
-    color: ColorManager.limerGreen2,
+    color: ColorManager.primaryText,
     fontSize: 16.sp,
     fontWeight: FontWightManager.bold,
     letterSpacing: SizeManager.s0_7,
@@ -94,7 +94,7 @@ class StyleManager {
     letterSpacing: SizeManager.s3,
   );
   static TextStyle get deleteAccPopUpTitleTextStyle => TextStyle(
-    color: ColorManager.limerGreen2,
+    color: ColorManager.primaryText,
     fontSize: 20.sp,
     fontWeight: FontWightManager.semiBold,
   );
@@ -135,7 +135,7 @@ class StyleManager {
     fontWeight: FontWightManager.regular,
   );
   static TextStyle get homePageCarouselTitle => TextStyle(
-    color: ColorManager.limerGreen2,
+    color: ColorManager.primaryText,
     fontSize: 24.sp,
     fontWeight: FontWightManager.bold,
     letterSpacing: SizeManager.s1,
@@ -180,7 +180,7 @@ class StyleManager {
     fontWeight: FontWightManager.bold,
   );
   static TextStyle get weightDataRowTextStyleLime => TextStyle(
-    color: ColorManager.limerGreen2,
+    color: ColorManager.primaryText,
     fontSize: 20.sp,
     fontWeight: FontWightManager.bold,
   );
@@ -192,7 +192,7 @@ class StyleManager {
   );
   static TextStyle get exerciseRepAndSetNumberTextStyle => TextStyle(
     fontSize: 18.sp,
-    color: ColorManager.limerGreen2,
+    color: ColorManager.primaryText,
     fontWeight: FontWightManager.bold,
     letterSpacing: SizeManager.s1,
   );
@@ -216,7 +216,7 @@ class StyleManager {
     decoration: TextDecoration.underline,
   );
   static TextStyle get profieloggedinTextStyle => TextStyle(
-    color: ColorManager.limerGreen2,
+    color: ColorManager.primaryText,
     fontSize: 18.sp,
     fontWeight: FontWightManager.bold,
     letterSpacing: SizeManager.s1,
@@ -228,7 +228,7 @@ class StyleManager {
     letterSpacing: SizeManager.s1,
   );
   static TextStyle get profileBodyMeasurmentsNameTextSTyle => TextStyle(
-    color: ColorManager.limerGreen2,
+    color: ColorManager.primaryText,
     fontSize: 16.sp,
     fontWeight: FontWightManager.semiBold,
   );

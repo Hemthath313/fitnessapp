@@ -229,11 +229,11 @@ class ExploreCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: Colors.amber.shade700,
+                          color: ColorManager.premium,
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.amber.withValues(alpha: 0.4),
+                              color: ColorManager.premium.withValues(alpha: 0.4),
                               blurRadius: 8,
                               spreadRadius: 0,
                             )
@@ -243,12 +243,12 @@ class ExploreCard extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children:  [
                             Icon(Icons.workspace_premium_rounded,
-                                color: Colors.white, size: 14),
+                                color: ColorManager.inkOnLight, size: 14),
                             SizedBox(width: 4),
                             Text(
                               'PREMIUM',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: ColorManager.inkOnLight,
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 0.5,
@@ -309,7 +309,7 @@ class ExploreCard extends StatelessWidget {
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: isPremiumLocked
-                                ? Colors.amber.shade700
+                                ? ColorManager.premium
                                 : ColorManager.primary.withValues(alpha: 0.85),
                             shape: BoxShape.circle,
                           ),
@@ -317,7 +317,7 @@ class ExploreCard extends StatelessWidget {
                             isPremiumLocked
                                 ? Icons.workspace_premium_rounded
                                 : Icons.arrow_forward_ios_rounded,
-                            color: Colors.white,
+                            color: isPremiumLocked ? ColorManager.inkOnLight : Colors.white,
                             size: 11,
                           ),
                         ),

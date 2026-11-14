@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/units.dart';
 import 'package:fitness_app/utils/managers/layout_manager.dart';
 import 'package:fitness_app/model/workout_session_model.dart';
 import 'package:fitness_app/presentation/workout_logs/widgets/repeat_workout_widgets.dart';
@@ -38,7 +39,7 @@ class WorkoutSessionCard extends StatelessWidget {
     final duration = _formatDuration(session.durationSeconds);
     if (duration.isNotEmpty) parts.add(duration);
     if (session.totalVolume >= 1) {
-      parts.add('${NumberFormat('#,###').format(session.totalVolume.round())} kg');
+      parts.add('${NumberFormat('#,###').format(Units.toDisplay(session.totalVolume).round())} ${Units.label}');
     }
     final n = session.exercises.length;
     parts.add('$n ${n == 1 ? 'exercise' : 'exercises'}');
@@ -110,14 +111,14 @@ class WorkoutSessionCard extends StatelessWidget {
                             key: const Key('session_partial_badge'),
                             padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
                             decoration: BoxDecoration(
-                              color: Colors.orange.withValues(alpha: 0.12),
+                              color: ColorManager.warning.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(8.r),
-                              border: Border.all(color: Colors.orange.withValues(alpha: 0.35)),
+                              border: Border.all(color: ColorManager.warning.withValues(alpha: 0.35)),
                             ),
                             child: Text(
                               'Partial',
                               style: TextStyle(
-                                color: Colors.orange,
+                                color: ColorManager.warningText,
                                 fontSize: AppText.caption,
                                 fontWeight: FontWeight.bold,
                               ),

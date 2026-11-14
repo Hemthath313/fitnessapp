@@ -75,7 +75,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                   Text(
                     'Boost Your Cardio',
                     style: TextStyle(
-                      color: ColorManager.limerGreen2,
+                      color: ColorManager.primaryText,
                       fontSize: 24.sp,
                       fontWeight: FontWeight.bold,
                     ),
@@ -173,7 +173,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: ColorManager.limerGreen2,
+                          color: ColorManager.primaryText,
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                         ),
@@ -218,8 +218,8 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  color: ColorManager.limerGreen2,
-                                  fontSize: 11.sp,
+                                  color: ColorManager.primaryText,
+                                  fontSize: 12.sp,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -233,7 +233,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: ColorManager.textSecondary,
-                                fontSize: 11.sp,
+                                fontSize: 12.sp,
                               ),
                             ),
                           ),
@@ -381,7 +381,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
                     Text(
                       'How to Perform',
                       style: TextStyle(
-                        color: ColorManager.limerGreen2,
+                        color: ColorManager.primaryText,
                         fontSize: 20.sp,
                         fontWeight: FontWeight.bold,
                       ),
@@ -494,7 +494,7 @@ class _CardioExercisesPageState extends State<CardioExercisesPage> {
         children: [
           Row(
             children: [
-              Icon(icon, color: ColorManager.limerGreen2, size: 20),
+              Icon(icon, color: ColorManager.primaryText, size: 20),
               SizedBox(width: 8),
               Text(
                 label,

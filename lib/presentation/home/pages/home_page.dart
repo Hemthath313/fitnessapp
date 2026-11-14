@@ -33,7 +33,48 @@ class _HomePageState extends State<HomePage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkForNewAchievements();
+      _statsForNotice =
+          Provider.of<StatisticsProvider>(context, listen: false)
+            ..addListener(_showFreezeNoticeIfAny);
+      _showFreezeNoticeIfAny();
     });
+  }
+
+  StatisticsProvider? _statsForNotice;
+
+  @override
+  void dispose() {
+    _statsForNotice?.removeListener(_showFreezeNoticeIfAny);
+    super.dispose();
+  }
+
+  /// Tells the user once when a streak freeze saved their streak.
+  void _showFreezeNoticeIfAny() {
+    if (!mounted) return;
+    final stats = _statsForNotice;
+    if (stats == null) return;
+    final day = stats.consumeFreezeNotice();
+    if (day == null) return;
+    final left = stats.freezesLeftThisMonth;
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(
+      key: const Key('streak_freeze_used_snackbar'),
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: ColorManager.surfaceLight,
+      duration: const Duration(seconds: 5),
+      content: Row(
+        children: [
+          Icon(Icons.ac_unit_rounded, color: ColorManager.waterText, size: 18.sp),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Text(
+              'A streak freeze saved your ${stats.currentStreak}-day streak. '
+              '$left left this month.',
+              style: TextStyle(color: ColorManager.textPrimary, fontSize: 13.sp),
+            ),
+          ),
+        ],
+      ),
+    ));
   }
 
   /// Pull-to-refresh: reloads today's calories and water, the weekly stats and
@@ -110,13 +151,13 @@ class _HomePageState extends State<HomePage> {
             children: [
               SizedBox(height: SizeManager.s8.h),
 
-              // 1. Today's snapshot — progress rings (calories & water)
-              const TodayHealthSnapshotWidget(),
-              SizedBox(height: SizeManager.s12.h),
-
-              // 2. Workout plan — the single hero answering "what do I do today?"
+              // 1. Workout plan — the single hero answering "what do I do today?"
               _sectionHeader('Workout Plan'),
               const HomeAiRoutineCard(),
+              SizedBox(height: SizeManager.s16.h),
+
+              // 2. Today's goals + snapshot (calories & water)
+              const TodayHealthSnapshotWidget(),
               SizedBox(height: SizeManager.s8.h),
 
               // 2a. Sunday/Monday week in review (renders nothing other days)

@@ -85,7 +85,7 @@ class _TransformationNutritionScreenState
               '${active.planTitle} • Day $_selectedDay',
               style: TextStyle(
                 color: primaryColor,
-                fontSize: 11.sp,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -144,7 +144,7 @@ class _TransformationNutritionScreenState
                     active.dietaryPreference ?? 'Personalized',
                     style: TextStyle(
                       color: primaryColor,
-                      fontSize: 11.sp,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -233,14 +233,14 @@ class _TransformationNutritionScreenState
     return Container(
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFA500).withValues(alpha: 0.12),
+        color: ColorManager.warning.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: const Color(0xFFFFA500).withValues(alpha: 0.4)),
+        border: Border.all(color: ColorManager.warning.withValues(alpha: 0.4)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info_outline_rounded, color: Color(0xFFFFA500), size: 20),
+          Icon(Icons.info_outline_rounded, color: ColorManager.warningText, size: 20),
           SizedBox(width: 10.w),
           Expanded(
             child: Column(
@@ -249,7 +249,7 @@ class _TransformationNutritionScreenState
                 Text(
                   'Nutritional Review Note',
                   style: TextStyle(
-                    color: const Color(0xFFFFA500),
+                    color: ColorManager.warningText,
                     fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
                   ),
@@ -260,7 +260,7 @@ class _TransformationNutritionScreenState
                       'Target caloric intake is below standard baseline. Clinical or dietician consultation is advised.',
                   style: TextStyle(
                     color: ColorManager.textPrimary,
-                    fontSize: 11.sp,
+                    fontSize: 12.sp,
                   ),
                 ),
               ],
@@ -378,7 +378,7 @@ class _TransformationNutritionScreenState
                 child: _buildMacroTargetPill(
                   'Fats',
                   '${plan.plannedFat.round()}g',
-                  const Color(0xFFFFA500),
+                  ColorManager.warning,
                 ),
               ),
             ],
@@ -411,7 +411,7 @@ class _TransformationNutritionScreenState
             label,
             style: TextStyle(
               color: ColorManager.textSecondary,
-              fontSize: 11.sp,
+              fontSize: 12.sp,
             ),
           ),
         ],
@@ -477,7 +477,7 @@ class _TransformationNutritionScreenState
                               meal.timeGuidance,
                               style: TextStyle(
                                 color: ColorManager.textSecondary,
-                                fontSize: 11.sp,
+                                fontSize: 12.sp,
                               ),
                             ),
                           ],
@@ -542,15 +542,15 @@ class _TransformationNutritionScreenState
                                 padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
                                 decoration: BoxDecoration(
                                   color: food.isRawWeight
-                                      ? Colors.amber.withValues(alpha: 0.15)
-                                      : Colors.blue.withValues(alpha: 0.15),
+                                      ? ColorManager.premium.withValues(alpha: 0.15)
+                                      : ColorManager.info.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(4.r),
                                 ),
                                 child: Text(
                                   food.preparationNote,
                                   style: TextStyle(
-                                    color: food.isRawWeight ? Colors.amber[800] : Colors.blue[300],
-                                    fontSize: 11.sp,
+                                    color: food.isRawWeight ? ColorManager.warningText : ColorManager.infoText,
+                                    fontSize: 12.sp,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -562,7 +562,7 @@ class _TransformationNutritionScreenState
                             '${food.quantity} ${food.unit} • ${food.calories.round()} kcal | ${food.protein}g P | ${food.carbs}g C | ${food.fat}g F',
                             style: TextStyle(
                               color: ColorManager.textSecondary,
-                              fontSize: 11.sp,
+                              fontSize: 12.sp,
                             ),
                           ),
                         ],
@@ -607,12 +607,12 @@ class _TransformationNutritionScreenState
                 icon: Icon(
                   isLogged ? Icons.check_circle_rounded : Icons.add_circle_outline_rounded,
                   size: 16.sp,
-                  color: isLogged ? ColorManager.success : primaryColor,
+                  color: isLogged ? ColorManager.successText : primaryColor,
                 ),
                 label: Text(
                   isLogged ? '✓ Logged to Food Tracker' : 'Log ${meal.name} to Tracker',
                   style: TextStyle(
-                    color: isLogged ? ColorManager.success : primaryColor,
+                    color: isLogged ? ColorManager.successText : primaryColor,
                     fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
                   ),
@@ -695,7 +695,7 @@ class _TransformationNutritionScreenState
                       ),
                       subtitle: Text(
                         '${sub.quantity} ${sub.unit} (${sub.preparationNote}) • ${sub.calories.round()} kcal | ${sub.protein}g P',
-                        style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+                        style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
                       ),
                       trailing: Icon(Icons.check_circle_outline_rounded, color: ColorManager.primaryText),
                       onTap: () async {

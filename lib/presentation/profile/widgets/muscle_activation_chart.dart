@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/model/workout_log.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
@@ -45,19 +47,19 @@ class _MuscleActivationChartState extends State<MuscleActivationChart> {
   Color _getMuscleColor(String muscle) {
     switch (muscle) {
       case 'Chest':
-        return Colors.blueAccent;
+        return ColorManager.info;
       case 'Back':
-        return Colors.green;
+        return ColorManager.success;
       case 'Legs':
-        return Colors.orangeAccent;
+        return ColorManager.warning;
       case 'Shoulders':
-        return Colors.purpleAccent;
+        return ColorManager.violetText;
       case 'Arms':
-        return Colors.redAccent;
+        return ColorManager.error;
       case 'Core':
-        return Colors.teal;
+        return ColorManager.waterText;
       default:
-        return Colors.blueGrey;
+        return ColorManager.textTertiary;
     }
   }
 
@@ -159,7 +161,7 @@ class _MuscleActivationChartState extends State<MuscleActivationChart> {
                                   sections: sections.isEmpty
                                       ? [
                                           PieChartSectionData(
-                                            color: Colors.blueGrey.withValues(alpha: 0.2),
+                                            color: ColorManager.textTertiary.withValues(alpha: 0.2),
                                             value: 1,
                                             radius: 30.r,
                                             showTitle: false,
@@ -205,7 +207,7 @@ class _MuscleActivationChartState extends State<MuscleActivationChart> {
                                           '${percentage.toStringAsFixed(0)}%',
                                           style: TextStyle(
                                             color: ColorManager.textSecondary,
-                                            fontSize: 11.sp,
+                                            fontSize: 12.sp,
                                           ),
                                         ),
                                       ],
@@ -241,7 +243,7 @@ class _MuscleActivationChartState extends State<MuscleActivationChart> {
                                       '${entry.key} (${((entry.value / totalSets) * 100).toStringAsFixed(0)}%)',
                                       style: TextStyle(
                                         color: ColorManager.textTertiary,
-                                        fontSize: 11.sp,
+                                        fontSize: 12.sp,
                                       ),
                                     ),
                                   ],
@@ -254,51 +256,50 @@ class _MuscleActivationChartState extends State<MuscleActivationChart> {
                     ),
                   ),
 
-                  // Lock Overlay for Non-Pro Users
+                  // Free users: the real chart blurred, with an unlock button.
                   if (!isPremium)
                     Positioned.fill(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: ColorManager.background.withValues(alpha: 0.85),
-                          borderRadius: BorderRadius.circular(16.r),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.lock_outline, color: ColorManager.primary, size: 36.sp),
-                            SizedBox(height: 8.h),
-                            Text(
-                              'Muscle Training Breakdown',
-                              style: TextStyle(
-                                color: ColorManager.textPrimary,
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16.r),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                          child: Container(
+                            color: ColorManager.surface.withValues(alpha: 0.55),
+                            alignment: Alignment.center,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.lock_rounded, color: ColorManager.warningText, size: 26.sp),
+                                SizedBox(height: 8.h),
+                                Text(
+                                  'Muscle Training Breakdown',
+                                  style: TextStyle(
+                                    color: ColorManager.textPrimary,
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: 4.h),
+                                Text(
+                                  'See which muscles you train most',
+                                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
+                                ),
+                                SizedBox(height: 12.h),
+                                ElevatedButton(
+                                  onPressed: () => context.push(Routes.premiumScreen),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: ColorManager.primary,
+                                    foregroundColor: ColorManager.onMint,
+                                    elevation: 0,
+                                    padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+                                  ),
+                                  child: Text('Unlock with Pro',
+                                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold)),
+                                ),
+                              ],
                             ),
-                            SizedBox(height: 4.h),
-                            Text(
-                              'Unlock dynamic muscle stats & charts',
-                              style: TextStyle(
-                                color: ColorManager.textSecondary,
-                                fontSize: 11.sp,
-                              ),
-                            ),
-                            SizedBox(height: 12.h),
-                            ElevatedButton(
-                              onPressed: () => context.push(Routes.premiumScreen),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: ColorManager.primary,
-                                foregroundColor: ColorManager.onMint,
-                                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-                                elevation: 3,
-                              ),
-                              child: Text(
-                                'Unlock Analytics',
-                                style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),

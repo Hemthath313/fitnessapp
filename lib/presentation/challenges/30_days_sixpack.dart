@@ -144,7 +144,7 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
               Container(
                 padding: EdgeInsets.all(6.w),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF5E36).withValues(alpha: 0.15),
+                  color: ColorManager.accent.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child:  Text('🔥', style: TextStyle(fontSize: 16.sp)),
@@ -167,7 +167,7 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
                       'Combine abs training with overall fat loss.',
                       style: TextStyle(
                         color: ColorManager.textSecondary,
-                        fontSize: 11.sp,
+                        fontSize: 12.sp,
                       ),
                     ),
                   ],
@@ -178,9 +178,9 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
                 onPressed: () => context.push(
                   '${Routes.transformationPlanDetailRoute}?planId=weight_loss_60',
                 ),
-                child: const Text(
+                child: Text(
                   'Explore 60-Day',
-                  style: TextStyle(color: Color(0xFFFF5E36), fontWeight: FontWeight.bold),
+                  style: TextStyle(color: ColorManager.accentText, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -203,9 +203,9 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
       bgColor = ColorManager.limerGreen2.withValues(alpha: 0.2);
       borderColor = ColorManager.limerGreen2;
       icon = Icon(Icons.check_circle,
-          color: ColorManager.limerGreen2, size: 24.sp);
+          color: ColorManager.primaryText, size: 24.sp);
     } else if (isPremiumLocked) {
-      icon = Icon(Icons.lock, color: Colors.amber, size: 20.sp);
+      icon = Icon(Icons.lock, color: ColorManager.warningText, size: 20.sp);
     } else if (isWaitDay) {
       icon = Icon(Icons.access_time_filled, color: ColorManager.divider, size: 20.sp);
     } else if (isLocked) {
@@ -302,7 +302,7 @@ class _SixPackChallengeSelectionScreenState extends State<SixPackChallengeSelect
                   child: Row(
                     children: [
                       Icon(Icons.fitness_center,
-                          size: 16.sp, color: ColorManager.primary),
+                          size: 16.sp, color: ColorManager.primaryText),
                       SizedBox(width: 10.w),
                       Expanded(
                         child: Text(

@@ -545,8 +545,8 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('START DAY 1 WORKOUT'), findsOneWidget);
-      await tester.tap(find.text('START DAY 1 WORKOUT'));
+      expect(find.text('Start Day 1 workout'), findsOneWidget);
+      await tester.tap(find.text('Start Day 1 workout'));
       await tester.pumpAndSettle();
 
       // Redirected to paywall!

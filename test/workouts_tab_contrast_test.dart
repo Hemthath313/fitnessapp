@@ -17,7 +17,7 @@ double _contrast(Color a, Color b) {
 }
 
 void main() {
-  test('dark text on mint passes WCAG AA', () {
+  test('text on the blue primary passes WCAG AA', () {
     expect(_contrast(ColorManager.onMint, ColorManager.primary),
         greaterThanOrEqualTo(4.5));
     for (final c in ColorManager.mintGradient.colors) {

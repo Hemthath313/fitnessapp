@@ -472,7 +472,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
         title: Row(
           children: [
-            Icon(Icons.star_rounded, color: Colors.amber, size: 26.sp),
+            Icon(Icons.star_rounded, color: ColorManager.premium, size: 26.sp),
             SizedBox(width: 8.w),
             Flexible(
               child: Text(
@@ -515,7 +515,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
               Navigator.pop(dialogContext);
               await _activateFreeStarterPlan(context);
             },
-            child: Text('Use 3-Day Free Plan', style: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.w600, fontSize: 12.sp)),
+            child: Text('Use 3-Day Free Plan', style: TextStyle(color: ColorManager.primaryText, fontWeight: FontWeight.w600, fontSize: 12.sp)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -545,9 +545,9 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
           SnackBar(
             content: const Text(
               '3-Day Starter Routine activated! Ready for your workout.',
-              style: TextStyle(fontWeight: FontWeight.w600),
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
             ),
-            backgroundColor: ColorManager.success,
+            backgroundColor: ColorManager.successDark,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -557,7 +557,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to activate starter plan: $e'),
+            content: Text('Failed to activate starter plan: $e', style: const TextStyle(color: Colors.white)),
             backgroundColor: ColorManager.error,
           ),
         );
@@ -701,7 +701,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              backgroundColor: ColorManager.success,
+              backgroundColor: ColorManager.successDark,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8.r),
@@ -766,14 +766,14 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
               icon: Icon(
                 canSave ? Icons.bookmark_add_rounded : Icons.lock_outline_rounded,
                 size: 16.sp,
-                color: canSave ? ColorManager.onMint : Colors.white,
+                color: canSave ? ColorManager.onMint : ColorManager.inkOnLight,
               ),
               label: Text(
                 canSave ? 'Save to Schedule' : 'Save (Pro)',
-                style: TextStyle(color: canSave ? ColorManager.onMint : Colors.white, fontSize: 12.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(color: canSave ? ColorManager.onMint : ColorManager.inkOnLight, fontSize: 12.sp, fontWeight: FontWeight.bold),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: canSave ? ColorManager.primary : Colors.amber.shade700,
+                backgroundColor: canSave ? ColorManager.primary : ColorManager.premium,
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
               ),
@@ -829,7 +829,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                             size: 18.sp, color: ColorManager.onMint),
                         SizedBox(width: 8.w),
                         Text(
-                          'GENERATE WEEKLY PLAN',
+                          'Generate weekly plan',
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
@@ -908,8 +908,8 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                          child: Text(
                            shortName,
                            style: TextStyle(
-                             color: isSelected ? Colors.black : ColorManager.textTertiary,
-                             fontSize: 11.sp,
+                             color: isSelected ? Colors.white : ColorManager.textTertiary,
+                             fontSize: 12.sp,
                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                            ),
                          ),
@@ -1148,7 +1148,7 @@ class _WorkoutGeneratorScreenState extends State<WorkoutGeneratorScreen> {
                     Text(
                       'How to Perform',
                       style: TextStyle(
-                        color: ColorManager.primary,
+                        color: ColorManager.primaryText,
                         fontSize: 20.sp,
                         fontWeight: FontWeight.bold,
                       ),

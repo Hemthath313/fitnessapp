@@ -528,7 +528,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap "Log Lift"
-      await tester.tap(find.text('Log Lift'));
+      await tester.tap(find.text('Log past workout'));
       await tester.pumpAndSettle();
 
       // Must navigate directly to manual workoutLogRoute, NOT duplicate the DayWorkoutSessionPage

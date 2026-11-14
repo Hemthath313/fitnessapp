@@ -48,8 +48,8 @@ class ProFeatureGate extends StatelessWidget {
                   color: ColorManager.premium.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.lock_rounded,
-                    color: ColorManager.premium, size: 36),
+                child: Icon(Icons.lock_rounded,
+                    color: ColorManager.warningText, size: 36),
               ),
               const SizedBox(height: 20),
               Text(

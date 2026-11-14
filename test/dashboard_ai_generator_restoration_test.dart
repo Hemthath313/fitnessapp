@@ -335,7 +335,7 @@ void main() {
 
       // 1. Transformation Hero is rendered at the top
       expect(find.text(TransformationPlansData.beginnerFitness30.title), findsOneWidget);
-      expect(find.text('START DAY 1 WORKOUT'), findsOneWidget);
+      expect(find.text('Start Day 1 workout'), findsOneWidget);
 
       // 2. Restored AI Workout Generator card is visible directly below
       expect(find.text('PLAN BUILDER'), findsOneWidget);
@@ -529,8 +529,8 @@ void main() {
       expect(find.textContaining('4 selected'), findsOneWidget);
 
       // Tap generate button
-      expect(find.text('GENERATE WEEKLY PLAN'), findsOneWidget);
-      await tester.tap(find.text('GENERATE WEEKLY PLAN'));
+      expect(find.text('Generate weekly plan'), findsOneWidget);
+      await tester.tap(find.text('Generate weekly plan'));
       await tester.pump(const Duration(milliseconds: 1300));
       await tester.pumpAndSettle();
 
@@ -596,7 +596,7 @@ void main() {
 
       // Transformation Hero at top
       expect(find.text(TransformationPlansData.beginnerFitness30.title), findsOneWidget);
-      expect(find.text('START DAY 5 WORKOUT'), findsOneWidget);
+      expect(find.text('Start Day 5 workout'), findsOneWidget);
 
       // Active AI Routine companion card below
       expect(find.text('WORKOUT ROUTINE'), findsOneWidget);

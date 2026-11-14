@@ -8,228 +8,10 @@ import 'package:fitness_app/utils/router/router.dart';
 
 import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 import 'package:fitness_app/presentation/transformation_plans/providers/transformation_provider.dart';
-import 'package:fitness_app/presentation/workouts/providers/workout_provider.dart';
 import 'package:fitness_app/presentation/custom_workouts/day_workout_session_page.dart';
-import 'package:intl/intl.dart';
 
 class QuickActionsWidget extends StatelessWidget {
   const QuickActionsWidget({super.key});
-
-  /// The one label for the "just log something" escape hatch, used by every
-  /// Log Lift sheet so the wording never drifts between cases.
-  static const String _logSingleLiftLabel = 'Log a Single Lift';
-
-  /// Shared bottom sheet for every Log Lift case that needs a prompt: a title
-  /// with icon, one line of context, a primary action and the single-lift
-  /// fallback.
-  void _showTrainSheet(
-    BuildContext context, {
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String message,
-    required IconData primaryIcon,
-    required String primaryLabel,
-    required VoidCallback onPrimary,
-  }) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: ColorManager.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 18.h),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(icon, color: iconColor, size: 22.sp),
-                  SizedBox(width: 8.w),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        color: ColorManager.textPrimary,
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 8.h),
-              Text(
-                message,
-                style: TextStyle(
-                  color: ColorManager.textSecondary,
-                  fontSize: 13.sp,
-                  height: 1.4,
-                ),
-              ),
-              SizedBox(height: 16.h),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorManager.primary,
-                    foregroundColor: ColorManager.onMint,
-                    padding: EdgeInsets.symmetric(vertical: 12.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.button.r),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    onPrimary();
-                  },
-                  icon: Icon(primaryIcon, color: ColorManager.onMint),
-                  label: Text(
-                    primaryLabel,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-              SizedBox(height: 8.h),
-              SizedBox(
-                width: double.infinity,
-                child: TextButton.icon(
-                  style: TextButton.styleFrom(
-                    foregroundColor: ColorManager.textSecondary,
-                    padding: EdgeInsets.symmetric(vertical: 10.h),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    context.push(Routes.workoutLogRoute);
-                  },
-                  icon: const Icon(Icons.add_rounded, size: 18),
-                  label: const Text(_logSingleLiftLabel),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _handleLogLift(BuildContext context) {
-    final transformationProvider =
-        Provider.of<TransformationProvider?>(context, listen: false);
-
-    // 1. Transformation Priority: When an active transformation exists, avoid
-    // showing misleading AI-split prompts or conflicting rest-day messages.
-    if (transformationProvider != null &&
-        transformationProvider.hasActiveTransformation) {
-      final active = transformationProvider.activeTransformation!;
-      final todayBp = transformationProvider.currentDayBlueprint;
-      final bool isRestDay = todayBp?.isRestDay ?? false;
-
-      if (!isRestDay) {
-        // Scheduled workout is already prominently featured in the unified hero card.
-        // Route directly to manual/ad-hoc lift logging so user can record single lifts or PRs.
-        context.push(Routes.workoutLogRoute);
-        return;
-      }
-
-      // Today is a scheduled rest/recovery day in the active transformation programme.
-      _showTrainSheet(
-        context,
-        icon: Icons.bedtime_rounded,
-        iconColor: Colors.blueAccent,
-        title: 'Today is a Rest Day (Day ${active.currentDay})',
-        message:
-            'Your active programme (${active.planTitle}) has a recovery day scheduled today. You can view your roadmap or log a single lift.',
-        primaryIcon: Icons.map_rounded,
-        primaryLabel: 'View Programme Roadmap',
-        onPrimary: () => context.push(Routes.transformationRoadmapRoute),
-      );
-      return;
-    }
-
-    // 2. Active AI Routine or Starter Split Fallback
-    final workoutProvider =
-        Provider.of<WorkoutProvider>(context, listen: false);
-    final grouped = workoutProvider.groupedSplitWorkouts;
-    final todayName = DateFormat('EEEE').format(DateTime.now());
-
-    if (grouped.isEmpty) {
-      // No active split yet -> prompt user to build plan or log single lift
-      _showTrainSheet(
-        context,
-        icon: Icons.fitness_center_rounded,
-        iconColor: ColorManager.primary,
-        title: 'Ready to Train?',
-        message:
-            'Build an adaptive split with previous weights and automatic progression, or log a single lift.',
-        primaryIcon: Icons.auto_awesome_rounded,
-        primaryLabel: 'Build My Adaptive Plan',
-        onPrimary: () => context.push(Routes.workoutGeneratorRoute),
-      );
-      return;
-    }
-
-    if (grouped.containsKey(todayName)) {
-      // When today's workout routine is already prominently displayed in HomeAiRoutineCard,
-      // avoid presenting a confusing duplicate workout-start action through Log Lift.
-      // Instead, route directly to manual/ad-hoc lift logging so the user can record
-      // individual exercises, PRs, or extra work without duplicating the routine start.
-      context.push(Routes.workoutLogRoute);
-      return;
-    }
-
-    // Today is a rest day — find next scheduled day or offer to start next session early
-    const weekDays = [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday',
-    ];
-    final currentIndex = weekDays.indexOf(todayName);
-    String nextWorkoutDay = '';
-    if (currentIndex != -1) {
-      for (int i = 1; i <= 6; i++) {
-        final next = weekDays[(currentIndex + i) % 7];
-        if (grouped.containsKey(next)) {
-          nextWorkoutDay = next;
-          break;
-        }
-      }
-    }
-
-    if (nextWorkoutDay.isEmpty || !grouped.containsKey(nextWorkoutDay)) {
-      context.push(Routes.workoutLogRoute);
-      return;
-    }
-
-    final nextWorkouts = grouped[nextWorkoutDay]!;
-    _showTrainSheet(
-      context,
-      icon: Icons.bedtime_rounded,
-      iconColor: Colors.blueAccent,
-      title: 'Today is a Rest Day ($todayName)',
-      message:
-          'Your next scheduled workout is $nextWorkoutDay (${nextWorkouts.length} exercises). You can start it early or log a single lift.',
-      primaryIcon: Icons.play_arrow_rounded,
-      primaryLabel: 'Start $nextWorkoutDay Workout Early',
-      onPrimary: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DayWorkoutSessionPage(
-            dayName: nextWorkoutDay,
-            workouts: nextWorkouts,
-          ),
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -239,6 +21,13 @@ class QuickActionsWidget extends StatelessWidget {
       selector: (_, stats) => stats.hasWorkoutToday,
       builder: (context, workoutDoneToday, _) {
         final List<Map<String, dynamic>> actions = [
+          {
+            'icon': Icons.play_arrow_rounded,
+            'label': 'Start workout',
+            'isCompleted': false,
+            // Live, from scratch: rest timer, tick sets, add exercises.
+            'onTap': () => DayWorkoutSessionPage.startQuickWorkout(context),
+          },
           {
             'icon': Icons.restaurant_menu_rounded,
             'label': 'Log Meal',
@@ -257,9 +46,10 @@ class QuickActionsWidget extends StatelessWidget {
           },
           {
             'icon': Icons.fitness_center_rounded,
-            'label': 'Log Lift',
+            'label': 'Log past workout',
             'isCompleted': workoutDoneToday,
-            'onTap': () => _handleLogLift(context),
+            // The form: today or an earlier date, several exercises.
+            'onTap': () => context.push(Routes.workoutLogRoute),
           },
           {
             'icon': Icons.auto_awesome_rounded,
@@ -291,7 +81,7 @@ class QuickActionsWidget extends StatelessWidget {
               Row(
                 children: [
                   for (var i = 0; i < actions.length; i++) ...[
-                    if (i > 0) SizedBox(width: 10.w),
+                    if (i > 0) SizedBox(width: 8.w),
                     Expanded(child: _buildActionTile(actions[i])),
                   ],
                 ],
@@ -335,7 +125,7 @@ class QuickActionsWidget extends StatelessWidget {
                         width: 48.w,
                         height: 48.w,
                         decoration: BoxDecoration(
-                          color: ColorManager.iconChip,
+                          color: ColorManager.chipBackground,
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: isCompleted
@@ -346,7 +136,7 @@ class QuickActionsWidget extends StatelessWidget {
                         ),
                         child: Icon(
                           act['icon'] as IconData,
-                          color: ColorManager.primary,
+                          color: ColorManager.primaryText,
                           size: 22.sp,
                         ),
                       ),
@@ -362,7 +152,7 @@ class QuickActionsWidget extends StatelessWidget {
                             ),
                             child: Icon(
                               Icons.check,
-                              color: const Color(0xFF06201B),
+                              color: ColorManager.onMint,
                               size: 10.sp,
                             ),
                           ),
@@ -373,11 +163,12 @@ class QuickActionsWidget extends StatelessWidget {
                   Text(
                     label,
                     textAlign: TextAlign.center,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: ColorManager.textPrimary,
-                      fontSize: 13.sp,
+                      fontSize: 12.sp,
+                      height: 1.2,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

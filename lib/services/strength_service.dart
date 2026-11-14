@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/units.dart';
 import 'package:fitness_app/model/personal_record_model.dart';
 import 'package:fitness_app/model/workout_log.dart';
 import 'package:fitness_app/model/workout_session_model.dart';
@@ -291,7 +292,7 @@ class StrengthService {
         insights.add(ExerciseInsight(
           exerciseName: displayName,
           status: StrengthStatus.stable,
-          message: 'Baseline recorded at ${latest.maxWeight.toStringAsFixed(1)} kg. Keep logging to track progression!',
+          message: 'Baseline recorded at ${Units.fmt(latest.maxWeight, 1)} ${Units.label}. Keep logging to track progression!',
           latestWeight: latest.maxWeight,
           latestEstimated1RM: latest.estimated1RM,
           change: 0.0,
@@ -307,7 +308,7 @@ class StrengthService {
         insights.add(ExerciseInsight(
           exerciseName: displayName,
           status: StrengthStatus.newPR,
-          message: 'New PR! +${weightDiff.toStringAsFixed(1)} kg increase over previous session.',
+          message: 'New PR! +${Units.fmt(weightDiff, 1)} ${Units.label} increase over previous session.',
           latestWeight: latest.maxWeight,
           latestEstimated1RM: latest.estimated1RM,
           change: weightDiff,
@@ -316,7 +317,7 @@ class StrengthService {
         insights.add(ExerciseInsight(
           exerciseName: displayName,
           status: StrengthStatus.improving,
-          message: 'Up +${weightDiff.toStringAsFixed(1)} kg from previous session (${prev.maxWeight.toStringAsFixed(1)} kg → ${latest.maxWeight.toStringAsFixed(1)} kg).',
+          message: 'Up +${Units.fmt(weightDiff, 1)} ${Units.label} from previous session (${Units.fmt(prev.maxWeight, 1)} ${Units.label} → ${Units.fmt(latest.maxWeight, 1)} ${Units.label}).',
           latestWeight: latest.maxWeight,
           latestEstimated1RM: latest.estimated1RM,
           change: weightDiff,
@@ -329,7 +330,7 @@ class StrengthService {
             insights.add(ExerciseInsight(
               exerciseName: displayName,
               status: StrengthStatus.stalled,
-              message: 'Weight unchanged for 2+ weeks. Consider adding 1 rep per set or a slight 2.5 kg bump.',
+              message: 'Weight unchanged for 2+ weeks. Consider adding 1 rep per set or a slight ${Units.useLb ? '5 lb' : '2.5 kg'} bump.',
               latestWeight: latest.maxWeight,
               latestEstimated1RM: latest.estimated1RM,
               change: 0.0,
@@ -340,7 +341,7 @@ class StrengthService {
         insights.add(ExerciseInsight(
           exerciseName: displayName,
           status: StrengthStatus.stable,
-          message: 'Solid baseline maintained at ${latest.maxWeight.toStringAsFixed(1)} kg. Aim for +1 rep next time.',
+          message: 'Solid baseline maintained at ${Units.fmt(latest.maxWeight, 1)} ${Units.label}. Aim for +1 rep next time.',
           latestWeight: latest.maxWeight,
           latestEstimated1RM: latest.estimated1RM,
           change: 0.0,
@@ -349,7 +350,7 @@ class StrengthService {
         insights.add(ExerciseInsight(
           exerciseName: displayName,
           status: StrengthStatus.stable,
-          message: 'Down ${weightDiff.abs().toStringAsFixed(1)} kg (likely deload or accessory variation).',
+          message: 'Down ${Units.fmt(weightDiff.abs(), 1)} ${Units.label} (likely deload or accessory variation).',
           latestWeight: latest.maxWeight,
           latestEstimated1RM: latest.estimated1RM,
           change: weightDiff,

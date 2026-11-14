@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -53,11 +54,11 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
       // Show error message for debugging
       return Container(
         height: 50,
-        color: Colors.red.withValues(alpha: 0.1),
+        color: ColorManager.error.withValues(alpha: 0.1),
         child: Center(
           child: Text(
             'Ad Error: $_errorMessage',
-            style: TextStyle(color: Colors.red, fontSize: 12.sp),
+            style: TextStyle(color: ColorManager.errorText, fontSize: 12.sp),
             textAlign: TextAlign.center,
           ),
         ),
@@ -70,7 +71,7 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
         child: Center(
           child: Text(
             'Loading Ad...',
-            style: TextStyle(color: Colors.grey, fontSize: 12.sp),
+            style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
           ),
         ),
       );

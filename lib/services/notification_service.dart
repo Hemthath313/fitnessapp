@@ -499,6 +499,64 @@ class NotificationService {
     await _localNotificationsPlugin.cancel(id: 1);
   }
 
+  static const int _streakAtRiskId = 60;
+
+  /// "Streak at risk" nudge at 7 pm today. Call on app open when a streak is
+  /// running, today is a workout day and nothing is logged yet. Finishing a
+  /// workout cancels it.
+  Future<void> scheduleStreakAtRiskReminder({
+    required int streak,
+    required int freezesLeft,
+  }) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final bool enabled =
+          prefs.getBool('notif_streak_reminders_enabled') ?? true;
+      if (!enabled || streak <= 0) {
+        await _localNotificationsPlugin.cancel(id: _streakAtRiskId);
+        return;
+      }
+      if (!await hasNotificationPermission()) return;
+
+      final now = _currentTzNow();
+      final at = tz.TZDateTime(tz.local, now.year, now.month, now.day, 19);
+      if (!at.isAfter(now)) return; // too late today
+
+      final profile = await NotificationProfile.load();
+      final copy = NotificationCopy.streakAtRisk(
+        name: profile.firstName,
+        streak: streak,
+        freezesLeft: freezesLeft,
+      );
+      const details = NotificationDetails(
+        android: AndroidNotificationDetails(
+          'streak_reminder', 'Streak Reminders',
+          channelDescription: 'Reminds you to keep your streak alive',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+      );
+      await _localNotificationsPlugin.cancel(id: _streakAtRiskId);
+      await _localNotificationsPlugin.zonedSchedule(
+        id: _streakAtRiskId,
+        title: copy.title,
+        body: copy.body,
+        scheduledDate: at,
+        notificationDetails: details,
+        payload: '${Routes.dayWorkoutSessionRoute}?day=today',
+        androidScheduleMode: await _resolveScheduleMode(),
+      );
+    } catch (e) {
+      if (kDebugMode) print('Failed to schedule streak-at-risk reminder: $e');
+    }
+  }
+
+  Future<void> cancelStreakAtRiskReminder() async {
+    try {
+      await _localNotificationsPlugin.cancel(id: _streakAtRiskId);
+    } catch (_) {}
+  }
+
   /// Smart Workout Day Reminders: Schedules recurring weekly reminders for each split day at user's preferred time
   Future<void> scheduleWorkoutDayReminders({
     required List<String> scheduledDays,
@@ -1010,7 +1068,8 @@ class NotificationService {
               priority: Priority.max,
               playSound: true,
               enableVibration: true,
-              fullScreenIntent: true,
+              // No fullScreenIntent: Play only allows it for calling and
+              // alarm-clock apps. The alarm channel still rings loudly.
               category: AndroidNotificationCategory.alarm,
               audioAttributesUsage: AudioAttributesUsage.alarm);
       
@@ -1107,9 +1166,7 @@ class NotificationService {
         iOS: iosDetails,
       );
 
-      final scheduleMode = _scheduleModeResolver != null
-          ? await _scheduleModeResolver!()
-          : AndroidScheduleMode.exactAllowWhileIdle;
+      final scheduleMode = await _resolveScheduleMode();
 
       final tzScheduled = tz.TZDateTime.from(scheduledDate, tz.local);
 
@@ -1149,9 +1206,7 @@ class NotificationService {
         iOS: iosDetails,
       );
 
-      final scheduleMode = _scheduleModeResolver != null
-          ? await _scheduleModeResolver!()
-          : AndroidScheduleMode.exactAllowWhileIdle;
+      final scheduleMode = await _resolveScheduleMode();
 
       final tzScheduled = tz.TZDateTime.from(scheduledDate, tz.local);
 
@@ -1191,9 +1246,7 @@ class NotificationService {
         iOS: iosDetails,
       );
 
-      final scheduleMode = _scheduleModeResolver != null
-          ? await _scheduleModeResolver!()
-          : AndroidScheduleMode.exactAllowWhileIdle;
+      final scheduleMode = await _resolveScheduleMode();
 
       final tzScheduled = tz.TZDateTime.from(scheduledDate, tz.local);
 
@@ -1245,9 +1298,7 @@ class NotificationService {
         iOS: iosDetails,
       );
 
-      final scheduleMode = _scheduleModeResolver != null
-          ? await _scheduleModeResolver!()
-          : AndroidScheduleMode.exactAllowWhileIdle;
+      final scheduleMode = await _resolveScheduleMode();
 
       await _localNotificationsPlugin.zonedSchedule(
         id: 43,
@@ -1303,9 +1354,7 @@ class NotificationService {
         iOS: iosDetails,
       );
 
-      final scheduleMode = _scheduleModeResolver != null
-          ? await _scheduleModeResolver!()
-          : AndroidScheduleMode.exactAllowWhileIdle;
+      final scheduleMode = await _resolveScheduleMode();
 
       final notificationId = 400 + dayNumber;
 

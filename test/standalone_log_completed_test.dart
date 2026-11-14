@@ -64,10 +64,14 @@ void main() {
     });
   });
 
-  group('Exercise sheet save button', () {
-    testWidgets('is shown when the sheet is opened on its own', (tester) async {
+  group('Exercise sheet Log Set tab', () {
+    testWidgets('on its own shows Add to workout, not a set table',
+        (tester) async {
       await _pumpSheet(tester);
-      expect(find.text('Save Session Log'), findsOneWidget);
+      expect(find.byKey(const Key('detail_add_to_workout_button')), findsOneWidget);
+      expect(find.text('Add to workout'), findsOneWidget);
+      expect(find.text('Save Session Log'), findsNothing);
+      expect(find.byKey(const Key('detail_weight_input_0')), findsNothing);
       expect(find.byKey(const Key('sheet_sync_hint')), findsNothing);
     });
 
@@ -75,7 +79,10 @@ void main() {
         (tester) async {
       await _pumpSheet(tester, onSetsChanged: (_) {});
       expect(find.text('Save Session Log'), findsNothing);
+      expect(find.byKey(const Key('detail_add_to_workout_button')), findsNothing);
       expect(find.byKey(const Key('sheet_sync_hint')), findsOneWidget);
+      expect(find.byKey(const Key('detail_weight_input_0')), findsOneWidget);
+      expect(find.byKey(const Key('detail_add_set_button')), findsOneWidget);
     });
   });
 }

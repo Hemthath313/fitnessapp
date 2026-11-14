@@ -136,7 +136,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(c, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: ColorManager.error),
             child: const Text('Reset', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
@@ -336,7 +336,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                   'Re-plan',
                   style: TextStyle(
                     color: ColorManager.onMint,
-                    fontSize: 11.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -351,7 +351,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
               SizedBox(width: 4.w),
               IconButton(
                 onPressed: () => _confirmResetPlan(context, workoutProvider),
-                icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
+                icon: Icon(Icons.delete_outline_rounded, color: ColorManager.errorText),
                 iconSize: 18.sp,
                 tooltip: 'Reset Schedule',
                 padding: EdgeInsets.zero,
@@ -448,15 +448,18 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
             Border? border;
 
             if (isToday) {
-              bgColor = hasWorkout && isCompletedToday
-                  ? const Color(0xFF1E4331)
-                  : ColorManager.infoText.withValues(alpha: 0.14);
-              textColor = hasWorkout && isCompletedToday
-                  ? const Color(0xFF81C784)
-                  : ColorManager.infoText;
+              // Today: brand-blue outline; a soft green tint once it's done
+              // (same treatment as the other completed days).
+              final bool todayDone = hasWorkout && isCompletedToday;
+              bgColor = todayDone
+                  ? ColorManager.successText.withValues(alpha: 0.14)
+                  : ColorManager.primary.withValues(alpha: 0.14);
+              textColor = todayDone
+                  ? ColorManager.successText
+                  : ColorManager.primaryText;
               border = Border.all(
-                color: hasWorkout && isCompletedToday ? const Color(0xFF4CAF50) : ColorManager.infoText,
-                width: 1,
+                color: todayDone ? ColorManager.successText : ColorManager.primaryText,
+                width: 1.4,
               );
             } else if (isDayDone) {
               bgColor = ColorManager.successText.withValues(alpha: 0.14);
@@ -495,21 +498,21 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                       dayShort,
                       style: TextStyle(
                         color: textColor,
-                        fontSize: 11.sp,
+                        fontSize: 12.sp,
                         fontWeight: isToday || isNext || hasWorkout || isDayDone ? FontWeight.bold : FontWeight.w500,
                       ),
                     ),
                     SizedBox(height: 2.h),
                     if (isToday && !hasWorkout)
-                      Text('REST', style: TextStyle(color: ColorManager.infoText, fontSize: 11.sp, fontWeight: FontWeight.bold))
+                      Text('REST', style: TextStyle(color: ColorManager.infoText, fontSize: 12.sp, fontWeight: FontWeight.bold))
                     else if (isDayDone)
-                      Text('DONE', style: TextStyle(color: ColorManager.successText, fontSize: 11.sp, fontWeight: FontWeight.bold))
+                      Text('DONE', style: TextStyle(color: ColorManager.successText, fontSize: 12.sp, fontWeight: FontWeight.bold))
                     else if (isNext)
-                      Text('NEXT', style: TextStyle(color: ColorManager.primaryText, fontSize: 11.sp, fontWeight: FontWeight.bold))
+                      Text('NEXT', style: TextStyle(color: ColorManager.primaryText, fontSize: 12.sp, fontWeight: FontWeight.bold))
                     else if (hasWorkout)
-                      Text('${grouped[day]!.length}ex', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp))
+                      Text('${grouped[day]!.length}ex', style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp))
                     else
-                      Text('—', style: TextStyle(color: ColorManager.textDisabled, fontSize: 11.sp)),
+                      Text('—', style: TextStyle(color: ColorManager.textDisabled, fontSize: 12.sp)),
                   ],
                 ),
               ),
@@ -552,7 +555,8 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
     return 'assets/images/anatomy_mint/mint_$best.png';
   }
 
-  /// Gradient day card (teal on even weekdays, coral on odd, green when done)
+  /// Gradient day card (blue on even weekdays, coral on odd). A finished day
+  /// keeps its colour; only the small status pill says it's done.
   /// built on the shared [GradientHeroCard].
   Widget _gradientDayShell({
     required String dayName,
@@ -563,7 +567,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
     final idx = _weekDays.indexOf(dayName);
     final bool warm = idx >= 0 && idx.isOdd;
     return GradientHeroCard(
-      tone: isDone ? HeroTone.green : (warm ? HeroTone.coral : HeroTone.teal),
+      tone: warm ? HeroTone.coral : HeroTone.teal,
       imageAsset: _anatomyAssetFor(exerciseNames, dayName),
       imageSize: 118.w,
       imageTop: 26.h,
@@ -604,14 +608,10 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                   decoration: BoxDecoration(
-                    color: isCompleted
-                        ? const Color(0xFF1E4331)
-                        : Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(6.r),
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(20.r),
                     border: Border.all(
-                      color: isCompleted
-                          ? const Color(0xFF4CAF50).withValues(alpha: 0.4)
-                          : Colors.white.withValues(alpha: 0.4),
+                      color: Colors.white.withValues(alpha: 0.4),
                     ),
                   ),
                   child: Row(
@@ -620,17 +620,17 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                       Icon(
                         isCompleted ? Icons.check_circle_rounded : Icons.flash_on_rounded,
                         size: 11.sp,
-                        color: isCompleted ? const Color(0xFF4CAF50) : Colors.white,
+                        color: isCompleted ? ColorManager.successText : Colors.white,
                       ),
                       SizedBox(width: 4.w),
                       Flexible(
                         child: Text(
                           isCompleted
-                              ? 'COMPLETED TODAY ✓'
+                              ? 'DONE TODAY'
                               : (isNextUp ? 'NEXT UP (TOMORROW)' : 'TODAY\'S TARGET'),
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: isCompleted ? const Color(0xFF81C784) : Colors.white,
+                            color: Colors.white,
                             fontSize: 11.sp,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.5,
@@ -647,7 +647,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                   child: Text(
                     'Today: $restDayName Rest',
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.blueAccent.shade100, fontSize: 11.sp, fontWeight: FontWeight.w600),
+                    style: TextStyle(color: Colors.blueAccent.shade100, fontSize: 12.sp, fontWeight: FontWeight.w600),
                   ),
                 )
               else
@@ -655,7 +655,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                   child: Text(
                     '${workouts.length} Exercises · ~45 min',
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.white60, fontSize: 11.sp),
+                    style: TextStyle(color: Colors.white60, fontSize: 12.sp),
                   ),
                 ),
             ],
@@ -669,14 +669,14 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
             children: [
               Text(
                 '$dayName Routine',
-                style: TextStyle(color: ColorManager.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 2.h),
               Text(
                 isCompleted
                     ? 'All ${workouts.length} exercises logged. Streak extended! 🔥'
                     : 'Scheduled full session with animated rest timers & set logs.',
-                style: TextStyle(color: Colors.white70, fontSize: 11.sp),
+                style: TextStyle(color: Colors.white70, fontSize: 12.sp),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -694,15 +694,15 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
               ...exerciseNames.take(3).map((name) => Container(
                 padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
                 decoration: BoxDecoration(
-                  color: isCompleted ? const Color(0xFF1E4331) : Colors.black.withValues(alpha: 0.25),
+                  color: Colors.black.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(6.r),
                   border: Border.all(color: Colors.white24),
                 ),
                 child: Text(
                   name,
                   style: TextStyle(
-                    color: isCompleted ? const Color(0xFFE8F5E9) : Colors.white70,
-                    fontSize: 11.sp,
+                    color: Colors.white70,
+                    fontSize: 12.sp,
                   ),
                 ),
               )),
@@ -715,7 +715,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                   ),
                   child: Text(
                     '+${exerciseNames.length - 3} more',
-                    style: TextStyle(color: Colors.white, fontSize: 11.sp, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Colors.white, fontSize: 12.sp, fontWeight: FontWeight.bold),
                   ),
                 ),
             ],
@@ -748,21 +748,21 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                 margin: EdgeInsets.only(bottom: 6.h),
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 5.h),
                 decoration: BoxDecoration(
-                  color: Colors.amber.withValues(alpha: 0.12),
+                  color: ColorManager.premium.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8.r),
-                  border: Border.all(color: Colors.amber.withValues(alpha: 0.4)),
+                  border: Border.all(color: ColorManager.premium.withValues(alpha: 0.4)),
                 ),
                 child: Row(
                   children: [
                     Icon(Icons.history_toggle_off_rounded,
-                        color: Colors.amber, size: 14.sp),
+                        color: ColorManager.warningText, size: 14.sp),
                     SizedBox(width: 5.w),
                     Expanded(
                       child: Text(
                         'Missed $missedDayName? Tap to resume missed workout',
                         style: TextStyle(
                           color: Colors.amber.shade200,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
@@ -770,7 +770,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                       ),
                     ),
                     Icon(Icons.chevron_right_rounded,
-                        color: Colors.amber, size: 14.sp),
+                        color: ColorManager.warningText, size: 14.sp),
                   ],
                 ),
               ),
@@ -811,8 +811,16 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: isCompleted ? const Color(0xFF2E7D32) : Colors.black.withValues(alpha: 0.35),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
+                // Done: quiet outlined button. Not done: solid dark button.
+                backgroundColor: isCompleted ? Colors.transparent : Colors.black.withValues(alpha: 0.35),
+                elevation: 0,
+                shadowColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.button.r),
+                  side: isCompleted
+                      ? const BorderSide(color: Colors.white38)
+                      : BorderSide.none,
+                ),
                 padding: EdgeInsets.zero,
               ),
             ),
@@ -846,20 +854,20 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
                 decoration: BoxDecoration(
-                  color: isDone ? const Color(0xFF1E4331) : Colors.black.withValues(alpha: 0.25),
-                  borderRadius: BorderRadius.circular(6.r),
+                  color: Colors.black.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
-                  isDone ? 'COMPLETED ✓' : 'SCHEDULED',
+                  isDone ? '✓ DONE' : 'SCHEDULED',
                   style: TextStyle(
-                    color: isDone ? const Color(0xFF81C784) : Colors.white60,
-                    fontSize: 11.sp,
+                    color: isDone ? ColorManager.successLight : Colors.white70,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
               const Spacer(),
-              Text('${workouts.length} Exercises', style: TextStyle(color: Colors.white60, fontSize: 11.sp)),
+              Text('${workouts.length} Exercises', style: TextStyle(color: Colors.white60, fontSize: 12.sp)),
             ],
           ),
 
@@ -867,7 +875,7 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
  padding: EdgeInsets.only(right: 84.w),
  child: Text(
             '$dayName Routine',
-            style: TextStyle(color: ColorManager.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
+            style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
           ),
  ),
 
@@ -883,10 +891,10 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                   color: Colors.black.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(6.r),
                 ),
-                child: Text(name, style: TextStyle(color: Colors.white70, fontSize: 11.sp)),
+                child: Text(name, style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
               )),
               if (exerciseNames.length > 3)
-                Text('+${exerciseNames.length - 3} more', style: TextStyle(color: Colors.white60, fontSize: 11.sp)),
+                Text('+${exerciseNames.length - 3} more', style: TextStyle(color: Colors.white60, fontSize: 12.sp)),
             ],
           ),
  ),
@@ -909,13 +917,13 @@ class _HomeAiRoutineCardState extends State<HomeAiRoutineCard> {
                   if (mounted) setState(() {});
                 });
               },
-              icon: Icon(Icons.play_arrow_rounded, size: 14.sp, color: ColorManager.textPrimary),
+              icon: Icon(isDone ? Icons.refresh_rounded : Icons.play_arrow_rounded, size: 14.sp, color: Colors.white),
               label: Text(
                 isDone ? 'Repeat Session' : 'Start $dayName Session',
-                style: TextStyle(color: ColorManager.textPrimary, fontSize: 11.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.white, fontSize: 12.sp, fontWeight: FontWeight.bold),
               ),
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: Colors.white24),
+                side: const BorderSide(color: Colors.white38),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
                 padding: EdgeInsets.zero,
               ),

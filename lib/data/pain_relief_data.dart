@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:flutter/material.dart';
 
 class PainReliefData {
@@ -6,7 +7,7 @@ class PainReliefData {
       'title': 'Leg Pain Relief',
       'subtitle': 'Soreness from running or leg day',
       'icon': Icons.directions_run,
-      'color': Colors.orangeAccent,
+      'color': ColorManager.warning,
       'routines': [
         {'name': 'Calf Stretch', 'duration': 45},
         {'name': 'Hamstring Reach', 'duration': 60},
@@ -19,7 +20,7 @@ class PainReliefData {
       'title': 'Lower Back Ease',
       'subtitle': 'Relief for desk workers',
       'icon': Icons.weekend,
-      'color': Colors.blueAccent,
+      'color': ColorManager.info,
       'routines': [
         {'name': 'Cat-Cow Stretch', 'duration': 60},
         {'name': 'Child\'s Pose', 'duration': 90},
@@ -32,7 +33,7 @@ class PainReliefData {
       'title': 'Neck & Shoulders',
       'subtitle': 'Reduce tension and stiffness',
       'icon': Icons.accessibility_new,
-      'color': Colors.purpleAccent,
+      'color': ColorManager.violet,
       'routines': [
         {'name': 'Neck Rolls', 'duration': 60},
         {'name': 'Shoulder Shrugs', 'duration': 45},
@@ -44,7 +45,7 @@ class PainReliefData {
       'title': 'Knee Mobility',
       'subtitle': 'Gentle movements for stiff knees',
       'icon': Icons.airline_seat_legroom_extra,
-      'color': Colors.greenAccent,
+      'color': ColorManager.success,
       'routines': [
         {'name': 'Seated Leg Lifts', 'duration': 45},
         {'name': 'Hamstring Curl (Standing)', 'duration': 45},

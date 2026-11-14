@@ -25,14 +25,14 @@ class BroSplitPage extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text("No", style: TextStyle(color: Colors.red)),
+              child: Text("No", style: TextStyle(color: ColorManager.errorText)),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 context.push(Routes.bodypartsPage);
               },
-              child: const Text("Yes", style: TextStyle(color: Colors.green)),
+              child: Text("Yes", style: TextStyle(color: ColorManager.successText)),
             ),
           ],
         );
@@ -112,7 +112,7 @@ class BroSplitPage extends StatelessWidget {
               key: const Key('use_this_split_button'),
               onPressed: () => context.push('${Routes.workoutGeneratorRoute}?days=5'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: ColorManager.limerGreen2,
+                backgroundColor: ColorManager.primary,
                 minimumSize: const Size.fromHeight(48),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadius.button),
@@ -120,7 +120,7 @@ class BroSplitPage extends StatelessWidget {
               ),
               child: Text('Use this split',
                   style: TextStyle(
-                      color: Colors.black,
+                      color: Colors.white,
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold)),
             ),
@@ -128,7 +128,7 @@ class BroSplitPage extends StatelessWidget {
             ElevatedButton(
               onPressed: () => _showExerciseDialog(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: ColorManager.limerGreen2,
+                backgroundColor: ColorManager.primary,
                 padding:
                     const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                 shape: RoundedRectangleBorder(
@@ -136,7 +136,7 @@ class BroSplitPage extends StatelessWidget {
                 ),
               ),
               child:  Text("View Exercises",
-                  style: TextStyle(color: Colors.black, fontSize: 16.sp)),
+                  style: TextStyle(color: Colors.white, fontSize: 16.sp)),
             ),
           ],
         ),

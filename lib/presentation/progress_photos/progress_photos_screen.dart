@@ -162,7 +162,7 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
                   ),
                   errorWidget: (context, url, error) => Container(
                     color: ColorManager.surfaceLight,
-                    child: const Icon(Icons.error, color: Colors.red),
+                    child: Icon(Icons.error, color: ColorManager.errorText),
                   ),
                 ),
               ),
@@ -186,7 +186,7 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
                       '${photo.weight!.toStringAsFixed(1)} kg',
                       style: TextStyle(
                         color: ColorManager.textSecondary,
-                        fontSize: 11.sp,
+                        fontSize: 12.sp,
                       ),
                     ),
                   ],
@@ -201,8 +201,8 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
                     child: Text(
                       photo.categoryDisplay,
                       style: TextStyle(
-                        color: ColorManager.primary,
-                        fontSize: 11.sp,
+                        color: ColorManager.primaryText,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -298,9 +298,9 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
                           Navigator.pop(context);
                           _showDeleteDialog(photo, provider);
                         },
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        label: const Text('Delete',
-                            style: TextStyle(color: Colors.red)),
+                        icon: Icon(Icons.delete, color: ColorManager.errorText),
+                        label: Text('Delete',
+                            style: TextStyle(color: ColorManager.errorText)),
                       ),
                       TextButton.icon(
                         onPressed: () => Navigator.pop(context),
@@ -353,8 +353,8 @@ class _ProgressPhotosScreenState extends State<ProgressPhotosScreen> {
                 }
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text('Delete', style: TextStyle(color: ColorManager.textPrimary)),
+            style: ElevatedButton.styleFrom(backgroundColor: ColorManager.error),
+            child: const Text('Delete', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

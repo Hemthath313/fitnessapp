@@ -122,9 +122,9 @@ class ProteinChartPage extends StatelessWidget {
             children: [
               _buildMacroBadge('P', item.protein, ColorManager.primary),
               const SizedBox(width: 8),
-              _buildMacroBadge('C', item.carbs, Colors.blue),
+              _buildMacroBadge('C', item.carbs, ColorManager.info),
               const SizedBox(width: 8),
-              _buildMacroBadge('F', item.fat, Colors.orange),
+              _buildMacroBadge('F', item.fat, ColorManager.warning),
             ],
           ),
         ],
@@ -147,7 +147,7 @@ class ProteinChartPage extends StatelessWidget {
             '$label: ',
             style: TextStyle(
               color: color,
-              fontSize: 11.sp,
+              fontSize: 12.sp,
               fontWeight: FontWeight.bold,
             ),
           ),

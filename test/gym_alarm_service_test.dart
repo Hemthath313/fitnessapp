@@ -89,7 +89,8 @@ void main() {
       expect(android.audioAttributesUsage, AudioAttributesUsage.alarm);
       expect(android.importance, Importance.max);
       expect(android.priority, Priority.max);
-      expect(android.fullScreenIntent, isTrue);
+      // Play policy: no full-screen intent for a non-alarm-clock app.
+      expect(android.fullScreenIntent, isFalse);
     });
 
     test('2. scheduleDailyGymAlarm advances to tomorrow when time has passed today', () async {

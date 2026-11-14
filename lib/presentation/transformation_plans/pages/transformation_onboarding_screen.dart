@@ -251,9 +251,9 @@ class _TransformationOnboardingScreenState
                         steps[index],
                         style: TextStyle(
                           color: isCurrent
-                              ? ColorManager.primary
+                              ? ColorManager.primaryText
                               : (isCompleted ? ColorManager.textPrimary : ColorManager.textTertiary),
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: isCurrent ? FontWeight.bold : FontWeight.w500,
                         ),
                       ),
@@ -374,7 +374,7 @@ class _TransformationOnboardingScreenState
         SizedBox(height: 8.h),
         Text(
           'Target weight is used to measure progression milestones and safe weekly pace.',
-          style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+          style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
         ),
       ],
     );
@@ -606,7 +606,7 @@ class _TransformationOnboardingScreenState
         SizedBox(height: 4.h),
         Text(
           'Exercises stressing affected joints will suggest safer alternatives.',
-          style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+          style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
         ),
         SizedBox(height: 6.h),
         Wrap(
@@ -701,7 +701,7 @@ class _TransformationOnboardingScreenState
                   SizedBox(width: 6.w),
                   Text(
                     '${_calculatedTDEE.toStringAsFixed(0)} kcal TDEE',
-                    style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+                    style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                   ),
                 ],
               ),
@@ -746,7 +746,7 @@ class _TransformationOnboardingScreenState
                 'Note: Calorie and macro values are scientifically estimated baselines. Individual metabolism and rate of progress vary.',
                 style: TextStyle(
                   color: ColorManager.textTertiary,
-                  fontSize: 11.sp,
+                  fontSize: 12.sp,
                   height: 1.35,
                 ),
               ),
@@ -793,12 +793,12 @@ class _TransformationOnboardingScreenState
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp)),
+          Text(label, style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp)),
           SizedBox(width: 8.w),
           Flexible(
             child: Text(
               value,
-              style: TextStyle(color: ColorManager.textPrimary, fontSize: 11.sp, fontWeight: FontWeight.w600),
+              style: TextStyle(color: ColorManager.textPrimary, fontSize: 12.sp, fontWeight: FontWeight.w600),
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.end,
             ),
@@ -819,7 +819,7 @@ class _TransformationOnboardingScreenState
         child: Column(
           children: [
             Text(value, style: TextStyle(color: color, fontSize: 13.sp, fontWeight: FontWeight.bold)),
-            Text(name, style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp)),
+            Text(name, style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),
           ],
         ),
       ),
@@ -904,12 +904,12 @@ class _TransformationOnboardingScreenState
         ),
         child: Column(
           children: [
-            Icon(icon, size: 28.sp, color: selected ? ColorManager.primary : ColorManager.textSecondary),
+            Icon(icon, size: 28.sp, color: selected ? ColorManager.primaryText : ColorManager.textSecondary),
             SizedBox(height: 6.h),
             Text(
               title,
               style: TextStyle(
-                color: selected ? ColorManager.primary : ColorManager.textPrimary,
+                color: selected ? ColorManager.primaryText : ColorManager.textPrimary,
                 fontSize: 13.sp,
                 fontWeight: FontWeight.bold,
               ),
@@ -1016,8 +1016,8 @@ class _TransformationOnboardingScreenState
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Personalized Roadmap generated for ${_plan.title}!'),
-          backgroundColor: ColorManager.success,
+          content: Text('Personalized Roadmap generated for ${_plan.title}!', style: const TextStyle(color: Colors.white)),
+          backgroundColor: ColorManager.successDark,
           behavior: SnackBarBehavior.floating,
         ),
       );

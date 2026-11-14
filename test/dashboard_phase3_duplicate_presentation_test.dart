@@ -333,7 +333,7 @@ void main() {
       expect(find.byType(HomeAiRoutineCard), findsOneWidget);
       expect(find.text(TransformationPlansData.weightLoss60.title), findsOneWidget);
       expect(find.text('DAY 1 OF 60'), findsOneWidget);
-      expect(find.text('START DAY 1 WORKOUT'), findsOneWidget);
+      expect(find.text('Start Day 1 workout'), findsOneWidget);
 
       // 2. AI Workout Generator card remains visible alongside
       expect(find.byType(DashboardAiWorkoutGeneratorCard), findsOneWidget);
@@ -392,8 +392,8 @@ void main() {
       expect(find.byType(HomeAiRoutineCard), findsOneWidget);
       expect(find.text('DAY 7 • REST DAY'), findsOneWidget);
       expect(find.text('Rest & Muscle Repair'), findsOneWidget);
-      expect(find.text('VIEW PROGRAMME ROADMAP'), findsOneWidget);
-      expect(find.text('START DAY 7 WORKOUT'), findsNothing);
+      expect(find.text('View programme roadmap'), findsOneWidget);
+      expect(find.text('Start Day 7 workout'), findsNothing);
 
       // 2. Duplicate card in challenges section is SUPPRESSED
       expect(find.byKey(const Key('active_challenge_card')), findsNothing);
@@ -696,7 +696,7 @@ void main() {
       expect(find.byIcon(Icons.lock_outline_rounded), findsNothing);
 
       // 3. CTA label is shown (premium user gets full access)
-      expect(find.text('START DAY 1 WORKOUT'), findsOneWidget);
+      expect(find.text('Start Day 1 workout'), findsOneWidget);
     });
 
     // -------------------------------------------------------------------------
@@ -829,7 +829,7 @@ void main() {
       expect(find.byIcon(Icons.lock_outline_rounded), findsOneWidget);
 
       // Tap the CTA button (locked state routes to premium screen)
-      await tester.tap(find.text('START DAY 1 WORKOUT'));
+      await tester.tap(find.text('Start Day 1 workout'));
       await tester.pumpAndSettle();
 
       // No workout launched — user is on the premium paywall screen

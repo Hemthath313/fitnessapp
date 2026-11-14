@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/units.dart';
 import 'package:fitness_app/utils/managers/layout_manager.dart';
 import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/model/workout_session_model.dart';
@@ -84,7 +85,7 @@ class _AdaptiveStrengthSummaryCardState
                       Expanded(
                         child: Row(
                           children: [
-                            Icon(Icons.bolt_rounded, color: Colors.amber, size: 20.sp),
+                            Icon(Icons.bolt_rounded, color: ColorManager.warningText, size: 20.sp),
                             SizedBox(width: 6.w),
                             Expanded(
                               child: Text(
@@ -112,7 +113,7 @@ class _AdaptiveStrengthSummaryCardState
                           'This Week',
                           style: TextStyle(
                             color: ColorManager.primaryText,
-                            fontSize: 11.sp,
+                            fontSize: 12.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -136,7 +137,7 @@ class _AdaptiveStrengthSummaryCardState
                             children: [
                               Text(
                                 'Adherence',
-                                style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+                                style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                               ),
                               SizedBox(height: 4.h),
                               FittedBox(
@@ -155,7 +156,7 @@ class _AdaptiveStrengthSummaryCardState
                                     SizedBox(width: 4.w),
                                     Text(
                                       'workouts',
-                                      style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+                                      style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
                                     ),
                                   ],
                                 ),
@@ -177,7 +178,7 @@ class _AdaptiveStrengthSummaryCardState
                             children: [
                               Text(
                                 'Volume Lifted',
-                                style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+                                style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                               ),
                               SizedBox(height: 4.h),
                               FittedBox(
@@ -186,7 +187,7 @@ class _AdaptiveStrengthSummaryCardState
                                 child: Row(
                                   children: [
                                     Text(
-                                      '${weeklyMetrics.thisWeekVolume.toInt()} kg',
+                                      '${Units.intOf(weeklyMetrics.thisWeekVolume)} ${Units.label}',
                                       style: TextStyle(
                                         color: ColorManager.primaryText,
                                         fontSize: 16.sp,
@@ -198,8 +199,8 @@ class _AdaptiveStrengthSummaryCardState
                                       Text(
                                         '${weeklyMetrics.volumeChangePct > 0 ? '+' : ''}${weeklyMetrics.volumeChangePct.toStringAsFixed(0)}%',
                                         style: TextStyle(
-                                          color: weeklyMetrics.volumeChangePct >= 0 ? ColorManager.primaryText : Colors.orange.shade800,
-                                          fontSize: 11.sp,
+                                          color: weeklyMetrics.volumeChangePct >= 0 ? ColorManager.primaryText : ColorManager.warningText,
+                                          fontSize: 12.sp,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -222,11 +223,11 @@ class _AdaptiveStrengthSummaryCardState
                       decoration: BoxDecoration(
                         color: ColorManager.surfaceDark,
                         borderRadius: BorderRadius.circular(AppRadius.small.r),
-                        border: Border.all(color: Colors.amber.withValues(alpha: 0.25)),
+                        border: Border.all(color: ColorManager.premium.withValues(alpha: 0.25)),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.emoji_events_rounded, color: Colors.amber, size: 20.sp),
+                          Icon(Icons.emoji_events_rounded, color: ColorManager.warningText, size: 20.sp),
                           SizedBox(width: 10.w),
                           Expanded(
                             child: Column(
@@ -252,8 +253,8 @@ class _AdaptiveStrengthSummaryCardState
                                 ),
                                 SizedBox(height: 2.h),
                                 Text(
-                                  'Top Set: ${topPR.weight.toInt()} kg × ${topPR.reps}  •  Est. 1RM: ${topPR.estimated1RM.toStringAsFixed(1)} kg',
-                                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+                                  'Top Set: ${Units.intOf(topPR.weight)} ${Units.label} × ${topPR.reps}  •  Est. 1RM: ${Units.fmt(topPR.estimated1RM, 1)} ${Units.label}',
+                                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
                                 ),
                               ],
                             ),
@@ -275,7 +276,7 @@ class _AdaptiveStrengthSummaryCardState
                           Expanded(
                             child: Text(
                               'Complete your first routine to unlock your Strength PR Vault!',
-                              style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+                              style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
                             ),
                           ),
                         ],

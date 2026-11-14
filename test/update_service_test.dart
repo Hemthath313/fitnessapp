@@ -254,9 +254,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Update Required'), findsOneWidget);
-      expect(find.text('UPDATE NOW'), findsOneWidget);
+      expect(find.text('Update now'), findsOneWidget);
       expect(find.byKey(const Key('update_later_button')), findsNothing);
-      expect(find.text('LATER'), findsNothing);
+      expect(find.text('Later'), findsNothing);
 
       final popScopeFinder = find.byWidgetPredicate((w) => w is PopScope);
       expect(popScopeFinder, findsOneWidget);
@@ -291,9 +291,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Update Available'), findsOneWidget);
-      expect(find.text('UPDATE NOW'), findsOneWidget);
+      expect(find.text('Update now'), findsOneWidget);
       expect(find.byKey(const Key('update_later_button')), findsOneWidget);
-      expect(find.text('LATER'), findsOneWidget);
+      expect(find.text('Later'), findsOneWidget);
 
       final popScopeFinder = find.byWidgetPredicate((w) => w is PopScope);
       expect(popScopeFinder, findsOneWidget);
@@ -534,8 +534,8 @@ void main() {
       expect(find.text('New chest and tricep routines'), findsOneWidget);
       expect(find.text('Improved rest timer UI'), findsOneWidget);
       expect(find.text('Performance enhancements'), findsOneWidget);
-      expect(find.text('UPDATE NOW'), findsOneWidget);
-      expect(find.text('LATER'), findsOneWidget);
+      expect(find.text('Update now'), findsOneWidget);
+      expect(find.text('Later'), findsOneWidget);
     });
 
     // 17. Small screen responsiveness keeps action buttons visible with scrollable notes
@@ -568,8 +568,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Action buttons must be rendered and visible even with long content on small screen
-      expect(find.text('UPDATE NOW'), findsOneWidget);
-      expect(find.text('LATER'), findsOneWidget);
+      expect(find.text('Update now'), findsOneWidget);
+      expect(find.text('Later'), findsOneWidget);
       expect(find.byKey(const Key('update_now_button')), findsOneWidget);
       expect(find.byKey(const Key('update_later_button')), findsOneWidget);
     });

@@ -68,8 +68,8 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
         Navigator.of(context).pop(true); // Return true on success
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Thank you! Your feedback helps us improve.'),
-            backgroundColor: ColorManager.success,
+            content: const Text('Thank you! Your feedback helps us improve.', style: TextStyle(color: Colors.white)),
+            backgroundColor: ColorManager.successDark,
           ),
         );
       }
@@ -131,7 +131,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'RATE & FEEDBACK',
+                      'Rate and send feedback',
                       style: TextStyle(
                         color: ColorManager.onMint,
                         fontSize: 16.sp,
@@ -174,7 +174,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                           },
                           icon: Icon(
                             isSelected ? Icons.star_rounded : Icons.star_border_rounded,
-                            color: isSelected ? Colors.amber : ColorManager.textTertiary,
+                            color: isSelected ? ColorManager.warningText : ColorManager.textTertiary,
                             size: SizeManager.s40.w,
                           ),
                         );
@@ -214,7 +214,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                       Text(
                         _errorMessage,
                         style: TextStyle(
-                          color: ColorManager.red,
+                          color: ColorManager.errorText,
                           fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),

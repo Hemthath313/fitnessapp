@@ -25,7 +25,7 @@ class LimeGreenRoundedButtonWidget extends StatelessWidget {
           onPressed: isLoading ? null : onTap,
           style: ElevatedButton.styleFrom(
             backgroundColor: ColorManager.primary,
-            foregroundColor: const Color(0xFF06201B),
+            foregroundColor: ColorManager.onMint,
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppRadius.button.r),
@@ -39,7 +39,7 @@ class LimeGreenRoundedButtonWidget extends StatelessWidget {
                   width: 20.w,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF06201B)),
+                    valueColor: const AlwaysStoppedAnimation<Color>(ColorManager.onMint),
                   ),
                 )
               : Text(
@@ -47,7 +47,7 @@ class LimeGreenRoundedButtonWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF06201B),
+                    color: ColorManager.onMint,
                     letterSpacing: 0.5,
                   ),
                 ),

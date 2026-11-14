@@ -146,7 +146,7 @@ class _DayDot extends StatelessWidget {
             color: done ? ColorManager.primary : ColorManager.surfaceLight,
           ),
           child: done
-              ? Icon(Icons.check_rounded, size: 16.sp, color: Colors.black)
+              ? Icon(Icons.check_rounded, size: 16.sp, color: Colors.white)
               : null,
         ),
         SizedBox(height: 4.h),
@@ -154,7 +154,7 @@ class _DayDot extends StatelessWidget {
           label,
           style: TextStyle(
             color: done ? accent : ColorManager.textTertiary,
-            fontSize: 11.sp,
+            fontSize: 12.sp,
           ),
         ),
       ],

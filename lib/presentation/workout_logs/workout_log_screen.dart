@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/units.dart';
 import 'package:fitness_app/utils/managers/layout_manager.dart';
 import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/data/exercise_data.dart';
@@ -35,7 +36,10 @@ class _DraftExercise {
 }
 
 class WorkoutLogScreen extends StatefulWidget {
-  const WorkoutLogScreen({super.key});
+  const WorkoutLogScreen({super.key, this.initialDate});
+
+  /// Pre-selected day (e.g. a day tapped in History). Defaults to today.
+  final DateTime? initialDate;
 
   static List<String> get suggestedExercises => ExerciseData.allExerciseNames;
 
@@ -59,7 +63,10 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
   bool _isSaving = false;
 
   /// The day the workout happened. Defaults to today; can be moved back.
-  late DateTime _date = _dateOnly(DateTime.now());
+  late DateTime _date = _dateOnly(
+      (widget.initialDate != null && !widget.initialDate!.isAfter(DateTime.now()))
+          ? widget.initialDate!
+          : DateTime.now());
 
   /// Exercises already filled in for this workout.
   final List<_DraftExercise> _added = [];
@@ -128,11 +135,29 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
     _isProgrammaticWeightUpdate = false;
   }
 
+  /// "Last time · Mar 3: 60 kg × 8 · 3 sets" for the chosen exercise.
+  String? _lastTimeText;
+  String? _lastTimeFor;
+
+  static String? _describeLastLog(WorkoutLog? log) {
+    if (log == null || log.sets.isEmpty) return null;
+    final best = log.sets.reduce((a, b) =>
+        (b.weight > a.weight || (b.weight == a.weight && b.reps > a.reps)) ? b : a);
+    final when = DateFormat('MMM d').format(log.date);
+    final setWord = log.sets.length == 1 ? 'set' : 'sets';
+    final load = best.weight > 0
+        ? '${Units.fmtSmart(best.weight)} ${Units.label} × ${best.reps}'
+        : '${best.reps} reps';
+    return 'Last time · $when: $load · ${log.sets.length} $setWord';
+  }
+
   Future<void> _selectExerciseAndSeedWeight(String rawName) async {
     final trimmed = rawName.trim();
     if (trimmed.isEmpty) return;
 
     final cachedLog = WorkoutLogService.getCachedLastLog(trimmed);
+    _lastTimeText = _describeLastLog(cachedLog);
+    _lastTimeFor = trimmed;
     final initialProgression = ProgressionService.calculateNextTarget(
       exerciseName: trimmed,
       previousLog: cachedLog,
@@ -157,6 +182,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
       final fetchedLog = await _logService.getLastExerciseLog(trimmed);
       if (!mounted || _exerciseController.text.trim() != trimmed) return;
       if (fetchedLog != null) {
+        _lastTimeText = _describeLastLog(fetchedLog);
         final progression = ProgressionService.calculateNextTarget(
           exerciseName: trimmed,
           previousLog: fetchedLog,
@@ -231,7 +257,8 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
   _DraftExercise? _readForm() {
     final List<WorkoutSet> finalSets = [];
     for (int i = 0; i < _sets.length; i++) {
-      final weight = double.tryParse(_weightControllers[i].text.trim()) ?? 0.0;
+      // Typed in the user's unit; stored in kg.
+      final weight = Units.parseToKg(_weightControllers[i].text) ?? 0.0;
       final reps = int.tryParse(_repControllers[i].text.trim()) ?? 0;
       // Only sets with reps are real sets; they are stored as completed so
       // progress charts and strength insights count them.
@@ -249,6 +276,8 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
   }
 
   void _resetForm() {
+    _lastTimeText = null;
+    _lastTimeFor = null;
     for (final c in _weightControllers) {
       c.dispose();
     }
@@ -400,7 +429,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
     return Scaffold(
       backgroundColor: ColorManager.background,
       appBar: AppBar(
-        title: Text('Log a workout', style: TextStyle(color: ColorManager.textPrimary)),
+        title: Text('Log past workout', style: TextStyle(color: ColorManager.textPrimary)),
         backgroundColor: ColorManager.background,
         iconTheme: IconThemeData(color: ColorManager.textPrimary),
       ),
@@ -424,7 +453,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.event_rounded, color: ColorManager.primary),
+                    Icon(Icons.event_rounded, color: ColorManager.primaryText),
                     SizedBox(width: 10.w),
                     Text(
                       'When',
@@ -465,7 +494,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                       'In this workout (${_added.length})',
                       style: TextStyle(
                         color: ColorManager.textTertiary,
-                        fontSize: 11.sp,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -476,7 +505,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                         child: Row(
                           children: [
                             Icon(Icons.check_circle_rounded,
-                                color: ColorManager.primary, size: 18.sp),
+                                color: ColorManager.primaryText, size: 18.sp),
                             SizedBox(width: 8.w),
                             Expanded(
                               child: Text(
@@ -492,7 +521,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                             ),
                             Text(
                               '${_added[i].sets.length} sets'
-                              '${_added[i].volume > 0 ? ' · ${_added[i].volume.toInt()} kg' : ''}',
+                              '${_added[i].volume > 0 ? ' · ${Units.intOf(_added[i].volume)} ${Units.label}' : ''}',
                               style: TextStyle(
                                 color: ColorManager.textTertiary,
                                 fontSize: 12.sp,
@@ -546,7 +575,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                     hintText: 'e.g. Barbell Bench Press...',
                     hintStyle: TextStyle(color: ColorManager.textTertiary, fontSize: 13.sp),
                     labelStyle: TextStyle(color: ColorManager.textSecondary),
-                    prefixIcon: const Icon(Icons.fitness_center_rounded, color: ColorManager.primary),
+                    prefixIcon: Icon(Icons.fitness_center_rounded, color: ColorManager.primaryText),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
                       borderSide: const BorderSide(color: ColorManager.primary, width: 2),
@@ -583,7 +612,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
                               child: Row(
                                 children: [
-                                  Icon(Icons.sports_gymnastics_rounded, size: 16.sp, color: ColorManager.primary),
+                                  Icon(Icons.sports_gymnastics_rounded, size: 16.sp, color: ColorManager.primaryText),
                                   SizedBox(width: 10.w),
                                   Expanded(
                                     child: Text(
@@ -606,6 +635,22 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                 );
               },
             ),
+            if (_lastTimeText != null && _exerciseController.text.trim() == _lastTimeFor) ...[
+              SizedBox(height: 8.h),
+              Row(
+                key: const Key('log_last_time_hint'),
+                children: [
+                  Icon(Icons.history_rounded, size: 15.sp, color: ColorManager.textSecondary),
+                  SizedBox(width: 6.w),
+                  Expanded(
+                    child: Text(
+                      _lastTimeText!,
+                      style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
+                    ),
+                  ),
+                ],
+              ),
+            ],
             SizedBox(height: 10.h),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -616,8 +661,8 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                     child: ActionChip(
                       label: Text(chip),
                       labelStyle: TextStyle(
-                        color: _exerciseController.text == chip ? Colors.black : ColorManager.textSecondary,
-                        fontSize: 11.sp,
+                        color: _exerciseController.text == chip ? Colors.white : ColorManager.textSecondary,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                       ),
                       backgroundColor: _exerciseController.text == chip ? ColorManager.primary : ColorManager.surface,
@@ -671,8 +716,8 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                       },
                     );
                   },
-                  icon: const Icon(Icons.fitness_center_rounded, size: 16, color: ColorManager.primary),
-                  label: Text('Plate Math', style: TextStyle(color: ColorManager.primary, fontSize: 13.sp, fontWeight: FontWeight.bold)),
+                  icon: Icon(Icons.fitness_center_rounded, size: 16, color: ColorManager.primaryText),
+                  label: Text('Plate Math', style: TextStyle(color: ColorManager.primaryText, fontSize: 13.sp, fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
@@ -691,7 +736,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         _buildTableHeaderCell('Set'),
-                        _buildTableHeaderCell('Weight (kg)'),
+                        _buildTableHeaderCell('Weight (${Units.label})'),
                         _buildTableHeaderCell('Reps'),
                         _buildTableHeaderCell('Action'),
                       ],
@@ -716,8 +761,8 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                                     child: Text(
                                       '${index + 1}',
                                       style: TextStyle(
-                                        color: ColorManager.primary,
-                                        fontSize: 11.sp,
+                                        color: ColorManager.primaryText,
+                                        fontSize: 12.sp,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -777,7 +822,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                                 child: Center(
                                   child: IconButton(
                                     tooltip: 'Remove set',
-                                    icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent),
+                                    icon: Icon(Icons.remove_circle_outline, color: ColorManager.errorText),
                                     onPressed: () => _removeSet(index),
                                   ),
                                 ),
@@ -790,8 +835,8 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                     const Divider(),
                     TextButton.icon(
                       onPressed: _addSet,
-                      icon: Icon(Icons.add, color: ColorManager.primary),
-                      label: Text('Add Set', style: TextStyle(color: ColorManager.primary, fontWeight: FontWeight.bold)),
+                      icon: Icon(Icons.add, color: ColorManager.primaryText),
+                      label: Text('Add Set', style: TextStyle(color: ColorManager.primaryText, fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
@@ -820,11 +865,11 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
               child: OutlinedButton.icon(
                 key: const Key('log_add_another_button'),
                 onPressed: _isSaving ? null : _commitCurrentExercise,
-                icon: const Icon(Icons.add_rounded, color: ColorManager.primary),
+                icon: Icon(Icons.add_rounded, color: ColorManager.primaryText),
                 label: Text(
                   'Add another exercise',
                   style: TextStyle(
-                    color: ColorManager.primary,
+                    color: ColorManager.primaryText,
                     fontWeight: FontWeight.bold,
                     fontSize: 14.sp,
                   ),
@@ -844,7 +889,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
                 onPressed: _isSaving ? null : _saveLog,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorManager.primary,
-                  foregroundColor: const Color(0xFF06201B),
+                  foregroundColor: ColorManager.onMint,
                   disabledBackgroundColor: ColorManager.primary.withValues(alpha: 0.6),
                   padding: EdgeInsets.symmetric(vertical: 15.h),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
@@ -885,7 +930,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
         style: TextStyle(
           color: ColorManager.textTertiary,
           fontWeight: FontWeight.bold,
-          fontSize: 11.sp,
+          fontSize: 12.sp,
         ),
       ),
     );

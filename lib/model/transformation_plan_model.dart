@@ -371,6 +371,14 @@ class UserTransformationState {
   final Map<String, TransformationDailyLog> dailyLogs; // Keyed by YYYY-MM-DD
   final Map<int, TransformationScheduleOverride> scheduleOverrides; // Keyed by dayNumber (1-based)
 
+  /// When each day was completed, keyed by dayNumber, value 'yyyy-MM-dd'.
+  /// Older saves have no entry; see [completionDateFor] for the fallback.
+  final Map<int, String> completedDayDates;
+
+  /// Short result of the workout that completed a day, keyed by dayNumber:
+  /// {'sets': n, 'minutes': n, 'prs': n}. Shown on the home card.
+  final Map<int, Map<String, int>> completedDaySummaries;
+
   UserTransformationState({
     required this.planId,
     required this.planTitle,
@@ -402,6 +410,8 @@ class UserTransformationState {
     this.dailyWaterTargetMl = 2500.0,
     this.dailyLogs = const {},
     this.scheduleOverrides = const {},
+    this.completedDayDates = const {},
+    this.completedDaySummaries = const {},
   });
 
   bool get isActive => status == 'active';
@@ -432,6 +442,83 @@ class UserTransformationState {
 
   /// Returns override object for the given day number, if any
   TransformationScheduleOverride? getScheduleOverride(int dayNumber) => scheduleOverrides[dayNumber];
+
+  static DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
+  static String dateKey(DateTime d) {
+    final m = d.month.toString().padLeft(2, '0');
+    final day = d.day.toString().padLeft(2, '0');
+    return '${d.year}-$m-$day';
+  }
+
+  /// Calendar date a completed day was finished on. Saves made before dates
+  /// were recorded fall back to the day's scheduled date (never later than
+  /// [today]). Returns null for days that are not completed.
+  DateTime? completionDateFor(int dayNumber, DateTime today) {
+    if (!isDayCompleted(dayNumber)) return null;
+    final raw = completedDayDates[dayNumber];
+    if (raw != null) {
+      final parsed = DateTime.tryParse(raw);
+      if (parsed != null) return _dateOnly(parsed);
+    }
+    final scheduled = getScheduledDateForDay(dayNumber);
+    final t = _dateOnly(today);
+    return scheduled.isAfter(t) ? t : _dateOnly(scheduled);
+  }
+
+  /// Self-paced programme position.
+  ///
+  /// * A workout finished today stays the current day, so the card can say
+  ///   "Day N done" until midnight.
+  /// * Otherwise the current day is the first day that is not completed or
+  ///   skipped. Missing a calendar day pauses the plan; nothing piles up.
+  /// * A rest day takes one calendar day: it is "today" on the first day
+  ///   after the previous workout, and is passed automatically after that.
+  ///
+  /// Returns the resolved day plus the rest days that have been passed, with
+  /// the date each one occupied (so they can be saved as completed).
+  ({int day, Map<int, DateTime> passedRestDays}) resolveProgress(
+    DateTime now, {
+    bool Function(int dayNumber)? isRestDay,
+  }) {
+    final today = _dateOnly(now);
+    final passed = <int, DateTime>{};
+    if (totalDays <= 0) return (day: 1, passedRestDays: passed);
+
+    int? doneToday;
+    for (final d in completedDayIndices) {
+      if (isRestDay?.call(d) ?? false) continue; // ticking a rest day never pins it
+      if (completionDateFor(d, today) == today) {
+        if (doneToday == null || d > doneToday) doneToday = d;
+      }
+    }
+    if (doneToday != null) {
+      return (day: doneToday.clamp(1, totalDays), passedRestDays: passed);
+    }
+
+    var cursor = _dateOnly(startDate);
+    var resolved = totalDays;
+    for (var d = 1; d <= totalDays; d++) {
+      if (isDayCompleted(d)) {
+        final next = completionDateFor(d, today)!.add(const Duration(days: 1));
+        if (next.isAfter(cursor)) cursor = next;
+        continue;
+      }
+      if (isDaySkipped(d)) continue;
+      if (isRestDay?.call(d) ?? false) {
+        if (cursor.isBefore(today)) {
+          passed[d] = cursor;
+          cursor = cursor.add(const Duration(days: 1));
+          continue;
+        }
+        resolved = d;
+        break;
+      }
+      resolved = d;
+      break;
+    }
+    return (day: resolved.clamp(1, totalDays), passedRestDays: passed);
+  }
 
   double get completionPercentage {
     if (totalDays <= 0) return 0.0;
@@ -506,6 +593,8 @@ class UserTransformationState {
     double? dailyWaterTargetMl,
     Map<String, TransformationDailyLog>? dailyLogs,
     Map<int, TransformationScheduleOverride>? scheduleOverrides,
+    Map<int, String>? completedDayDates,
+    Map<int, Map<String, int>>? completedDaySummaries,
   }) {
     return UserTransformationState(
       planId: planId ?? this.planId,
@@ -538,6 +627,8 @@ class UserTransformationState {
       dailyWaterTargetMl: dailyWaterTargetMl ?? this.dailyWaterTargetMl,
       dailyLogs: dailyLogs ?? this.dailyLogs,
       scheduleOverrides: scheduleOverrides ?? this.scheduleOverrides,
+      completedDayDates: completedDayDates ?? this.completedDayDates,
+      completedDaySummaries: completedDaySummaries ?? this.completedDaySummaries,
     );
   }
 
@@ -573,6 +664,9 @@ class UserTransformationState {
       'dailyWaterTargetMl': dailyWaterTargetMl,
       'dailyLogs': dailyLogs.map((k, v) => MapEntry(k, v.toMap())),
       'scheduleOverrides': scheduleOverrides.map((k, v) => MapEntry(k.toString(), v.toMap())),
+      'completedDayDates': completedDayDates.map((k, v) => MapEntry(k.toString(), v)),
+      'completedDaySummaries':
+          completedDaySummaries.map((k, v) => MapEntry(k.toString(), v)),
     };
   }
 
@@ -666,6 +760,26 @@ class UserTransformationState {
       }
     });
 
+    final rawCompletedDates = map['completedDayDates'] as Map<dynamic, dynamic>? ?? {};
+    final completedDayDatesMap = <int, String>{};
+    rawCompletedDates.forEach((k, v) {
+      final dayNum = int.tryParse(k.toString());
+      if (dayNum != null && v != null) completedDayDatesMap[dayNum] = v.toString();
+    });
+
+    final rawSummaries = map['completedDaySummaries'] as Map<dynamic, dynamic>? ?? {};
+    final summariesMap = <int, Map<String, int>>{};
+    rawSummaries.forEach((k, v) {
+      final dayNum = int.tryParse(k.toString());
+      if (dayNum != null && v is Map) {
+        final entry = <String, int>{};
+        v.forEach((key, value) {
+          if (value is num) entry[key.toString()] = value.toInt();
+        });
+        summariesMap[dayNum] = entry;
+      }
+    });
+
     return UserTransformationState(
       planId: map['planId']?.toString() ?? '',
       planTitle: map['planTitle']?.toString() ?? '',
@@ -697,6 +811,8 @@ class UserTransformationState {
       dailyWaterTargetMl: (map['dailyWaterTargetMl'] as num?)?.toDouble() ?? 2500.0,
       dailyLogs: dailyLogsMap,
       scheduleOverrides: scheduleOverridesMap,
+      completedDayDates: completedDayDatesMap,
+      completedDaySummaries: summariesMap,
     );
   }
 }

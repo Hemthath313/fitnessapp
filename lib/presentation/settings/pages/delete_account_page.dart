@@ -189,7 +189,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                           children: [
                             Icon(
                               Icons.info_outline,
-                              color: ColorManager.limerGreen2,
+                              color: ColorManager.primaryText,
                               size: SizeManager.s20.sp,
                             ),
                             SizedBox(width: SizeManager.s8.w),

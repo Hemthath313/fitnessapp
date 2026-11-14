@@ -263,7 +263,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                                                 'View exercises',
                                                 style: TextStyle(
                                                   color: ColorManager.textSecondary,
-                                                  fontSize: 11.sp,
+                                                  fontSize: 12.sp,
                                                   fontWeight: FontWeight.w500,
                                                 ),
                                               ),
@@ -373,7 +373,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                     Icon(
                       Icons.tune_rounded,
                       color: hasFilterSelected
-                          ? ColorManager.primary
+                          ? ColorManager.primaryText
                           : ColorManager.textSecondary,
                       size: 20,
                     ),
@@ -479,7 +479,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: Colors.grey[700],
+                          color: ColorManager.divider,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -507,7 +507,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                           child: Text(
                             'Reset',
                             style: TextStyle(
-                              color: ColorManager.primary,
+                              color: ColorManager.primaryText,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -540,7 +540,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                           backgroundColor: ColorManager.surfaceDark,
                           visualDensity: VisualDensity.compact,
                           labelStyle: TextStyle(
-                            color: isSelected ? ColorManager.primary : ColorManager.textSecondary,
+                            color: isSelected ? ColorManager.primaryText : ColorManager.textSecondary,
                             fontSize: 12.sp,
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                           ),
@@ -578,7 +578,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                           backgroundColor: ColorManager.surfaceDark,
                           visualDensity: VisualDensity.compact,
                           labelStyle: TextStyle(
-                            color: isSelected ? ColorManager.primary : ColorManager.textSecondary,
+                            color: isSelected ? ColorManager.primaryText : ColorManager.textSecondary,
                             fontSize: 12.sp,
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                           ),
@@ -604,7 +604,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: ColorManager.primary,
-                          foregroundColor: const Color(0xFF06201B),
+                          foregroundColor: ColorManager.onMint,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(AppRadius.button),
@@ -802,7 +802,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   color: ColorManager.primaryText,
-                                  fontSize: 11.sp,
+                                  fontSize: 12.sp,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -816,7 +816,7 @@ class _BodyPartsScreenState extends State<BodyPartsScreen> {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: ColorManager.textSecondary,
-                                fontSize: 11.sp,
+                                fontSize: 12.sp,
                               ),
                             ),
                           ),

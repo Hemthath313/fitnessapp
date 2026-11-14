@@ -104,7 +104,99 @@ class TransformationProvider with ChangeNotifier {
     String? historyDocId,
   })? batchCommitForTesting;
 
-  UserTransformationState? get activeTransformation => _activeTransformation;
+  /// The active plan with [UserTransformationState.currentDay] resolved for
+  /// today (self-paced, see [UserTransformationState.resolveProgress]).
+  /// The stored value is only a floor, so the plan never moves backwards.
+  UserTransformationState? get activeTransformation {
+    final state = _activeTransformation;
+    if (state == null) return null;
+    final day = _resolvedDayFor(state);
+    if (day != state.currentDay) {
+      _activeTransformation = state.copyWith(currentDay: day);
+    }
+    return _activeTransformation;
+  }
+
+  /// Clock used for day resolution; tests can override it.
+  DateTime Function() clockForTesting = DateTime.now;
+
+  bool Function(int) _restDayFn(UserTransformationState state) {
+    final blueprint = TransformationPlansData.getById(state.planId);
+    return (int d) => blueprint?.getDayBlueprint(d)?.isRestDay ?? false;
+  }
+
+  int _resolvedDayFor(UserTransformationState state) {
+    final now = clockForTesting();
+    final resolved =
+        state.resolveProgress(now, isRestDay: _restDayFn(state)).day;
+    final floor = state.currentDay.clamp(1, state.totalDays < 1 ? 1 : state.totalDays);
+    return resolved > floor ? resolved : floor;
+  }
+
+  /// Milestones unlock when the programme reaches their day: the highest
+  /// completed day counts, not just how many days were ticked.
+  List<TransformationMilestone> _evaluateMilestones(
+      List<TransformationMilestone> milestones, List<int> completed) {
+    final reached = completed.isEmpty
+        ? 0
+        : [completed.length, completed.reduce((a, b) => a > b ? a : b)]
+            .reduce((a, b) => a > b ? a : b);
+    return milestones.map((m) {
+      if (!m.isAchieved && reached >= m.triggerDay) {
+        return m.copyWith(isAchieved: true, achievedAt: DateTime.now());
+      }
+      return m;
+    }).toList();
+  }
+
+  /// Saves rest days the user has already passed as completed (so progress
+  /// can reach 100% and milestones fire) and stores the resolved current day.
+  Future<void> _syncProgress() async {
+    final state = _activeTransformation;
+    final uid = _uid;
+    if (state == null || uid == null || !state.isActive) return;
+
+    final now = clockForTesting();
+    final result = state.resolveProgress(now, isRestDay: _restDayFn(state));
+    final indices = List<int>.from(state.completedDayIndices);
+    final dates = Map<int, String>.from(state.completedDayDates);
+    result.passedRestDays.forEach((d, date) {
+      if (!indices.contains(d)) {
+        indices.add(d);
+        dates[d] = UserTransformationState.dateKey(date);
+      }
+    });
+    indices.sort();
+    final floor = state.currentDay.clamp(1, state.totalDays < 1 ? 1 : state.totalDays);
+    final day = result.day > floor ? result.day : floor;
+
+    if (indices.length == state.completedDayIndices.length &&
+        day == state.currentDay) {
+      return;
+    }
+
+    final updated = state.copyWith(
+      completedDayIndices: indices,
+      completedDayDates: dates,
+      milestones: _evaluateMilestones(state.milestones, indices),
+      currentDay: day,
+    );
+    _activeTransformation = updated;
+    try {
+      if (activeDocSaverForTesting != null) {
+        await activeDocSaverForTesting!(uid, updated.toMap());
+      } else {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('active_transformation')
+            .doc('current')
+            .set(updated.toMap());
+      }
+    } catch (e) {
+      debugPrint('TransformationProvider: Error syncing progress: $e');
+    }
+  }
   List<UserTransformationState> get history => _history;
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -121,7 +213,7 @@ class TransformationProvider with ChangeNotifier {
   /// Current day's blueprint from the active plan
   TransformationDayBlueprint? get currentDayBlueprint {
     final blueprint = activeBlueprint;
-    final state = _activeTransformation;
+    final state = activeTransformation;
     if (blueprint == null || state == null) return null;
     return blueprint.getDayBlueprint(state.currentDay);
   }
@@ -222,6 +314,7 @@ class TransformationProvider with ChangeNotifier {
           return dateB.compareTo(dateA);
         });
       }
+      await _syncProgress();
     } catch (e) {
       debugPrint('TransformationProvider: Error loading transformation: $e');
       _error = e.toString();
@@ -552,38 +645,74 @@ class TransformationProvider with ChangeNotifier {
   }
 
   /// Explicitly marks a day completed in the programme (idempotent: does nothing if already completed)
-  Future<void> markDayCompleted(int dayIndex) async {
-    if (_activeTransformation == null) return;
-    if (isDayCompleted(dayIndex)) return;
-    await toggleDayCompletion(dayIndex);
+  ///
+  /// [summary] ({'sets', 'minutes', 'prs'}) is stored for the home card. If
+  /// the day is already done (a repeat), only the summary is refreshed.
+  Future<void> markDayCompleted(int dayIndex, {Map<String, int>? summary}) async {
+    final current = _activeTransformation;
+    final uid = _uid;
+    if (current == null) return;
+    if (!isDayCompleted(dayIndex)) {
+      await toggleDayCompletion(dayIndex, summary: summary);
+      return;
+    }
+    if (summary == null || uid == null) return;
+    final summaries =
+        Map<int, Map<String, int>>.from(current.completedDaySummaries)
+          ..[dayIndex] = summary;
+    final updated = current.copyWith(completedDaySummaries: summaries);
+    try {
+      if (activeDocSaverForTesting != null) {
+        await activeDocSaverForTesting!(uid, updated.toMap());
+      } else {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .collection('active_transformation')
+            .doc('current')
+            .set(updated.toMap());
+      }
+      _activeTransformation = updated;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('TransformationProvider: Error saving day summary: $e');
+    }
   }
 
   /// Toggles completion status of a day in the programme
-  Future<void> toggleDayCompletion(int dayIndex) async {
+  Future<void> toggleDayCompletion(int dayIndex, {Map<String, int>? summary}) async {
     final current = _activeTransformation;
     final uid = _uid;
     if (current == null || uid == null) return;
 
     final updatedIndices = List<int>.from(current.completedDayIndices);
+    final updatedDates = Map<int, String>.from(current.completedDayDates);
+    final updatedSummaries =
+        Map<int, Map<String, int>>.from(current.completedDaySummaries);
     if (updatedIndices.contains(dayIndex)) {
       updatedIndices.remove(dayIndex);
+      updatedDates.remove(dayIndex);
+      updatedSummaries.remove(dayIndex);
     } else {
+      if (summary != null) updatedSummaries[dayIndex] = summary;
       updatedIndices.add(dayIndex);
+      // Record when it was done so the plan can move on tomorrow.
+      updatedDates[dayIndex] =
+          UserTransformationState.dateKey(clockForTesting());
     }
     updatedIndices.sort();
 
-    // Check milestones triggered by completed count or day index
-    final updatedMilestones = current.milestones.map((m) {
-      if (!m.isAchieved && updatedIndices.length >= m.triggerDay) {
-        return m.copyWith(isAchieved: true, achievedAt: DateTime.now());
-      }
-      return m;
-    }).toList();
+    final updatedMilestones =
+        _evaluateMilestones(current.milestones, updatedIndices);
 
-    final updatedState = current.copyWith(
+    var updatedState = current.copyWith(
       completedDayIndices: updatedIndices,
+      completedDayDates: updatedDates,
+      completedDaySummaries: updatedSummaries,
       milestones: updatedMilestones,
     );
+    updatedState = updatedState.copyWith(
+        currentDay: _resolvedDayFor(updatedState));
 
     try {
       if (activeDocSaverForTesting != null) {

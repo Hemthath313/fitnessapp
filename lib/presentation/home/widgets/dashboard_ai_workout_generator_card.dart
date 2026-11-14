@@ -114,14 +114,14 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.auto_awesome,
-                            color: ColorManager.primary, size: 13.sp),
+                            color: ColorManager.primaryText, size: 13.sp),
                         SizedBox(width: 5.w),
                         Flexible(
                           child: Text(
                             'PLAN BUILDER',
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: ColorManager.primary,
+                              color: ColorManager.primaryText,
                               fontSize: 11.sp,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.6,
@@ -141,7 +141,7 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                     textAlign: TextAlign.end,
                     style: TextStyle(
                       color: ColorManager.textTertiary,
-                      fontSize: 11.sp,
+                      fontSize: 12.sp,
                     ),
                   ),
                 ),
@@ -190,7 +190,7 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                             '$days Days',
                             style: TextStyle(
                               color: ColorManager.white,
-                              fontSize: 11.sp,
+                              fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -234,9 +234,9 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
               Center(
                 child: TextButton.icon(
                   onPressed: () => _activateFreeStarterPlan(context),
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.bolt_rounded,
-                    color: Colors.white70,
+                    color: ColorManager.textSecondary,
                     size: 16,
                   ),
                   label: Text(
@@ -244,7 +244,7 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: Colors.white70,
+                      color: ColorManager.textSecondary,
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                     ),
@@ -310,14 +310,14 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.auto_awesome,
-                            color: ColorManager.primary, size: 13.sp),
+                            color: ColorManager.primaryText, size: 13.sp),
                         SizedBox(width: 5.w),
                         Flexible(
                           child: Text(
                             'WORKOUT ROUTINE',
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: ColorManager.primary,
+                              color: ColorManager.primaryText,
                               fontSize: 11.sp,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.6,
@@ -335,7 +335,7 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: ColorManager.textTertiary,
-                      fontSize: 11.sp,
+                      fontSize: 12.sp,
                     ),
                   ),
                 ),
@@ -387,16 +387,16 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                     children: [
                       if (isCompleted) ...[
                         Icon(Icons.check_circle_rounded,
-                            color: ColorManager.success, size: 12.sp),
+                            color: ColorManager.successText, size: 12.sp),
                         SizedBox(width: 4.w),
                       ],
                       Text(
                         day,
                         style: TextStyle(
                           color: isDayToday
-                              ? ColorManager.primary
+                              ? ColorManager.primaryText
                               : ColorManager.textSecondary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: isDayToday
                               ? FontWeight.bold
                               : FontWeight.normal,
@@ -444,25 +444,35 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                             ? Icons.refresh_rounded
                             : Icons.play_arrow_rounded,
                         size: 16.sp,
-                        color: Colors.white,
+                        color: isCompletedToday
+                            ? ColorManager.textPrimary
+                            : ColorManager.onMint,
                       ),
                       label: Text(
                         isCompletedToday
                             ? 'Repeat Routine'
                             : 'Start Routine',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: isCompletedToday
+                              ? ColorManager.textPrimary
+                              : ColorManager.onMint,
                           fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
+                        // Done for today: quiet grey button (matches the
+                        // Workout Plan card). Otherwise the blue primary.
                         backgroundColor: isCompletedToday
-                            ? const Color(0xFF1E4331)
+                            ? ColorManager.surfaceDark
                             : ColorManager.primary,
+                        elevation: 0,
                         padding: EdgeInsets.symmetric(vertical: 10.h),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AppRadius.button.r),
+                          side: isCompletedToday
+                              ? BorderSide(color: ColorManager.divider)
+                              : BorderSide.none,
                         ),
                       ),
                     ),
@@ -476,12 +486,12 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
                     icon: Icon(
                       Icons.refresh_rounded,
                       size: 16.sp,
-                      color: ColorManager.primary,
+                      color: ColorManager.primaryText,
                     ),
                     label: Text(
                       'Re-plan Split',
                       style: TextStyle(
-                        color: ColorManager.primary,
+                        color: ColorManager.primaryText,
                         fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                       ),
@@ -520,9 +530,9 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
           SnackBar(
             content: const Text(
               '3-Day Starter Routine activated! Ready for your workout.',
-              style: TextStyle(fontWeight: FontWeight.w600),
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
             ),
-            backgroundColor: ColorManager.success,
+            backgroundColor: ColorManager.successDark,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -531,7 +541,7 @@ class DashboardAiWorkoutGeneratorCard extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to activate starter plan: $e'),
+            content: Text('Failed to activate starter plan: $e', style: const TextStyle(color: Colors.white)),
             backgroundColor: ColorManager.error,
           ),
         );

@@ -587,7 +587,7 @@ void main() {
       expect(find.byType(HomeAiRoutineCard), findsOneWidget);
       expect(find.text(TransformationPlansData.weightLoss60.title), findsOneWidget);
       expect(find.text('DAY 1 OF 60'), findsOneWidget);
-      expect(find.text('START DAY 1 WORKOUT'), findsOneWidget);
+      expect(find.text('Start Day 1 workout'), findsOneWidget);
 
       // Competing secondary AI card is NOT on the Home dashboard
       expect(find.byType(DashboardAiWorkoutGeneratorCard), findsNothing);
@@ -796,7 +796,7 @@ void main() {
       expect(find.text('Workout Generator Screen'), findsOneWidget);
 
       // 4. Log Lift Action
-      expect(find.text('Log Lift'), findsOneWidget);
+      expect(find.text('Log past workout'), findsOneWidget);
     });
 
     // -------------------------------------------------------------------------
@@ -1225,7 +1225,7 @@ void main() {
     // -------------------------------------------------------------------------
     // Test 7c: One Log Lift sheet with consistent wording
     // -------------------------------------------------------------------------
-    testWidgets('7c. Log Lift without a plan shows one sheet with "Log a Single Lift"',
+    testWidgets('7c. Log past workout opens the log form directly, with no sheet',
         (tester) async {
       _configureTestViewport(tester, width: 390);
 
@@ -1247,54 +1247,12 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
-      await tester.tap(find.text('Log Lift'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
-
-      expect(find.text('Ready to Train?'), findsOneWidget);
-      expect(find.text('Build My Adaptive Plan'), findsOneWidget);
-      expect(find.text('Log a Single Lift'), findsOneWidget);
-      expect(find.text('Log a Single Exercise Manually'), findsNothing);
-      expect(find.text('Log a Single Ad-Hoc Lift'), findsNothing);
-
-      // The fallback button logs a lift and closes the sheet.
-      await tester.tap(find.text('Log a Single Lift'));
+      expect(find.text('Start workout'), findsOneWidget);
+      await tester.tap(find.text('Log past workout'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.text('Workout Log Screen'), findsOneWidget);
       expect(find.text('Ready to Train?'), findsNothing);
-    });
-
-    testWidgets('7d. Log Lift sheet primary action opens the plan builder',
-        (tester) async {
-      _configureTestViewport(tester, width: 390);
-
-      final transProvider = TransformationProvider(autoLoad: false);
-      transProvider.userIdOverrideForTesting = 'p4_u7d';
-      transProvider.activeDocFetcherForTesting = (_) => null;
-      await transProvider.loadTransformation();
-
-      final workoutProvider = WorkoutProvider()..setAllWorkoutsForTesting([]);
-
-      await tester.pumpWidget(_buildOptionATestDashboard(
-        transformationProvider: transProvider,
-        workoutProvider: workoutProvider,
-        subscriptionProvider: _MockSubscriptionProvider()..setPremium(true),
-        homeProvider: _MockHomeProvider(),
-        consumptionProvider: _MockConsumptionProvider(),
-        statsProvider: _MockStatisticsProvider(),
-      ));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200));
-
-      await tester.tap(find.text('Log Lift'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
-      await tester.tap(find.text('Build My Adaptive Plan'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
-
-      expect(find.text('Workout Generator Screen'), findsOneWidget);
     });
 
     // -------------------------------------------------------------------------

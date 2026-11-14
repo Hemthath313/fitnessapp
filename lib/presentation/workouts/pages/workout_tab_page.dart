@@ -1,6 +1,5 @@
 import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/presentation/explore/explore_page.dart';
-import 'package:fitness_app/presentation/home/providers/home_provider.dart';
 import 'package:fitness_app/presentation/in_app_purchases/providers/subscription_provider.dart';
 import 'package:fitness_app/presentation/journal/widgets/weekly_schedule_widget.dart';
 import 'package:fitness_app/utils/managers/asset_manager.dart';
@@ -8,6 +7,7 @@ import 'package:fitness_app/utils/managers/card_size_manager.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/utils/managers/value_manager.dart';
 import 'package:fitness_app/utils/router/router.dart';
+import 'package:fitness_app/presentation/custom_workouts/day_workout_session_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -93,9 +93,6 @@ class _WorkoutTabPageState extends State<WorkoutTabPage>
 
   @override
   Widget build(BuildContext context) {
-    final homeProvider = Provider.of<HomeProvider>(context);
-    final userData = homeProvider.userData;
-    final firstName = userData['first name'] ?? 'User';
 
     return Scaffold(
       backgroundColor: ColorManager.background,
@@ -104,122 +101,97 @@ class _WorkoutTabPageState extends State<WorkoutTabPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Greeting Header
+            // Title (Home already greets the user by name).
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Hello, $firstName 👋',
-                          style: TextStyle(
-                            color: ColorManager.white,
-                            fontSize: 24.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          'Ready to crush your goals today?',
-                          style: TextStyle(
-                            color: ColorManager.textMuted,
-                            fontSize: 14.sp,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Semantics(
-                    button: true,
-                    label: 'Build a workout plan',
-                    child: InkWell(
-                      key: const Key('ai_plan_button'),
-                      onTap: () => context.push(Routes.workoutGeneratorRoute),
-                      borderRadius: BorderRadius.circular(20.r),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                        decoration: BoxDecoration(
-                          color: ColorManager.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20.r),
-                          border: Border.all(color: ColorManager.primary.withValues(alpha: 0.2)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.auto_awesome_rounded, color: ColorManager.primary, size: 16.sp),
-                            SizedBox(width: 6.w),
-                            Text(
-                              'Plan Builder',
-                              style: TextStyle(
-                                color: ColorManager.primary,
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 12.h),
+              child: Text(
+                'Workouts',
+                style: TextStyle(
+                  color: ColorManager.textPrimary,
+                  fontSize: 24.sp,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
+
+            // One main action: start a live workout. Logging after the fact
+            // is a quiet secondary link, so only one blue button competes.
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              child: ElevatedButton.icon(
+                key: const Key('workouts_start_workout_button'),
+                onPressed: () => DayWorkoutSessionPage.startQuickWorkout(context),
+                icon: Icon(Icons.play_arrow_rounded, size: 22.sp, color: ColorManager.onMint),
+                label: Text('Start workout',
+                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ColorManager.primary,
+                  foregroundColor: ColorManager.onMint,
+                  elevation: 0,
+                  minimumSize: Size.fromHeight(50.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.button.r),
+                  ),
+                ),
+              ),
+            ),
+            Center(
+              child: TextButton(
+                key: const Key('workouts_log_past_button'),
+                onPressed: () => context.push(Routes.workoutLogRoute),
+                child: Text.rich(
+                  TextSpan(
+                    text: 'or ',
+                    style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp),
+                    children: [
+                      TextSpan(
+                        text: 'log a past workout',
+                        style: TextStyle(
+                          color: ColorManager.primaryText,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 4.h),
 
             // My Plan / Explore Segmented Sub-tab bar
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Container(
-                height: 48.h,
-                padding: EdgeInsets.all(4.w),
+                height: 42.h,
+                padding: EdgeInsets.all(3.w),
                 decoration: BoxDecoration(
-                  color: ColorManager.surface,
-                  boxShadow: ColorManager.cardShadow,
+                  // Quiet segmented control: grey track, no blue, so it never
+                  // looks like a second primary button.
+                  color: ColorManager.surfaceDark,
                   borderRadius: BorderRadius.circular(AppRadius.card.r),
-                  border: Border.all(color: ColorManager.divider),
                 ),
                 child: TabBar(
                   controller: _tabController,
                   indicator: BoxDecoration(
-                    gradient: ColorManager.mintGradient,
-                    borderRadius: BorderRadius.circular(22.r),
+                    color: ColorManager.surfaceLight,
+                    borderRadius: BorderRadius.circular(AppRadius.card.r - 3),
+                    boxShadow: ColorManager.cardShadow,
                   ),
                   indicatorSize: TabBarIndicatorSize.tab,
-                  labelColor: ColorManager.onMint,
-                  unselectedLabelColor: ColorManager.textMuted,
+                  labelColor: ColorManager.textPrimary,
+                  unselectedLabelColor: ColorManager.textSecondary,
                   labelStyle: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  unselectedLabelStyle: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                   ),
+                  unselectedLabelStyle: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
                   dividerColor: Colors.transparent,
                   tabs: const [
-                    Tab(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.calendar_today_rounded, size: 16),
-                          SizedBox(width: 8),
-                          Text('My Plan'),
-                        ],
-                      ),
-                    ),
-                    Tab(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.explore_rounded, size: 18),
-                          SizedBox(width: 8),
-                          Text('Explore'),
-                        ],
-                      ),
-                    ),
+                    Tab(text: 'My Plan'),
+                    Tab(text: 'Explore'),
                   ],
                 ),
               ),
@@ -329,14 +301,14 @@ class _MyPlanTabViewState extends State<_MyPlanTabView>
                           fit: BoxFit.contain,
                           errorBuilder: (context, error, stackTrace) => Icon(
                             cat['icon'] as IconData,
-                            color: ColorManager.primary,
+                            color: ColorManager.primaryText,
                             size: 26.sp,
                           ),
                         )
                       else
                         Icon(
                           cat['icon'] as IconData,
-                          color: ColorManager.primary,
+                          color: ColorManager.primaryText,
                           size: 26.sp,
                         ),
                       SizedBox(height: 6.h),

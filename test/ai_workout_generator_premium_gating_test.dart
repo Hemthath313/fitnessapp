@@ -134,15 +134,15 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // 1. Free user sees clean 'GENERATE WEEKLY PLAN' button
-        expect(find.text('GENERATE WEEKLY PLAN'), findsOneWidget);
+        // 1. Free user sees clean 'Generate weekly plan' button
+        expect(find.text('Generate weekly plan'), findsOneWidget);
 
         // 2. Free user can interact with days/equipment
         await tester.tap(find.text('Tue'));
         await tester.pumpAndSettle();
 
         // 3. Tapping generate checks premium: user is not premium -> navigated directly to premium screen
-        final generateBtn = find.text('GENERATE WEEKLY PLAN');
+        final generateBtn = find.text('Generate weekly plan');
         await tester.ensureVisible(generateBtn);
         await tester.tap(generateBtn);
         await tester.pumpAndSettle();
@@ -236,7 +236,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Tap generate button
-        final generateBtn = find.text('GENERATE WEEKLY PLAN');
+        final generateBtn = find.text('Generate weekly plan');
         await tester.ensureVisible(generateBtn);
         await tester.tap(generateBtn);
         await tester.pumpAndSettle();
@@ -286,7 +286,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Empty state shows Generate Plan with AI and free starter routine option
-        expect(find.text('Build a Plan'), findsOneWidget);
+        expect(find.text('Build a plan'), findsOneWidget);
         expect(find.text('Or Activate Free 3-Day Starter Routine'), findsOneWidget);
       },
     );
@@ -385,8 +385,8 @@ void main() {
         await tester.pumpAndSettle();
 
         // Premium user sees full Generate button
-        expect(find.text('GENERATE WEEKLY PLAN'), findsOneWidget);
-        await tester.tap(find.text('GENERATE WEEKLY PLAN'));
+        expect(find.text('Generate weekly plan'), findsOneWidget);
+        await tester.tap(find.text('Generate weekly plan'));
         await tester.pump(const Duration(milliseconds: 1300));
         await tester.pumpAndSettle();
 
@@ -482,7 +482,7 @@ void main() {
 
         // Free user successfully enters generator
         expect(find.text('Plan Builder'), findsOneWidget);
-        expect(find.text('GENERATE WEEKLY PLAN'), findsOneWidget);
+        expect(find.text('Generate weekly plan'), findsOneWidget);
       },
     );
 
@@ -518,7 +518,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Allowed into generator
-        expect(find.text('GENERATE WEEKLY PLAN'), findsOneWidget);
+        expect(find.text('Generate weekly plan'), findsOneWidget);
         expect(find.text('PREMIUM_SCREEN_DESTINATION'), findsNothing);
       },
     );

@@ -155,7 +155,7 @@ class TransformationWeeklyAdherenceSummary extends StatelessWidget {
                     Expanded(
                       child: _buildMetricTile(
                         icon: Icons.water_drop_rounded,
-                        color: Colors.blue,
+                        color: ColorManager.info,
                         label: 'Hydration',
                         value: '${summary.waterGoalConsistencyCount} hit goal',
                       ),
@@ -207,7 +207,7 @@ class TransformationWeeklyAdherenceSummary extends StatelessWidget {
                   dayLetter,
                   style: TextStyle(
                     color: ColorManager.textSecondary,
-                    fontSize: 11.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -216,7 +216,7 @@ class TransformationWeeklyAdherenceSummary extends StatelessWidget {
                   score != null ? '${score.round()}%' : '—',
                   style: TextStyle(
                     color: score != null ? primaryColor : ColorManager.textTertiary,
-                    fontSize: 11.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -252,13 +252,13 @@ class TransformationWeeklyAdherenceSummary extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
                 ),
                 Text(
                   value,
                   style: TextStyle(
                     color: ColorManager.textPrimary,
-                    fontSize: 11.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
                   ),
                   overflow: TextOverflow.ellipsis,

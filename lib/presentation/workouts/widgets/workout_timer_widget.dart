@@ -120,7 +120,7 @@ class _WorkoutTimerWidgetState extends State<WorkoutTimerWidget> {
     // Show dialog or snackbar
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Rest time complete! Time to work out 💪'),
+        content: Text('Rest time complete! Time to work out 💪', style: const TextStyle(color: ColorManager.onMint, fontWeight: FontWeight.w600)),
         backgroundColor: ColorManager.limerGreen2,
         duration: const Duration(seconds: 2),
       ),
@@ -173,7 +173,7 @@ class _WorkoutTimerWidgetState extends State<WorkoutTimerWidget> {
               style: TextStyle(
                 fontSize: SizeManager.s40.sp,
                 fontWeight: FontWeight.bold,
-                color: ColorManager.limerGreen2,
+                color: ColorManager.primaryText,
                 fontFamily: 'monospace',
               ),
             ),
@@ -188,7 +188,7 @@ class _WorkoutTimerWidgetState extends State<WorkoutTimerWidget> {
               IconButton(tooltip: _isRunning ? 'Pause' : 'Start', 
                 icon: Icon(
                   _isRunning ? Icons.pause : Icons.play_arrow,
-                  color: ColorManager.limerGreen2,
+                  color: ColorManager.primaryText,
                 ),
                 onPressed: _isRunning ? _pauseTimer : _startTimer,
                 iconSize: SizeManager.s40.sp,
@@ -197,7 +197,7 @@ class _WorkoutTimerWidgetState extends State<WorkoutTimerWidget> {
 
               // Reset button
               IconButton(tooltip: 'Reset timer', 
-                icon: Icon(Icons.stop, color: Colors.red),
+                icon: Icon(Icons.stop, color: ColorManager.errorText),
                 onPressed: _resetTimer,
                 iconSize: SizeManager.s28.sp,
               ),

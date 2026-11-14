@@ -216,19 +216,19 @@ class _MonthlyComparisonPageState extends State<MonthlyComparisonPage> {
 
   Widget _buildTableRow(String part, double? val1, double? val2) {
     String diffText = '-';
-    Color diffColor = Colors.white54;
+    Color diffColor = ColorManager.textTertiary;
 
     if (val1 != null && val2 != null) {
       double diff = val2 - val1;
       if (diff > 0) {
         diffText = '+${diff.toStringAsFixed(1)}';
-        diffColor = Colors.greenAccent;
+        diffColor = ColorManager.successText;
       } else if (diff < 0) {
         diffText = diff.toStringAsFixed(1);
-        diffColor = Colors.redAccent;
+        diffColor = ColorManager.error;
       } else {
         diffText = '0.0';
-        diffColor = Colors.white54;
+        diffColor = ColorManager.textTertiary;
       }
     }
 

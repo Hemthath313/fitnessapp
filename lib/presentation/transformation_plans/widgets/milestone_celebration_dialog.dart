@@ -133,7 +133,7 @@ class MilestoneCelebrationDialog extends StatelessWidget {
               'Unlocked on $dateStr',
               style: TextStyle(
                 color: ColorManager.textTertiary,
-                fontSize: 11.sp,
+                fontSize: 12.sp,
               ),
             ),
             SizedBox(height: 22.h),

@@ -177,6 +177,6 @@ flutter:
 # splash (SplashBrandAnimation) has no white flash. Regenerate with:
 #   dart run flutter_native_splash:create
 flutter_native_splash:
-  color: "#0A1C22"
+  color: "#121314"
   android_12:
-    color: "#0A1C22"
+    color: "#121314"

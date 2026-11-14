@@ -13,13 +13,19 @@ class AdConfig {
 
   // Interstitial Ad Unit ID - FIXED: Use proper interstitial ad unit ID
   static const String _interstitialAdUnitId =
-      'ca-app-pub-5975958510203735/6257548519'; // intersitial-ad (REPLACE WITH YOUR ACTUAL INTERSTITIAL AD UNIT ID)
+      'ca-app-pub-5975958510203735/6257548519'; // interstitial-ad (confirm in AdMob it is an Interstitial unit)
 
   // Test Ad Unit IDs (for development)
   static const String testBannerAdUnitId =
       'ca-app-pub-3940256099942544/6300978111';
   static const String testInterstitialAdUnitId =
       'ca-app-pub-3940256099942544/1033173712';
+
+  /// Hashed IDs of your own phones, so testing a release build never counts
+  /// as invalid ad traffic. Run a release build once, look in logcat for
+  /// "Use RequestConfiguration.Builder().setTestDeviceIds(Arrays.asList(\"...\"))"
+  /// and paste that ID here.
+  static const List<String> testDeviceIds = <String>[];
 
   // Check if running in debug mode - FIXED: Use proper debug detection
   static bool get isDebugMode {

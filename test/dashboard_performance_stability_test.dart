@@ -495,7 +495,7 @@ void main() {
       // Priority 1 Hero Card is active
       expect(find.text(TransformationPlansData.beginnerFitness30.title), findsOneWidget);
       expect(find.text('DAY 1 OF 30'), findsOneWidget);
-      expect(find.text('START DAY 1 WORKOUT'), findsOneWidget);
+      expect(find.text('Start Day 1 workout'), findsOneWidget);
 
       // Trigger stats and consumption changes (rebuilding siblings)
       stats.setStreak(3);
@@ -504,7 +504,7 @@ void main() {
 
       // Hero card remains rock-solid and responsive
       expect(find.text(TransformationPlansData.beginnerFitness30.title), findsOneWidget);
-      expect(find.text('START DAY 1 WORKOUT'), findsOneWidget);
+      expect(find.text('Start Day 1 workout'), findsOneWidget);
       expect(find.text('3'), findsOneWidget); // AppBar updated streak
     });
 

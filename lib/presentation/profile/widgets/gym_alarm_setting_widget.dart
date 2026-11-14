@@ -404,7 +404,7 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
           // 2. Daily Gym Alarm
           _buildToggleRow(
             icon: Icons.alarm_rounded,
-            color: Colors.orange,
+            color: ColorManager.warning,
             title: 'Daily Gym Alarm',
             subtitle: 'Alarm to wake up and get ready for training',
             value: _isAlarmEnabled,
@@ -422,7 +422,7 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
           // 3. Friendly Streak Protection
           _buildToggleRow(
             icon: Icons.local_fire_department_rounded,
-            color: Colors.amber,
+            color: ColorManager.premium,
             title: 'Gentle Streak Protection',
             subtitle: 'Friendly reminder after 48h of inactivity (zero guilt)',
             value: _isStreakNotifEnabled,
@@ -433,7 +433,7 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
           // 4. Rest Day Recovery Tips
           _buildToggleRow(
             icon: Icons.self_improvement_rounded,
-            color: Colors.blueAccent,
+            color: ColorManager.info,
             title: 'Rest Day Recovery Tips',
             subtitle: 'Morning recovery guidance on planned rest days',
             value: _isRecoveryNotifEnabled,
@@ -444,7 +444,7 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
           // 5. Hydration Reminder
           _buildToggleRow(
             icon: Icons.water_drop_rounded,
-            color: Colors.cyan,
+            color: ColorManager.waterText,
             title: 'Hydration Reminder',
             subtitle: 'Daily water target check-in at a time you choose',
             value: _isWaterNotifEnabled,
@@ -512,7 +512,7 @@ class _GymAlarmSettingWidgetState extends State<GymAlarmSettingWidget> {
                     subtitle,
                     style: TextStyle(
                       color: ColorManager.textSecondary,
-                      fontSize: 11.sp,
+                      fontSize: 12.sp,
                     ),
                   ),
                 ],

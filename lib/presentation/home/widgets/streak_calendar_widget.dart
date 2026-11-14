@@ -75,12 +75,12 @@ class StreakCalendarWidget extends StatelessWidget {
                         Container(
                           padding: EdgeInsets.all(6.w),
                           decoration: BoxDecoration(
-                            color: Colors.orange.withValues(alpha: 0.15),
+                            color: ColorManager.warning.withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             Icons.local_fire_department_rounded,
-                            color: Colors.orange,
+                            color: ColorManager.warningText,
                             size: 24.sp,
                           ),
                         ),
@@ -97,7 +97,7 @@ class StreakCalendarWidget extends StatelessWidget {
                                         ? 'Start Your First Workout'
                                         : 'No Active Streak'),
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: ColorManager.textPrimary,
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -123,7 +123,7 @@ class StreakCalendarWidget extends StatelessWidget {
                                   color: completedToday ||
                                           (currentStreak > 0 &&
                                               statsProvider.isRestDay(today))
-                                      ? ColorManager.limerGreen2
+                                      ? ColorManager.primaryText
                                       : ColorManager.textSecondary,
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w500,
@@ -169,7 +169,7 @@ class StreakCalendarWidget extends StatelessWidget {
                         dayLabels[index],
                         style: TextStyle(
                           color: isToday
-                              ? ColorManager.primary
+                              ? ColorManager.primaryText
                               : ColorManager.textSecondary,
                           fontSize: 12.sp,
                           fontWeight:
@@ -210,7 +210,7 @@ class StreakCalendarWidget extends StatelessWidget {
                                   '${day.day}',
                                   style: TextStyle(
                                     color: isToday
-                                        ? ColorManager.primary
+                                        ? ColorManager.primaryText
                                         : isFuture
                                             ? ColorManager.textSecondary
                                                 .withValues(alpha: 0.5)
@@ -244,7 +244,7 @@ class StreakCalendarWidget extends StatelessWidget {
                     child: Text(
                       'Next Milestone: $nextMilestoneName',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: ColorManager.textPrimary,
                         fontSize: 13.sp,
                         fontWeight: FontWeight.bold,
                       ),

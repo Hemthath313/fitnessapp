@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/units.dart';
 import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'dart:async';
 import 'dart:math' as math;
@@ -9,14 +10,13 @@ import 'package:fitness_app/services/progression_service.dart';
 import 'package:fitness_app/services/workout_log_service.dart';
 import 'package:fitness_app/utils/haptics.dart';
 import 'package:fitness_app/presentation/workout_tools/plate_calculator_sheet.dart';
+import 'package:fitness_app/presentation/custom_workouts/day_workout_session_page.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
 import 'package:fitness_app/widgets/exercise_video_player.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import 'package:fitness_app/presentation/home/providers/statistics_provider.dart';
 
 class ExerciseSetDraft {
   final String weight;
@@ -526,11 +526,11 @@ class _InteractiveExerciseDetailWidgetState
     _syncDrafts();
   }
 
-  // Remove Set row
-  void _removeSetRow() {
-    if (_sets.length <= 1) return;
+  // Remove a set row (swipe). Always keeps at least one set.
+  void _removeSetAt(int index) {
+    if (_sets.length <= 1 || index < 0 || index >= _sets.length) return;
     setState(() {
-      final removed = _sets.removeLast();
+      final removed = _sets.removeAt(index);
       removed.dispose();
     });
     _syncDrafts();
@@ -557,140 +557,20 @@ class _InteractiveExerciseDetailWidgetState
     );
   }
 
-  // Save live log to Firebase
-  Future<void> _saveWorkoutLog() async {
-    final completedSets = _sets.where((s) => s.isCompleted).toList();
-    if (completedSets.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Complete at least one set before saving!'),
-          backgroundColor: ColorManager.error,
-        ),
-      );
-      return;
-    }
-
-    final List<WorkoutSet> setsToSave = [];
-    double currentMaxWeight = 0.0;
-
-    for (var set in completedSets) {
-      final w = double.tryParse(set.weightController.text) ?? 0.0;
-      final r = int.tryParse(set.repsController.text) ?? 0;
-      setsToSave.add(WorkoutSet(weight: w, reps: r, isCompleted: true));
-      if (w > currentMaxWeight) {
-        currentMaxWeight = w;
-      }
-    }
-
-    final WorkoutLog log = WorkoutLog(
-      id: '',
-      exerciseName: widget.name,
-      date: DateTime.now(),
-      sets: setsToSave,
-      category: widget.category,
-    );
-
-    try {
-      await _logService.addLog(log);
-      if (mounted) {
-        Provider.of<StatisticsProvider>(context, listen: false).updateStreak();
-      }
-
-      // Stop/Cancel the rest timer since the workout session is finished and saved!
-      _restTimer?.cancel();
-      _isResting = false;
-      _restTimerSeconds = 0;
-      _draftStore().remove(_draftKey);
-
-      // Check if this was a new Personal Record
-      final bool isPR = currentMaxWeight > _historicMaxWeight && _historicMaxWeight > 0;
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Workout sets logged successfully!'),
-            backgroundColor: ColorManager.success,
-          ),
-        );
-
-        if (isPR) {
-          _showPRDialog(currentMaxWeight);
-        }
-
-        // Auto reload log history and switch to history tab
-        await _loadPreviousLogAndMax();
-        setState(() {
-          _currentTab = 2; // Swaps tab to history log list
-        });
-      }
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Failed to save workout. Please try again.'),
-            backgroundColor: ColorManager.error,
-          ),
-        );
-      }
-    }
-  }
-
-  // Trigger Gold Personal Record Card
-  void _showPRDialog(double prWeight) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: ColorManager.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-             Text('🏆 ', style: TextStyle(fontSize: 24.sp)),
-            Text(
-              'Personal Record!',
-              style: TextStyle(
-                color: ColorManager.textPrimary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Congratulations!',
-              style: TextStyle(
-                color: ColorManager.textSecondary,
-                fontSize: 16.sp,
-              ),
-            ),
-            SizedBox(height: 12.h),
-            Text(
-              'You lifted a new max of ${prWeight.toStringAsFixed(1)} kg in ${widget.name}!',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: ColorManager.primary,
-                fontWeight: FontWeight.bold,
-                fontSize: 18.sp,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          Center(
-            child: ElevatedButton(
-              onPressed: () => Navigator.pop(ctx),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColorManager.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button)),
-              ),
-              child: const Text('Awesome!', style: TextStyle(color: ColorManager.onMint)),
-            ),
-          ),
-        ],
-      ),
-    );
+  /// One way to log: open a live workout with this exercise (rest timer,
+  /// tick sets, saved to History when finished).
+  void _addToWorkout() {
+    final catalog = ExerciseData.findByName(widget.name);
+    final dynamic exercise = catalog ??
+        {
+          'name': widget.name,
+          'setNumber': _sets.isNotEmpty ? _sets.length : 3,
+          'repNumber': _parseDefaultRepsInt(),
+        };
+    final navigator = Navigator.of(context);
+    // Close this sheet first so Back from the workout returns to the list.
+    if (navigator.canPop()) navigator.pop();
+    DayWorkoutSessionPage.startQuickWorkout(navigator.context, exercises: [exercise]);
   }
 
   void _confirmDeleteLog(WorkoutLog log) {
@@ -717,8 +597,8 @@ class _InteractiveExerciseDetailWidgetState
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: const Text('Log deleted successfully'),
-                      backgroundColor: ColorManager.success,
+                      content: const Text('Log deleted successfully', style: TextStyle(color: Colors.white)),
+                      backgroundColor: ColorManager.successDark,
                     ),
                   );
                 }
@@ -726,14 +606,14 @@ class _InteractiveExerciseDetailWidgetState
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Failed to delete log: $e'),
+                      content: Text('Failed to delete log: $e', style: const TextStyle(color: Colors.white)),
                       backgroundColor: ColorManager.error,
                     ),
                   );
                 }
               }
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            child: Text('Delete', style: TextStyle(color: ColorManager.errorText, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -766,8 +646,8 @@ class _InteractiveExerciseDetailWidgetState
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Copied ${log.sets.length} sets to "Log Set" tab!'),
-        backgroundColor: ColorManager.success,
+        content: Text('Copied ${log.sets.length} sets to "Log Set" tab!', style: const TextStyle(color: Colors.white)),
+        backgroundColor: ColorManager.successDark,
         duration: const Duration(seconds: 2),
       ),
     );
@@ -786,16 +666,18 @@ class _InteractiveExerciseDetailWidgetState
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 10.h),
           decoration: BoxDecoration(
-            color: isSelected ? ColorManager.primary : Colors.transparent,
+            // Quiet segmented style: charcoal pill, no blue.
+            color: isSelected ? ColorManager.surfaceLight : Colors.transparent,
             borderRadius: BorderRadius.circular(12.r),
+            boxShadow: isSelected ? ColorManager.cardShadow : null,
           ),
           alignment: Alignment.center,
           child: Text(
             label,
             style: TextStyle(
-              color: isSelected ? ColorManager.onMint : ColorManager.textSecondary,
+              color: isSelected ? ColorManager.textPrimary : ColorManager.textSecondary,
               fontSize: 14.sp,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
             ),
           ),
         ),
@@ -965,7 +847,7 @@ class _InteractiveExerciseDetailWidgetState
               children: [
                 Text(
                   title,
-                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
                 ),
                 Text(
                   subtitle,
@@ -995,6 +877,21 @@ class _InteractiveExerciseDetailWidgetState
       );
     }
 
+    // One way to log: on its own, this tab shows last time and sends the
+    // user into a live workout. The set table only appears inside a workout.
+    if (widget.onSetsChanged == null) return _buildStandaloneLogPanel();
+
+    final isBarbell = PlateCalculatorSheet.isBarbellExercise(
+      name: widget.name,
+      equipment: widget.equipment,
+    );
+    final headerStyle = TextStyle(
+      color: ColorManager.textSecondary,
+      fontSize: 11.sp,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.4,
+    );
+
     return Column(
       children: [
         // Table Headers
@@ -1002,252 +899,312 @@ class _InteractiveExerciseDetailWidgetState
           padding: EdgeInsets.symmetric(vertical: 8.h),
           child: Row(
             children: [
-              SizedBox(
-                width: 40.w,
-                child: Text('SET',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp, fontWeight: FontWeight.bold)),
-              ),
-              SizedBox(
-                width: 100.w,
-                child: Text('PREVIOUS',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp, fontWeight: FontWeight.bold)),
-              ),
-              Expanded(
-                child: Text('KG',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp, fontWeight: FontWeight.bold)),
-              ),
-              Expanded(
-                child: Text('REPS',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp, fontWeight: FontWeight.bold)),
-              ),
-              SizedBox(
-                width: 50.w,
-                child: Text('DONE',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp, fontWeight: FontWeight.bold)),
-              ),
+              SizedBox(width: 32.w, child: Text('SET', textAlign: TextAlign.center, style: headerStyle)),
+              SizedBox(width: 84.w, child: Text('LAST', textAlign: TextAlign.center, style: headerStyle)),
+              Expanded(child: Text(Units.label.toUpperCase(), textAlign: TextAlign.center, style: headerStyle)),
+              Expanded(child: Text('REPS', textAlign: TextAlign.center, style: headerStyle)),
+              SizedBox(width: 48.w),
             ],
           ),
         ),
-        const Divider(),
 
-        // Log Rows
+        // Log Rows (swipe left to remove a set)
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: _sets.length,
           itemBuilder: (context, idx) {
             final setInput = _sets[idx];
-            final isBarbell = PlateCalculatorSheet.isBarbellExercise(
-              name: widget.name,
-              equipment: widget.equipment,
-            );
-            
-            // Format previous values if available
-            String prevDisplay = "—";
+            final done = setInput.isCompleted;
+
+            String prevDisplay = '—';
             if (_previousLog != null && idx < _previousLog!.sets.length) {
               final prevSet = _previousLog!.sets[idx];
-              prevDisplay = "${prevSet.weight.toStringAsFixed(1)} kg x ${prevSet.reps}";
+              prevDisplay = '${Units.fmtSmart(prevSet.weight)} × ${prevSet.reps}';
             }
 
-            return Container(
-              padding: EdgeInsets.symmetric(vertical: 6.h),
-              decoration: BoxDecoration(
-                color: setInput.isCompleted ? ColorManager.success.withValues(alpha: 0.05) : Colors.transparent,
-                borderRadius: BorderRadius.circular(8.r),
+            InputDecoration fieldDecoration() => InputDecoration(
+                  hintText: '—',
+                  hintStyle: TextStyle(color: ColorManager.textTertiary, fontSize: 13.sp),
+                  contentPadding: EdgeInsets.zero,
+                  filled: true,
+                  fillColor: done ? Colors.transparent : ColorManager.surfaceDark,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                    borderSide: BorderSide.none,
+                  ),
+                );
+
+            return Dismissible(
+              key: ObjectKey(setInput),
+              direction: _sets.length > 1
+                  ? DismissDirection.endToStart
+                  : DismissDirection.none,
+              onDismissed: (_) => _removeSetAt(idx),
+              background: Container(
+                alignment: Alignment.centerRight,
+                padding: EdgeInsets.only(right: 16.w),
+                margin: EdgeInsets.symmetric(vertical: 3.h),
+                decoration: BoxDecoration(
+                  color: ColorManager.error.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Icon(Icons.delete_outline, color: ColorManager.errorText, size: 20.sp),
               ),
-              child: Row(
-                children: [
-                  // Set Index
-                  SizedBox(
-                    width: 40.w,
-                    child: Text(
-                      '${idx + 1}',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: ColorManager.textPrimary,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  
-                  // Previous Log Display
-                  SizedBox(
-                    width: 100.w,
-                    child: Text(
-                      prevDisplay,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
-                    ),
-                  ),
-
-                  // Weight Field
-                  Expanded(
-                    child: Container(
-                      height: 38.h,
-                      margin: EdgeInsets.symmetric(horizontal: 6.w),
-                      child: TextField(
-                        key: Key('detail_weight_input_$idx'),
-                        controller: setInput.weightController,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              child: AnimatedContainer(
+                key: Key('detail_set_row_$idx'),
+                duration: const Duration(milliseconds: 200),
+                margin: EdgeInsets.symmetric(vertical: 3.h),
+                padding: EdgeInsets.symmetric(vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: done
+                      ? ColorManager.success.withValues(alpha: 0.12)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 32.w,
+                      child: Text(
+                        '${idx + 1}',
                         textAlign: TextAlign.center,
-                        enabled: !setInput.isCompleted,
-                        style: TextStyle(color: ColorManager.textPrimary, fontSize: 14.sp),
-                        decoration: InputDecoration(
-                          hintText: '—',
-                          hintStyle: TextStyle(color: ColorManager.textTertiary, fontSize: 13.sp),
-                          contentPadding: EdgeInsets.zero,
-                          filled: true,
-                          fillColor: setInput.isCompleted ? ColorManager.surfaceDark : ColorManager.surfaceLight,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.r),
-                            borderSide: BorderSide(color: ColorManager.divider),
-                          ),
-                          suffixIcon: isBarbell
-                              ? IconButton(tooltip: 'Plate calculator', 
-                                  key: Key('detail_plate_calc_$idx'),
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                  icon: Icon(
-                                    Icons.calculate_outlined,
-                                    size: 16.sp,
-                                    color: setInput.isCompleted
-                                        ? Colors.white24
-                                        : ColorManager.primary,
-                                  ),
-                                  onPressed: setInput.isCompleted
-                                      ? null
-                                      : () => _openPlateCalculator(idx),
-                                )
-                              : null,
+                        style: TextStyle(
+                          color: ColorManager.textPrimary,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
-                  ),
-
-                  // Reps Field
-                  Expanded(
-                    child: Container(
-                      height: 38.h,
-                      margin: EdgeInsets.symmetric(horizontal: 6.w),
-                      child: TextField(
-                        key: Key('detail_reps_input_$idx'),
-                        controller: setInput.repsController,
-                        keyboardType: TextInputType.number,
+                    SizedBox(
+                      width: 84.w,
+                      child: Text(
+                        prevDisplay,
                         textAlign: TextAlign.center,
-                        enabled: !setInput.isCompleted,
-                        style: TextStyle(color: ColorManager.textPrimary, fontSize: 14.sp),
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.zero,
-                          filled: true,
-                          fillColor: setInput.isCompleted ? ColorManager.surfaceDark : ColorManager.surfaceLight,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.r),
-                            borderSide: BorderSide(color: ColorManager.divider),
+                        style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        height: 40.h,
+                        margin: EdgeInsets.symmetric(horizontal: 4.w),
+                        child: TextField(
+                          key: Key('detail_weight_input_$idx'),
+                          controller: setInput.weightController,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          textAlign: TextAlign.center,
+                          enabled: !done,
+                          style: TextStyle(
+                            color: ColorManager.textPrimary,
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
                           ),
+                          decoration: fieldDecoration(),
                         ),
                       ),
                     ),
-                  ),
-
-                  // Checkbox
-                  SizedBox(
-                    width: 50.w,
-                    child: IconButton(
-                      tooltip: setInput.isCompleted ? 'Mark set not done' : 'Mark set done',
-                      onPressed: () => _toggleSetCompletion(idx),
-                      icon: Icon(
-                        setInput.isCompleted ? Icons.check_circle : Icons.radio_button_unchecked,
-                        color: setInput.isCompleted ? ColorManager.success : ColorManager.textSecondary,
-                        size: 24.sp,
+                    Expanded(
+                      child: Container(
+                        height: 40.h,
+                        margin: EdgeInsets.symmetric(horizontal: 4.w),
+                        child: TextField(
+                          key: Key('detail_reps_input_$idx'),
+                          controller: setInput.repsController,
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          enabled: !done,
+                          style: TextStyle(
+                            color: ColorManager.textPrimary,
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          decoration: fieldDecoration(),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                    // Done: 48 x 44 tap target.
+                    SizedBox(
+                      width: 48.w,
+                      height: 44,
+                      child: IconButton(
+                        key: Key('detail_set_done_$idx'),
+                        tooltip: done ? 'Mark set not done' : 'Mark set done',
+                        padding: EdgeInsets.zero,
+                        onPressed: () => _toggleSetCompletion(idx),
+                        icon: Icon(
+                          done ? Icons.check_circle : Icons.check_circle_outline,
+                          color: done ? ColorManager.successText : ColorManager.textTertiary,
+                          size: 28.sp,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: 8.h),
 
-        // Controls (Add/Delete Set)
+        // One quiet full-width add button; swipe a row left to remove it.
+        SizedBox(
+          width: double.infinity,
+          child: TextButton.icon(
+            key: const Key('detail_add_set_button'),
+            onPressed: _addSetRow,
+            icon: Icon(Icons.add, size: 18.sp),
+            label: Text('Add set', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
+            style: TextButton.styleFrom(
+              foregroundColor: ColorManager.primaryText,
+              backgroundColor: ColorManager.surfaceDark,
+              padding: EdgeInsets.symmetric(vertical: 12.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.button.r),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 8.h),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            ElevatedButton.icon(
-              onPressed: _addSetRow,
-              icon: Icon(Icons.add, size: 18.sp),
-              label: const Text('Add Set'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColorManager.surfaceLight,
-                foregroundColor: ColorManager.primary,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.button.r),
-                  side: BorderSide(color: ColorManager.divider),
-                ),
+            Expanded(
+              child: Text(
+                _sets.length > 1 ? 'Swipe a set left to remove it' : '',
+                style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
               ),
             ),
-            ElevatedButton.icon(
-              onPressed: _sets.length <= 1 ? null : _removeSetRow,
-              icon: Icon(Icons.delete, size: 18.sp),
-              label: const Text('Remove Set'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColorManager.surfaceLight,
-                foregroundColor: Colors.red,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.button.r),
-                  side: BorderSide(color: ColorManager.divider),
-                ),
+            if (isBarbell)
+              TextButton.icon(
+                key: const Key('detail_plate_calc_button'),
+                onPressed: () {
+                  final idx = _sets.indexWhere((s) => !s.isCompleted);
+                  _openPlateCalculator(idx < 0 ? _sets.length - 1 : idx);
+                },
+                icon: Icon(Icons.calculate_outlined, size: 16.sp),
+                label: Text('Plates', style: TextStyle(fontSize: 13.sp)),
+                style: TextButton.styleFrom(foregroundColor: ColorManager.textSecondary),
               ),
-            ),
           ],
         ),
-        SizedBox(height: 24.h),
+        SizedBox(height: 12.h),
 
         // Opened from a guided workout: the sets sync back to it and are saved
-        // once, when the workout is finished. Saving here as well would log
-        // the same sets twice.
-        if (widget.onSetsChanged != null)
-          Container(
-            key: const Key('sheet_sync_hint'),
-            width: double.infinity,
-            padding: EdgeInsets.all(12.w),
-            decoration: BoxDecoration(
-              color: ColorManager.primary.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: ColorManager.primary.withValues(alpha: 0.25)),
-            ),
-            child: Text(
-              'These sets are part of your workout. They are saved when you tap Finish.',
-              style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp),
-            ),
-          )
-        else
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _saveWorkoutLog,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorManager.primary,
-                  foregroundColor: const Color(0xFF06201B),
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.button.r),
-                  ),
-                ),
+        // once, when the workout is finished.
+        Container(
+          key: const Key('sheet_sync_hint'),
+          width: double.infinity,
+          padding: EdgeInsets.all(12.w),
+          decoration: BoxDecoration(
+            color: ColorManager.surfaceDark,
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.info_outline, size: 16.sp, color: ColorManager.textSecondary),
+              SizedBox(width: 8.w),
+              Expanded(
                 child: Text(
-                  'Save Session Log',
-                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                  'Saved with your workout when you tap Finish.',
+                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 13.sp),
                 ),
               ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Standalone Log Set tab: last time + one button into a live workout.
+  Widget _buildStandaloneLogPanel() {
+    final prev = _previousLog;
+    final List<WorkoutSet> sets = prev?.sets ?? const <WorkoutSet>[];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(height: 8.h),
+        Container(
+          key: const Key('detail_last_time_card'),
+          padding: EdgeInsets.all(16.w),
+          decoration: BoxDecoration(
+            color: ColorManager.surfaceDark,
+            borderRadius: BorderRadius.circular(AppRadius.tile.r),
+          ),
+          child: sets.isEmpty
+              ? Row(
+                  children: [
+                    Icon(Icons.history, size: 20.sp, color: ColorManager.textSecondary),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: Text(
+                        'No sets logged yet. Your first session sets the baseline.',
+                        style: TextStyle(color: ColorManager.textSecondary, fontSize: 14.sp),
+                      ),
+                    ),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Last time · ${DateFormat('d MMM').format(prev!.date)}',
+                      style: TextStyle(
+                        color: ColorManager.textSecondary,
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    Wrap(
+                      spacing: 8.w,
+                      runSpacing: 8.h,
+                      children: [
+                        for (var i = 0; i < sets.length; i++)
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                            decoration: BoxDecoration(
+                              color: ColorManager.surfaceLight,
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                            child: Text(
+                              '${Units.fmtSmart(sets[i].weight)} ${Units.label} × ${sets[i].reps}',
+                              style: TextStyle(
+                                color: ColorManager.textPrimary,
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+        ),
+        SizedBox(height: 16.h),
+        ElevatedButton.icon(
+          key: const Key('detail_add_to_workout_button'),
+          onPressed: _addToWorkout,
+          icon: Icon(Icons.play_arrow_rounded, size: 20.sp),
+          label: Text(
+            'Add to workout',
+            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: ColorManager.primary,
+            foregroundColor: ColorManager.onMint,
+            elevation: 0,
+            padding: EdgeInsets.symmetric(vertical: 14.h),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.button.r),
             ),
+          ),
+        ),
+        SizedBox(height: 8.h),
+        Text(
+          'Starts a workout with a rest timer. Sets are saved to History when you finish.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
+        ),
       ],
     );
   }
@@ -1348,7 +1305,7 @@ class _InteractiveExerciseDetailWidgetState
                             onPressed: () => _reuseSets(log),
                           ),
                           IconButton(
-                            icon: Icon(Icons.delete_outline, color: Colors.redAccent, size: 18.sp),
+                            icon: Icon(Icons.delete_outline, color: ColorManager.errorText, size: 18.sp),
                             tooltip: 'Delete this log',
                             constraints: const BoxConstraints(),
                             padding: EdgeInsets.symmetric(horizontal: 4.w),
@@ -1373,7 +1330,7 @@ class _InteractiveExerciseDetailWidgetState
                             child: Text(
                               '$setIndex',
                               style: TextStyle(
-                                fontSize: 11.sp,
+                                fontSize: 12.sp,
                                 color: ColorManager.textSecondary,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -1381,7 +1338,7 @@ class _InteractiveExerciseDetailWidgetState
                           ),
                           SizedBox(width: 12.w),
                           Text(
-                            '${setObj.weight.toStringAsFixed(1)} kg x ${setObj.reps} reps',
+                            '${Units.fmt(setObj.weight, 1)} ${Units.label} x ${setObj.reps} reps',
                             style: TextStyle(
                               color: ColorManager.textPrimary,
                               fontSize: 13.sp,
@@ -1456,7 +1413,7 @@ class _InteractiveExerciseDetailWidgetState
               reservedSize: 28.w,
               getTitlesWidget: (value, meta) {
                 return Text(
-                  '${value.toStringAsFixed(0)}kg',
+                  '${Units.fmt(value, 0)}${Units.label}',
                   style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
                 );
               },
@@ -1559,12 +1516,12 @@ class _InteractiveExerciseDetailWidgetState
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.timer, color: ColorManager.primary, size: 20.sp),
+                          Icon(Icons.timer, color: ColorManager.primaryText, size: 20.sp),
                           SizedBox(width: 8.w),
                           Text(
                             'Rest Timer: ${(_restTimerSeconds ~/ 60).toString().padLeft(2, '0')}:${(_restTimerSeconds % 60).toString().padLeft(2, '0')}',
                             style: TextStyle(
-                              color: ColorManager.primary,
+                              color: ColorManager.primaryText,
                               fontWeight: FontWeight.bold,
                               fontSize: 14.sp,
                             ),
@@ -1582,7 +1539,7 @@ class _InteractiveExerciseDetailWidgetState
                         child: Text(
                           'Skip',
                           style: TextStyle(
-                            color: ColorManager.primary,
+                            color: ColorManager.primaryText,
                             fontWeight: FontWeight.bold,
                             fontSize: 14.sp,
                           ),
@@ -1597,9 +1554,8 @@ class _InteractiveExerciseDetailWidgetState
                 margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 6.h),
                 padding: EdgeInsets.all(4.w),
                 decoration: BoxDecoration(
-                  color: ColorManager.surfaceLight,
+                  color: ColorManager.surfaceDark,
                   borderRadius: BorderRadius.circular(AppRadius.tile.r),
-                  border: Border.all(color: ColorManager.divider),
                 ),
                 child: Row(
                   children: [
@@ -1657,7 +1613,7 @@ class _InteractiveExerciseDetailWidgetState
                                 ),
                                 child: Text(
                                   'Video Guide',
-                                  style: TextStyle(color: Colors.white, fontSize: 11.sp),
+                                  style: TextStyle(color: Colors.white, fontSize: 12.sp),
                                 ),
                               ),
                             ),

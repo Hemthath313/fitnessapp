@@ -102,7 +102,7 @@ class _ExerciseOfTheWeekScreenState extends State<ExerciseOfTheWeekScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.self_improvement,
-                size: 56.sp, color: ColorManager.primary),
+                size: 56.sp, color: ColorManager.primaryText),
             SizedBox(height: 12.h),
             Text(
               'Hold-and-brace exercise',
@@ -192,7 +192,7 @@ class _ExerciseOfTheWeekScreenState extends State<ExerciseOfTheWeekScreen> {
               ),
             ),
             const Spacer(),
-            Icon(Icons.star, color: ColorManager.primary, size: 20.sp),
+            Icon(Icons.star, color: ColorManager.primaryText, size: 20.sp),
           ],
         ),
         SizedBox(height: 12.h),

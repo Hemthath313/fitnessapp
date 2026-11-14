@@ -129,7 +129,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                                 resolvedPlan.difficulty,
                                 style: TextStyle(
                                   color: Colors.white70,
-                                  fontSize: 11.sp,
+                                  fontSize: 12.sp,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -525,7 +525,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                           item['desc'] as String,
                           style: TextStyle(
                             color: ColorManager.textSecondary,
-                            fontSize: 11.sp,
+                            fontSize: 12.sp,
                             height: 1.35,
                           ),
                         ),
@@ -569,7 +569,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
       },
       {
         'title': 'Holistic Progress Tracking',
-        'desc': 'Measured via weekly weigh-in check-ins, body circumference cm, progress photos, and gym strength retention.',
+        'desc': 'Measured via weekly weigh-in check-ins, body measurements, and gym strength retention.',
         'icon': Icons.analytics_rounded,
       },
       {
@@ -658,7 +658,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                           item['desc'] as String,
                           style: TextStyle(
                             color: ColorManager.textSecondary,
-                            fontSize: 11.sp,
+                            fontSize: 12.sp,
                             height: 1.35,
                           ),
                         ),
@@ -691,7 +691,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                         'Want Focused Core Training?',
                         style: TextStyle(
                           color: ColorManager.textPrimary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -699,7 +699,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                         'Pair with the 30-Day Six-Pack Challenge.',
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                         ),
                       ),
                     ],
@@ -839,7 +839,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                           item['desc'] as String,
                           style: TextStyle(
                             color: ColorManager.textSecondary,
-                            fontSize: 11.sp,
+                            fontSize: 12.sp,
                             height: 1.35,
                           ),
                         ),
@@ -872,7 +872,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                         'Need Bulking Nutrition Guidance?',
                         style: TextStyle(
                           color: ColorManager.textPrimary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -880,7 +880,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                         'Target 1.8–2.2g protein/kg and clean surplus with Bulking Diet.',
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                         ),
                       ),
                     ],
@@ -920,7 +920,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                         'Track 1RM & Overload Progress',
                         style: TextStyle(
                           color: ColorManager.textPrimary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -928,7 +928,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                         'Monitor personal records and strength curves.',
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                         ),
                       ),
                     ],
@@ -1068,7 +1068,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                           item['desc'] as String,
                           style: TextStyle(
                             color: ColorManager.textSecondary,
-                            fontSize: 11.sp,
+                            fontSize: 12.sp,
                             height: 1.35,
                           ),
                         ),
@@ -1101,7 +1101,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                         'PR Vault & 1RM Progression',
                         style: TextStyle(
                           color: ColorManager.textPrimary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -1109,7 +1109,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                         'Track all-time compound records and 1RM curves.',
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                         ),
                       ),
                     ],
@@ -1149,7 +1149,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                         'Inspect Previous Performance',
                         style: TextStyle(
                           color: ColorManager.textPrimary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -1157,7 +1157,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                         'Review past session logs, tonnage, and exercise history.',
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                         ),
                       ),
                     ],
@@ -1258,7 +1258,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
             label,
             style: TextStyle(
               color: ColorManager.textTertiary,
-              fontSize: 11.sp,
+              fontSize: 12.sp,
             ),
           ),
         ],
@@ -1295,7 +1295,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
               phase.description,
               style: TextStyle(
                 color: ColorManager.textSecondary,
-                fontSize: 11.sp,
+                fontSize: 12.sp,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -1312,14 +1312,14 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.restaurant_rounded, size: 13.sp, color: ColorManager.accent),
+                      Icon(Icons.restaurant_rounded, size: 13.sp, color: ColorManager.accentText),
                       SizedBox(width: 6.w),
                       Expanded(
                         child: Text(
                           'Nutrition: ${phase.nutritionFocus}',
                           style: TextStyle(
                             color: ColorManager.textSecondary,
-                            fontSize: 11.sp,
+                            fontSize: 12.sp,
                           ),
                         ),
                       ),
@@ -1330,7 +1330,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                     'Weeks in this phase (${phase.weeks.length}):',
                     style: TextStyle(
                       color: ColorManager.textPrimary,
-                      fontSize: 11.sp,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1349,7 +1349,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                                 'Week ${w.weekNumber}:',
                                 style: TextStyle(
                                   color: primaryColor,
-                                  fontSize: 11.sp,
+                                  fontSize: 12.sp,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -1359,7 +1359,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                                   w.focus,
                                   style: TextStyle(
                                     color: ColorManager.textSecondary,
-                                    fontSize: 11.sp,
+                                    fontSize: 12.sp,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -1406,7 +1406,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                     'Day ${m.triggerDay}',
                     style: TextStyle(
                       color: primaryColor,
-                      fontSize: 11.sp,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1429,7 +1429,7 @@ class TransformationPlanDetailScreen extends StatelessWidget {
                         m.description,
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                         ),
                       ),
                     ],

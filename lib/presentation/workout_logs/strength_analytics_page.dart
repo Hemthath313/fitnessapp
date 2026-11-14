@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/units.dart';
 import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/model/personal_record_model.dart';
 import 'package:fitness_app/model/workout_log.dart';
@@ -58,7 +59,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
       final gemini = Gemini.instance;
       final prompt =
           'I am a fitness user. My exercise "${insight.exerciseName}" has plateaued — '
-          'I have been lifting ${insight.latestWeight.toStringAsFixed(1)} kg. '
+          'I have been lifting ${Units.fmt(insight.latestWeight, 1)} ${Units.label}. '
           'Give me ONE specific, actionable suggestion (under 60 words) to break through this plateau. '
           'Be direct, practical, and motivating.';
       final response = await gemini.text(prompt);
@@ -278,7 +279,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
                   child: Text(
                     cat,
                     style: TextStyle(
-                      color: isSelected ? ColorManager.primary : ColorManager.textSecondary,
+                      color: isSelected ? ColorManager.primaryText : ColorManager.textSecondary,
                       fontSize: 12.sp,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
@@ -295,7 +296,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
           _showEstimated1RM
               ? 'Calculated via Epley formula (reps 1-12) for completed working sets.'
               : 'Absolute heaviest load lifted for at least 1 clean repetition.',
-          style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+          style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
         ),
         SizedBox(height: 12.h),
 
@@ -330,7 +331,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
         color: ColorManager.surface,
         boxShadow: ColorManager.cardShadow,
         borderRadius: BorderRadius.circular(AppRadius.tile.r),
-        border: Border.all(color: rank < 3 ? Colors.amber.withValues(alpha: 0.4) : ColorManager.divider),
+        border: Border.all(color: rank < 3 ? ColorManager.premium.withValues(alpha: 0.4) : ColorManager.divider),
       ),
       child: InkWell(
         onTap: () => context.push(
@@ -365,7 +366,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
                   SizedBox(height: 2.h),
                   Text(
                     'Achieved: ${DateFormat('MMM d, yyyy').format(pr.achievedAt)}',
-                    style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+                    style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                   ),
                 ],
               ),
@@ -374,16 +375,16 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '${displayVal.toStringAsFixed(displayVal % 1 == 0 ? 0 : 1)} kg',
+                  '${Units.fmtSmart(displayVal)} ${Units.label}',
                   style: TextStyle(
-                    color: rank == 0 ? Colors.amber : ColorManager.primary,
+                    color: rank == 0 ? ColorManager.warningText : ColorManager.primaryText,
                     fontWeight: FontWeight.bold,
                     fontSize: 16.sp,
                   ),
                 ),
                 Text(
                   metricLabel,
-                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                 ),
               ],
             ),
@@ -527,7 +528,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
                       SizedBox(height: 2.h),
                       Text(
                         _chartMetricIs1RM ? 'Progression (Estimated 1RM)' : 'Progression (Top Set Weight)',
-                        style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+                        style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                       ),
                     ],
                   ),
@@ -543,7 +544,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
                       ),
                       child: Text(
                         _chartMetricIs1RM ? 'Switch to Weight' : 'Switch to 1RM',
-                        style: TextStyle(color: ColorManager.primaryText, fontSize: 11.sp, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: ColorManager.primaryText, fontSize: 12.sp, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -621,7 +622,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
             showTitles: true,
             reservedSize: 36.w,
             getTitlesWidget: (v, _) => Text(
-              '${v.toInt()}kg',
+              '${Units.intOf(v)}${Units.label}',
               style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
             ),
           ),
@@ -690,22 +691,22 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
 
     switch (insight.status) {
       case StrengthStatus.newPR:
-        badgeColor = Colors.green;
+        badgeColor = ColorManager.success;
         badgeLabel = 'New PR';
         badgeIcon = Icons.military_tech_rounded;
         break;
       case StrengthStatus.improving:
-        badgeColor = Colors.blueAccent;
+        badgeColor = ColorManager.info;
         badgeLabel = 'Improving';
         badgeIcon = Icons.trending_up_rounded;
         break;
       case StrengthStatus.stalled:
-        badgeColor = Colors.orange;
+        badgeColor = ColorManager.warning;
         badgeLabel = 'Stalled';
         badgeIcon = Icons.pause_circle_outline_rounded;
         break;
       case StrengthStatus.stable:
-        badgeColor = Colors.grey;
+        badgeColor = ColorManager.textTertiary;
         badgeLabel = 'Stable';
         badgeIcon = Icons.check_circle_outline_rounded;
         break;
@@ -723,7 +724,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
         borderRadius: BorderRadius.circular(AppRadius.tile.r),
         border: Border.all(
           color: insight.status == StrengthStatus.stalled
-              ? Colors.orange.withValues(alpha: 0.4)
+              ? ColorManager.warning.withValues(alpha: 0.4)
               : ColorManager.divider,
         ),
       ),
@@ -758,7 +759,7 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
                       badgeLabel,
                       style: TextStyle(
                         color: badgeColor,
-                        fontSize: 11.sp,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -784,13 +785,13 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
           Row(
             children: [
               Text(
-                'Top Set: ${insight.latestWeight.toStringAsFixed(1)} kg',
-                style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+                'Top Set: ${Units.fmt(insight.latestWeight, 1)} ${Units.label}',
+                style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
               ),
               SizedBox(width: 12.w),
               Text(
-                'Estimated 1RM: ${insight.latestEstimated1RM.toStringAsFixed(1)} kg',
-                style: TextStyle(color: ColorManager.primaryText, fontSize: 11.sp, fontWeight: FontWeight.w600),
+                'Estimated 1RM: ${Units.fmt(insight.latestEstimated1RM, 1)} ${Units.label}',
+                style: TextStyle(color: ColorManager.primaryText, fontSize: 12.sp, fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -810,14 +811,14 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.auto_awesome, color: Colors.amber, size: 16.sp),
+                    Icon(Icons.auto_awesome, color: ColorManager.warningText, size: 16.sp),
                     SizedBox(width: 8.w),
                     Expanded(
                       child: Text(
                         _aiSuggestions[insight.exerciseName]!,
                         style: TextStyle(
                           color: ColorManager.textPrimary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontStyle: FontStyle.italic,
                         ),
                       ),
@@ -832,10 +833,10 @@ class _StrengthAnalyticsPageState extends State<StrengthAnalyticsPage>
                   onPressed: isLoadingAI ? null : () => _getAISuggestion(insight),
                   icon: isLoadingAI
                       ? SizedBox(width: 14.w, height: 14.w, child: const CircularProgressIndicator(strokeWidth: 2))
-                      : Icon(Icons.auto_awesome, size: 14.sp, color: Colors.amber),
+                      : Icon(Icons.auto_awesome, size: 14.sp, color: ColorManager.warningText),
                   label: Text(
                     isLoadingAI ? 'Analyzing...' : 'Ask AI Coach for Tips',
-                    style: TextStyle(color: Colors.amber, fontSize: 11.sp, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: ColorManager.warningText, fontSize: 12.sp, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),

@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/units.dart';
 import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -94,7 +95,7 @@ class _TransformationStrengthProgressCardState
                         '${summary.totalStrengthWorkouts} Workouts',
                         style: TextStyle(
                           color: ColorManager.primaryText,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -124,14 +125,14 @@ class _TransformationStrengthProgressCardState
                         label: 'PRs Set',
                         value: '${summary.prsAchieved.length}',
                         icon: Icons.emoji_events_rounded,
-                        color: Colors.amber,
+                        color: ColorManager.premium,
                       ),
                     ),
                     SizedBox(width: 8.w),
                     Expanded(
                       child: _buildMetricBadge(
                         label: 'Est 1RM Gain',
-                        value: '+${summary.totalEstimated1RMGain.toStringAsFixed(1)} kg',
+                        value: '+${Units.fmt(summary.totalEstimated1RMGain, 1)} ${Units.label}',
                         icon: Icons.trending_up_rounded,
                         color: ColorManager.success,
                       ),
@@ -188,7 +189,7 @@ class _TransformationStrengthProgressCardState
             textAlign: TextAlign.center,
             style: TextStyle(
               color: ColorManager.textSecondary,
-              fontSize: 11.sp,
+              fontSize: 12.sp,
               height: 1.3,
             ),
           ),
@@ -228,7 +229,7 @@ class _TransformationStrengthProgressCardState
             label,
             style: TextStyle(
               color: ColorManager.textSecondary,
-              fontSize: 11.sp,
+              fontSize: 12.sp,
             ),
             overflow: TextOverflow.ellipsis,
           ),
@@ -293,8 +294,8 @@ class _TransformationStrengthProgressCardState
                   child: Text(
                     _show1RM ? '1RM Trend' : 'Weight Trend',
                     style: TextStyle(
-                      color: _show1RM ? ColorManager.primary : ColorManager.textSecondary,
-                      fontSize: 11.sp,
+                      color: _show1RM ? ColorManager.primaryText : ColorManager.textSecondary,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -309,8 +310,8 @@ class _TransformationStrengthProgressCardState
               padding: EdgeInsets.symmetric(vertical: 20.h),
               child: Center(
                 child: Text(
-                  'Baseline: ${selected.startingWeight.toStringAsFixed(1)} kg • Log 1 more session to view chart curve',
-                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+                  'Baseline: ${Units.fmt(selected.startingWeight, 1)} ${Units.label} • Log 1 more session to view chart curve',
+                  style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
                 ),
               ),
             ),
@@ -361,21 +362,21 @@ class _TransformationStrengthProgressCardState
               children: [
                 Text(
                   DateFormat('MMM d').format(points.first.date),
-                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                 ),
                 Expanded(
                   child: Text(
                     _show1RM
-                        ? '${selected.startingEstimated1RM.toStringAsFixed(1)} kg → ${selected.latestEstimated1RM.toStringAsFixed(1)} kg'
-                        : '${selected.startingWeight.toStringAsFixed(1)} kg → ${selected.latestWeight.toStringAsFixed(1)} kg (${selected.weightDifference >= 0 ? '+' : ''}${selected.weightDifference.toStringAsFixed(1)} kg)',
+                        ? '${Units.fmt(selected.startingEstimated1RM, 1)} ${Units.label} → ${Units.fmt(selected.latestEstimated1RM, 1)} ${Units.label}'
+                        : '${Units.fmt(selected.startingWeight, 1)} ${Units.label} → ${Units.fmt(selected.latestWeight, 1)} ${Units.label} (${selected.weightDifference >= 0 ? '+' : ''}${Units.fmt(selected.weightDifference, 1)} ${Units.label})',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: ColorManager.textPrimary, fontSize: 11.sp, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: ColorManager.textPrimary, fontSize: 12.sp, fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Text(
                   DateFormat('MMM d').format(points.last.date),
-                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+                  style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                 ),
               ],
             ),
@@ -424,10 +425,10 @@ class _TransformationStrengthProgressCardState
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        'Start: ${p.startingWeight.toStringAsFixed(1)} kg • Latest: ${p.latestWeight.toStringAsFixed(1)} kg',
+                        'Start: ${Units.fmt(p.startingWeight, 1)} ${Units.label} • Latest: ${Units.fmt(p.latestWeight, 1)} ${Units.label}',
                         style: TextStyle(
                           color: ColorManager.textSecondary,
-                          fontSize: 11.sp,
+                          fontSize: 12.sp,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -445,10 +446,10 @@ class _TransformationStrengthProgressCardState
                       borderRadius: BorderRadius.circular(6.r),
                     ),
                     child: Text(
-                      '${isPositive ? '+' : ''}${p.weightDifference.toStringAsFixed(1)} kg (${isPositive ? '+' : ''}${p.percentageImprovement.toStringAsFixed(1)}%)',
+                      '${isPositive ? '+' : ''}${Units.fmt(p.weightDifference, 1)} ${Units.label} (${isPositive ? '+' : ''}${p.percentageImprovement.toStringAsFixed(1)}%)',
                       style: TextStyle(
-                        color: isPositive ? ColorManager.success : ColorManager.textSecondary,
-                        fontSize: 11.sp,
+                        color: isPositive ? ColorManager.successText : ColorManager.textSecondary,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -469,7 +470,7 @@ class _TransformationStrengthProgressCardState
       children: [
         Row(
           children: [
-            Icon(Icons.emoji_events_rounded, color: Colors.amber, size: 16.sp),
+            Icon(Icons.emoji_events_rounded, color: ColorManager.warningText, size: 16.sp),
             SizedBox(width: 6.w),
             Text(
               'Personal Records Achieved (${summary.prsAchieved.length})',
@@ -489,7 +490,7 @@ class _TransformationStrengthProgressCardState
             decoration: BoxDecoration(
               color: ColorManager.surfaceDark,
               borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(color: Colors.amber.withValues(alpha: 0.2)),
+              border: Border.all(color: ColorManager.premium.withValues(alpha: 0.2)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -505,14 +506,14 @@ class _TransformationStrengthProgressCardState
                       ),
                       Text(
                         DateFormat('MMM d, yyyy').format(pr.achievedAt),
-                        style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp),
+                        style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp),
                       ),
                     ],
                   ),
                 ),
                 Text(
-                  '${pr.weight.toStringAsFixed(1)} kg × ${pr.reps} reps',
-                  style: TextStyle(color: Colors.amber, fontSize: 11.sp, fontWeight: FontWeight.bold),
+                  '${Units.fmt(pr.weight, 1)} ${Units.label} × ${pr.reps} reps',
+                  style: TextStyle(color: ColorManager.warningText, fontSize: 12.sp, fontWeight: FontWeight.bold),
                 ),
               ],
             ),

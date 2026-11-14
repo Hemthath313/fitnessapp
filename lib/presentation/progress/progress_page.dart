@@ -229,16 +229,16 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                                   decoration: BoxDecoration(
                                     color: weightDelta <= 0
                                         ? ColorManager.primary.withValues(alpha: 0.12)
-                                        : Colors.orange.withValues(alpha: 0.12),
+                                        : ColorManager.warning.withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(12.r),
                                     border: Border.all(
-                                      color: weightDelta <= 0 ? ColorManager.primary.withValues(alpha: 0.3) : Colors.orange.withValues(alpha: 0.3),
+                                      color: weightDelta <= 0 ? ColorManager.primary.withValues(alpha: 0.3) : ColorManager.warning.withValues(alpha: 0.3),
                                     ),
                                   ),
                                   child: Text(
                                     '${weightDelta >= 0 ? '+' : ''}${weightDelta.toStringAsFixed(1)} kg',
                                     style: TextStyle(
-                                      color: weightDelta <= 0 ? ColorManager.primaryText : Colors.orange,
+                                      color: weightDelta <= 0 ? ColorManager.primaryText : ColorManager.warningText,
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -487,7 +487,7 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                     child: _buildDeepDiveCard(
                       title: 'Strength',
                       icon: Icons.bar_chart_rounded,
-                      color: Colors.deepPurple,
+                      color: ColorManager.violetText,
                       onTap: () => context.push(Routes.strengthAnalyticsRoute),
                     ),
                   ),
@@ -496,7 +496,7 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
                     child: _buildDeepDiveCard(
                       title: 'Muscle Stats',
                       icon: Icons.pie_chart_rounded,
-                      color: Colors.pink,
+                      color: ColorManager.accentText,
                       onTap: () => context.push(Routes.muscleAnalyticsRoute),
                     ),
                   ),
@@ -579,7 +579,7 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp)),
+          Text(label, style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp)),
           SizedBox(height: 4.h),
           FittedBox(
             fit: BoxFit.scaleDown,
@@ -740,7 +740,7 @@ class _ProgressPageState extends State<ProgressPage> with SingleTickerProviderSt
     if (delta != null && delta.abs() >= 0.05) {
       if (delta > 0) {
         deltaText = '+${delta.toStringAsFixed(1)} cm';
-        deltaColor = Colors.orange;
+        deltaColor = ColorManager.warning;
       } else {
         deltaText = '${delta.toStringAsFixed(1)} cm';
         deltaColor = ColorManager.primaryText;

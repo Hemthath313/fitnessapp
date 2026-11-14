@@ -131,11 +131,11 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
             Center(
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorManager.limerGreen2),
+                    backgroundColor: ColorManager.primary),
                 onPressed: () => Navigator.pop(context),
                 child: const Text(
                   'Close',
-                  style: TextStyle(color: Colors.black),
+                  style: TextStyle(color: ColorManager.onMint),
                 ),
               ),
             ),
@@ -185,7 +185,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
                 final isUnlocked = accessAllowed;
 
                 return Card(
-                  color: isUnlocked ? ColorManager.surface : Colors.grey[800],
+                  color: isUnlocked ? ColorManager.surface : ColorManager.surfaceDark,
                   margin:
                       EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                   shape: RoundedRectangleBorder(
@@ -225,7 +225,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
                         Text(
                           exercise.setsReps,
                           style: TextStyle(
-                              fontSize: 14.sp, color: ColorManager.limerGreen2),
+                              fontSize: 14.sp, color: ColorManager.primaryText),
                         ),
                         Text(
                           'Target: ${exercise.target}',
@@ -238,7 +238,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
                         ? Checkbox(
                             value: _completionStatus[index],
                             activeColor: ColorManager.limerGreen2,
-                            checkColor: Colors.black,
+                            checkColor: ColorManager.onMint,
                             onChanged: (val) {
                               setState(() {
                                 _completionStatus[index] = val ?? false;
@@ -262,10 +262,10 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _allCompleted()
                       ? ColorManager.limerGreen2
-                      : Colors.grey[600],
+                      : ColorManager.textTertiary,
                   disabledBackgroundColor: _isSaving
                       ? ColorManager.limerGreen2
-                      : Colors.grey[600],
+                      : ColorManager.textTertiary,
                   padding: EdgeInsets.symmetric(vertical: 16.h),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppRadius.button.r)),
@@ -311,7 +311,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
       ),
       child: Row(
         children: [
-          Icon(Icons.check_circle, color: ColorManager.limerGreen2, size: 22.sp),
+          Icon(Icons.check_circle, color: ColorManager.primaryText, size: 22.sp),
           SizedBox(width: 10.w),
           Expanded(
             child: Text(
@@ -437,7 +437,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
           child: Text(
             '🎉 Day ${widget.day} Done!',
             style: TextStyle(
-                color: ColorManager.limerGreen2, fontWeight: FontWeight.bold),
+                color: ColorManager.primaryText, fontWeight: FontWeight.bold),
           ),
         ),
         content: Text(
@@ -449,7 +449,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
           Center(
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: ColorManager.limerGreen2,
+                backgroundColor: ColorManager.primary,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppRadius.button.r)),
               ),
@@ -457,7 +457,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
                 Navigator.of(context).pop(); // close dialog
                 Navigator.of(context).pop(); // go back
               },
-              child: const Text('Great!', style: TextStyle(color: Colors.black)),
+              child: const Text('Great!', style: TextStyle(color: ColorManager.onMint)),
             ),
           ),
         ],
@@ -474,10 +474,10 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
         backgroundColor: ColorManager.surface,
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
-        title: const Center(
+        title: Center(
           child: Text(
             '🏆 CHALLENGE COMPLETE!',
-            style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
+            style: TextStyle(color: ColorManager.warningText, fontWeight: FontWeight.bold),
           ),
         ),
         content: Column(
@@ -496,7 +496,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
               maxLines: 3,
               decoration: InputDecoration(
                 hintText: 'Share your feedback...',
-                hintStyle: const TextStyle(color: Colors.white38),
+                hintStyle: TextStyle(color: ColorManager.textTertiary),
                 filled: true,
                 fillColor: Colors.black26,
                 border: OutlineInputBorder(
@@ -510,7 +510,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
           Center(
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.amber,
+                backgroundColor: ColorManager.premium,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppRadius.button.r)),
               ),
@@ -556,7 +556,7 @@ class _DailyExercisePageState extends State<DailyExercisePage> {
                 child: Icon(
                   Icons.lock,
                   size: 80.sp,
-                  color: ColorManager.primary,
+                  color: ColorManager.primaryText,
                 ),
               ),
               SizedBox(height: SizeManager.s24.h),

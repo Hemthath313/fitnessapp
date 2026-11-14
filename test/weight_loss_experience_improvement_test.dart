@@ -382,6 +382,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // Tips, nutrition and advice live in the folded "Plan guide" section.
+      await tester.ensureVisible(find.byKey(const Key('plan_guide_toggle')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('plan_guide_toggle')));
+      await tester.pumpAndSettle();
       // Check orientation banner
       expect(find.byKey(const Key('weight_loss_roadmap_orientation_banner')), findsOneWidget);
       expect(find.textContaining('Fat Loss Rule: Sustainable energy deficit'), findsOneWidget);

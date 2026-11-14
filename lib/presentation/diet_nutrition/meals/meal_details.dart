@@ -66,7 +66,7 @@ class MealDetailsSheet extends StatelessWidget {
               IconButton(
                 tooltip: 'Add food',
                 onPressed: () => _showAddFoodDialog(context),
-                icon: Icon(Icons.add_circle, color: ColorManager.limerGreen2, size: 24.sp),
+                icon: Icon(Icons.add_circle, color: ColorManager.primaryText, size: 24.sp),
               ),
             ],
           ),
@@ -120,11 +120,11 @@ class MealDetailsSheet extends StatelessWidget {
               icon: Icon(Icons.swap_horiz, size: 20.sp),
               label: Text(
                 'Swap With Library Meal',
-                style: TextStyle(color: ColorManager.background, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(color: ColorManager.onMint, fontSize: 14.sp, fontWeight: FontWeight.bold),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.limerGreen2,
-                foregroundColor: ColorManager.black,
+                foregroundColor: ColorManager.onMint,
                 padding: EdgeInsets.symmetric(vertical: 12.h),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
               ),
@@ -178,8 +178,8 @@ class MealDetailsSheet extends StatelessWidget {
                 Navigator.pop(c);
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: ColorManager.limerGreen2),
-            child: const Text("Add", style: TextStyle(color: Colors.black)),
+            style: ElevatedButton.styleFrom(backgroundColor: ColorManager.primary),
+            child: const Text("Add", style: TextStyle(color: ColorManager.onMint)),
           )
         ],
       ),

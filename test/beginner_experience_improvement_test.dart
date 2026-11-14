@@ -365,6 +365,11 @@ void main() {
 
       expect(find.text('Complete Beginner – 30 Days'), findsOneWidget);
       expect(find.text('Day 1 of 30'), findsOneWidget);
+      // Tips, nutrition and advice live in the folded "Plan guide" section.
+      await tester.ensureVisible(find.byKey(const Key('plan_guide_toggle')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('plan_guide_toggle')));
+      await tester.pumpAndSettle();
       expect(find.byKey(const Key('beginner_roadmap_orientation_banner')), findsOneWidget);
       expect(find.textContaining('Beginner Rule: Form beats weight'), findsOneWidget);
     });

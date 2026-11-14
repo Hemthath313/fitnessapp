@@ -1,3 +1,4 @@
+import 'package:fitness_app/utils/units.dart';
 import 'package:fitness_app/utils/managers/radius_manager.dart';
 import 'package:fitness_app/presentation/workout_tools/plate_calculator_sheet.dart';
 import 'package:fitness_app/utils/managers/color_manager.dart';
@@ -43,7 +44,7 @@ void showOneRepMaxDialog(BuildContext context) {
                       keyboardType: TextInputType.number,
                       style: TextStyle(color: ColorManager.textPrimary),
                       decoration: InputDecoration(
-                        labelText: 'Weight (kg)',
+                        labelText: 'Weight (${Units.label})',
                         labelStyle: TextStyle(color: ColorManager.textTertiary),
                         filled: true,
                         fillColor: ColorManager.surfaceDark,
@@ -95,7 +96,7 @@ void showOneRepMaxDialog(BuildContext context) {
                   children: [
                     Text('ESTIMATED 1-REP MAX', style: TextStyle(color: ColorManager.primaryText, fontSize: 11.sp, fontWeight: FontWeight.bold, letterSpacing: 0.6)),
                     SizedBox(height: 4.h),
-                    Text('${estimatedMax.toStringAsFixed(1)} kg', style: TextStyle(color: ColorManager.white, fontSize: 24.sp, fontWeight: FontWeight.bold)),
+                    Text('${estimatedMax.toStringAsFixed(1)} ${Units.label}', style: TextStyle(color: ColorManager.white, fontSize: 24.sp, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -150,7 +151,7 @@ class RoutineCustomizerCard extends StatelessWidget {
           ),
           Text(
             'Change frequency, target goal, or equipment in seconds.',
-            style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+            style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
           ),
           Wrap(
             spacing: 6.w,
@@ -166,7 +167,7 @@ class RoutineCustomizerCard extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: () => context.push(Routes.workoutGeneratorRoute),
               icon: Icon(Icons.flash_on_rounded, size: 14.sp, color: ColorManager.onMint),
-              label: Text('Re-generate Split', style: TextStyle(color: ColorManager.onMint, fontSize: 11.sp, fontWeight: FontWeight.bold)),
+              label: Text('Re-generate Split', style: TextStyle(color: ColorManager.onMint, fontSize: 12.sp, fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorManager.primary,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.button.r)),
@@ -192,7 +193,7 @@ class ProToolkitCard extends StatelessWidget {
         color: ColorManager.surface,
         boxShadow: ColorManager.cardShadow,
         borderRadius: BorderRadius.circular(AppRadius.card.r),
-        border: Border.all(color: Colors.amber.withValues(alpha: 0.4)),
+        border: Border.all(color: ColorManager.premium.withValues(alpha: 0.4)),
       ),
       padding: EdgeInsets.all(14.w),
       child: Column(
@@ -211,7 +212,7 @@ class ProToolkitCard extends StatelessWidget {
           ),
           Text(
             'Avoid gym math. Visual barbell loading and 1-rep max calculator.',
-            style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+            style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
           ),
           Row(
             children: [
@@ -228,10 +229,10 @@ class ProToolkitCard extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        Icon(Icons.fitness_center_rounded, color: ColorManager.primary, size: 16.sp),
+                        Icon(Icons.fitness_center_rounded, color: ColorManager.primaryText, size: 16.sp),
                         SizedBox(height: 3.h),
-                        Text('Plate Math', style: TextStyle(color: ColorManager.white, fontSize: 11.sp, fontWeight: FontWeight.bold)),
-                        Text('Olympic Bar', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp)),
+                        Text('Plate Math', style: TextStyle(color: ColorManager.white, fontSize: 12.sp, fontWeight: FontWeight.bold)),
+                        Text('Olympic Bar', style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp)),
                       ],
                     ),
                   ),
@@ -251,10 +252,10 @@ class ProToolkitCard extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        Icon(Icons.speed_rounded, color: Colors.amber, size: 16.sp),
+                        Icon(Icons.speed_rounded, color: ColorManager.warningText, size: 16.sp),
                         SizedBox(height: 3.h),
-                        Text('1RM Calc', style: TextStyle(color: ColorManager.white, fontSize: 11.sp, fontWeight: FontWeight.bold)),
-                        Text('Max Strength', style: TextStyle(color: ColorManager.textTertiary, fontSize: 11.sp)),
+                        Text('1RM Calc', style: TextStyle(color: ColorManager.white, fontSize: 12.sp, fontWeight: FontWeight.bold)),
+                        Text('Max Strength', style: TextStyle(color: ColorManager.textTertiary, fontSize: 12.sp)),
                       ],
                     ),
                   ),
@@ -292,7 +293,7 @@ class StrengthPartnerCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.emoji_events_rounded, color: Colors.amber, size: 18.sp),
+                  Icon(Icons.emoji_events_rounded, color: ColorManager.warningText, size: 18.sp),
                   SizedBox(width: 6.w),
                   Text(
                     'Strength Partner & PRs',
@@ -305,7 +306,7 @@ class StrengthPartnerCard extends StatelessWidget {
           ),
           Text(
             'Track your Estimated 1RMs, progressive overload benchmarks, and PR vault.',
-            style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp),
+            style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp),
           ),
           InkWell(
             onTap: () => context.push(Routes.strengthAnalyticsRoute),
@@ -324,7 +325,7 @@ class StrengthPartnerCard extends StatelessWidget {
                   SizedBox(width: 6.w),
                   Text(
                     'Open PR Vault & Analytics',
-                    style: TextStyle(color: ColorManager.primaryText, fontSize: 11.sp, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: ColorManager.primaryText, fontSize: 12.sp, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -349,7 +350,7 @@ class _FeatureBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(6.r),
         border: Border.all(color: ColorManager.divider),
       ),
-      child: Text(text, style: TextStyle(color: ColorManager.textSecondary, fontSize: 11.sp)),
+      child: Text(text, style: TextStyle(color: ColorManager.textSecondary, fontSize: 12.sp)),
     );
   }
 }
