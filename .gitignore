@@ -52,3 +52,7 @@ key.properties
 *.keystore
 *.p12
 
+
+# Secrets (API keys)
+.env
+**/.env
