@@ -473,10 +473,13 @@ class UpdateService {
       bool playStoreImmediateAllowed = _customPlayStoreImmediateAllowed ?? false;
       bool playStoreFlexibleAllowed = _customPlayStoreFlexibleAllowed ?? false;
       int? playStoreVersionCode = _customPlayStoreVersionCode;
+      // True when Google Play actually answered (a mocked answer counts).
+      bool playCheckSucceeded = isAndroid && _customPlayStoreUpdateAvailable != null;
 
       if (isAndroid && _customPlayStoreUpdateAvailable == null) {
         try {
           final playInfo = await play.InAppUpdate.checkForUpdate();
+          playCheckSucceeded = true;
           if (playInfo.updateAvailability == play.UpdateAvailability.updateAvailable ||
               playInfo.updateAvailability == play.UpdateAvailability.developerTriggeredUpdateInProgress) {
             playStoreHasUpdate = true;
@@ -525,9 +528,22 @@ class UpdateService {
       final bool hasUpdate;
       final bool isForceUpdate;
 
-      if (isBelowMinimumVersion) {
+      if (playCheckSucceeded && !playStoreHasUpdate) {
+        // Android + Play answered "no update for this device yet" (release in
+        // review, staged rollout not reached this user, ...). Never prompt or
+        // block: the user would open the store and find nothing to install,
+        // and a forced update would lock them out.
+        hasUpdate = false;
+        isForceUpdate = false;
+      } else if (isBelowMinimumVersion) {
         hasUpdate = true;
         isForceUpdate = true;
+      } else if (playCheckSucceeded && playStoreHasUpdate) {
+        // Play is the source of truth for "is there an update": offer it even
+        // if latest_version in Firestore wasn't bumped. Firestore only
+        // decides whether it is mandatory.
+        hasUpdate = true;
+        isForceUpdate = config.forceUpdate && isOlderThanLatest;
       } else if (isOlderThanLatest) {
         hasUpdate = true;
         isForceUpdate = config.forceUpdate;

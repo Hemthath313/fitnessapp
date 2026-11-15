@@ -22,6 +22,38 @@
           }
         },
         {
+          "client_id": "661343486324-c170cm7eapvdooj558mrrvjhl3f3l07n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gymbuddy.fitnessapp",
+            "certificate_hash": "5d20df7ec5a0f77c2cc04585a5db346e00dd97c2"
+          }
+        },
+        {
+          "client_id": "661343486324-d923k4it6i3g1nk8tph979q5jvpsfbk9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gymbuddy.fitnessapp",
+            "certificate_hash": "b0a26665f7ca5b3a1ef8671bde8fe7b258a161f7"
+          }
+        },
+        {
+          "client_id": "661343486324-gi9pikoq7v7a1ppfo8v1kiksf5d15apa.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gymbuddy.fitnessapp",
+            "certificate_hash": "fcaa5306caa18c31fef5593dc0104c54d679729e"
+          }
+        },
+        {
+          "client_id": "661343486324-lt5rd5of629sko50g73c2k01daj9orbr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gymbuddy.fitnessapp",
+            "certificate_hash": "75b0b1aee2f65bfe2c050e6dcd54e2f2a6e404ed"
+          }
+        },
+        {
           "client_id": "661343486324-u392bv0p49koqbt3irt5thleflapd234.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -47,7 +79,8 @@
             }
           ]
         }
-      }
+      },
+      "admob_app_id": "ca-app-pub-5975958510203735~8996828666"
     }
   ],
   "configuration_version": "1"

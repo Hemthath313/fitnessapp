@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "661343486324",
+    "project_id": "tracking-ed1ba",
+    "storage_bucket": "tracking-ed1ba.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:661343486324:android:4999d1d064591987666c21",
+        "android_client_info": {
+          "package_name": "com.gymbuddy.fitnessapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "661343486324-5o7v4235gp9cpupraf7kafn4ima8q7jj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gymbuddy.fitnessapp",
+            "certificate_hash": "171bf1d3da0b4be9fc4c4686e64f37ee534a10ab"
+          }
+        },
+        {
+          "client_id": "661343486324-u392bv0p49koqbt3irt5thleflapd234.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjqC1H5QV4DrRYnP6buubn4NPhXqTHikQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "661343486324-u392bv0p49koqbt3irt5thleflapd234.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "661343486324-6l3grf1tnjkvmdrmqq4dk9v4567muvg1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.gymbuddy.fitnessapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -408,7 +408,10 @@ void main() {
       );
 
       final updateInfo = await updateService.checkForUpdates();
-      expect(updateInfo.hasUpdate, isTrue);
+      // Play says nothing to install for this device yet (review / staged
+      // rollout): no prompt, so users are never sent to a store page with
+      // no update on it.
+      expect(updateInfo.hasUpdate, isFalse);
       expect(updateInfo.isForceUpdate, isFalse);
       expect(updateInfo.canUsePlayStoreFlexibleUpdate, isFalse);
       expect(updateInfo.updateUrl, contains('play.google.com'));

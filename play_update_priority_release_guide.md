@@ -1,3 +1,21 @@
+# How app updates work now (read this first)
+
+> The priority-based setup described further down is **no longer used** by the app.
+
+- **Is there an update?** Google Play decides (native In-App Update API). The app only prompts when Play reports an update for that device, so staged rollouts and releases still in review never send users to a store page with nothing to install.
+- **Must they update?** Firestore `config/app_version` decides:
+  - `min_required_version`: anyone below this gets the native **immediate** (full-screen, blocking) update.
+  - `force_update: true` + `latest_version`: forces everyone below `latest_version`.
+  - Otherwise the update is optional: native **flexible** update (downloads in the background, "RESTART" snackbar when ready), offered once per app session.
+- If Google Play can't be reached (app not installed from Play, no Play account), the Firestore rules apply on their own and the store page is the fallback.
+
+## Release checklist
+1. Upload the new build and roll it out in Play Console.
+2. Optional updates need nothing else.
+3. To force an update, wait until the rollout is at 100%, then set `min_required_version` in Firestore `config/app_version` to the new version (e.g. `1.0.11`). Also set `latest_version` to the new version.
+
+---
+
 # Google Play In-App Update Priority — Release Management Guide
 
 ## Overview
