@@ -20,19 +20,8 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-# Keep Google Mobile Ads classes
--keep class com.google.android.gms.ads.** { *; }
--keep class com.google.ads.** { *; }
-
-# Keep Firebase classes
--keep class com.google.firebase.** { *; }
--keep class com.google.android.gms.** { *; }
-
-# Keep Flutter classes
--keep class io.flutter.** { *; }
-
-# Keep your app's classes
--keep class com.gymbuddy.fitnessapp.** { *; }
+# Keep Home Widget Provider
+-keep class com.gymbuddy.fitnessapp.FitnessWidgetProvider { *; }
 
 # Keep native methods
 -keepclasseswithmembernames class * {
@@ -66,17 +55,15 @@
     <fields>;
 }
 
-# Keep Crashlytics
+# Keep Crashlytics stack trace info
 -keepattributes SourceFile,LineNumberTable
 -keep public class * extends java.lang.Exception
--keep class com.google.firebase.crashlytics.** { *; }
 -dontwarn com.google.firebase.crashlytics.**
 
-# Keep Google Sign In
--keep class com.google.android.gms.auth.** { *; }
--keep class com.google.android.gms.common.** { *; }
-
-# Ignore missing Play Core classes referenced by the Flutter Engine (deferred components)
+# Ignore missing optional classes referenced by libraries
 -dontwarn com.google.android.play.core.**
 -dontwarn io.flutter.embedding.engine.deferredcomponents.**
 -dontwarn io.flutter.embedding.android.FlutterPlayStoreSplitApplication
+-dontwarn io.grpc.**
+-dontwarn javax.annotation.**
+-dontwarn org.codehaus.mojo.animal_sniffer.**

@@ -10,8 +10,10 @@ import 'package:url_launcher/url_launcher.dart';
 class LegalLinks {
   LegalLinks._();
 
-  static const String privacyPolicyUrl = '';
-  static const String termsUrl = '';
+  static const String privacyPolicyUrl =
+      'https://hemthath313.github.io/fitnessapp/privacy-policy.html';
+  static const String termsUrl =
+      'https://hemthath313.github.io/fitnessapp/terms-of-use.html';
 
   static const String androidPackage = 'com.gymbuddy.fitnessapp';
 
