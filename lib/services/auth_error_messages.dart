@@ -38,6 +38,8 @@ class AuthErrorMessages {
         'Google sign-in was cancelled.',
     'network_error':
         'Network error during sign-in. Check your internet connection.',
+    'null-id-token':
+        'Google sign-in could not verify your identity. Please try again.',
   };
 
   /// Extracts a known code from a [FirebaseAuthException] or from any error

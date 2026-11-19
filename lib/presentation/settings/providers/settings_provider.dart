@@ -77,7 +77,9 @@ class SettingsProvider with ChangeNotifier {
       if (isGoogleUser) {
         // Firebase refuses user.delete() unless the sign-in is recent
         // (requires-recent-login), so confirm the Google account first.
-        final googleAccount = await GoogleSignIn().signIn();
+        final googleAccount = await GoogleSignIn(
+          serverClientId: app_auth.AuthProvider.googleServerClientId,
+        ).signIn();
         if (googleAccount == null) {
           throw FirebaseAuthException(
             code: 'cancelled',

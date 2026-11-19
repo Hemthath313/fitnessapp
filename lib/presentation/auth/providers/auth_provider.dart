@@ -519,11 +519,17 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  static const String googleServerClientId =
+      '661343486324-u392bv0p49koqbt3irt5thleflapd234.apps.googleusercontent.com';
+
   Future<void> signInWithGoogle(BuildContext context) async {
     LoadingOverlay.show(context, message: 'Signing in with Google...');
     
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        serverClientId: googleServerClientId,
+      );
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
         if (context.mounted) {
           LoadingOverlay.hide(context);
@@ -533,6 +539,13 @@ class AuthProvider with ChangeNotifier {
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
+
+      if (googleAuth.idToken == null) {
+        throw FirebaseAuthException(
+          code: 'null-id-token',
+          message: 'Google Sign-In failed to retrieve ID token.',
+        );
+      }
 
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
