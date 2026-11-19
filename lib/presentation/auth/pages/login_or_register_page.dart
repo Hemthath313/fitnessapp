@@ -340,7 +340,12 @@ class _LoginPageState extends State<LoginPage> {
                   onTap: isLoading
                       ? () {}
                       : () async {
-                          await authProvider.signInWithGoogle(context);
+                          try {
+                            await authProvider.signInWithGoogle(context);
+                          } catch (e) {
+                            debugPrint('Google Sign-In failed: $e');
+                            _handleAuthError(e);
+                          }
                         },
                 ),
                 

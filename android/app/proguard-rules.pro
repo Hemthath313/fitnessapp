@@ -23,6 +23,10 @@
 # Keep Home Widget Provider
 -keep class com.gymbuddy.fitnessapp.FitnessWidgetProvider { *; }
 
+# Google Sign In & Play Services Auth (targeted to preserve sign-in models without disabling DEX obfuscation)
+-keep class com.google.android.gms.auth.api.signin.** { *; }
+-keep class com.google.android.gms.common.api.** { *; }
+
 # Keep native methods
 -keepclasseswithmembernames class * {
     native <methods>;

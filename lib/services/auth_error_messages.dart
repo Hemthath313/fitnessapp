@@ -32,6 +32,12 @@ class AuthErrorMessages {
         'For your security, please sign in again to continue.',
     'account-exists-with-different-credential':
         'This email is linked to a different sign-in method. Try that one.',
+    'sign_in_failed':
+        'Google sign-in failed. Please check your connection or try again.',
+    'sign_in_canceled':
+        'Google sign-in was cancelled.',
+    'network_error':
+        'Network error during sign-in. Check your internet connection.',
   };
 
   /// Extracts a known code from a [FirebaseAuthException] or from any error
